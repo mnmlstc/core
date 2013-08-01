@@ -21,6 +21,10 @@ The components provided by MNMLSTC Core are:
  * ``range<T>``
  * ``any``
 
+ * ``cbegin``
+ * ``cend``
+ * ``make_unique<T>``
+
 Some important differences between these components and their Boost
 counterparts are:
 
@@ -35,9 +39,11 @@ counterparts are:
  * The ``variant<Ts...>`` can be empty, and in an uninitialized state. This
    means that, unlike the ``boost::variant<Ts...>``, a default constructed
    ``variant<Ts...>`` is in the same state as an ``optional<T>``.
- * The ``range<T>`` is an actual type that follos the proposed
+ * The ``range<T>`` is an actual type that follows the proposed
    ``std::range<T>`` as explained in `N3350
    <http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2012/n3350.html>`_.
+
+All of the MNMLSTC Core components reside in the ``core`` namespace.
 
 Requirements
 ------------
