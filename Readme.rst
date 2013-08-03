@@ -3,8 +3,9 @@ Overview
 
 MNMLSTC Core is a C++11 library that adds a functionality set that will only
 be available in C++14 and later. It is small and easy to use. A majority of the
-components of MNMLSTC Core can also be found in Boost. However the exact
-behavior differs in several ways that are discussed within the documentation.
+components of MNMLSTC Core can also be found in Boost. However their are some
+behavior differences between MNMLSTC Core components and their Boost
+counterparts.
 
 Information on installing and using MNMLSTC Core (as well as modifying its
 internals) can be found in its documentation
