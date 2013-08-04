@@ -30,7 +30,7 @@ Some important differences between these components and their Boost
 counterparts are:
 
  * The ``any`` implementation follows the interface laid out in the 3rd
-   `draft proposal <https://beman.github.io/dot16/any-proposal.html>`_
+   `draft proposal <http://beman.github.io/dot16/any-proposal.html>`_
    currently written by Beman Dawes, and Kevlin Henney. It performs the small
    object optimization. It also has one caveat explained in its documentation
    related to the *allocator.uses.construction* constructors.
