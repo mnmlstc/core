@@ -263,6 +263,8 @@ public:
     std::swap(this->data, that.data);
   }
 
+  std::type_info const& type () const noexcept { return this->table->type(); }
+
   bool empty () const noexcept {
     return this->table == impl::get_any_dispatch<void>();
   }
