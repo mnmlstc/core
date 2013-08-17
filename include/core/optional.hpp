@@ -3,6 +3,7 @@
 
 #include <initializer_list>
 #include <type_traits>
+#include <functional>
 #include <stdexcept>
 #include <utility>
 #include <memory>
@@ -282,9 +283,57 @@ public:
   }
 };
 
+
 template <typename Type>
 auto make_optional (Type&& value) -> optional<typename std::decay<Type>::type> {
   return optional<typename std::decay<Type>::type>(std::forward<Type>(value));
+}
+
+template <typename T>
+bool operator == (optional<T> const& lhs, optional<T> const& rhs) noexcept {
+  if (bool(lhs) != bool(rhs)) { return false; }
+  if (bool(lhs) == bool(rhs) == false) { return true; }
+  return *lhs == *rhs;
+}
+
+template <typename T>
+bool operator < (optional<T> const& lhs, optional<T> const& rhs) noexcept {
+  if (bool(rhs) == false) { return false; }
+  if (bool(lhs) == false) { return true; }
+  return std::less<T> { }(*lhs, *rhs);
+}
+
+template <typename T>
+bool operator == (optional<T> const& lhs, nullopt_t) noexcept {
+  return not lhs;
+}
+
+template <typename T>
+bool operator == (nullopt_t, optional<T> const&) noexcept { return false; }
+
+template <typename T>
+bool operator < (optional<T> const& lhs, nullopt_t) noexcept {
+  return not lhs;
+}
+
+template <typename T>
+bool operator < (nullopt_t, optional<T> const& rhs) noexcept {
+  return bool(rhs);
+}
+
+template <typename T>
+bool operator == (optional<T> const& opt, T const& value) noexcept {
+  return bool(opt) ? *opt == value : false;
+}
+
+template <typename T>
+bool operator == (T const& value, optional<T> const& opt) noexcept {
+  return bool(opt) ? value == *opt : false;
+}
+
+template <typename T>
+bool operator < (optional<T> const& opt, T const& value) noexcept {
+  return bool(opt) ? std::less<T>{ }(*opt, value) : true;
 }
 
 }} /* namespace core::v1 */
