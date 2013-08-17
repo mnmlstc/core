@@ -13,13 +13,52 @@ int main () {
     task("copy-constructor") = [] { assert::fail(); },
     task("move-constructor") = [] { assert::fail(); },
 
-    task("rvalue-assign") = [] { assert::fail(); },
-    task("lvalue-assign") = [] { assert::fail(); },
-    task("copy-assign") = [] { assert::fail(); },
-    task("move-assign") = [] { assert::fail(); },
+    task("rvalue-assign") = [] {
+      assert::fail();
+    },
 
-    task("swap") = [] { assert::fail(); },
-    task("type") = [] { assert::fail(); },
+    task("lvalue-assign") = [] {
+      std::uint64_t integer = 42;
+      core::any value;
+      value = integer;
+      assert::is_false(value.empty());
+      assert::equal(value.type(), typeid(integer));
+    },
+
+    task("copy-assign") = [] {
+      std::uint64_t integer = 42;
+      core::any value { integer };
+      core::any assigned;
+      assigned = value;
+      assert::is_false(value.empty());
+      assert::is_false(assigned.empty());
+      assert::equal(typeid(integer), assigned.type());
+    },
+
+    task("move-assign") = [] {
+      std::uint64_t integer = 42;
+      core::any value { integer };
+      core::any assigned;
+      assigned = std::move(value);
+      assert::is_true(value.empty());
+      assert::is_false(assigned.empty());
+      assert::equal(typeid(integer), assigned.type());
+    },
+
+    task("swap") = [] {
+      std::uint64_t integer = 42;
+      core::any value { integer };
+      core::any to_swap { };
+      std::swap(value, to_swap);
+      assert::is_true(value.empty());
+      assert::is_false(to_swap.empty());
+    },
+
+    task("type") = [] {
+      std::uint64_t integer = 42;
+      core::any value { integer };
+      assert::equal(typeid(integer), value.type());
+    },
 
     task("cast-const-ref") = [] { assert::fail(); },
     task("cast-const-ptr") = [] { assert::fail(); },
