@@ -22,10 +22,10 @@ set(CORE_VERSION
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/configure")
 
-cmake_dependent_option(
-  BUILD_WITH_LIBCXX "Use libc++ as the standard library" ON
-  "USE STDLIB_LIBCXX" OFF
-)
+#cmake_dependent_option(
+#  BUILD_WITH_LIBCXX "Use libc++ as the standard library" ON
+#  "USE STDLIB_LIBCXX" OFF
+#)
 
 #------------------------------------------------------------------------------
 # Compiler Environment Check
@@ -87,6 +87,19 @@ check_include_file_cxx(tuple HAVE_TUPLE)
 check_include_file_cxx(cstdint HAVE_CSTDINT)
 check_include_file_cxx(cstddef HAVE_CSTDDEF)
 
+# Handle Insane Environment
+if (NOT HAVE_INITIALIZER_LIST)
+  message(FATAL_ERROR "standard header <initializer_list> could not be found")
+endif ()
+
+if (NOT HAVE_TYPE_TRAITS)
+  message(FATAL_ERROR "standard header <type_traits> could not be found")
+endif ()
+
+if (NOT HAVE_TUPLE)
+  message(FATAL_ERROR "standard header <tuple> could not be found")
+endif ()
+
 #------------------------------------------------------------------------------
 # Configuration
 #------------------------------------------------------------------------------
@@ -104,6 +117,10 @@ configure_package_config_file(
 )
 
 include_directories(${PROJECT_SOURCE_DIR}/include)
+
+if (CAN_USE_STD_CXX11)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${USE_STD_CXX11}")
+endif ()
 
 if (BUILD_TESTING)
   set(CMAKE_TEST_COMMAND ctest)
