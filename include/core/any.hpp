@@ -10,6 +10,13 @@ namespace core {
 inline namespace v1 {
 namespace impl {
 
+template <typename Type>
+using is_small = std::integral_constant<bool, sizeof(Type) <= sizeof(void*)>;
+
+template <typename Type>
+using decay = typename std::decay<Type>::type;
+
+
 struct any_dispatch {
   using destroy_function = void (*)(void**);
   using clone_function = void(*)(void* const*, void**);
@@ -20,7 +27,7 @@ struct any_dispatch {
   type_function const type;
 };
 
-template <typename Type, bool=sizeof(Type) <= sizeof(void*)>
+template <typename Type, bool=is_small<Type>::value>
 struct any_dispatch_select;
 
 template <typename Type>
@@ -34,7 +41,7 @@ struct any_dispatch_select<Type, true> {
     std::allocator_traits<allocator_type>::construct(alloc, pointer, value);
   }
 
-  static void destroy (void* data) {
+  static void destroy (void** data) {
     allocator_type alloc { };
     auto pointer = reinterpret_cast<Type*>(data);
     std::allocator_traits<allocator_type>::destroy(alloc, pointer);
@@ -45,7 +52,7 @@ template <typename Type>
 struct any_dispatch_select<Type, false> {
   using allocator_type = std::allocator<Type>;
 
-  static clone (void* const* source, void** data) {
+  static void clone (void* const* source, void** data) {
     allocator_type alloc { };
     auto const& value = **reinterpret_cast<Type* const*>(source);
     auto pointer = std::allocator_traits<allocator_type>::allocate(alloc, 1);
@@ -81,9 +88,6 @@ inline any_dispatch const* get_any_dispatch<void> () {
   return std::addressof(instance);
 }
 
-template <typename Type>
-using is_small = std::integral_constant<bool, sizeof(Type) <= sizeof(void*)>;
-
 } /* namespace impl */
 
 class bad_any_cast final : public std::bad_cast {
@@ -106,12 +110,13 @@ class any final {
 
   template <typename ValueType>
   any (ValueType&& value, std::true_type&&) :
-    table { impl::get_any_dispatch<ValueType>() },
+    table { impl::get_any_dispatch<impl::decay<ValueType>>() },
     data { nullptr }
   {
-    using allocator_type = std::allocator<ValueType>;
+    using value_type = impl::decay<ValueType>;
+    using allocator_type = std::allocator<value_type>;
     allocator_type alloc { };
-    auto pointer = reinterpret_cast<ValueType*>(std::addressof(this->data));
+    auto pointer = reinterpret_cast<value_type*>(std::addressof(this->data));
     std::allocator_traits<allocator_type>::construct(
       alloc, pointer, std::forward<ValueType>(value)
     );
@@ -119,10 +124,11 @@ class any final {
 
   template <typename ValueType>
   any (ValueType&& value, std::false_type&&) :
-    table { impl::get_any_dispatch<ValueType>() },
+    table { impl::get_any_dispatch<impl::decay<ValueType>>() },
     data { nullptr }
   {
-    using allocator_type = std::allocator<ValueType>;
+    using value_type = impl::decay<ValueType>;
+    using allocator_type = std::allocator<value_type>;
     allocator_type alloc { };
     auto pointer = std::allocator_traits<allocator_type>::allocate(alloc, 1);
     std::allocator_traits<allocator_type>::construct(
@@ -131,55 +137,6 @@ class any final {
     this->data = pointer;
   }
 
-  /* First rule of allocator.uses.construction */
-  template <
-    class Alloc,
-    typename ValueType,
-    typename=typename std::enable_if<
-      not std::uses_allocator<ValueType, Allocator>::value
-    >::type
-  > any (std::allocator_arg_t, Allocator const&, ValueType&& value) :
-    any { std::forward<ValueType>(value) }
-  { }
-
-  /* Second rule of allocator.uses.construction */
-  template <
-    class Allocator,
-    typename ValueType,
-    typename=typename std::enable_if<
-      std::uses_allocator<ValueType, Allocator>::value
-    >::type
-  > any (
-    std::allocator_arg_t,
-    Allocator const& alloc,
-    ValueType&& value,
-    typename std::is_constructible<
-      ValueType,
-      std::allocator_arg_t,
-      Allocator,
-      decltype(std::forward<ValueType>(value))
-    >::type* = nullptr
-  ) :
-    any {
-      ValueType { std::allocator_arg, alloc, std::forward<ValueType>(value) }
-    }
-  { }
-
-  /* Third rule of allocator.uses.construction */
-  template <
-    class Allocator,
-    typename ValueType,
-    typename=typename std::enable_if<
-      std::uses_allocator<ValueType, Allocator>::value
-    >::type,
-    typename=typename std::enable_if<
-      std::is_constructible<ValueType, Allocator>::value
-    >::type
-  > any (std::allocator_arg_t, Allocator const& alloc, ValueType&& value) :
-    any { ValueType { std::forward<ValueType>(value), alloc } }
-  { }
-
-  /* is_small */
   template <typename ValueType>
   ValueType const* cast (std::true_type&&) const {
     return reinterpret_cast<ValueType const*>(std::addressof(this->data));
@@ -224,23 +181,10 @@ public:
   template <
     typename ValueType,
     typename=typename std::enable_if<
-      not std::is_same<any, typename std::decay<ValueType>::type>::value
+      not std::is_same<any, impl::decay<ValueType>>::value
     >::type
   > any (ValueType&& value) :
     any { std::forward<ValueType>(value), impl::is_small<ValueType> { } }
-  { }
-
-  template <class Allocator>
-  any (std::allocator_arg_t, Allocator const&) = delete;
-
-  template <class Allocator, typename ValueType>
-  any (std::allocator_arg_t, Allocator const& alloc, ValueType&& value) :
-    any {
-      std::allocator_arg,
-      alloc,
-      std::forward<ValueType>(value),
-      typename std::uses_allocator<ValueType, Allocator>::type { }
-    }
   { }
 
   ~any () noexcept { this->table->destroy(std::addressof(this->data)); }
@@ -251,10 +195,7 @@ public:
   }
 
   any& operator = (any&& that) noexcept {
-    this->table = that.table;
-    this->data = that.data;
-    that.table = impl::get_any_dispatch<void>();
-    that.data = nullptr;
+    any { std::move(that) }.swap(*this);
     return *this;
   }
 
@@ -289,14 +230,14 @@ ValueType any_cast (any& operand) {
 template <typename ValueType>
 ValueType const* any_cast (any const* operand) noexcept {
   return operand and operand->type() == typeid(ValueType)
-    ? operand->cast<ValueType>()
+    ? operand->cast<ValueType>(impl::is_small<ValueType> { })
     : nullptr;
 }
 
 template <typename ValueType>
 ValueType* any_cast (any* operand) noexcept {
   return operand and operand->type() == typeid(ValueType)
-    ? operand->cast<ValueType>()
+    ? operand->cast<ValueType>(impl::is_small<ValueType> { })
     : nullptr;
 }
 
