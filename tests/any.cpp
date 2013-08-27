@@ -1,4 +1,7 @@
 #include <core/any.hpp>
+#include <type_traits>
+#include <string>
+
 #include <cstdint>
 
 #include <unittest/unittest.hpp>
@@ -7,14 +10,53 @@ int main () {
   using namespace unittest;
 
   test("any") = {
-    task("allocator-constructor") = [] { assert::fail(); },
-    task("default-constructor") = [] { assert::fail(); },
-    task("value-constructor") = [] { assert::fail(); },
-    task("copy-constructor") = [] { assert::fail(); },
-    task("move-constructor") = [] { assert::fail(); },
+    task("default-constructor") = [] {
+      core::any value;
+
+      assert::is_true(value.empty());
+      assert::equal(value.type(), typeid(void));
+    },
+    task("value-constructor") = [] {
+      std::string text { "value-constructor" };
+      core::any copy { text };
+
+      assert::is_false(copy.empty());
+      assert::is_false(text.empty());
+      assert::equal(copy.type(), typeid(text));
+
+      core::any move { std::move(text) };
+
+      assert::is_false(move.empty());
+      assert::is_true(text.empty());
+      assert::equal(move.type(), typeid(text));
+    },
+
+    task("copy-constructor") = [] {
+      core::any value { std::string { "copy-constructor" } };
+      core::any ctor { value };
+
+      assert::is_false(value.empty());
+      assert::is_false(ctor.empty());
+      assert::equal(ctor.type(), value.type());
+    },
+
+    task("move-constructor") = [] {
+      core::any value { std::string { "move-constructor" } };
+      core::any ctor { std::move(value) };
+
+      assert::is_false(ctor.empty());
+      assert::is_true(value.empty());
+      assert::equal(ctor.type(), typeid(std::string));
+    },
 
     task("rvalue-assign") = [] {
-      assert::fail();
+      std::string text { "rvalue-assign works!" };
+      core::any value;
+      value = std::move(text);
+
+      assert::is_false(value.empty());
+      assert::is_true(text.empty());
+      assert::equal(value.type(), typeid(text));
     },
 
     task("lvalue-assign") = [] {
@@ -60,8 +102,29 @@ int main () {
       assert::equal(typeid(integer), value.type());
     },
 
-    task("cast-const-ref") = [] { assert::fail(); },
-    task("cast-const-ptr") = [] { assert::fail(); },
+    task("cast-const-ref") = [] {
+      std::uint64_t integer = 42;
+      core::any const value { integer };
+      auto integer_value = core::any_cast<std::uint64_t>(value);
+      
+      assert::equal(integer_value, integer);
+      assert::throws<core::bad_any_cast>([&value] {
+        core::any_cast<double>(value);
+      });
+    },
+
+    task("cast-const-ptr") = [] {
+      std::uint64_t integer = 42;
+      core::any const value { integer };
+      auto integer_ptr = core::any_cast<std::uint64_t>(std::addressof(value));
+      auto double_ptr = core::any_cast<double>(std::addressof(value));
+
+      assert::is_not_null(integer_ptr);
+      assert::is_null(double_ptr);
+      assert::equal(*integer_ptr, integer);
+      assert::is_true(std::is_pointer<decltype(integer_ptr)>::value);
+    },
+
     task("cast-ref") = []{
       std::uint64_t integer = 42;
       core::any value { integer };
@@ -74,7 +137,6 @@ int main () {
     },
 
     task("cast-ptr") = []{
-      using core::any_cast;
       std::uint64_t integer = 42;
       core::any value { integer };
       auto integer_ptr = core::any_cast<std::uint64_t>(std::addressof(value));
@@ -85,5 +147,5 @@ int main () {
       assert::equal(*integer_ptr, integer);
     },
   };
-
+  monitor::run();
 }
