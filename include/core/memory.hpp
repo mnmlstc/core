@@ -11,7 +11,7 @@ inline namespace v1 {
 namespace impl {
 
 template <typename U>
-using remove_extent_t = typename std::remove_extent<Type>::type;
+using remove_extent = typename std::remove_extent<U>::type;
 
 } /* namespace impl */
 
@@ -28,7 +28,7 @@ template <
   typename=typename std::enable_if<std::is_array<Type>::value>::type,
   typename=typename std::enable_if<not std::extent<Type>::value>::type
 > auto make_unique(std::size_t size) -> std::unique_ptr<Type> {
-  return std::unique_ptr<Type>(new impl::remove_extent_t<Type>[size] { });
+  return std::unique_ptr<Type>(new impl::remove_extent<Type>[size] { });
 }
 
 template <
