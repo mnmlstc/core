@@ -15,4 +15,6 @@ int main () {
     },
     task("cend") = [value] { assert::equal(core::cend(value), value.end()); }
   };
+
+  monitor::run();
 }
