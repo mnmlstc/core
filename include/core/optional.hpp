@@ -17,8 +17,7 @@ struct nullopt_t final { };
 constexpr in_place_t in_place { };
 constexpr nullopt_t nullopt { };
 
-class bad_optional_access final : public std::logic_error {
-public:
+struct bad_optional_access final : public std::logic_error {
   explicit bad_optional_access (std::string const& what_arg) :
     std::logic_error { what_arg }
   { }
@@ -28,7 +27,9 @@ public:
 
   ~bad_optional_access () noexcept { }
 
-  virtual char const* what () const { return std::logic_error::what(); }
+  virtual char const* what () const noexcept {
+    return std::logic_error::what();
+  }
 };
 
 template <typename Type>
@@ -41,6 +42,11 @@ class optional final {
   static_assert(
     not std::is_same<typename std::decay<Type>::type, in_place_t>::value,
     "Cannot have an optional<in_place_t>"
+  );
+
+  static_assert(
+    not std::is_same<typename std::decay<Type>::type, std::nullptr_t>::value,
+    "Cannot have an optional<std::nullptr_t>"
   );
 
   using value_type = Type;
@@ -59,7 +65,7 @@ public:
     engaged { that.engaged }
   {
     if (not this->engaged) { return; }
-    allocator_type { };
+    allocator_type alloc { };
     std::allocator_traits<allocator_type>::construct(
       alloc,
       reinterpret_cast<value_type*>(this->data),
@@ -69,10 +75,10 @@ public:
 
   optional (optional&& that)
   noexcept(std::is_nothrow_move_constructible<value_type>::value) :
-    enaged { std::move(that.engaged) }
+    engaged { std::move(that.engaged) }
   {
     if (not this->enaged) { return; }
-    allocator_type { };
+    allocator_type alloc { };
     std::allocator_traits<allocator_type>::construct(
       alloc,
       reinterpret_cast<value_type*>(this->data),
@@ -101,7 +107,7 @@ public:
     allocator_type alloc { };
     std::allocator_traits<allocator_type>::construct(
       alloc,
-      reinterpret_cast<value_type*>(this->data)
+      reinterpret_cast<value_type*>(this->data),
       std::move(value)
     );
     this->engaged = true;
@@ -171,7 +177,7 @@ public:
   ) {
     allocator_type alloc { };
     if (not this->engaged and not that.engaged) { return *this; }
-    if (this->engaged and not that.engaged)
+//    if (this->engaged and not that.engaged)
   }
 
   template <typename T>
