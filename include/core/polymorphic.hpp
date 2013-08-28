@@ -18,8 +18,8 @@ template <typename Type>
 using lvalue = typename std::add_lvalue_reference<Type>::type;
 
 template <class T, class U>
-auto copy (std::unique_ptr<T> const& ptr) -> std::unique_ptr<U> {
-  return core::make_unique<U>(*dynamic_cast<U const*>(ptr.get()));
+auto copy (std::unique_ptr<T> const& ptr) -> std::unique_ptr<T> {
+  return core::make_unique<U>(*dynamic_cast<U*>(ptr.get()));
 }
 
 template <typename T>
@@ -45,6 +45,7 @@ class polymorphic final {
 
   copier_type copier;
   unique_type data;
+
 public:
 
   template <
@@ -54,7 +55,7 @@ public:
     >::type
   > polymorphic (T&& value) :
     copier { impl::copy<element_type, impl::decay<T>> },
-    data { core::make_unique<impl::decay<T>>() }
+    data { core::make_unique<impl::decay<T>>(std::forward<T>(value)) }
   {
     using derived_type = impl::decay<T>;
 
@@ -131,11 +132,11 @@ public:
   }
 
   void swap (polymorphic& that) noexcept {
-    std::swap(this->table, that.table);
+    std::swap(this->copier, that.copier);
     std::swap(this->data, that.data);
   }
 
-  explicit operator bool () const noexcept { return this->data; }
+  explicit operator bool () const noexcept { return bool(this->data); }
   auto operator * () const noexcept -> impl::lvalue<element_type> {
     return *this->data;
   }
