@@ -50,14 +50,16 @@ class optional final {
   );
 
   using value_type = Type;
+  using data_type = std::aligned_storage<
+    sizeof(value_type),
+    std::alignment_of<value_type>::value
+  >::type;
   using allocator_type = std::allocator<value_type>;
+
 
   using nothrow_move_construct = std::is_nothrow_move_constructible<value_type>;
 
-  typename std::aligned_storage<
-    sizeof(value_type),
-    std::alignment_of<value_type>::value
-  > data;
+  data_type data;
   bool engaged;
 
 public:
@@ -68,7 +70,7 @@ public:
     allocator_type alloc { };
     std::allocator_traits<allocator_type>::construct(
       alloc,
-      reinterpret_cast<value_type*>(this->data),
+      reinterpret_cast<value_type*>(std::addressof(this->data)),
       *that
     );
   }
@@ -77,11 +79,11 @@ public:
   noexcept(std::is_nothrow_move_constructible<value_type>::value) :
     engaged { std::move(that.engaged) }
   {
-    if (not this->enaged) { return; }
+    if (not this->engaged) { return; }
     allocator_type alloc { };
     std::allocator_traits<allocator_type>::construct(
       alloc,
-      reinterpret_cast<value_type*>(this->data),
+      reinterpret_cast<value_type*>(std::addressof(this->data)),
       std::move(*that)
     );
     this->engaged = true;
@@ -95,7 +97,7 @@ public:
     allocator_type alloc { };
     std::allocator_traits<allocator_type>::construct(
       alloc,
-      reinterpret_cast<value_type*>(this->data),
+      reinterpret_cast<value_type*>(std::addressof(this->data)),
       value
     );
     this->engaged = true;
@@ -107,7 +109,7 @@ public:
     allocator_type alloc { };
     std::allocator_traits<allocator_type>::construct(
       alloc,
-      reinterpret_cast<value_type*>(this->data),
+      reinterpret_cast<value_type*>(std::addressof(this->data)),
       std::move(value)
     );
     this->engaged = true;
@@ -121,7 +123,7 @@ public:
     allocator_type alloc { };
     std::allocator_traits<allocator_type>::construct(
       alloc,
-      reinterpret_cast<value_type*>(this->data),
+      reinterpret_cast<value_type*>(std::addressof(this->data)),
       std::forward<Args>(args)...
     );
     this->engaged = true;
@@ -136,7 +138,7 @@ public:
     allocator_type alloc { };
     std::allocator_traits<allocator_type>::construct(
       alloc,
-      reinterpret_cast<value_type*>(this->data),
+      reinterpret_cast<value_type*>(std::addressof(this->data)),
       list,
       std::forward<Args>(args)...
     );
@@ -147,7 +149,7 @@ public:
     if (not this->engaged) { return; }
     allocator_type alloc { };
     std::allocator_traits<allocator_type>::destroy(
-      alloc, reinterpret_cast<value_type*>(this->data)
+      alloc, reinterpret_cast<value_type*>(std::addressof(this->data))
     );
   }
 
@@ -156,14 +158,14 @@ public:
     if (not this->engaged and not that.engaged) { return *this; }
     if (this->engaged and not that.engaged) {
       std::allocator_traits<allocator_type>::destroy(
-        alloc, reinterpret_cast<value_type*>(this->data)
+        alloc, reinterpret_cast<value_type*>(std::addressof(this->data))
       );
       this->engaged = false;
     }
 
     std::allocator_traits<allocator_type>::construct(
       alloc,
-      reinterpret_cast<value_type*>(this->data), 
+      reinterpret_cast<value_type*>(std::addressof(this->data)),
       *that
     );
     this->engaged = true;
@@ -186,7 +188,7 @@ public:
       allocator_type alloc { };
       std::allocator_traits<allocator_type>::construct(
         alloc,
-        reinterpret_cast<value_type*>(this->data),
+        reinterpret_cast<value_type*>(std::addressof(this->data)),
         std::forward<T>(value)
       );
       this->engaged = true;
@@ -198,26 +200,26 @@ public:
     if (not this->engaged) { return *this; }
     allocator_type alloc { };
     std::allocator_traits<allocator_type>::destroy(
-      alloc, reinterpret_cast<value_type*>(this->data)
+      alloc, reinterpret_cast<value_type*>(std::addressof(this->data))
     );
     this->engaged = false;
     return *this;
   }
 
   value_type const* operator -> () const {
-    return reinterpret_cast<value_type const*>(this->data);
+    return reinterpret_cast<value_type const*>(std::addressof(this->data));
   }
 
   value_type* operator -> () {
-    return reinterpret_cast<value_type*>(this->data);
+    return reinterpret_cast<value_type*>(std::addressof(this->data));
   }
 
   value_type const& operator * () const {
-    return *reinterpret_cast<value_type const*>(this->data);
+    return *reinterpret_cast<value_type const*>(std::addressof(this->data));
   }
 
   value_type& operator * () {
-    return *reinterpret_cast<value_type*>(this->data);
+    return *reinterpret_cast<value_type*>(std::addressof(this->data));
   }
 
   explicit operator bool () const { return this->engaged; }

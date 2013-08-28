@@ -1,4 +1,5 @@
 #include <core/optional.hpp>
+#include <string>
 #include <cstdint>
 
 #include <unittest/unittest.hpp>
@@ -7,12 +8,30 @@ int main () {
   using namespace unittest;
 
   test("optional") = {
-    task("default-constructor") = [] { assert::fail(); },
-    task("copy-constructor") = [] { assert::fail(); },
+    task("default-constructor") = [] {
+      core::optional<int> opt;
+      assert::is_true(not opt);
+      assert::equal(opt, core::nullopt);
+    },
+
+    task("copy-constructor") = [] {
+      core::optional<int> opt { 4 };
+      core::optional<int> copy { opt };
+      assert::is_false(not opt);
+      assert::is_false(not copy);
+      assert::equal(opt, copy);
+      assert::equal(copy.value(), 4);
+    },
     task("move-constructor") = [] { assert::fail(); },
     task("null-constructor") = [] { assert::fail(); },
     task("copy-value-constructor") = [] { assert::fail(); },
-    task("move-value-constructor") = [] { assert::fail(); },
+    task("move-value-constructor") = [] {
+      std::string text { "move-value" };
+      core::optional<std::string> opt { std::move(text) };
+      assert::is_true(bool(opt));
+      assert::is_true(text.empty());
+      assert::equal(opt.value(), std::string { "move-value" });
+    },
     task("in-place-constructor") = [] { assert::fail(); },
     task("null-assign-operator") = [] { assert::fail(); },
     task("copy-assign-operator") = [] { assert::fail(); },
