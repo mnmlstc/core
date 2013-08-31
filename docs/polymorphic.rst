@@ -8,15 +8,21 @@ MNMLSTC Core. At the time of this writing, it is not planned for inclusion in a
 future version of the C++ standard library, nor has it been proposed for
 inclusion.
 
-The polymorphic component requires that both RTTI and exceptions be enabled.
-The RTTI is absolutely required for the polymorphic deep-copy to take place.
-
-.. namespace:: core
+A :class:`polymorphic\<T, Deleter>` is intended to act as a smart pointer for
+an abstract or polymorphic type ``T`` that performs a *deep copy* on
+assignment. This is synonymous with the :class:`any`, however it affords a
+user the ability to ascertain what possible types the
+:class:`polymorphic\<T, Deleter>` contains.
 
 .. warning:: *Only* polymorphic types may be used with
    :class:`polymorphic\<T, Deleter>`. If deep-copy semantics with a
    :class:`std::unique_ptr\<T>` are desired for a non-polymorphic type, use
    :class:`deep_ptr\<T>` instead.
+
+The polymorphic component requires that both RTTI and exceptions be enabled.
+The RTTI is absolutely required for the polymorphic deep-copy to take place.
+
+.. namespace:: core
 
 .. class:: bad_polymorphic_reset
 

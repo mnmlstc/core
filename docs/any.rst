@@ -12,6 +12,12 @@ make a small object optimization to avoid allocations for small and integral
 types. The MNMLSTC Core any implements this optimization, and attempts to
 follow the proposal as closely as possible.
 
+.. note:: While the :class:`any`it does not provide the
+  *allocator.uses.construction* constructors. This is due to several library
+  implementations not implementing them for various containers, and to
+  alleviate possible confusing errors, these have been omitted from the
+  MNMLSTC implementation.
+
 .. namespace:: core
 
 .. class:: bad_any_cast

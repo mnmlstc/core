@@ -23,22 +23,12 @@ Some components provided by MNMLSTC Core are:
  * ``range<T>``
  * ``any``
 
-And many others. Details on each component can be found in MNMLSTC Core's
+And others. Details on each component can be found in MNMLSTC Core's
 documentation.
 
 Some important differences between these components and their Boost
 counterparts are:
 
- * The ``any`` implementation follows the interface laid out in the 3rd
-   `draft proposal <http://beman.github.io/dot16/any-proposal.html>`_
-   currently written by Beman Dawes, and Kevlin Henney. It performs the small
-   object optimization. It also has one caveat explained in its documentation
-   related to the *allocator.uses.construction* constructors.
- * The ``polymorphic<T>`` is intended to act as a smart pointer for an abstract
-   or polymorphic type ``T``, that performs a *deep copy* on assignment.
-   This is nearly synonymous with the ``any`` type, however it affords a user
-   the ability to ascertain what possible types the ``polymorphic<T>`` may
-   store.
  * The ``optional<T>`` implements an interface equivalent to the C++14
    ``std::optional<T>``, but does so with C++11 semantics, which can be
    limiting, due to the now relaxed rules regarding constexpr.
