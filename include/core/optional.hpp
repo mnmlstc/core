@@ -170,15 +170,8 @@ public:
 
   template <typename T>
   optional& operator = (T&& value) {
-    if (not this->engaged) {
-      allocator_type alloc { };
-      std::allocator_traits<allocator_type>::construct(
-        alloc,
-        reinterpret_cast<value_type*>(std::addressof(this->data)),
-        std::forward<T>(value)
-      );
-      this->engaged = true;
-    } else { **this = std::forward<T>(value); }
+    if (not this->engaged) { this->emplace(std::forward<T>(value)); }
+    else { **this = std::forward<T>(value); }
     return *this;
   }
 
@@ -231,24 +224,23 @@ public:
     noexcept(std::swap(std::declval<value_type>(), std::declval<value_type>()))
   ) {
     if (not this->engaged and not that.engaged) { return; }
-    if (this->engaged and that.engaged) { std::swap(**this, *that); return; }
-    if (this->engaged and not that.engaged) {
-      allocator_type alloc { };
+    if (this->engaged and that.engaged) {
+      std::swap(**this, *that);
+      return;
     }
-    std::swap(this->engaged, that.engaged);
+
+    auto& to_disengage = this->engaged ? *this : that;
+    auto& to_engage = this->engaged ? that : *this;
+
+    to_engage.emplace(std::move(*to_disengage));
+    to_disengage = nullopt;
   }
 
   template <typename U, typename... Args>
   void emplace (std::initializer_list<U> list, Args&&... args) {
-    allocator_type alloc { };
-    if (this->engaged) {
-      std::allocator_traits<allocator_type>::destruct(
-        alloc,
-        reinterpret_cast<value_type*>(this->data)
-      );
-      this->engaged = false;
-    }
+    if (this->engaged) { *this = nullopt; }
 
+    allocator_type alloc { };
     std::allocator_traits<allocator_type>::construct(
       alloc,
       reinterpret_cast<value_type*>(this->data),
@@ -259,15 +251,9 @@ public:
 
   template <typename... Args>
   void emplace (Args&&... args) {
-    allocator_type alloc { };
-    if (this->engaged) {
-      std::allocator_traits<allocator_type>::destruct(
-        alloc,
-        reinterpret_cast<value_type*>(this->data)
-      );
-      this->engaged = false;
-    }
+    if (this->engaged) { *this = nullopt; }
 
+    allocator_type alloc { };
     std::allocator_traits<allocator_type>::construct(
       alloc,
       reinterpret_cast<value_type*>(this->data),
