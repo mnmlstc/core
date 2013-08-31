@@ -1,11 +1,9 @@
 Overview
 ========
 
-MNMLSTC Core is a C++11 library that adds a functionality set that will only
-be available in C++14 and later, as well as some generally useful additions.
-It is small and easy to use. A majority of the components of MNMLSTC Core can
-also be found in Boost. However their are some behavior differences between
-MNMLSTC Core components and their Boost counterparts.
+MNMLSTC Core is a small and easy to use C++11 library that adds a functionality
+set that will be available in C++14 and later, as well as some extremely useful
+additions.
 
 Information on installing and using MNMLSTC Core (as well as modifying its
 internals) can be found in its documentation
@@ -15,18 +13,18 @@ MNMLSTC Core is released under the Apache 2.0 License.
 Components
 ----------
 
-The components provided by MNMLSTC Core are:
+Some components provided by MNMLSTC Core are:
 
  * ``polymorphic<T>``
  * ``variant<Ts...>``
  * ``optional<T>``
  * ``expected<T>``
+ * ``deep_ptr<T>``
  * ``range<T>``
  * ``any``
 
- * ``cbegin``
- * ``cend``
- * ``make_unique<T>``
+And many others. Details on each component can be found in MNMLSTC Core's
+documentation.
 
 Some important differences between these components and their Boost
 counterparts are:
@@ -66,6 +64,8 @@ There are several requirements to fully use MNMLSTC Core:
  * `MNMLSTC Unittest <https://github.com/mnmlstc/unittest>`_
  * `Sphinx Documentation Generator <http://sphinx-doc.org>`_
  * `Cloud Sphinx Theme <https://pypi.python.org/pypi/cloud_sptheme>`_
+
+MNMLSTC Unittest is only necessary if building and running the unit tests.
 
 Sphinx and the Cloud Sphinx Theme are only necessary if generating
 documentation manually.

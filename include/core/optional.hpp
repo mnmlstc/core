@@ -21,6 +21,7 @@ struct bad_optional_access final : public std::logic_error {
   explicit bad_optional_access (std::string const& what_arg) :
     std::logic_error { what_arg }
   { }
+
   explicit bad_optional_access (char const* what_arg) noexcept :
     std::logic_error { what_arg }
   { }
@@ -50,12 +51,11 @@ class optional final {
   );
 
   using value_type = Type;
-  using data_type = std::aligned_storage<
+  using data_type = typename std::aligned_storage<
     sizeof(value_type),
     std::alignment_of<value_type>::value
   >::type;
   using allocator_type = std::allocator<value_type>;
-
 
   using nothrow_move_construct = std::is_nothrow_move_constructible<value_type>;
 
@@ -154,22 +154,8 @@ public:
   }
 
   optional& operator = (optional const& that) {
-    allocator_type alloc { };
-    if (not this->engaged and not that.engaged) { return *this; }
-    if (this->engaged and not that.engaged) {
-      std::allocator_traits<allocator_type>::destroy(
-        alloc, reinterpret_cast<value_type*>(std::addressof(this->data))
-      );
-      this->engaged = false;
-    }
-
-    std::allocator_traits<allocator_type>::construct(
-      alloc,
-      reinterpret_cast<value_type*>(std::addressof(this->data)),
-      *that
-    );
-    this->engaged = true;
-
+    if (not that.engaged) { return *this = nullopt; }
+    **this = *that;
     return *this;
   }
 
@@ -177,9 +163,9 @@ public:
     std::is_nothrow_move_assignable<value_type>::value and
     std::is_nothrow_move_constructible<value_type>::value
   ) {
-    allocator_type alloc { };
-    if (not this->engaged and not that.engaged) { return *this; }
-//    if (this->engaged and not that.engaged)
+    if (not that.engaged) { return *this = nullopt; }
+    **this = std::move(*that);
+    return *this;
   }
 
   template <typename T>

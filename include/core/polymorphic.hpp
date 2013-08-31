@@ -6,33 +6,31 @@
 #include <typeinfo>
 #include <memory>
 
-#include <core/memory.hpp>
-
 namespace core {
 inline namespace v1 {
 namespace impl {
 
-
-template <typename Type> using decay = typename std::decay<Type>::type;
-template <typename Type>
-using lvalue = typename std::add_lvalue_reference<Type>::type;
-
-template <class T, class U>
-auto copy (std::unique_ptr<T> const& ptr) -> std::unique_ptr<T> {
-  return core::make_unique<U>(*dynamic_cast<U*>(ptr.get()));
-}
-
-template <typename T>
-auto null_copy (std::unique_ptr<T> const& ptr) -> std::unique_ptr<T> {
-  return std::unique_ptr<T> { };
+template <typename T, typename D>
+std::unique_ptr<T, D> null_poly_copy (std::unique_ptr<T, D> const&) {
+  return std::unique_ptr<T, D> { };
 }
 
 } /* namespace impl */
 
-/* Can be simplified down to a std::unique_ptr<Type> and a const copy function ptr */
-template <class Type>
+template <typename T, typename D, typename U>
+std::unique_ptr<T, D> default_poly_copy (std::unique_ptr<T, D> const& ptr) {
+  auto value = *dynamic_cast<U*>(ptr.get());
+  return std::unique_ptr<T, D> {
+    new U { std::move(value) }, ptr.get_deleter()
+  };
+}
+
+struct bad_polymorphic_reset final : std::logic_error { };
+
+template <typename T, typename Deleter=std::default_delete<T>>
 class polymorphic final {
-  using unique_type = std::unique_ptr<Type>;
+
+  using unique_type = std::unique_ptr<T, Deleter>;
   using element_type = typename unique_type::element_type;
   using deleter_type = typename unique_type::deleter_type;
   using copier_type = unique_type (*)(unique_type const&);
@@ -40,49 +38,47 @@ class polymorphic final {
 
   static_assert(
     std::is_polymorphic<element_type>::value,
-    "Cannot create a polymorphic<T> with a non-polymorphic type"
+    "Cannot create a polymorphic with a non-polymorphic type"
   );
 
-  copier_type copier;
+  copier_type copier { impl::null_poly_copy<element_type, deleter_type> };
   unique_type data;
 
 public:
 
-  template <
-    typename T,
-    typename=typename std::enable_if<
-      not std::is_same<polymorphic, impl::decay<T>>::value
-    >::type
-  > polymorphic (T&& value) :
-    copier { impl::copy<element_type, impl::decay<T>> },
-    data { core::make_unique<impl::decay<T>>(std::forward<T>(value)) }
-  {
-    using derived_type = impl::decay<T>;
-
-    static_assert(
-      not std::is_abstract<derived_type>::value,
-      "Cannot create a polymorphic<T> from an abstract type"
-    );
-
-    static_assert(
-      std::is_base_of<element_type, derived_type>::value,
-      "Cannot create a polymorphic<T> from a non-derived instance"
-    );
-  }
-
-  template <typename T>
-  polymorphic (polymorphic<T> const& that) noexcept :
-    copier { that.copier },
-    data { that.copier(that.data) }
+  template <typename U>
+  explicit polymorphic (U* ptr, copier_type copier=nullptr) noexcept :
+    polymorphic { ptr, deleter_type { }, copier }
   { }
 
-  template <typename T>
-  polymorphic (polymorphic<T>&& that) noexcept :
-    copier { that.copier },
-    data { std::move(that.data) }
-  { that.copier = impl::null_copy<T>; }
+  template <typename U>
+  polymorphic (
+    U* ptr,
+    deleter_type const& deleter,
+    copier_type copier = nullptr
+  ) noexcept :
+    polymorphic { ptr, deleter_type { deleter }, copier }
+  { }
 
-  polymorphic (polymorphic const& that) noexcept :
+  template <typename U>
+  polymorphic (
+    U* ptr,
+    deleter_type&& deleter,
+    copier_type copier = nullptr
+  ) noexcept :
+    copier {
+      copier ? copier : default_poly_copy<element_type, deleter_type, U>
+    },
+    data { ptr, std::move(deleter) }
+  {
+    constexpr bool abstract = std::is_abstract<U>::value;
+    constexpr bool base = std::is_base_of<element_type, U>::value;
+
+    static_assert(not abstract, "cannot create polymorphic with abstract");
+    static_assert(base, "cannot create a polymorphic with non-derived type");
+  }
+
+  polymorphic (polymorphic const& that) :
     copier { that.copier },
     data { that.copier(that.data) }
   { }
@@ -90,45 +86,71 @@ public:
   polymorphic (polymorphic&& that) noexcept :
     copier { std::move(that.copier) },
     data { std::move(that.data) }
-  { that.copier = impl::null_copy<element_type>; }
+  { that.copier = impl::null_poly_copy<element_type, deleter_type>; }
 
   polymorphic () noexcept :
-    copier { impl::null_copy<element_type> },
+    copier { impl::null_poly_copy<element_type, deleter_type> },
     data { }
   { }
 
   ~polymorphic () noexcept { }
+
+  template <typename U, typename D>
+  polymorphic& operator = (std::unique_ptr<U, D>&& ptr) {
+    polymorphic { std::move(ptr) }.swap(*this);
+    return *this;
+  }
+
+  template <typename U>
+  polymorphic& operator = (U* ptr) {
+    polymorphic { ptr }.swap(*this);
+    return *this;
+  }
 
   polymorphic& operator = (polymorphic const& that) {
     polymorphic { that }.swap(*this);
     return *this;
   }
 
-  polymorphic& operator = (polymorphic&& that) noexcept {
+  polymorphic& operator = (polymorphic&& that) {
     polymorphic { std::move(that) }.swap(*this);
     return *this;
   }
 
-  template <
-    typename DerivedType,
-    typename=typename std::enable_if<
-      not std::is_same<polymorphic, impl::decay<DerivedType>>::value
-    >::type
-  > polymorphic& operator = (DerivedType&& derived) {
-    polymorphic { std::forward<DerivedType>(derived) }.swap(*this);
-    return *this;
+  explicit operator bool () const noexcept { return bool(this->data); }
+
+  element_type& operator * () const noexcept { return *this->data; }
+  pointer operator -> () const noexcept { return this->data.get(); }
+
+  pointer get () const noexcept { return this->data.get(); }
+
+  deleter_type const& get_deleter () const noexcept {
+    return this->data.get_deleter();
   }
 
-  template <typename T>
-  polymorphic& operator = (polymorphic<T> const& that) {
-    polymorphic { that }.swap(*this);
-    return *this;
+  deleter_type& get_deleter () noexcept { return this->data.get_deleter(); }
+
+  copier_type const& get_copier () const noexcept { return this->copier; }
+  copier_type& get_copier () noexcept { return this->copier; }
+
+  pointer release () noexcept {
+    this->copier = impl::null_poly_copy<element_type, deleter_type>;
+    return this->data.release();
   }
 
-  template <typename T>
-  polymorphic& operator = (polymorphic<T>&& that) {
-    polymorphic { that }.swap(*this);
-    return *this;
+  void reset (pointer ptr = nullptr) {
+    constexpr auto inval = "cannot reset null polymorphic with valid pointer";
+    constexpr auto type = "cannot reset polymorphic with different type";
+
+    if (ptr and not this->data) { throw bad_polymorphic_reset { inval }; }
+    if (ptr and typeid(*this->data) != typeid(*ptr)) {
+      throw bad_polymorphic_reset { type };
+    }
+
+    this->data.reset(ptr);
+    if (not ptr) {
+      this->copier = impl::null_poly_copy<element_type, deleter_type>;
+    }
   }
 
   void swap (polymorphic& that) noexcept {
@@ -136,22 +158,24 @@ public:
     std::swap(this->data, that.data);
   }
 
-  explicit operator bool () const noexcept { return bool(this->data); }
-  auto operator * () const noexcept -> impl::lvalue<element_type> {
-    return *this->data;
-  }
-
-  pointer operator -> () const noexcept { return this->data.get(); }
 };
 
 }} /* namespace core::v1 */
 
 namespace std {
 
-template <typename T>
-void swap (core::v1::polymorphic<T>& lhs, core::v1::polymorphic<T>& rhs) {
-  lhs.swap(rhs);
-}
+template <typename T, typename Deleter>
+void swap (
+  core::v1::polymorphic<T, Deleter>& lhs,
+  core::v1::polymorphic<T, Deleter>& rhs
+) noexcept { lhs.swap(rhs); }
+
+template <typename T, typename Deleter>
+struct hash<core::v1::polymorphic<T, Deleter>> {
+  size_t operator ()(core::v1::polymorphic<T, Deleter> const& value) {
+    return hash<T*> { }(value.get());
+  }
+};
 
 } /* namespace std */
 
