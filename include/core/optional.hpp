@@ -223,8 +223,10 @@ public:
   }
 
   void swap (optional& that) noexcept (
-    std::is_nothrow_move_constructible<value_type>::value/* and
-    noexcept(std::swap(std::declval<value_type>(), std::declval<value_type>()))*/
+    std::is_nothrow_move_constructible<value_type>::value and
+    noexcept(
+      std::swap(std::declval<value_type&>(), std::declval<value_type&>())
+    )
   ) {
     if (not this->engaged and not that.engaged) { return; }
     if (this->engaged and that.engaged) {

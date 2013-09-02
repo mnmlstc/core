@@ -181,6 +181,27 @@ int main () {
       assert::equal(*opt, std::string { "make-optional" });
     },
 
+    task("swap") = [] {
+      core::optional<int> lhs { 4 };
+      core::optional<int> rhs { };
+      core::optional<int> rhs2 { 4 };
+
+      std::swap(lhs, rhs);
+
+      assert::is_true(not lhs);
+      assert::is_true(bool(rhs));
+      assert::equal(rhs, 4);
+      assert::equal(rhs, rhs2);
+
+      std::swap(lhs, rhs);
+
+      assert::is_true(not rhs);
+      assert::is_true(bool(lhs));
+      assert::equal(lhs, 4);
+      assert::equal(lhs, rhs2);
+
+    },
+
     task("hash") = [] {
       std::unordered_map<core::optional<std::string>, int> values = {
         std::make_pair(core::make_optional<std::string>("text1"), 0),
