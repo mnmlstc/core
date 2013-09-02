@@ -134,8 +134,10 @@ int main () {
       });
     },
 
-    task("value_or") = [] {
-      assert::fail();
+    task("value-or") = [] {
+      core::optional<std::string> opt { };
+      auto str = opt.value_or("value-or");
+      assert::equal(str, std::string { "value-or" });
     },
 
     task("emplace") = [] {
@@ -145,9 +147,33 @@ int main () {
       assert::equal(*opt, 4);
     },
 
-    task("equality-comparable") = [] { assert::fail(); },
+    task("equality-comparable") = [] {
+      core::optional<int> lhs_int { };
+      core::optional<int> rhs_int { };
 
-    task("less-than-comparable") = [] { assert::fail(); },
+      rhs_int.emplace(7);
+
+      assert::is_false(core::nullopt == rhs_int);
+      assert::equal(lhs_int, decltype(rhs_int) { });
+      assert::equal(lhs_int, core::nullopt);
+      assert::equal(rhs_int, 7);
+      assert::equal(7, rhs_int);
+    },
+
+    task("less-than-comparable") = [] {
+      core::optional<int> empty_lhs { };
+      core::optional<int> empty_rhs { };
+      core::optional<int> lhs { 4 };
+      core::optional<int> rhs { 8 };
+
+      assert::is_false(empty_lhs < empty_rhs);
+      assert::less(empty_lhs, rhs);
+      assert::less(lhs, rhs);
+
+      assert::less(empty_lhs, core::nullopt);
+      assert::less(core::nullopt, rhs);
+      assert::less(lhs, 5);
+    },
 
     task("make-optional") = [] {
       auto opt = core::make_optional<std::string>("make-optional");
@@ -162,7 +188,9 @@ int main () {
         std::make_pair(core::make_optional<std::string>("text3"), 2),
       };
 
-      assert::fail();
+      assert::equal(values[core::make_optional<std::string>("text1")], 0);
+      assert::equal(values[core::make_optional<std::string>("text2")], 1);
+      assert::equal(values[core::make_optional<std::string>("text3")], 2);
     }
   };
 

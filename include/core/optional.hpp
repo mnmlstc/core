@@ -219,7 +219,7 @@ public:
   template <typename T>
   value_type value_or (T&& val) {
     if (not this->engaged) { return value_type { std::forward<T>(val) }; }
-    return *this;
+    return **this;
   }
 
   void swap (optional& that) noexcept (
