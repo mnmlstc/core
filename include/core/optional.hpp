@@ -154,8 +154,7 @@ public:
   }
 
   optional& operator = (optional const& that) {
-    if (not that.engaged) { return *this = nullopt; }
-    **this = *that;
+    optional { that }.swap(*this);
     return *this;
   }
 
@@ -163,13 +162,17 @@ public:
     std::is_nothrow_move_assignable<value_type>::value and
     std::is_nothrow_move_constructible<value_type>::value
   ) {
-    if (not that.engaged) { return *this = nullopt; }
-    **this = std::move(*that);
+    optional { std::move(that) }.swap(*this);
     return *this;
   }
 
-  template <typename T>
-  optional& operator = (T&& value) {
+  template <
+    typename T,
+    typename=typename std::enable_if<
+      std::is_constructible<value_type, T>::value and
+      std::is_assignable<value_type, T>::value
+    >::type
+  > optional& operator = (T&& value) {
     if (not this->engaged) { this->emplace(std::forward<T>(value)); }
     else { **this = std::forward<T>(value); }
     return *this;
@@ -220,8 +223,8 @@ public:
   }
 
   void swap (optional& that) noexcept (
-    std::is_nothrow_move_constructible<value_type>::value and
-    noexcept(std::swap(std::declval<value_type>(), std::declval<value_type>()))
+    std::is_nothrow_move_constructible<value_type>::value/* and
+    noexcept(std::swap(std::declval<value_type>(), std::declval<value_type>()))*/
   ) {
     if (not this->engaged and not that.engaged) { return; }
     if (this->engaged and that.engaged) {
@@ -243,7 +246,7 @@ public:
     allocator_type alloc { };
     std::allocator_traits<allocator_type>::construct(
       alloc,
-      reinterpret_cast<value_type*>(this->data),
+      reinterpret_cast<value_type*>(std::addressof(this->data)),
       list,
       std::forward<Args>(args)...
     );
@@ -256,7 +259,7 @@ public:
     allocator_type alloc { };
     std::allocator_traits<allocator_type>::construct(
       alloc,
-      reinterpret_cast<value_type*>(this->data),
+      reinterpret_cast<value_type*>(std::addressof(this->data)),
       std::forward<Args>(args)...
     );
     this->engaged = true;
@@ -329,7 +332,7 @@ template <typename Type>
 struct hash<core::optional<Type>> {
   using result_type = typename hash<Type>::result_type;
 
-  result_type operator () (core::optional<Type> const& value) {
+  result_type operator () (core::optional<Type> const& value) const {
     return value ? hash<Type> { }(*value) : result_type { };
   }
 };

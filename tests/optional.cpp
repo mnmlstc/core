@@ -1,5 +1,9 @@
 #include <core/optional.hpp>
+
+#include <unordered_map>
+#include <utility>
 #include <string>
+
 #include <cstdint>
 
 #include <unittest/unittest.hpp>
@@ -73,10 +77,43 @@ int main () {
       assert::is_true(not opt);
     },
 
-    task("copy-assign-operator") = [] { assert::fail(); },
-    task("move-assign-operator") = [] { assert::fail(); },
-    task("copy-value-assign-operator") = [] { assert::fail(); },
-    task("move-value-assign-operator") = [] { assert::fail(); },
+    task("copy-assign-operator") = [] {
+      core::optional<int> opt { 4 };
+      core::optional<int> copy { };
+      copy = opt;
+
+      assert::is_false(not opt);
+      assert::is_false(not copy);
+      assert::equal(opt, copy);
+      assert::equal(*copy, 4);
+    },
+
+    task("move-assign-operator") = [] {
+      core::optional<int> opt { 4 };
+      core::optional<int> move { };
+      move = std::move(opt);
+
+      assert::is_true(not opt);
+      assert::is_false(not move);
+      assert::equal(*move, 4);
+    },
+
+    task("copy-value-assign-operator") = [] {
+      core::optional<int> opt { };
+      int value = 4;
+      opt = value;
+      assert::is_true(bool(opt));
+      assert::equal(*opt, 4);
+    },
+
+    task("move-value-assign-operator") = [] {
+      core::optional<std::string> opt { };
+      std::string value { "move-value" };
+      opt = std::move(value);
+      assert::is_true(value.empty());
+      assert::is_true(bool(opt));
+      assert::equal(*opt, std::string { "move-value" });
+    },
 
     task("arrow-operator") = [] {
       core::optional<std::string> opt { "arrow" };
@@ -90,16 +127,43 @@ int main () {
       assert::equal(*opt, 56);
     },
 
-    task("operator-bool") = [] { assert::fail(); },
-    task("value") = [] { assert::fail(); },
-    task("value_or") = [] { assert::fail(); },
-    task("emplace") = [] { assert::fail(); },
+    task("value") = [] {
+      assert::throws<core::bad_optional_access>([] {
+        core::optional<int> opt { };
+        int x = opt.value();
+      });
+    },
+
+    task("value_or") = [] {
+      assert::fail();
+    },
+
+    task("emplace") = [] {
+      core::optional<int> opt { };
+      opt.emplace(4);
+      assert::is_false(not opt);
+      assert::equal(*opt, 4);
+    },
 
     task("equality-comparable") = [] { assert::fail(); },
+
     task("less-than-comparable") = [] { assert::fail(); },
-    task("make-optional") = [] { assert::fail(); },
-    task("swap") = [] { assert::fail(); },
-    task("hash") = [] { assert::fail(); }
+
+    task("make-optional") = [] {
+      auto opt = core::make_optional<std::string>("make-optional");
+      assert::is_true(bool(opt));
+      assert::equal(*opt, std::string { "make-optional" });
+    },
+
+    task("hash") = [] {
+      std::unordered_map<core::optional<std::string>, int> values = {
+        std::make_pair(core::make_optional<std::string>("text1"), 0),
+        std::make_pair(core::make_optional<std::string>("text2"), 1),
+        std::make_pair(core::make_optional<std::string>("text3"), 2),
+      };
+
+      assert::fail();
+    }
   };
 
   monitor::run();
