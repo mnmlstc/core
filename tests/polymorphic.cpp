@@ -45,7 +45,9 @@ int main () {
       );
     },
 
-    task("move-constructor") = []{ assert::fail(); },
+    task("move-constructor") = []{
+      assert::fail();
+    },
     task("value-assignment") = []{ assert::fail(); },
     task("copy-assignment") = []{ assert::fail(); },
     task("move-assignment") = []{ assert::fail(); },
@@ -63,7 +65,17 @@ int main () {
     task("reset") = [] { assert::fail(); },
     task("swap") = [] { assert::fail(); },
     task("get") = [] { assert::fail(); },
-    task("get-copier") = [] { assert::fail(); },
+
+    task("get-copier") = [] {
+      core::polymorphic<base> value { new derived { } };
+      auto poly_copy = core::default_poly_copy<
+        base,
+        std::default_delete<base>,
+        derived
+      >;
+
+      assert::equal(value.get_copier(), poly_copy);
+    },
 
     task("operator-equal") = [] {
       core::polymorphic<base> lhs, rhs;
