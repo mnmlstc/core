@@ -7,10 +7,14 @@ struct base {
   base (base&&) = default;
   base () = default;
   virtual ~base () { }
+
+  virtual int get () const noexcept { return 0; }
 };
 
 struct derived : base {
   int value = 42;
+
+  virtual int get () const noexcept override { return this->value; }
 };
 
 int main () {
@@ -46,11 +50,45 @@ int main () {
     },
 
     task("move-constructor") = []{
-      assert::fail();
+      core::polymorphic<base> value { new derived { } };
+      core::polymorphic<base> move { std::move(value) };
+
+      assert::is_true(not value);
+      assert::is_true(bool(move));
+
+      assert::equal(dynamic_cast<derived&>(*move).value, 42);
     },
+
     task("value-assignment") = []{ assert::fail(); },
-    task("copy-assignment") = []{ assert::fail(); },
-    task("move-assignment") = []{ assert::fail(); },
+
+    task("copy-assignment") = []{
+      core::polymorphic<base> value { new derived { } };
+      core::polymorphic<base> copy { };
+      copy = value;
+
+      assert::is_true(bool(value));
+      assert::is_true(bool(copy));
+
+      assert::equal(typeid(derived), typeid(*value));
+      assert::equal(typeid(derived), typeid(*copy));
+
+      assert::equal(dynamic_cast<derived&>(*copy).value, 42);
+      assert::equal(
+        dynamic_cast<derived&>(*copy).value,
+        dynamic_cast<derived&>(*value).value
+      );
+    },
+
+    task("move-assignment") = []{
+      core::polymorphic<base> value { new derived { } };
+      core::polymorphic<base> move { };
+      move = std::move(value);
+
+      assert::is_true(not value);
+      assert::is_true(bool(move));
+
+      assert::equal(dynamic_cast<derived&>(*move).value, 42);
+    },
 
     task("operator-bool") = [] {
       core::polymorphic<base> value;
@@ -59,12 +97,46 @@ int main () {
       assert::is_true(bool(value));
     },
 
-    task("dereference-operator") = [] { assert::fail(); },
-    task("arrow-operator") = [] { assert::fail(); },
-    task("release") = [] { assert::fail(); },
-    task("reset") = [] { assert::fail(); },
-    task("swap") = [] { assert::fail(); },
-    task("get") = [] { assert::fail(); },
+    task("dereference-operator") = [] {
+      core::polymorphic<base> poly { new derived { } };
+      base& parent = *poly;
+      assert::equal(typeid(parent), typeid(derived));
+    },
+
+    task("arrow-operator") = [] {
+      core::polymorphic<base> poly { new derived { } };
+      assert::equal(poly->get(), 42);
+    },
+
+    task("release") = [] {
+      core::polymorphic<base> poly { new derived { } };
+      assert::is_true(bool(poly));
+      poly.release();
+      assert::is_true(not poly);
+    },
+
+    task("reset") = [] {
+      assert::fail();
+    },
+
+    task("swap") = [] {
+      core::polymorphic<base> lhs { new derived { } };
+      core::polymorphic<base> rhs { };
+
+      assert::is_true(bool(lhs));
+      assert::is_true(not rhs);
+
+      std::swap(lhs, rhs);
+
+      assert::is_true(not lhs);
+      assert::is_true(bool(rhs));
+    },
+
+    task("get") = [] {
+      core::polymorphic<base> const poly { new derived { } };
+      derived* ptr = dynamic_cast<derived*>(poly.get());
+      assert::is_not_null(ptr);
+    },
 
     task("get-copier") = [] {
       core::polymorphic<base> value { new derived { } };
@@ -84,11 +156,47 @@ int main () {
       assert::equal(lhs, nullptr);
     },
 
-    task("operator-not-equal") = [] { assert::fail(); },
-    task("operator-greater-than-or-equal") = [] { assert::fail(); },
-    task("operator-less-than-or-equal") = [] { assert::fail(); },
-    task("operator-greater-than") = [] { assert::fail(); },
-    task("operator-less-than") = [] { assert::fail(); }
+    task("operator-not-equal") = [] {
+      core::polymorphic<base> lhs { new derived { } };
+      core::polymorphic<base> rhs { };
+      assert::not_equal(lhs, rhs);
+    },
+
+    task("operator-greater-than-or-equal") = [] {
+      core::polymorphic<base> lhs { new derived { } };
+      core::polymorphic<base> rhs { };
+
+      assert::greater_equal(lhs, rhs);
+      assert::greater_equal(lhs, nullptr);
+      assert::greater_equal(nullptr, rhs);
+    },
+
+    task("operator-less-than-or-equal") = [] {
+      core::polymorphic<base> lhs { };
+      core::polymorphic<base> rhs { new derived { } };
+
+      assert::less_equal(lhs, rhs);
+      assert::less_equal(lhs, nullptr);
+      assert::less_equal(nullptr, lhs);
+      assert::less_equal(nullptr, rhs);
+    },
+
+    task("operator-greater-than") = [] {
+      core::polymorphic<base> lhs { new derived { } };
+      core::polymorphic<base> rhs { };
+
+      assert::greater(lhs, rhs);
+      assert::greater(lhs, nullptr);
+    },
+
+    task("operator-less-than") = [] {
+      core::polymorphic<base> lhs { };
+      core::polymorphic<base> rhs { new derived { } };
+
+      assert::less(lhs, rhs);
+      assert::less(lhs, nullptr);
+      assert::less(nullptr, rhs);
+    }
 
   };
 
