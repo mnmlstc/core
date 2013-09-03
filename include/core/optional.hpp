@@ -34,7 +34,7 @@ struct bad_optional_access final : public std::logic_error {
 };
 
 template <typename Type>
-class optional final {
+struct optional final {
   static_assert(
     not std::is_same<typename std::decay<Type>::type, nullopt_t>::value,
     "Cannot have an optional<nullopt_t>"
@@ -51,18 +51,8 @@ class optional final {
   );
 
   using value_type = Type;
-  using data_type = typename std::aligned_storage<
-    sizeof(value_type),
-    std::alignment_of<value_type>::value
-  >::type;
   using allocator_type = std::allocator<value_type>;
 
-  using nothrow_move_construct = std::is_nothrow_move_constructible<value_type>;
-
-  data_type data;
-  bool engaged;
-
-public:
   optional (optional const& that) :
     engaged { that.engaged }
   {
@@ -266,6 +256,15 @@ public:
     );
     this->engaged = true;
   }
+
+private:
+  using data_type = typename std::aligned_storage<
+    sizeof(value_type),
+    std::alignment_of<value_type>::value
+  >::type;
+
+  data_type data;
+  bool engaged;
 };
 
 
