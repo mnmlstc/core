@@ -226,7 +226,6 @@ int main () {
 
       assert::greater(lhs, rhs);
       assert::greater(lhs, nullptr);
-      assert::greater(nullptr, lhs);
     },
 
     task("operator-less-than") = [] {
@@ -234,7 +233,6 @@ int main () {
       core::polymorphic<base> rhs { new derived { } };
 
       assert::less(lhs, rhs);
-      assert::less(lhs, nullptr);
       assert::less(nullptr, rhs);
     }
 

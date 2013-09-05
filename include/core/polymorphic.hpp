@@ -42,7 +42,7 @@ struct bad_polymorphic_reset final : std::logic_error {
 };
 
 template <typename T, typename Deleter=std::default_delete<T>>
-class polymorphic final {
+struct polymorphic final {
 
   using unique_type = std::unique_ptr<T, Deleter>;
   using element_type = typename unique_type::element_type;
@@ -50,15 +50,6 @@ class polymorphic final {
   using copier_type = unique_type (*)(unique_type const&);
   using pointer = typename unique_type::pointer;
 
-  static_assert(
-    std::is_polymorphic<element_type>::value,
-    "Cannot create a polymorphic with a non-polymorphic type"
-  );
-
-  copier_type copier { impl::null_poly_copy<element_type, deleter_type> };
-  unique_type data;
-
-public:
 
   template <typename U, typename D>
   explicit polymorphic (
@@ -185,7 +176,116 @@ public:
     std::swap(this->data, that.data);
   }
 
+private:
+  static_assert(
+    std::is_polymorphic<element_type>::value,
+    "Cannot create a polymorphic with a non-polymorphic type"
+  );
+
+  copier_type copier { impl::null_poly_copy<element_type, deleter_type> };
+  unique_type data;
 };
+
+/* Pattern used for type and deleter is:
+ * T, D
+ * U, E
+ */
+
+template <typename T, typename D, typename U, typename E>
+bool operator == (polymorphic<T, D> const& lhs, polymorphic<U, E> const& rhs) {
+  return lhs.get() == rhs.get();
+}
+
+template <typename T, typename D, typename U, typename E>
+bool operator != (polymorphic<T, D> const& lhs, polymorphic<U, E> const& rhs) {
+  return lhs.get() != rhs.get();
+}
+
+template <typename T, typename D, typename U, typename E>
+bool operator >= (polymorphic<T, D> const& lhs, polymorphic<U, E> const& rhs) {
+  return not (lhs < rhs);
+}
+
+template <typename T, typename D, typename U, typename E>
+bool operator <= (polymorphic<T, D> const& lhs, polymorphic<U, E> const& rhs) {
+  return not (rhs < lhs);
+}
+
+template <typename T, typename D, typename U, typename E>
+bool operator > (polymorphic<T, D> const& lhs, polymorphic<U, E> const& rhs) {
+  return rhs < lhs;
+}
+
+template <typename T, typename D, typename U, typename E>
+bool operator < (polymorphic<T, D> const& lhs, polymorphic<U, E> const& rhs) {
+  using common_type = typename std::common_type<
+    typename polymorphic<T, D>::pointer,
+    typename polymorphic<U, E>::pointer
+  >::type;
+  return std::less<common_type> { }(lhs.get(), rhs.get());
+}
+
+template <typename T, typename D>
+bool operator == (polymorphic<T, D> const& lhs, std::nullptr_t) noexcept {
+  return not lhs;
+}
+
+template <typename T, typename D>
+bool operator == (std::nullptr_t, polymorphic<T, D> const& rhs) noexcept {
+  return not rhs;
+}
+
+template <typename T, typename D>
+bool operator != (polymorphic<T, D> const& lhs, std::nullptr_t) noexcept {
+  return bool(lhs);
+}
+
+template <typename T, typename D>
+bool operator != (std::nullptr_t, polymorphic<T, D> const& rhs) noexcept {
+  return bool(rhs);
+}
+
+template <typename T, typename D>
+bool operator >= (polymorphic<T, D> const& lhs, std::nullptr_t) noexcept {
+  return not (lhs < nullptr);
+}
+
+template <typename T, typename D>
+bool operator >= (std::nullptr_t, polymorphic<T, D> const& rhs) noexcept {
+  return not (nullptr < rhs);
+}
+
+template <typename T, typename D>
+bool operator <= (polymorphic<T, D> const& lhs, std::nullptr_t) noexcept {
+  return not (nullptr < lhs);
+}
+
+template <typename T, typename D>
+bool operator <= (std::nullptr_t, polymorphic<T, D> const& rhs) noexcept {
+  return not (rhs < nullptr);
+}
+
+template <typename T, typename D>
+bool operator > (polymorphic<T, D> const& lhs, std::nullptr_t) noexcept {
+  return nullptr < lhs;
+}
+
+template <typename T, typename D>
+bool operator > (std::nullptr_t, polymorphic<T, D> const& rhs) noexcept {
+  return rhs < nullptr;
+}
+
+template <typename T, typename D>
+bool operator < (polymorphic<T, D> const& lhs, std::nullptr_t) noexcept {
+  using pointer = typename polymorphic<T, D>::pointer;
+  return std::less<pointer> { }(lhs.get(), nullptr);
+}
+
+template <typename T, typename D>
+bool operator < (std::nullptr_t, polymorphic<T, D> const& rhs) noexcept {
+  using pointer = typename polymorphic<T, D>::pointer;
+  return std::less<pointer> { }(nullptr, rhs.get());
+}
 
 }} /* namespace core::v1 */
 
