@@ -190,12 +190,15 @@ int main () {
       core::polymorphic<derived> der;
       assert::equal(lhs, rhs);
       assert::equal(lhs, nullptr);
+      assert::equal(nullptr, lhs);
     },
 
     task("operator-not-equal") = [] {
       core::polymorphic<base> lhs { new derived { } };
       core::polymorphic<base> rhs { };
       assert::not_equal(lhs, rhs);
+      assert::not_equal(lhs, nullptr);
+      assert::not_equal(nullptr, lhs);
     },
 
     task("operator-greater-than-or-equal") = [] {
@@ -223,6 +226,7 @@ int main () {
 
       assert::greater(lhs, rhs);
       assert::greater(lhs, nullptr);
+      assert::greater(nullptr, lhs);
     },
 
     task("operator-less-than") = [] {
