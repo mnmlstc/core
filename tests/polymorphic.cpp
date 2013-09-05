@@ -14,6 +14,12 @@ struct base {
 struct derived : base {
   int value = 42;
 
+  explicit derived (int value) : value { value } { }
+
+  derived (derived const&) = default;
+  derived (derived&&) = default;
+  derived () = default;
+
   virtual int get () const noexcept override { return this->value; }
 };
 
@@ -59,7 +65,25 @@ int main () {
       assert::equal(dynamic_cast<derived&>(*move).value, 42);
     },
 
-    task("value-assignment") = []{ assert::fail(); },
+    task("unique-ptr-assignment") = []{
+      core::polymorphic<base> poly { };
+      std::unique_ptr<derived> ptr { new derived { 56 } };
+      poly = std::move(ptr);
+
+      assert::is_true(bool(poly));
+      assert::is_true(not ptr);
+      assert::equal(typeid(derived), typeid(*poly));
+      assert::equal(poly->get(), 56);
+    },
+
+    task("raw-ptr-assignment") = []{
+      core::polymorphic<base> poly { };
+      poly = new derived { };
+
+      assert::is_true(bool(poly));
+      assert::equal(typeid(derived), typeid(*poly));
+      assert::equal(poly->get(), 42);
+    },
 
     task("copy-assignment") = []{
       core::polymorphic<base> value { new derived { } };
@@ -116,7 +140,19 @@ int main () {
     },
 
     task("reset") = [] {
-      assert::fail();
+      struct second_derived : base { };
+      core::polymorphic<base> poly { new derived { } };
+      auto improper = new second_derived { };
+      auto proper = new derived { };
+
+      assert::is_true(bool(poly));
+      poly.reset(proper);
+      assert::is_true(bool(poly));
+      assert::throws<core::bad_polymorphic_reset>([poly, improper] () mutable {
+        poly.reset(improper);
+      });
+      poly.reset();
+      assert::is_true(not poly);
     },
 
     task("swap") = [] {

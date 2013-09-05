@@ -25,7 +25,21 @@ std::unique_ptr<T, D> default_poly_copy (std::unique_ptr<T, D> const& ptr) {
   };
 }
 
-struct bad_polymorphic_reset final : std::logic_error { };
+struct bad_polymorphic_reset final : std::logic_error {
+  explicit bad_polymorphic_reset (std::string const& what_arg) :
+    std::logic_error { what_arg }
+  { }
+
+  explicit bad_polymorphic_reset (char const* what_arg) noexcept :
+    std::logic_error { what_arg }
+  { }
+
+  ~bad_polymorphic_reset () noexcept { }
+
+  virtual char const* what () const noexcept {
+    return std::logic_error::what();
+  }
+};
 
 template <typename T, typename Deleter=std::default_delete<T>>
 class polymorphic final {
@@ -45,6 +59,19 @@ class polymorphic final {
   unique_type data;
 
 public:
+
+  template <typename U, typename D>
+  explicit polymorphic (
+    std::unique_ptr<U, D>&& ptr,
+    copier_type copier=nullptr
+  ) noexcept :
+    copier {
+      copier
+        ? copier
+        : default_poly_copy<element_type, deleter_type, U>
+    },
+    data { std::move(ptr) }
+  { }
 
   template <typename U>
   explicit polymorphic (U* ptr, copier_type copier=nullptr) noexcept :
