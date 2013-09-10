@@ -2,7 +2,7 @@ Overview
 ========
 
 MNMLSTC Core is a small and easy to use C++11 library that adds a functionality
-set that will be available in C++14 and later, as well as some extremely useful
+set that will be available in C++14 and later, as well as some useful
 additions.
 
 Information on installing and using MNMLSTC Core (as well as modifying its
@@ -29,11 +29,6 @@ documentation.
 Some important differences between these components and their Boost
 counterparts are:
 
- * The ``optional<T>`` implements an interface equivalent to the C++14
-   ``std::optional<T>``, but does so with C++11 semantics, which can be
-   limiting, due to the now relaxed rules regarding constexpr.
- * The ``expected<T>`` is closely related to the ``Expected<T>`` put forth by
-   Andrei Alexandrescu in his 2012 talk *Systematic Error Handling in C++*.
  * The ``variant<Ts...>`` can be empty, and in an uninitialized state. This
    means that, unlike the ``boost::variant<Ts...>``, a default constructed
    ``variant<Ts...>`` is in the same state as an ``optional<T>``.
