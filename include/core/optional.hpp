@@ -50,6 +50,11 @@ struct optional final {
     "Cannot have an optional<std::nullptr_t>"
   );
 
+  static_assert(
+    not std::is_same<typename std::decay<Type>::type, void>::value,
+    "Cannot have an optional<void>"
+  );
+
   using value_type = Type;
   using allocator_type = std::allocator<value_type>;
 
