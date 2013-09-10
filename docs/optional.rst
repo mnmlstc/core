@@ -8,9 +8,14 @@ this implementation of ``optional<T>`` follows the C++14 implementation as
 closely as possible.
 
 .. note:: Due to the relaxation of rules regarding ``constexpr`` in C++14,
-          :class:`optional\<T>` is not able to implement the entire
-          interface. For those parts of the interface that cannot be used,
-          a note much like this one will be in the function description.
+   :class:`optional\<T>` is not able to implement the entire
+   interface. For those parts of the interface that cannot be used,
+   a note much like this one will be in the function description.
+
+   Additionally, the current proposal states that one cannot use
+   ``std::aligned_storage`` to hold the data contained within (this is a result
+   of the number of constexpr constructors). This optional implementation
+   ignores this, and uses ``std::aligned_storage``.
 
 .. namespace:: core
 
