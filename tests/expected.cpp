@@ -84,8 +84,30 @@ int main () {
       assert::equal(value.value(), std::string { "move" });
     },
 
-    task("move-assign-operator") = [] { assert::fail(); },
-    task("copy-assign-operator") = [] { assert::fail(); },
+    task("move-assign-operator") = [] {
+      core::expected<std::string> value { "move" };
+      core::expected<std::string> move { };
+      move = std::move(value);
+
+      assert::is_true(bool(value));
+      assert::is_true(bool(move));
+      assert::is_true(value.value().empty());
+
+      assert::equal(move.value(), std::string { "move" });
+    },
+
+    task("copy-assign-operator") = [] {
+      core::expected<std::string> value { "copy" };
+      core::expected<std::string> copy { };
+      copy = value;
+
+      assert::is_true(bool(value));
+      assert::is_true(bool(copy));
+      assert::equal(copy.value(), value.value());
+
+      assert::equal(copy.value(), std::string { "copy" });
+    },
+
     task("ptr-assign-operator") = [] { assert::fail(); },
 
     task("dereference-operator") = [] {
