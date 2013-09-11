@@ -48,7 +48,15 @@ struct expected final {
     valid { true }
   { this->val = std::move(val); }
 
-  expected (expected const&);
+  expected (expected const& that) :
+    valid { that.valid }
+  {
+    if (this->valid) {
+      new (std::addressof(this->val)) value_type { that.val };
+      return;
+    }
+    new (std::addressof(this->ptr)) std::exception_ptr { that.ptr };
+  }
   expected (expected&& that) noexcept :
     valid { std::move(that.valid) }
   {
@@ -102,15 +110,18 @@ struct expected final {
 
   explicit operator bool () const noexcept { return this->valid; }
 
-  value_type const& operator * () const { return this->value(); }
-  value_type& operator * () { return this->value(); }
+  value_type const& operator * () const noexcept(false) {
+    return this->value();
+  }
 
-  value_type const& value () const {
+  value_type& operator * () noexcept(false) { return this->value(); }
+
+  value_type const& value () const noexcept(false) {
     if (not this->valid) { std::rethrow_exception(this->ptr); }
     return this->val;
   }
 
-  value_type& value () {
+  value_type& value () noexcept(false) {
     if (not this->valid) { std::rethrow_exception(this->ptr); }
     return this->val;
   }
@@ -146,7 +157,7 @@ struct expected final {
   }
 
   template <typename E>
-  E expect () const {
+  E expect () const noexcept(false) {
     try { this->raise(); }
     catch (E const& e) { return e; }
     catch (...) {
@@ -154,7 +165,7 @@ struct expected final {
     }
   }
 
-  void raise () const {
+  void raise () const noexcept(false) {
     if (this->valid) { throw bad_expected_type { "expected<T> is valid" }; }
     std::rethrow_exception(this->ptr);
   }
