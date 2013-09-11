@@ -131,6 +131,7 @@ int main () {
       assert::throws<core::bad_optional_access>([] {
         core::optional<int> opt { };
         int x = opt.value();
+        std::ignore = x;
       });
     },
 

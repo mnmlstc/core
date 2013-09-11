@@ -212,9 +212,15 @@ struct optional final {
   }
 
   template <typename T>
-  value_type value_or (T&& val) {
+  value_type value_or (T&& val) const& {
     if (not this->engaged) { return value_type { std::forward<T>(val) }; }
     return **this;
+  }
+
+  template <typename T>
+  value_type value_or (T&& val) && {
+    if (not this->engaged) { return value_type { std::forward<T>(val) }; }
+    return value_type { std::move(**this) };
   }
 
   void swap (optional& that) noexcept (
@@ -282,7 +288,7 @@ auto make_optional (Type&& value) -> optional<typename std::decay<Type>::type> {
 template <typename T>
 bool operator == (optional<T> const& lhs, optional<T> const& rhs) noexcept {
   if (bool(lhs) != bool(rhs)) { return false; }
-  if (bool(lhs) == bool(rhs) == false) { return true; }
+  if (not lhs and not rhs) { return true; }
   return *lhs == *rhs;
 }
 
