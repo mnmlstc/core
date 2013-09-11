@@ -5,7 +5,6 @@ project(core CXX)
 # Modules, Variables, and Options
 #------------------------------------------------------------------------------
 include(CMakePackageConfigHelpers)
-include(CMakeDependentOption)
 include(CheckCXXCompilerFlag)
 include(CheckIncludeFileCXX)
 include(CTest)
@@ -22,10 +21,11 @@ set(CORE_VERSION
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/configure")
 
-#cmake_dependent_option(
-#  BUILD_WITH_LIBCXX "Use libc++ as the standard library" ON
-#  "USE STDLIB_LIBCXX" OFF
-#)
+option(BUILD_WITH_LIBCXX "Use libc++ as stdlib" OFF)
+
+if (APPLE AND ${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
+  set(BUILD_WITH_LIBCXX ON CACHE BOOL "Use libc++ as stdlib" ON)
+endif ()
 
 #------------------------------------------------------------------------------
 # Compiler Environment Check
@@ -118,8 +118,16 @@ configure_package_config_file(
 
 include_directories(${PROJECT_SOURCE_DIR}/include)
 
+if (CAN_USE_STDLIB_LIBCXX AND BUILD_WITH_LIBCXX)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${USE_STDLIB_LIBCXX}")
+endif ()
+
 if (CAN_USE_STD_CXX11)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${USE_STD_CXX11}")
+endif ()
+
+if (CAN_WARN_ALL)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${WARN_ALL}")
 endif ()
 
 if (BUILD_TESTING)
