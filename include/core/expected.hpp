@@ -80,7 +80,13 @@ struct expected final {
   }
 
   expected& operator = (std::exception_ptr ptr) {
-    expected { ptr }.swap(*this);
+    if (not this->valid) {
+      this->ptr = ptr;
+      return *this;
+    }
+    this->val.~value_type();
+    this->valid = false;
+    new (std::addressof(this->ptr)) std::exception_ptr { ptr };
     return *this;
   }
 
@@ -121,7 +127,23 @@ struct expected final {
     noexcept(
       std::swap(std::declval<value_type&>(), std::declval<value_type&>())
     )
-  ) { }
+  ) {
+    if (not this->valid and not that.valid) {
+      std::swap(this->ptr, that.ptr);
+      return;
+    }
+
+    if (this->valid and that.valid) {
+      std::swap(this->val, that.val);
+      return;
+    }
+
+    auto& to_invalidate = this->valid ? *this : that;
+    auto& to_validate = this->valid ? that : *this;
+    auto ptr = to_validate.ptr;
+    to_validate = std::move(to_invalidate.value());
+    to_invalidate = ptr;
+  }
 
   template <typename E>
   E expect () const {
