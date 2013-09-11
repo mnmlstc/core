@@ -68,7 +68,13 @@ int main () {
       assert::equal(std::string { exception.what() }, std::string { "test" });
     },
 
-    task("copy-value-assign-operator") = [] { assert::fail(); },
+    task("copy-value-assign-operator") = [] {
+      core::expected<int> value { };
+      value = 5;
+      assert::is_true(bool(value));
+      assert::fail();
+    },
+
     task("move-value-assign-operator") = [] { assert::fail(); },
     task("move-assign-operator") = [] { assert::fail(); },
     task("copy-assign-operator") = [] { assert::fail(); },

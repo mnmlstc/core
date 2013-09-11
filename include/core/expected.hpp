@@ -116,9 +116,15 @@ struct expected final {
 
   /* TODO: enable-if value_type is constructible with U */
   template <typename U>
-  value_type value_or (U&& val) {
+  value_type value_or (U&& val) const& {
     if (not this->valid) { return value_type { std::forward<U>(val) }; }
     return this->val;
+  }
+
+  template <typename U>
+  value_type value_or (U&& val) && {
+    if (not this->valid) { return value_type { std::forward<U>(val) }; }
+    return value_type { std::move(this->val) };
   }
 
   void swap (expected& that) noexcept(
@@ -153,7 +159,7 @@ struct expected final {
     }
   }
 
-  void raise () const noexcept(false) {
+  [[noreturn]] void raise () const noexcept(false) {
     if (this->valid) { throw bad_expected_type { "expected<T> is valid" }; }
     std::rethrow_exception(this->ptr);
   }
