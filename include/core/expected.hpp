@@ -7,8 +7,6 @@
 #include <utility>
 #include <memory>
 
-#include <iostream>
-
 namespace core {
 inline namespace v1 {
 
@@ -62,7 +60,7 @@ struct expected final {
   }
 
   expected () noexcept :
-    val { }
+    val { },
     valid { true }
   { }
 
@@ -199,12 +197,14 @@ private:
 
 template <typename T>
 bool operator == (expected<T> const& lhs, expected<T> const& rhs) noexcept {
+  if (bool(lhs) and bool(rhs)) { return lhs.value() == rhs.value(); }
   return false;
 }
 
 template <typename T>
 bool operator == (expected<T> const& lhs, T const& rhs) noexcept {
-  return false;
+  if (not lhs) { return false; }
+  return lhs.value() == rhs.value();
 }
 
 template <typename T>
@@ -215,19 +215,24 @@ bool operator == (T const& lhs, expected<T> const& rhs) noexcept {
 
 template <typename T>
 bool operator < (expected<T> const& lhs, expected<T> const& rhs) noexcept {
-  return false;
+  if (not lhs) { return false; }
+  if (not rhs) { return true; }
+  return std::less<T> { }(lhs.value(), rhs.value());
 }
 
 template <typename T>
 bool operator < (expected<T> const& lhs, T const& rhs) noexcept {
-  return false;
+  if (not lhs) { return true; }
+  return std::less<T>{ }(lhs.value(), rhs);
 }
 
 template <typename T>
 auto make_expected (T&& value) noexcept -> expected<T>;
 
 template <typename T>
-auto make_expected (std::exception_ptr error) noexcept -> expected<T>;
+auto make_expected (std::exception_ptr error) noexcept -> expected<T> {
+  return expected<T> { error };
+}
 
 }} /* namespace core::v1 */
 
