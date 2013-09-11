@@ -247,6 +247,7 @@ struct optional final {
       list,
       std::forward<Args>(args)...
     );
+    this->engaged = true;
   }
 
   template <typename... Args>
