@@ -199,7 +199,7 @@ struct expected<void> final {
 
   explicit operator bool () const noexcept { return not this->ptr; }
 
-  void swap (expected& that) { std::swap(this->ptr, that.ptr); }
+  void swap (expected& that) noexcept { std::swap(this->ptr, that.ptr); }
 
   template <class E> E expect () const {
     try { this->raise(); }
@@ -250,7 +250,9 @@ bool operator < (expected<T> const& lhs, T const& rhs) noexcept {
 }
 
 template <typename T>
-auto make_expected (T&& value) noexcept -> expected<T>;
+auto make_expected (T&& value) noexcept -> expected<
+  typename std::decay<T>::type
+> { return expected<typename std::decay<T>::type> { std::forward<T>(value) }; }
 
 template <typename T>
 auto make_expected (std::exception_ptr error) noexcept -> expected<T> {

@@ -72,10 +72,18 @@ int main () {
       core::expected<int> value { };
       value = 5;
       assert::is_true(bool(value));
-      assert::fail();
+      assert::equal(value.value(), 5);
     },
 
-    task("move-value-assign-operator") = [] { assert::fail(); },
+    task("move-value-assign-operator") = [] {
+      core::expected<std::string> value { };
+      std::string str { "move" };
+      value = std::move(str);
+      assert::is_true(bool(value));
+      assert::is_true(str.empty());
+      assert::equal(value.value(), std::string { "move" });
+    },
+
     task("move-assign-operator") = [] { assert::fail(); },
     task("copy-assign-operator") = [] { assert::fail(); },
     task("ptr-assign-operator") = [] { assert::fail(); },
@@ -101,8 +109,30 @@ int main () {
     task("value-or") = [] { assert::fail(); },
     task("value") = [] { assert::fail(); },
     task("expect") = [] { assert::fail(); },
-    task("raise") = [] { assert::fail(); },
-    task("swap") = [] { assert::fail(); }
+
+    task("raise") = [] {
+      core::expected<int> value { };
+      core::expected<int> error {
+        std::make_exception_ptr(std::logic_error { "raise" })
+      };
+      assert::is_true(bool(value));
+      assert::throws<core::bad_expected_type>([&value] { value.raise(); });
+      assert::throws<std::logic_error>([&error] { error.raise(); });
+    },
+
+    task("swap") = [] { assert::fail(); },
+
+    task("make_expected") = [] {
+      auto value = core::make_expected(std::string { "make-expected" });
+      auto error = core::make_expected<std::string>(
+        std::make_exception_ptr(std::logic_error { "error" })
+      );
+
+      assert::is_true(bool(value));
+      assert::is_true(not error);
+
+      assert::equal(*value, std::string { "make-expected" });
+    }
   };
 
   monitor::run();
