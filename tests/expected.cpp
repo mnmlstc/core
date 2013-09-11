@@ -79,7 +79,23 @@ int main () {
     task("move-assign-operator") = [] { assert::fail(); },
     task("copy-assign-operator") = [] { assert::fail(); },
     task("ptr-assign-operator") = [] { assert::fail(); },
-    task("dereference-operator") = [] { assert::fail(); },
+
+    task("dereference-operator") = [] {
+      core::expected<int> nothrow { 51 };
+      core::expected<int> throws {
+        std::make_exception_ptr(std::logic_error { "" })
+      };
+
+      assert::is_true(bool(nothrow));
+      assert::is_true(not throws);
+
+      assert::equal(*nothrow, 51);
+      assert::throws<std::logic_error>([&throws] {
+        int value = *throws;
+        std::ignore = value;
+      });
+    },
+
     task("equality-comparable") = [] { assert::fail(); },
     task("less-than-comparable") = [] { assert::fail(); },
     task("value-or") = [] { assert::fail(); },
