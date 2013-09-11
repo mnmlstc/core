@@ -137,8 +137,13 @@ int main () {
 
     task("value-or") = [] {
       core::optional<std::string> opt { };
-      auto str = opt.value_or("value-or");
-      assert::equal(str, std::string { "value-or" });
+      core::optional<std::string> val { "value-or" };
+
+      auto first = opt.value_or("value-or");
+      auto second = val.value_or("not-value");
+
+      assert::equal(first, std::string { "value-or" });
+      assert::equal(second, std::string { "value-or" });
     },
 
     task("emplace") = [] {
