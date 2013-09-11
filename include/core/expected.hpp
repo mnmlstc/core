@@ -10,7 +10,7 @@
 namespace core {
 inline namespace v1 {
 
-struct bad_expected_type final : public std::logic_error {
+struct bad_expected_type : public std::logic_error {
   explicit bad_expected_type (std::string const& what_arg) :
     std::logic_error { what_arg }
   { }
@@ -31,7 +31,6 @@ struct expected final {
   using value_type = T;
 
   using exception_allocator_type = std::allocator<std::exception_ptr>;
-  using allocator_type = std::allocator<value_type>;
 
   explicit expected (std::exception_ptr ptr) noexcept :
     ptr { },
@@ -39,9 +38,8 @@ struct expected final {
   { this->ptr = ptr; }
 
   explicit expected (value_type const& val) :
-    val { },
-    valid { true }
-  { this->val = val; }
+    expected { value_type { val } }
+  { }
 
   explicit expected (value_type&& val) noexcept :
     val { },
@@ -53,18 +51,15 @@ struct expected final {
   {
     if (this->valid) {
       new (std::addressof(this->val)) value_type { that.val };
-      return;
-    }
-    new (std::addressof(this->ptr)) std::exception_ptr { that.ptr };
+    } else { new (std::addressof(this->ptr)) std::exception_ptr { that.ptr }; }
   }
+
   expected (expected&& that) noexcept :
-    valid { std::move(that.valid) }
+    valid { that.valid }
   {
     if (this->valid) {
       new (std::addressof(this->val)) value_type { std::move(that.val) };
-      return;
-    }
-    new (std::addressof(this->ptr)) std::exception_ptr { std::move(that.ptr) };
+    } else { new (std::addressof(this->ptr)) std::exception_ptr { that.ptr }; }
   }
 
   expected () noexcept :
@@ -72,10 +67,7 @@ struct expected final {
     valid { true }
   { }
 
-  ~expected () {
-    if (not this->valid) { return; }
-    this->val.~value_type();
-  }
+  ~expected () { if (this->valid) { this->val.~value_type(); } }
 
   expected& operator = (expected const& that) {
     expected { that }.swap(*this);
@@ -88,13 +80,9 @@ struct expected final {
   }
 
   expected& operator = (std::exception_ptr ptr) {
-    if (not this->valid) {
-      this->ptr = ptr;
-      return *this;
-    }
-    this->val.~value_type();
+    if (this->valid) { this->val.~value_type(); }
+    this->ptr = ptr;
     this->valid = false;
-    new (std::addressof(this->ptr)) std::exception_ptr { ptr };
     return *this;
   }
 
