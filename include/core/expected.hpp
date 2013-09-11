@@ -30,8 +30,6 @@ template <typename T>
 struct expected final {
   using value_type = T;
 
-  using exception_allocator_type = std::allocator<std::exception_ptr>;
-
   explicit expected (std::exception_ptr ptr) noexcept :
     ptr { },
     valid { false }
@@ -178,14 +176,14 @@ template <>
 struct expected<void> final {
   using value_type = void;
 
-  explicit expected (std::exception_ptr error) noexcept : error { error } { }
-  expected (expected const& that) noexcept : error { that.error } { }
-  expected (expected&& that) noexcept : error { std::move(that.error) } { }
-  expected () noexcept : error { nullptr } { }
+  explicit expected (std::exception_ptr ptr) noexcept : ptr { ptr } { }
+  expected (expected const& that) noexcept : ptr { that.ptr } { }
+  expected (expected&& that) noexcept : ptr { std::move(that.ptr) } { }
+  expected () noexcept : ptr { nullptr } { }
   ~expected () noexcept { }
 
-  expected& operator = (std::exception_ptr error) noexcept {
-    expected { error }.swap(*this);
+  expected& operator = (std::exception_ptr ptr) noexcept {
+    expected { ptr }.swap(*this);
     return *this;
   }
 
@@ -199,9 +197,9 @@ struct expected<void> final {
     return *this;
   }
 
-  explicit operator bool () const noexcept { return not this->error; }
+  explicit operator bool () const noexcept { return not this->ptr; }
 
-  void swap (expected& that) { std::swap(this->error, that.error); }
+  void swap (expected& that) { std::swap(this->ptr, that.ptr); }
 
   template <class E> E expect () const {
     try { this->raise(); }
@@ -211,15 +209,13 @@ struct expected<void> final {
     }
   }
 
-  void raise () const {
-    if (not this->error) {
-      throw bad_expected_type { "expected<void> is valid" };
-    }
-    std::rethrow_exception(this->error);
+  [[noreturn]] void raise () const {
+    if (not this->ptr) { throw bad_expected_type { "valid expected<void>" }; }
+    std::rethrow_exception(this->ptr);
   }
 
 private:
-  std::exception_ptr error;
+  std::exception_ptr ptr;
 };
 
 template <typename T>
