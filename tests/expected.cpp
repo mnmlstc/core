@@ -137,7 +137,20 @@ int main () {
 
     task("equality-comparable") = [] { assert::fail(); },
     task("less-than-comparable") = [] { assert::fail(); },
-    task("value-or") = [] { assert::fail(); },
+
+    task("value-or") = [] {
+      std::logic_error error { "error" };
+      core::expected<std::string> value1 { std::make_exception_ptr(error) };
+      core::expected<std::string> value2 { "value-or" };
+      auto first = value1.value_or("value-or");
+      auto second = value2.value_or("not-value");
+      auto third = core::expected<std::string> { "value-or" }.value_or("empty");
+
+      assert::equal(first, std::string { "value-or" });
+      assert::equal(second, std::string { "value-or" });
+      assert::equal(third, std::string { "value-or" });
+    },
+
     task("value") = [] { assert::fail(); },
     task("expect") = [] { assert::fail(); },
 
