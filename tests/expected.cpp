@@ -135,8 +135,27 @@ int main () {
       });
     },
 
-    task("equality-comparable") = [] { assert::fail(); },
-    task("less-than-comparable") = [] { assert::fail(); },
+    task("equality-comparable") = [] {
+      core::expected<int> lhs { 5 };
+      core::expected<int> rhs { 6 };
+
+      assert::is_true(bool(lhs));
+      assert::is_true(bool(rhs));
+      assert::equal(lhs, 5);
+      assert::equal(6, rhs);
+      assert::equal(lhs, core::expected<int> { 5 });
+      assert::equal(core::expected<int> { 6 }, rhs);
+    },
+
+    task("less-than-comparable") = [] {
+      core::expected<int> lhs { 5 };
+      core::expected<int> rhs { 6 };
+
+      assert::is_true(bool(lhs));
+      assert::is_true(bool(rhs));
+      assert::less(lhs, rhs);
+      assert::less(lhs, 6);
+    },
 
     task("value-or") = [] {
       std::logic_error error { "error" };
