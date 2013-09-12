@@ -209,5 +209,18 @@ int main () {
     }
   };
 
+  test("expected<void>") = {
+    task("default-constructor") = [] { assert::fail(); },
+    task("copy-constructor") = [] { assert::fail(); },
+    task("move-constructor") = [] { assert::fail(); },
+    task("ptr-constructor") = [] { assert::fail(); },
+    task("copy-assign-operator") = [] { assert::fail(); },
+    task("move-assign-operator") = [] { assert::fail(); },
+    task("equality-comparable") = [] { assert::fail(); },
+    task("expect") = [] { assert::fail(); },
+    task("raise") = [] { assert::fail(); },
+    task("swap") = [] { assert::fail(); }
+  };
+
   monitor::run();
 }
