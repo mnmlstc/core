@@ -182,7 +182,19 @@ int main () {
       assert::throws<std::logic_error>([&error] { error.raise(); });
     },
 
-    task("swap") = [] { assert::fail(); },
+    task("swap") = [] {
+      auto ptr = std::make_exception_ptr(std::logic_error { "swap" });
+      core::expected<int> error { ptr };
+      core::expected<int> value { 5 };
+
+      assert::is_true(bool(value));
+      assert::is_true(not error);
+
+      //std::swap(value, error);
+
+      assert::is_true(bool(error));
+      assert::is_true(not value);
+    },
 
     task("make_expected") = [] {
       auto value = core::make_expected(std::string { "make-expected" });
