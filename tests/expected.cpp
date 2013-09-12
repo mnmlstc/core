@@ -4,15 +4,9 @@
 
 #include <unittest/unittest.hpp>
 
-struct type {
-  type (type const&) = default;
-  type (type&&) = default;
-  type () = default;
-  ~type () { std::clog << "It's working!" << std::endl; }
-
-  type& operator = (type const&) = default;
-  type& operator = (type&&) = default;
-};
+std::ostream& operator << (std::ostream& os, core::expected<void> const&) {
+  return os << "core::expected<void>";
+}
 
 int main () {
   using namespace unittest;
@@ -229,16 +223,137 @@ int main () {
   };
 
   test("expected<void>") = {
-    task("default-constructor") = [] { assert::fail(); },
-    task("copy-constructor") = [] { assert::fail(); },
-    task("move-constructor") = [] { assert::fail(); },
-    task("ptr-constructor") = [] { assert::fail(); },
-    task("copy-assign-operator") = [] { assert::fail(); },
-    task("move-assign-operator") = [] { assert::fail(); },
-    task("equality-comparable") = [] { assert::fail(); },
-    task("expect") = [] { assert::fail(); },
-    task("raise") = [] { assert::fail(); },
-    task("swap") = [] { assert::fail(); }
+    task("default-constructor") = [] {
+      core::expected<void> value { };
+      assert::is_true(bool(value));
+    },
+
+    task("copy-constructor") = [] {
+      auto ptr = std::make_exception_ptr(std::logic_error { "" });
+      core::expected<void> value { ptr };
+      core::expected<void> copy { value };
+
+      assert::is_true(not value);
+      assert::is_true(not copy);
+
+      assert::equal(value.get_ptr(), copy.get_ptr());
+      assert::equal(value.get_ptr(), ptr);
+      assert::equal(copy.get_ptr(), ptr);
+    },
+
+    task("move-constructor") = [] {
+      auto ptr = std::make_exception_ptr(std::logic_error { "" });
+      core::expected<void> value { ptr };
+      core::expected<void> move { std::move(value) };
+
+      assert::is_true(bool(value));
+      assert::is_true(not move);
+
+      assert::equal(move.get_ptr(), ptr);
+    },
+
+    task("ptr-constructor") = [] {
+      auto ptr = std::make_exception_ptr(std::logic_error { "" });
+      core::expected<void> value { ptr };
+
+      assert::is_true(not value);
+      assert::equal(ptr, value.get_ptr());
+    },
+
+    task("copy-assign-operator") = [] {
+      auto ptr = std::make_exception_ptr(std::logic_error { "" });
+      core::expected<void> value { ptr };
+      core::expected<void> copy { };
+
+      assert::is_true(bool(copy));
+
+      copy = value;
+
+      assert::is_true(not value);
+      assert::is_true(not copy);
+
+      assert::equal(value.get_ptr(), copy.get_ptr());
+      assert::equal(value.get_ptr(), ptr);
+      assert::equal(copy.get_ptr(), ptr);
+    },
+
+    task("move-assign-operator") = [] {
+      auto ptr = std::make_exception_ptr(std::logic_error { "" });
+      core::expected<void> value { ptr };
+      core::expected<void> move { };
+
+      assert::is_true(bool(move));
+
+      move = std::move(value);
+
+      assert::is_true(bool(value));
+      assert::is_true(not move);
+
+      assert::equal(move.get_ptr(), ptr);
+    },
+
+    task("equality-comparable") = [] {
+      auto ptr = std::make_exception_ptr(std::logic_error { "" });
+      core::expected<void> empty_lhs { };
+      core::expected<void> empty_rhs { };
+
+      core::expected<void> lhs { ptr };
+      core::expected<void> rhs { ptr };
+
+      assert::is_true(bool(empty_lhs));
+      assert::is_true(bool(empty_rhs));
+
+      assert::equal(empty_lhs, empty_rhs);
+      assert::equal(lhs.get_ptr(), rhs.get_ptr());
+      assert::equal(lhs.get_ptr(), ptr);
+      assert::equal(rhs.get_ptr(), ptr);
+      assert::equal(lhs, ptr);
+      assert::equal(ptr, rhs);
+    },
+
+    task("expect") = [] {
+      core::expected<void> value { };
+      core::expected<void> error {
+        std::make_exception_ptr(std::logic_error { "error" })
+      };
+      assert::is_true(bool(value));
+      assert::throws<core::bad_expected_type>([&value] {
+        std::ignore = value.expect<std::nested_exception>();
+      });
+      auto err = error.expect<std::logic_error>();
+      assert::equal(std::string { err.what() }, std::string { "error" });
+    },
+
+    task("raise") = [] {
+      core::expected<void> value { };
+      core::expected<void> error {
+        std::make_exception_ptr(std::logic_error { "raise" })
+      };
+      assert::is_true(bool(value));
+      assert::throws<core::bad_expected_type>([&value] { value.raise(); });
+      assert::throws<std::logic_error>([&error] { error.raise(); });
+    },
+
+    task("swap") = [] {
+      auto lhs_ptr = std::make_exception_ptr(std::logic_error { "" });
+      auto rhs_ptr = std::make_exception_ptr(core::bad_expected_type { "" });
+
+      core::expected<void> lhs { lhs_ptr };
+      core::expected<void> rhs { rhs_ptr };
+
+      assert::is_true(not lhs);
+      assert::is_true(not rhs);
+      assert::equal(lhs.get_ptr(), lhs_ptr);
+      assert::equal(rhs.get_ptr(), rhs_ptr);
+
+      std::swap(lhs, rhs);
+ 
+      assert::is_true(not lhs);
+      assert::is_true(not rhs);
+      assert::equal(lhs.get_ptr(), rhs_ptr);
+      assert::equal(rhs.get_ptr(), lhs_ptr);
+
+    }
   };
 
   monitor::run();

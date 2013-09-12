@@ -189,7 +189,11 @@ struct expected<void> final {
 
   explicit expected (std::exception_ptr ptr) noexcept : ptr { ptr } { }
   expected (expected const& that) noexcept : ptr { that.ptr } { }
-  expected (expected&& that) noexcept : ptr { std::move(that.ptr) } { }
+
+  expected (expected&& that) noexcept :
+    ptr { std::move(that.ptr) }
+  { that.ptr = nullptr; }
+
   expected () noexcept : ptr { nullptr } { }
   ~expected () noexcept { }
 
@@ -210,9 +214,10 @@ struct expected<void> final {
 
   explicit operator bool () const noexcept { return not this->ptr; }
 
+  std::exception_ptr get_ptr () const noexcept { return this->ptr; }
   void swap (expected& that) noexcept { std::swap(this->ptr, that.ptr); }
 
-  template <class E> E expect () const {
+  template <class E> E expect () const noexcept(false) {
     try { this->raise(); }
     catch (E const& e) { return e; }
     catch (...) {
@@ -220,7 +225,7 @@ struct expected<void> final {
     }
   }
 
-  [[noreturn]] void raise () const {
+  [[noreturn]] void raise () const noexcept(false) {
     if (not this->ptr) { throw bad_expected_type { "valid expected<void>" }; }
     std::rethrow_exception(this->ptr);
   }
@@ -271,6 +276,13 @@ bool operator < (expected<T> const& lhs, T const& rhs) noexcept {
   if (not lhs) { return true; }
   return std::less<T>{ }(lhs.value(), rhs);
 }
+
+/* expected<void> specialization */
+template <>
+bool operator == <void>(
+  expected<void> const& lhs,
+  expected<void> const& rhs
+) noexcept { return lhs.get_ptr() == rhs.get_ptr(); }
 
 template <typename T>
 auto make_expected (T&& value) noexcept -> expected<
