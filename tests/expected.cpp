@@ -108,7 +108,16 @@ int main () {
       assert::equal(copy.value(), std::string { "copy" });
     },
 
-    task("ptr-assign-operator") = [] { assert::fail(); },
+    task("ptr-assign-operator") = [] {
+      std::logic_error exception { "error" };
+      auto ptr = std::make_exception_ptr(exception);
+      core::expected<std::string> value { };
+      value = ptr;
+
+      assert::is_true(not value);
+      assert::equal(value, ptr);
+      assert::throws<std::logic_error>([&value] { value.raise(); });
+    },
 
     task("dereference-operator") = [] {
       core::expected<int> nothrow { 51 };
