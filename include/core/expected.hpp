@@ -112,7 +112,7 @@ struct expected final {
     return this->val;
   }
 
-  std::exception_ptr get_ptr () noexcept(false) {
+  std::exception_ptr get_ptr () const noexcept(false) {
     if (this->valid) { throw bad_expected_type { "expected<T> is valid" }; }
     return this->ptr;
   }
@@ -227,6 +227,18 @@ template <typename T>
 bool operator == (expected<T> const& lhs, expected<T> const& rhs) noexcept {
   if (bool(lhs) and bool(rhs)) { return lhs.value() == rhs.value(); }
   return false;
+}
+
+template <typename T>
+bool operator == (expected<T> const& lhs, std::exception_ptr rhs) {
+  if (bool(lhs)) { return false; }
+  return lhs.get_ptr() == rhs;
+}
+
+template <typename T>
+bool operator == (std::exception_ptr lhs, expected<T> const& rhs) {
+  if (bool(rhs)) { return false; }
+  return lhs == rhs.get_ptr();
 }
 
 template <typename T>
