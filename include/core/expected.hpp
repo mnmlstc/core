@@ -250,7 +250,7 @@ bool operator == (std::exception_ptr lhs, expected<T> const& rhs) {
 template <typename T>
 bool operator == (expected<T> const& lhs, T const& rhs) noexcept {
   if (not lhs) { return false; }
-  return lhs.value() == rhs.value();
+  return lhs.value() == rhs;
 }
 
 template <typename T>
