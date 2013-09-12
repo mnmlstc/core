@@ -112,6 +112,11 @@ struct expected final {
     return this->val;
   }
 
+  std::exception_ptr get_ptr () noexcept(false) {
+    if (this->valid) { throw bad_expected_type { "expected<T> is valid" }; }
+    return this->ptr;
+  }
+
   /* TODO: enable-if value_type is constructible with U */
   template <typename U>
   value_type value_or (U&& val) const& {
