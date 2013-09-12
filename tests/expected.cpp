@@ -166,7 +166,7 @@ int main () {
       };
       assert::is_true(bool(value));
       assert::throws<core::bad_expected_type>([&value] {
-        std::ignore = value.expect<std::logic_error>();
+        std::ignore = value.expect<std::nested_exception>();
       });
       auto err = error.expect<std::logic_error>();
       assert::equal(std::string { err.what() }, std::string { "error" });
