@@ -78,22 +78,29 @@ struct expected final {
   }
 
   expected& operator = (std::exception_ptr ptr) {
-    if (this->valid) { this->val.~value_type(); }
-    this->ptr = ptr;
-    this->valid = false;
+    if (not this->valid) { this->ptr = ptr; }
+    else {
+      this->val.~value_type();
+      new (std::addressof(this->ptr)) std::exception_ptr { ptr };
+      this->valid = false;
+    }
     return *this;
   }
 
   expected& operator = (value_type const& val) {
-    expected { val }.swap(*this);
-    return *this;
+    return *this = value_type { val };
   }
 
   expected& operator = (value_type&& val) {
-    expected { std::move(val) }.swap(*this);
+    if (this->valid) { this->val = std::move(val); }
+    else {
+      this->ptr.~exception_ptr();
+      new (std::addressof(this->val)) value_type { std::move(val) };
+      this->valid = true;
+    }
     return *this;
   }
-
+    
   explicit operator bool () const noexcept { return this->valid; }
 
   value_type const& operator * () const noexcept(false) {
@@ -117,7 +124,6 @@ struct expected final {
     return this->ptr;
   }
 
-  /* TODO: enable-if value_type is constructible with U */
   template <typename U>
   value_type value_or (U&& val) const& {
     if (not this->valid) { return value_type { std::forward<U>(val) }; }

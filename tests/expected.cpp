@@ -190,7 +190,7 @@ int main () {
       assert::is_true(bool(value));
       assert::is_true(not error);
 
-      //std::swap(value, error);
+      std::swap(value, error);
 
       assert::is_true(bool(error));
       assert::is_true(not value);
