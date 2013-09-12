@@ -151,8 +151,26 @@ int main () {
       assert::equal(third, std::string { "value-or" });
     },
 
-    task("value") = [] { assert::fail(); },
-    task("expect") = [] { assert::fail(); },
+    task("value") = [] {
+      assert::throws<std::logic_error>([]{
+        auto ptr = std::make_exception_ptr(std::logic_error { "" });
+        core::expected<std::string> value { ptr };
+        std::ignore = value.value();
+      });
+    },
+
+    task("expect") = [] {
+      core::expected<int> value { };
+      core::expected<int> error {
+        std::make_exception_ptr(std::logic_error { "error" })
+      };
+      assert::is_true(bool(value));
+      assert::throws<core::bad_expected_type>([&value] {
+        std::ignore = value.expect<std::logic_error>();
+      });
+      auto err = error.expect<std::logic_error>();
+      assert::equal(std::string { err.what() }, std::string { "error" });
+    },
 
     task("raise") = [] {
       core::expected<int> value { };
