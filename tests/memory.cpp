@@ -1,6 +1,8 @@
-#include <core/polymorphic.hpp>
+#include <core/memory.hpp>
 
 #include <unittest/unittest.hpp>
+
+namespace poly {
 
 struct base {
   base (base const&) = default;
@@ -23,127 +25,129 @@ struct derived : base {
   virtual int get () const noexcept override { return this->value; }
 };
 
+} /* namespace poly */
+
 int main () {
   using namespace unittest;
 
-  test("polymorphic<T>") = {
+  test("poly_ptr") = {
     task("default-constructor") = []{
-      core::polymorphic<base> value;
+      core::poly_ptr<poly::base> value;
       assert::is_true(not value);
     },
 
     task("value-constructor") = [] {
-      core::polymorphic<base> value { new derived { } };
+      core::poly_ptr<poly::base> value { new poly::derived { } };
       assert::is_false(not value);
-      assert::equal(typeid(derived), typeid(*value));
+      assert::equal(typeid(poly::derived), typeid(*value));
     },
 
     task("copy-constructor") = [] {
-      core::polymorphic<base> value { new derived { } };
-      core::polymorphic<base> copy { value };
+      core::poly_ptr<poly::base> value { new poly::derived { } };
+      core::poly_ptr<poly::base> copy { value };
 
       assert::is_false(not value);
       assert::is_false(not copy);
 
-      assert::equal(typeid(derived), typeid(*value));
-      assert::equal(typeid(derived), typeid(*copy));
+      assert::equal(typeid(poly::derived), typeid(*value));
+      assert::equal(typeid(poly::derived), typeid(*copy));
 
-      assert::equal(dynamic_cast<derived&>(*copy).value, 42);
+      assert::equal(dynamic_cast<poly::derived&>(*copy).value, 42);
       assert::equal(
-        dynamic_cast<derived&>(*copy).value,
-        dynamic_cast<derived&>(*value).value
+        dynamic_cast<poly::derived&>(*copy).value,
+        dynamic_cast<poly::derived&>(*value).value
       );
     },
 
     task("move-constructor") = []{
-      core::polymorphic<base> value { new derived { } };
-      core::polymorphic<base> move { std::move(value) };
+      core::poly_ptr<poly::base> value { new poly::derived { } };
+      core::poly_ptr<poly::base> move { std::move(value) };
 
       assert::is_true(not value);
       assert::is_true(bool(move));
 
-      assert::equal(dynamic_cast<derived&>(*move).value, 42);
+      assert::equal(dynamic_cast<poly::derived&>(*move).value, 42);
     },
 
     task("unique-ptr-assignment") = []{
-      core::polymorphic<base> poly { };
-      std::unique_ptr<derived> ptr { new derived { 56 } };
+      core::poly_ptr<poly::base> poly { };
+      std::unique_ptr<poly::derived> ptr { new poly::derived { 56 } };
       poly = std::move(ptr);
 
       assert::is_true(bool(poly));
       assert::is_true(not ptr);
-      assert::equal(typeid(derived), typeid(*poly));
+      assert::equal(typeid(poly::derived), typeid(*poly));
       assert::equal(poly->get(), 56);
     },
 
     task("raw-ptr-assignment") = []{
-      core::polymorphic<base> poly { };
-      poly = new derived { };
+      core::poly_ptr<poly::base> poly { };
+      poly = new poly::derived { };
 
       assert::is_true(bool(poly));
-      assert::equal(typeid(derived), typeid(*poly));
+      assert::equal(typeid(poly::derived), typeid(*poly));
       assert::equal(poly->get(), 42);
     },
 
     task("copy-assignment") = []{
-      core::polymorphic<base> value { new derived { } };
-      core::polymorphic<base> copy { };
+      core::poly_ptr<poly::base> value { new poly::derived { } };
+      core::poly_ptr<poly::base> copy { };
       copy = value;
 
       assert::is_true(bool(value));
       assert::is_true(bool(copy));
 
-      assert::equal(typeid(derived), typeid(*value));
-      assert::equal(typeid(derived), typeid(*copy));
+      assert::equal(typeid(poly::derived), typeid(*value));
+      assert::equal(typeid(poly::derived), typeid(*copy));
 
-      assert::equal(dynamic_cast<derived&>(*copy).value, 42);
+      assert::equal(dynamic_cast<poly::derived&>(*copy).value, 42);
       assert::equal(
-        dynamic_cast<derived&>(*copy).value,
-        dynamic_cast<derived&>(*value).value
+        dynamic_cast<poly::derived&>(*copy).value,
+        dynamic_cast<poly::derived&>(*value).value
       );
     },
 
     task("move-assignment") = []{
-      core::polymorphic<base> value { new derived { } };
-      core::polymorphic<base> move { };
+      core::poly_ptr<poly::base> value { new poly::derived { } };
+      core::poly_ptr<poly::base> move { };
       move = std::move(value);
 
       assert::is_true(not value);
       assert::is_true(bool(move));
 
-      assert::equal(dynamic_cast<derived&>(*move).value, 42);
+      assert::equal(dynamic_cast<poly::derived&>(*move).value, 42);
     },
 
     task("operator-bool") = [] {
-      core::polymorphic<base> value;
+      core::poly_ptr<poly::base> value;
       assert::is_true(not value);
-      value = new derived { };
+      value = new poly::derived { };
       assert::is_true(bool(value));
     },
 
     task("dereference-operator") = [] {
-      core::polymorphic<base> poly { new derived { } };
-      base& parent = *poly;
-      assert::equal(typeid(parent), typeid(derived));
+      core::poly_ptr<poly::base> poly { new poly::derived { } };
+      poly::base& parent = *poly;
+      assert::equal(typeid(parent), typeid(poly::derived));
     },
 
     task("arrow-operator") = [] {
-      core::polymorphic<base> poly { new derived { } };
+      core::poly_ptr<poly::base> poly { new poly::derived { } };
       assert::equal(poly->get(), 42);
     },
 
     task("release") = [] {
-      core::polymorphic<base> poly { new derived { } };
+      core::poly_ptr<poly::base> poly { new poly::derived { } };
       assert::is_true(bool(poly));
       poly.release();
       assert::is_true(not poly);
     },
 
     task("reset") = [] {
-      struct second_derived : base { };
-      core::polymorphic<base> poly { new derived { } };
+      struct second_derived : poly::base { };
+      core::poly_ptr<poly::base> poly { new poly::derived { } };
       auto improper = new second_derived { };
-      auto proper = new derived { };
+      auto proper = new poly::derived { };
 
       assert::is_true(bool(poly));
       poly.reset(proper);
@@ -156,8 +160,8 @@ int main () {
     },
 
     task("swap") = [] {
-      core::polymorphic<base> lhs { new derived { } };
-      core::polymorphic<base> rhs { };
+      core::poly_ptr<poly::base> lhs { new poly::derived { } };
+      core::poly_ptr<poly::base> rhs { };
 
       assert::is_true(bool(lhs));
       assert::is_true(not rhs);
@@ -169,41 +173,41 @@ int main () {
     },
 
     task("get") = [] {
-      core::polymorphic<base> const poly { new derived { } };
-      derived* ptr = dynamic_cast<derived*>(poly.get());
+      core::poly_ptr<poly::base> const poly { new poly::derived { } };
+      poly::derived* ptr = dynamic_cast<poly::derived*>(poly.get());
       assert::is_not_null(ptr);
     },
 
     task("get-copier") = [] {
-      core::polymorphic<base> value { new derived { } };
+      core::poly_ptr<poly::base> value { new poly::derived { } };
       auto poly_copy = core::default_poly_copy<
-        base,
-        std::default_delete<base>,
-        derived
+        poly::base,
+        std::default_delete<poly::base>,
+        poly::derived
       >;
 
       assert::equal(value.get_copier(), poly_copy);
     },
 
     task("operator-equal") = [] {
-      core::polymorphic<base> lhs, rhs;
-      core::polymorphic<derived> der;
+      core::poly_ptr<poly::base> lhs, rhs;
+      core::poly_ptr<poly::derived> der;
       assert::equal(lhs, rhs);
       assert::equal(lhs, nullptr);
       assert::equal(nullptr, lhs);
     },
 
     task("operator-not-equal") = [] {
-      core::polymorphic<base> lhs { new derived { } };
-      core::polymorphic<base> rhs { };
+      core::poly_ptr<poly::base> lhs { new poly::derived { } };
+      core::poly_ptr<poly::base> rhs { };
       assert::not_equal(lhs, rhs);
       assert::not_equal(lhs, nullptr);
       assert::not_equal(nullptr, lhs);
     },
 
     task("operator-greater-than-or-equal") = [] {
-      core::polymorphic<base> lhs { new derived { } };
-      core::polymorphic<base> rhs { };
+      core::poly_ptr<poly::base> lhs { new poly::derived { } };
+      core::poly_ptr<poly::base> rhs { };
 
       assert::greater_equal(lhs, rhs);
       assert::greater_equal(lhs, nullptr);
@@ -211,8 +215,8 @@ int main () {
     },
 
     task("operator-less-than-or-equal") = [] {
-      core::polymorphic<base> lhs { };
-      core::polymorphic<base> rhs { new derived { } };
+      core::poly_ptr<poly::base> lhs { };
+      core::poly_ptr<poly::base> rhs { new poly::derived { } };
 
       assert::less_equal(lhs, rhs);
       assert::less_equal(lhs, nullptr);
@@ -221,21 +225,25 @@ int main () {
     },
 
     task("operator-greater-than") = [] {
-      core::polymorphic<base> lhs { new derived { } };
-      core::polymorphic<base> rhs { };
+      core::poly_ptr<poly::base> lhs { new poly::derived { } };
+      core::poly_ptr<poly::base> rhs { };
 
       assert::greater(lhs, rhs);
       assert::greater(lhs, nullptr);
     },
 
     task("operator-less-than") = [] {
-      core::polymorphic<base> lhs { };
-      core::polymorphic<base> rhs { new derived { } };
+      core::poly_ptr<poly::base> lhs { };
+      core::poly_ptr<poly::base> rhs { new poly::derived { } };
 
       assert::less(lhs, rhs);
       assert::less(nullptr, rhs);
     }
+  };
 
+  test("make-unique") = {
+    task("make-unique-single") = []{ assert::fail(); },
+    task("make-unique-array") = []{ assert::fail(); }
   };
 
   monitor::run();
