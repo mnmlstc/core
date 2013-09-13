@@ -299,7 +299,8 @@ void swap (
 
 template <typename T, typename Deleter>
 struct hash<core::v1::polymorphic<T, Deleter>> {
-  size_t operator ()(core::v1::polymorphic<T, Deleter> const& value) {
+  using value_type = core::v1::polymorphic<T, Deleter>
+  size_t operator ()(value_type const& value) const noexcept {
     return hash<T*> { }(value.get());
   }
 };
