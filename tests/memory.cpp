@@ -30,7 +30,7 @@ struct derived : base {
 int main () {
   using namespace unittest;
 
-  test("poly_ptr") = {
+  test("poly-ptr") = {
     task("default-constructor") = []{
       core::poly_ptr<poly::base> value;
       assert::is_true(not value);
@@ -238,12 +238,53 @@ int main () {
 
       assert::less(lhs, rhs);
       assert::less(nullptr, rhs);
-    }
+    },
+
+    task("make-poly") = [] { assert::fail(); }
+  };
+
+  test("deep-ptr") = {
+    task("default-constructor") = [] { assert::fail(); },
+    task("value-constructor") = [] { assert::fail(); },
+    task("move-constructor") = [] { assert::fail(); },
+    task("copy-constructor") = [] { assert::fail(); },
+    task("unique-ptr-assign-operator") = [] { assert::fail(); },
+    task("raw-ptr-assignment") = [] { assert::fail(); },
+    task("copy-assignment") = []{ assert::fail(); },
+    task("move-assignment") = []{ assert::fail(); },
+    task("operator-bool") = []{ assert::fail(); },
+    task("dereference-operator") = [] { assert::fail(); },
+    task("arrow-operator") = [] { assert::fail(); },
+    task("release") = []{ assert::fail(); },
+    task("reset") = [] { assert::fail(); },
+    task("get") = [] { assert::fail(); },
+    task("get-copier") = [] { assert::fail(); },
+    task("operator-equal") = [] { assert::fail(); },
+    task("operator-not-equal") = [] { assert::fail(); },
+    task("operator-greater-than-or-equal") = [] { assert::fail(); },
+    task("operator-less-than-or-equal") = [] { assert::fail(); },
+    task("operator-greater-than") = [] { assert::fail(); },
+    task("operator-less-than") = [] { assert::fail(); },
+    task("make-deep") = [] { assert::fail(); }
   };
 
   test("make-unique") = {
-    task("make-unique-single") = []{ assert::fail(); },
-    task("make-unique-array") = []{ assert::fail(); }
+    task("make-unique-single") = []{
+      auto unique = core::make_unique<std::vector<int>>(
+        std::vector<int> { 1, 2, 3, 4, 5}
+      );
+      assert::is_not_null(unique.get());
+      assert::equal((*unique)[0], 1);
+      assert::equal((*unique)[1], 2);
+      assert::equal((*unique)[2], 3);
+      assert::equal((*unique)[3], 4);
+      assert::equal((*unique)[4], 5);
+    },
+
+    task("make-unique-array") = []{
+      auto unique = core::make_unique<int>(7);
+      assert::is_not_null(unique.get());
+    }
   };
 
   monitor::run();

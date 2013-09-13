@@ -366,7 +366,59 @@ bool operator < (
 /* deep_ptr convention for type, deleter, copier is
  * T, D, C : U, E, K
  */
+template <
+  typename T, typename D, typename C,
+  typename U, typename E, typename K
+> bool operator == (
+  deep_ptr<T, D, C> const& lhs,
+  deep_ptr<U, E, K> const& rhs
+) noexcept { return lhs.get() == rhs.get(); }
 
+template <
+  typename T, typename D, typename C,
+  typename U, typename E, typename K
+> bool operator != (
+  deep_ptr<T, D, C> const& lhs,
+  deep_ptr<U, E, K> const& rhs
+) noexcept { return lhs.get() != rhs.get(); }
+
+template <
+  typename T, typename D, typename C,
+  typename U, typename E, typename K
+> bool operator >= (
+  deep_ptr<T, D, C> const& lhs,
+  deep_ptr<U, E, K> const& rhs
+) noexcept { return not (lhs < rhs); }
+
+template <
+  typename T, typename D, typename C,
+  typename U, typename E, typename K
+> bool operator <= (
+  deep_ptr<T, D, C> const& lhs,
+  deep_ptr<U, E, K> const& rhs
+) noexcept { return not (rhs < lhs); }
+
+template <
+  typename T, typename D, typename C,
+  typename U, typename E, typename K
+> bool operator > (
+  deep_ptr<T, D, C> const& lhs,
+  deep_ptr<U, E, K> const& rhs
+) noexcept { return rhs < lhs; }
+
+template <
+  typename T, typename D, typename C,
+  typename U, typename E, typename K
+> bool operator < (
+  deep_ptr<T, D, C> const& lhs,
+  deep_ptr<U, E, K> const& rhs
+) noexcept {
+  using common_type = typename std::common_type<
+    typename deep_ptr<T, D, C>::pointer,
+    typename deep_ptr<U, E, K>::pointer
+  >::type;
+  return std::less<common_type> { }(lhs.get(), rhs.get());
+}
 
 /* poly_ptr nullptr operator overloads */
 template <typename T, typename D>
