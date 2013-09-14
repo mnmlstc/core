@@ -15,8 +15,9 @@ rather than by feature.
 
    Using MNMLSTC Core <usage>
    optional
-   iterator
+   expected
    <variant>
+   iterator
    memory
    <range>
    any
