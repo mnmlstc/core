@@ -19,6 +19,16 @@ using remove_extent = typename std::remove_extent<U>::type;
 template <typename T>
 using add_lvalue_reference = typename std::add_lvalue_reference<T>::type;
 
+template <typename T> using result_of = typename std::result_of<T>::type;
+
+template <typename T>
+using remove_reference = typename std::remove_reference<T>::type;
+
+template <typename T>
+using deep_lvalue = typename std::conditional<
+  std::is_reference<T>::value, T, T const&
+>::type;
+
 template <typename T, typename D>
 class pointer {
   template <typename U>
@@ -52,7 +62,7 @@ std::unique_ptr<T, D> null_poly_copy (std::unique_ptr<T, D> const&) noexcept {
 template <typename T>
 struct default_copy {
   using allocator_type = std::allocator<T>;
-  using pointer = T;
+  using pointer = T*;
 
   constexpr default_copy () noexcept { }
   template <typename U>
@@ -233,15 +243,40 @@ template <
   using copier_type = Copier;
   using pointer = typename impl::pointer<element_type, deleter_type>::type;
 
-  /* TODO: Need to do same impl::pointer with copier_type in below statement */
   static_assert(
-    std::is_same<typename copier_type::pointer, pointer>::value,
+    std::is_same<impl::result_of<copier_type(pointer)>, pointer>::value,
     "deleter_type and copier_type have differing pointer types"
   );
 
+  deep_ptr (
+    pointer ptr,
+    impl::deep_lvalue<deleter_type> deleter,
+    impl::deep_lvalue<copier_type> copier
+  ) noexcept :
+    data { ptr, deleter, copier }
+  { }
+
+  deep_ptr (
+    pointer ptr,
+    impl::remove_reference<deleter_type>&& deleter,
+    impl::remove_reference<copier_type>&& copier
+  ) noexcept :
+    data { std::move(ptr), std::move(deleter), std::move(copier) }
+  { }
+
+  template <typename U, typename E>
+  deep_ptr (std::unique_ptr<U, E>&& that) noexcept :
+    deep_ptr { that.release(), std::move(that.get_deleter()), copier_type { } }
+  { }
+
+  explicit deep_ptr (pointer ptr) noexcept :
+    deep_ptr { ptr, deleter_type { }, copier_type { } }
+  { }
+
   constexpr deep_ptr (std::nullptr_t) noexcept : deep_ptr { } { }
+
   deep_ptr (deep_ptr const& that) :
-    data {
+    deep_ptr {
       that.get() ? that.get_copier()(that.get()) : that.get(),
       that.get_deleter(),
       that.get_copier()

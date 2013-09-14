@@ -244,20 +244,122 @@ int main () {
   };
 
   test("deep-ptr") = {
-    task("default-constructor") = [] { assert::fail(); },
-    task("value-constructor") = [] { assert::fail(); },
-    task("move-constructor") = [] { assert::fail(); },
-    task("copy-constructor") = [] { assert::fail(); },
-    task("unique-ptr-assign-operator") = [] { assert::fail(); },
-    task("raw-ptr-assignment") = [] { assert::fail(); },
-    task("copy-assignment") = []{ assert::fail(); },
-    task("move-assignment") = []{ assert::fail(); },
-    task("operator-bool") = []{ assert::fail(); },
-    task("dereference-operator") = [] { assert::fail(); },
-    task("arrow-operator") = [] { assert::fail(); },
-    task("release") = []{ assert::fail(); },
-    task("reset") = [] { assert::fail(); },
+    task("default-constructor") = [] {
+      core::deep_ptr<poly::derived> value { };
+      assert::is_true(not value);
+    },
+
+    task("value-constructor") = [] {
+      core::deep_ptr<poly::derived> value { new poly::derived { } };
+
+      assert::is_true(bool(value));
+      assert::equal((*value).value, 42);
+    },
+
+    task("move-constructor") = [] {
+      core::deep_ptr<poly::derived> value { new poly::derived { } };
+      core::deep_ptr<poly::derived> move { std::move(value) };
+
+      assert::is_true(not value);
+      assert::is_true(bool(move));
+      assert::equal((*move).value, 42);
+    },
+
+    task("copy-constructor") = [] {
+      core::deep_ptr<poly::derived> value { new poly::derived { } };
+      core::deep_ptr<poly::derived> copy { value };
+
+      assert::is_true(bool(value));
+      assert::is_true(bool(copy));
+
+      assert::equal(value->get(), copy->get());
+      assert::equal(value->get(), 42);
+      assert::equal(copy->get(), 42);
+    },
+
+    task("unique-ptr-assign-operator") = [] {
+      core::deep_ptr<poly::derived> value { };
+      std::unique_ptr<poly::derived> unique { new poly::derived { } };
+
+      value = std::move(unique);
+
+      assert::is_true(not unique);
+      assert::is_true(bool(value));
+      assert::equal(value->get(), 42);
+    },
+
+    task("copy-assignment") = []{
+      core::deep_ptr<poly::derived> value { new poly::derived { } };
+      core::deep_ptr<poly::derived> copy { };
+
+      assert::is_true(bool(value));
+      assert::is_true(not copy);
+
+      copy = value;
+
+      assert::is_true(bool(value));
+      assert::is_true(bool(copy));
+      assert::equal(value->get(), copy->get());
+      assert::equal(copy->get(), 42);
+    },
+
+    task("move-assignment") = []{
+      core::deep_ptr<poly::derived> value { new poly::derived { } };
+      core::deep_ptr<poly::derived> move { };
+
+      assert::is_true(bool(value));
+      assert::is_true(not move);
+
+      move = std::move(value);
+
+      assert::is_true(not value);
+      assert::is_true(bool(move));
+      assert::equal(move->get(), 42);
+    },
+
+    task("operator-bool") = []{
+      core::deep_ptr<poly::derived> true_value { new poly::derived { } };
+      core::deep_ptr<poly::derived> false_value { };
+
+      assert::is_true(bool(true_value));
+      assert::is_true(not false_value);
+    },
+
+    task("dereference-operator") = [] {
+      core::deep_ptr<poly::derived> value { new poly::derived { } };
+      assert::is_true(bool(value));
+      assert::equal((*value).value, 42);
+    },
+
+    task("arrow-operator") = [] {
+      core::deep_ptr<poly::derived> value { new poly::derived { } };
+      assert::is_true(bool(value));
+      assert::equal(value->get(), 42);
+    },
+
+    task("release") = []{
+      core::deep_ptr<poly::derived> value { new poly::derived { } };
+
+      assert::is_true(bool(value));
+
+      auto ptr = value.release();
+
+      assert::is_null(value.get());
+      assert::is_true(not value);
+      assert::is_not_null(ptr);
+      assert::equal(ptr->get(), 42);
+      delete ptr;
+    },
+
+    task("reset") = [] {
+      core::deep_ptr<poly::derived> value { new poly::derived { } };
+      assert::is_true(bool(value));
+      value.reset();
+      assert::is_true(not value);
+    },
+
     task("get") = [] { assert::fail(); },
+
     task("get-copier") = [] { assert::fail(); },
     task("operator-equal") = [] { assert::fail(); },
     task("operator-not-equal") = [] { assert::fail(); },
