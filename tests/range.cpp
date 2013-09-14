@@ -150,28 +150,31 @@ int main () {
 
       auto slice = range.slice(6);
 
+      assert::equal(
+        std::string { "a-long-string" },
+        std::string { slice.begin(), slice.end() }
+      );
+
       assert::equal(slice.begin(), range.begin() + 6);
       assert::equal(slice.end(), range.end());
       assert::equal(slice.size(), 13);
 
       slice = range.slice(-7);
 
-      assert::equal(slice.end(), range.begin() + 7);
+      assert::equal(
+        std::string { "-string" },
+        std::string { slice.begin(), slice.end() }
+      );
+
+      assert::equal(slice.begin(), range.end() - 7);
       assert::equal(slice.end(), range.end());
-      assert::equal(slice.size(), 13);
 
       slice = range.slice(6, -7);
 
-      assert::equal(slice.begin(), range.begin() + 6);
-      assert::equal(slice.end(), range.end() - 7);
-      assert::equal(slice.size(), 6);
-
-      assert::equal(slice[0], 'a');
-      assert::equal(slice[1], '-');
-      assert::equal(slice[2], 'l');
-      assert::equal(slice[3], 'o');
-      assert::equal(slice[4], 'n');
-      assert::equal(slice[5], 'g');
+      assert::equal(
+        std::string { "a-long" },
+        std::string { slice.begin(), slice.end() }
+      );
 
       assert::fail();
     },
@@ -364,6 +367,10 @@ int main () {
       assert::equal(lhs[3], 'o');
       assert::equal(lhs[4], 'n');
       assert::equal(lhs[5], 'd');
+    }
+
+    task("make-range") = [] {
+      assert::fail();
     }
   };
 
