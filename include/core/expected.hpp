@@ -100,7 +100,7 @@ struct expected final {
     }
     return *this;
   }
-    
+
   explicit operator bool () const noexcept { return this->valid; }
 
   value_type const& operator * () const noexcept(false) {

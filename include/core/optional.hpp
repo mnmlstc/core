@@ -192,11 +192,11 @@ struct optional final {
   }
 
   value_type const& operator * () const {
-    return *reinterpret_cast<value_type const*>(std::addressof(this->data));
+    return reinterpret_cast<value_type const&>(this->data);
   }
 
   value_type& operator * () {
-    return *reinterpret_cast<value_type*>(std::addressof(this->data));
+    return reinterpret_cast<value_type&>(this->data);
   }
 
   explicit operator bool () const { return this->engaged; }
