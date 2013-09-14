@@ -591,13 +591,22 @@ template <
   return poly_ptr<T> { new U { std::forward<U>(value) } };
 }
 
+/* make_deep */
+template <
+  typename T,
+  typename=typename std::enable_if<not std::is_array<T>::value>::type,
+  typename... Args
+> auto make_deep (Args&&... args) -> deep_ptr<T> {
+  return deep_ptr<T> { new T { std::forward<Args>(args)... } };
+}
+
 /* make_unique */
 template <
   typename Type,
   typename=typename std::enable_if<not std::is_array<Type>::value>::type,
   typename... Args
 > auto make_unique(Args&&... args) -> std::unique_ptr<Type> {
-  return std::unique_ptr<Type> { new Type(std::forward<Args>(args)...) };
+  return std::unique_ptr<Type> { new Type { std::forward<Args>(args)... } };
 }
 
 template <

@@ -190,8 +190,8 @@ int main () {
     },
 
     task("operator-equal") = [] {
-      core::poly_ptr<poly::base> lhs, rhs;
-      core::poly_ptr<poly::derived> der;
+      core::poly_ptr<poly::base> lhs { };
+      core::poly_ptr<poly::base> rhs { };
       assert::equal(lhs, rhs);
       assert::equal(lhs, nullptr);
       assert::equal(nullptr, lhs);
@@ -240,7 +240,13 @@ int main () {
       assert::less(nullptr, rhs);
     },
 
-    task("make-poly") = [] { assert::fail(); }
+    task("make-poly") = [] {
+      poly::derived derived { };
+      auto poly = core::make_poly<poly::base>(std::move(derived));
+      assert::is_true(bool(poly));
+      assert::equal(typeid(derived), typeid(*poly));
+      assert::equal(poly->get(), 42);
+    }
   };
 
   test("deep-ptr") = {
@@ -358,16 +364,77 @@ int main () {
       assert::is_true(not value);
     },
 
-    task("get") = [] { assert::fail(); },
+    task("get") = [] {
+      core::deep_ptr<poly::derived> value { };
+      assert::is_null(value.get());
+    },
 
-    task("get-copier") = [] { assert::fail(); },
-    task("operator-equal") = [] { assert::fail(); },
-    task("operator-not-equal") = [] { assert::fail(); },
-    task("operator-greater-than-or-equal") = [] { assert::fail(); },
-    task("operator-less-than-or-equal") = [] { assert::fail(); },
-    task("operator-greater-than") = [] { assert::fail(); },
-    task("operator-less-than") = [] { assert::fail(); },
-    task("make-deep") = [] { assert::fail(); }
+    task("get-copier") = [] {
+      core::deep_ptr<poly::derived> value { new poly::derived { } };
+      auto ptr = value.get_copier()(value.get());
+      assert::is_not_null(ptr);
+      delete ptr;
+    },
+
+    task("operator-equal") = [] {
+      core::deep_ptr<poly::derived> lhs { };
+      core::deep_ptr<poly::derived> rhs { };
+      assert::equal(lhs, rhs);
+      assert::equal(lhs, nullptr);
+      assert::equal(nullptr, rhs);
+    },
+
+    task("operator-not-equal") = [] {
+      core::deep_ptr<poly::derived> lhs { new poly::derived { } };
+      core::deep_ptr<poly::derived> rhs { };
+      assert::not_equal(lhs, rhs);
+      assert::not_equal(lhs, nullptr);
+      assert::not_equal(nullptr, lhs);
+    },
+
+    task("operator-greater-than-or-equal") = [] {
+      core::deep_ptr<poly::derived> lhs { new poly::derived { } };
+      core::deep_ptr<poly::derived> rhs { };
+
+      assert::greater_equal(lhs, rhs);
+      assert::greater_equal(lhs, nullptr);
+      assert::greater_equal(nullptr, rhs);
+
+    },
+
+    task("operator-less-than-or-equal") = [] {
+      core::deep_ptr<poly::derived> lhs { };
+      core::deep_ptr<poly::derived> rhs { new poly::derived { } };
+
+      assert::less_equal(lhs, rhs);
+      assert::less_equal(lhs, nullptr);
+      assert::less_equal(nullptr, lhs);
+      assert::less_equal(nullptr, rhs);
+    },
+
+    task("operator-greater-than") = [] {
+      core::poly_ptr<poly::derived> lhs { new poly::derived { } };
+      core::poly_ptr<poly::derived> rhs { };
+
+      assert::greater(lhs, rhs);
+      assert::greater(lhs, nullptr);
+    },
+
+    task("operator-less-than") = [] {
+      core::deep_ptr<poly::derived> lhs { };
+      core::deep_ptr<poly::derived> rhs { new poly::derived { } };
+
+      assert::less(lhs, rhs);
+      assert::less(nullptr, rhs);
+    },
+
+    task("make-deep") = [] {
+      auto deep = core::make_deep<std::tuple<std::string, std::string>>(
+        "hello",
+        "world!"
+      );
+      assert::is_true(bool(deep));
+    }
   };
 
   test("make-unique") = {
