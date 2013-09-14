@@ -104,10 +104,24 @@ struct range {
 
   range (range&& that) noexcept :
     range { std::move(that.begin_), std::move(that.end_) }
-  { }
+  { that.begin_ = that.end_; }
 
   range () = default;
   ~range () = default;
+
+  range& operator = (range const& that) {
+    return *this = range { that };
+  }
+
+  range& operator = (range&& that) {
+    range { std::move(that) }.swap(*this);
+    return *this;
+  }
+
+  reference operator [](difference_type idx) const {
+    static_assert(is_random_access, "can only subscript into random-access");
+    return idx < 0 ? this->end()[idx] : this->begin()[idx];
+  }
 
   iterator begin () const { return this->begin_; }
   iterator end () const { return this->end_; }
@@ -116,11 +130,6 @@ struct range {
   reference back () const {
     static_assert(is_bidirectional, "can only get back of bidirectional");
     return *std::prev(this->end());
-  }
-
-  reference operator [](difference_type idx) const {
-    static_assert(is_random_access, "can only subscript into random-access");
-    return idx < 0 ? this->end()[idx] : this->begin()[idx];
   }
 
   bool empty () const { return this->begin() == this->end(); }
