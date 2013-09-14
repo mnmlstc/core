@@ -14,7 +14,6 @@ rather than by feature.
    :maxdepth: 1
 
    Using MNMLSTC Core <usage>
-   polymorphic
    optional
    iterator
    <variant>
