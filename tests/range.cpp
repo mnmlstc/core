@@ -144,7 +144,25 @@ int main () {
       assert::equal(value.size(), range.size());
     },
 
-    task("slice") = [] { assert::fail(); },
+    task("slice") = [] {
+      std::string value { "slice-a-long-string" };
+      core::range<std::string::iterator> range { value };
+
+      auto slice = range.slice(6);
+
+      assert::equal(slice.begin(), range.begin() + 6);
+      assert::equal(slice.end(), range.end());
+      assert::equal(slice.size(), 13);
+
+      slice = std::move(range.slice(-6));
+
+      assert::equal(slice.begin(), range.begin());
+      assert::equal(slice.end(), range.end() - 6);
+      assert::equal(slice.size(), 13);
+
+      assert::fail();
+    },
+
     task("split") = [] { assert::fail(); },
 
     task("pop-front") = [] {
@@ -253,6 +271,11 @@ int main () {
       assert::equal(range[7], 'p');
       assert::equal(range[8], 't');
       assert::equal(range[9], 'o');
+
+      /* Attempt to pop backwards and WAAAY past the beginning */
+      range.pop_front_upto(-15);
+
+      assert::equal(range.size(), 10);
     },
 
     task("pop-back-upto") = [] { assert::fail(); },
