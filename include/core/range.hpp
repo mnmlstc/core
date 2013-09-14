@@ -142,7 +142,54 @@ struct range {
   /* Creates an open-ended range of [start, stop) */
   range slice (difference_type start, difference_type stop) const {
     static_assert(is_forward, "can only slice forward-range");
+    /* Behavior is:
+     * if start is negative, the begin marker is this->end() - start
+     * if stop is negative, the end marker is this->end() - stop
+     * if start is positive, the begin marker is this->begin() + start
+     * if stop is positive, the end marker is this->begin() + stop
+     *
+     * if start and stop are positive, and stop is less than or equal to start,
+     * an empty range is returned.
+     *
+     * if start and stop are negative and stop is less than or equal to start,
+     * an empty range is returned.
+     *
+     * if start is positive and stop is negative and abs(stop) + start is
+     * greater than or equal to this->size(), an empty range is returned.
+     *
+     * if start is negative and stop is positive and this->size() + start is
+     * greater or equal to stop, an empty range is returned.
+     *
+     * The first two conditions can be computed cheaply, while the third and
+     * fourth are a bit more expensive, but WILL be required no matter what
+     * iterator type we are. However we don't compute the size until after
+     * we've checked the first two conditions
+     *
+     * An example with python style slicing for each would be:
+     * [4:3] -> empty range
+     * [-4:-4] -> empty range
+     * [7:-4] -> empty range for string of size 11 or more
+     * [-4:15] -> empty range for a string of size 19 or less.
+     */
+    bool const start_positive = start > 0;
+    bool const stop_positive = stop > 0;
+    bool const stop_less = stop < start;
+    bool const first_return_empty =
+      (start_positive and stop_positive and stop_less) or
+      (not start_positive and not stop_positive and stop_less);
+    if (first_return_empty) { return range { }; }
+
+    /* now safe to compute size */
+    auto const size = this->size();
+    auto third_empty = std::abs(stop) + start;
+
+    bool const second_return_empty =
+      (start_positive and not stop_positive and third_empty >= size) or
+      (not start_positive and stop_positive and size + start >= stop)
+    if (second_return_empty) { return range { }; }
+
     return range { };
+    /* time to do actual work */
   }
 
   /* Creates an open-ended range of [start, end()) */
