@@ -146,9 +146,116 @@ int main () {
 
     task("slice") = [] { assert::fail(); },
     task("split") = [] { assert::fail(); },
-    task("pop-front") = [] { assert::fail(); },
-    task("pop-back") = [] { assert::fail(); },
-    task("pop-front-upto") = [] { assert::fail(); },
+
+    task("pop-front") = [] {
+      std::string value { "pop-front" };
+      core::range<std::string::iterator> range { value };
+      assert::is_false(range.empty());
+
+      range.pop_front();
+
+      assert::equal(range[0], 'o');
+      assert::equal(range[1], 'p');
+      assert::equal(range[2], '-');
+      assert::equal(range[3], 'f');
+      assert::equal(range[4], 'r');
+      assert::equal(range[5], 'o');
+      assert::equal(range[6], 'n');
+      assert::equal(range[7], 't');
+
+      range.pop_front(3);
+
+      assert::equal(range[0], 'f');
+      assert::equal(range[1], 'r');
+      assert::equal(range[2], 'o');
+      assert::equal(range[3], 'n');
+      assert::equal(range[4], 't');
+
+      range.pop_front(-4);
+
+      assert::equal(range[0], 'p');
+      assert::equal(range[1], 'o');
+      assert::equal(range[2], 'p');
+      assert::equal(range[3], '-');
+      assert::equal(range[4], 'f');
+      assert::equal(range[5], 'r');
+      assert::equal(range[6], 'o');
+      assert::equal(range[7], 'n');
+      assert::equal(range[8], 't');
+    },
+
+    task("pop-back") = [] {
+      std::string value { "pop-back" };
+      core::range<std::string::iterator> range { value };
+
+      assert::equal(range[0], 'p');
+      assert::equal(range[1], 'o');
+      assert::equal(range[2], 'p');
+      assert::equal(range[3], '-');
+      assert::equal(range[4], 'b');
+      assert::equal(range[5], 'a');
+      assert::equal(range[6], 'c');
+      assert::equal(range[7], 'k');
+
+      range.pop_back();
+
+      assert::equal(range.size(), 7);
+
+      assert::equal(range[0], 'p');
+      assert::equal(range[1], 'o');
+      assert::equal(range[2], 'p');
+      assert::equal(range[3], '-');
+      assert::equal(range[4], 'b');
+      assert::equal(range[5], 'a');
+      assert::equal(range[6], 'c');
+
+      range.pop_back(4);
+
+      assert::equal(range.size(), 3);
+
+      assert::equal(range[0], 'p');
+      assert::equal(range[1], 'o');
+      assert::equal(range[2], 'p');
+
+      range.pop_back(-5);
+
+      assert::equal(range.size(), value.size());
+
+      assert::equal(range[0], 'p');
+      assert::equal(range[1], 'o');
+      assert::equal(range[2], 'p');
+      assert::equal(range[3], '-');
+      assert::equal(range[4], 'b');
+      assert::equal(range[5], 'a');
+      assert::equal(range[6], 'c');
+      assert::equal(range[7], 'k');
+    },
+
+    task("pop-front-upto") = [] {
+      std::string value { "pop-front-upto" };
+      core::range<std::string::iterator> range { value };
+
+      assert::equal(value.begin(), range.begin());
+      assert::equal(value.end(), range.end());
+
+      range.pop_front_upto(4);
+
+      assert::not_equal(value.begin(), range.begin());
+      assert::equal(value.end(), range.end());
+
+      assert::equal(range[0], 'f');
+      assert::equal(range[1], 'r');
+      assert::equal(range[2], 'o');
+      assert::equal(range[3], 'n');
+      assert::equal(range[4], 't');
+      assert::equal(range[5], '-');
+      assert::equal(range[6], 'u');
+      assert::equal(range[7], 'p');
+      assert::equal(range[8], 't');
+      assert::equal(range[9], 'o');
+    },
+
+    task("pop-back-upto") = [] { assert::fail(); },
 
     task("swap") = [] {
       std::string second { "second" };
