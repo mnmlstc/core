@@ -1,7 +1,9 @@
 #include <core/range.hpp>
 
+#include <forward_list>
 #include <vector>
 #include <string>
+#include <list>
 
 #include <unittest/unittest.hpp>
 
@@ -176,7 +178,32 @@ int main () {
         std::string { slice.begin(), slice.end() }
       );
 
-      assert::fail();
+      /* bidirectional-range specific */
+      std::string bidir_value { "bidirectional-range" };
+      std::list<char> bidirectional { bidir_value.begin(), bidir_value.end() };
+      core::range<std::list<char>::iterator> bidir { bidirectional };
+      auto bislice = bidir.slice(2, -6);
+
+      assert::equal(
+        std::string { "directional" },
+        std::string { bislice.begin(), bislice.end() }
+      );
+
+      /* forward-range specific */
+      std::string forward_value { "a-forward-range" };
+      std::forward_list<char> forward_list {
+        forward_value.begin(),
+        forward_value.end()
+      };
+      core::range<std::forward_list<char>::iterator> forward_range {
+        forward_list
+      };
+
+      auto forward_slice = forward_range.slice(2, -6);
+      assert::equal(
+        std::string { "forward" },
+        std::string { forward_slice.begin(), forward_slice.end() }
+      );
     },
 
     task("split") = [] { assert::fail(); },
@@ -367,7 +394,7 @@ int main () {
       assert::equal(lhs[3], 'o');
       assert::equal(lhs[4], 'n');
       assert::equal(lhs[5], 'd');
-    }
+    },
 
     task("make-range") = [] {
       assert::fail();

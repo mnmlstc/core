@@ -185,11 +185,24 @@ struct range {
 
     bool const second_return_empty =
       (start_positive and not stop_positive and third_empty >= size) or
-      (not start_positive and stop_positive and size + start >= stop)
+      (not start_positive and stop_positive and size + start >= stop);
     if (second_return_empty) { return range { }; }
 
-    return range { };
-    /* time to do actual work */
+    /* While the code below technically works for all iterators it is
+     * ineffecient in some cases for bidirectional ranges, where either of
+     * start or stop are negative.
+     * TODO: Specialize for bidirectional operators
+     */
+    if (not start_positive) { start = size + start; }
+    if (not stop_positive) { stop = size + stop; }
+
+    auto begin = this->begin();
+    std::advance(begin, start);
+
+    auto end = begin;
+    std::advance(end, stop - start);
+
+    return range { begin, end };
   }
 
   /* Creates an open-ended range of [start, end()) */
