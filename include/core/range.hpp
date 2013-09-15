@@ -266,7 +266,9 @@ private:
 };
 
 template <typename Iterator>
-auto make_range (Iterator begin, Iterator end) -> range<Iterator>;
+auto make_range (Iterator begin, Iterator end) -> range<Iterator> {
+  return range<Iterator> { begin, end };
+}
 
 template <typename Range>
 auto make_range (Range&& value) -> range<decltype(std::begin(value))> {
