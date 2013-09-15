@@ -5,6 +5,8 @@
 #include <string>
 #include <list>
 
+#include <sstream>
+
 #include <unittest/unittest.hpp>
 
 int main () {
@@ -206,7 +208,21 @@ int main () {
       );
     },
 
-    task("split") = [] { assert::fail(); },
+    task("split") = [] {
+      std::string value { "splitstring" };
+      core::range<std::string::iterator> range { value };
+      auto pair = range.split(5);
+
+      assert::equal(
+        std::string { "split" },
+        std::string { std::get<0>(pair).begin(), std::get<0>(pair).end() }
+      );
+
+      assert::equal(
+        std::string { "string" },
+        std::string { std::get<1>(pair).begin(), std::get<1>(pair).end() }
+      );
+    },
 
     task("pop-front") = [] {
       std::string value { "pop-front" };
@@ -397,6 +413,14 @@ int main () {
     },
 
     task("make-range") = [] {
+      std::string value { "make-range" };
+      auto string_range = core::make_range(value);
+
+      assert::equal(
+        value,
+        std::string { string_range.begin(), string_range.end() }
+      );
+
       assert::fail();
     }
   };
