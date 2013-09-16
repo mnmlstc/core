@@ -3,7 +3,7 @@ Overview
 
 MNMLSTC Core is a small and easy to use C++11 library that adds a functionality
 set that will be available in C++14 and later, as well as some useful
-additions.
+additions, or some proposals that have not been completely approved yet.
 
 Information on installing and using MNMLSTC Core (as well as modifying its
 internals) can be found in its documentation
@@ -15,28 +15,19 @@ Components
 
 Some components provided by MNMLSTC Core are:
 
- * ``polymorphic<T>``
  * ``variant<Ts...>``
  * ``optional<T>``
  * ``expected<T>``
  * ``deep_ptr<T>``
+ * ``poly_ptr<T>``
  * ``range<T>``
  * ``any``
 
 And others. Details on each component can be found in MNMLSTC Core's
-documentation.
-
-Some important differences between these components and their Boost
-counterparts are:
-
- * The ``variant<Ts...>`` can be empty, and in an uninitialized state. This
-   means that, unlike the ``boost::variant<Ts...>``, a default constructed
-   ``variant<Ts...>`` is in the same state as an ``optional<T>``.
- * The ``range<T>`` is an actual type that follows the proposed
-   ``std::range<T>`` as explained in `N3350
-   <http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2012/n3350.html>`_.
-
-All of the MNMLSTC Core components reside in the ``core`` namespace.
+documentation. All of the MNMLSTC Core components reside in the ``core``
+namespace. The library is organized equivalent to the standard library e.g.,
+components related to memory are in the memory header, functional components
+in the functional header, etc.
 
 Requirements
 ------------
