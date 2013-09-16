@@ -2,10 +2,30 @@
 #define CORE_TYPE_TRAITS_HPP
 
 #include <type_traits>
+#include <utility>
 
 namespace core {
 inline namespace v1 {
 
+/* custom type traits */
+/* Check if template class is given class */
+template <class T, template <class...> class Class>
+struct is_specialization_of : std::false_type { };
+
+template <template <class...> class Class, class... Args>
+struct is_specialization_of<Class<Args...>, Class> : std::true_type { };
+
+/* extracts the class of a member function ponter */
+template <class T> struct class_of { using type = T; };
+template <class Signature, class Type>
+struct class_of<Signature Type::*> { using type = Type; };
+
+/* forward declaration */
+template <class... Args> struct invokable;
+template <class... Args> struct invoke_of;
+template <class T> struct result_of; /* SFINAE result_of */
+
+/* C++14 style aliases for standard traits */
 template <class T>
 using remove_volatile_t = typename std::remove_volatile<T>::type;
 
@@ -57,7 +77,83 @@ using underlying_type_t = typename std::underlying_type<T>::type;
 template <class... T>
 using common_type_t = typename std::common_type<T...>::type;
 
-template <class T> using result_of_t = typename std::result_of<T>::type;
+/* custom type trait specializations */
+template <class... Args> using invoke_of_t = typename invoke_of<Args...>::type;
+template <class T> using class_of_t = typename class_of<T>::type;
+
+namespace impl {
+
+struct undefined { undefined (...); };
+
+/* Get the result of an attempt at the INVOKE expression */
+/* fallback */
+template <class... Args> auto invoke_of (undefined, Args&&...) -> undefined;
+
+template <class Functor, class Object, class... Args>
+auto invoke_of (Functor&& fun, Object&& obj, Args&&... args) -> enable_if_t<
+  std::is_member_function_pointer<remove_reference_t<Functor>>::value and
+  std::is_base_of<
+    class_of_t<remove_reference_t<Functor>>,
+    remove_reference_t<Object>
+  >::value,
+  decltype((std::forward<Object>(obj).*fun)(std::forward<Args>(args)...))
+>;
+
+template <class Functor, class Object, class... Args>
+auto invoke_of (Functor&& fun, Object&& obj, Args&&... args) -> enable_if_t<
+  std::is_member_function_pointer<remove_reference_t<Functor>>::value and
+  not std::is_base_of<
+    class_of_t<remove_reference_t<Functor>>,
+    remove_reference_t<Object>
+  >::value,
+  decltype(((*std::forward<Object>(obj)).*fun)(std::forward<Args>(args)...))
+>;
+
+template <class Functor, class Object>
+auto invoke_of (Functor&& functor, Object&& object) -> enable_if_t<
+  std::is_member_object_pointer<remove_reference_t<Functor>>::value and
+  std::is_base_of<
+    class_of_t<remove_reference_t<Functor>>,
+    remove_reference_t<Object>
+  >::value,
+  decltype(std::forward<Object>(object).*functor)
+>;
+
+template <class Functor, class Object>
+auto invoke_of (Functor&& functor, Object&& object) -> enable_if_t<
+  std::is_member_object_pointer<remove_reference_t<Functor>>::value and
+  not std::is_base_of<
+    class_of_t<remove_reference_t<Functor>>,
+    remove_reference_t<Object>
+  >::value,
+  decltype((*std::forward<Object>(object)).*functor)
+>;
+
+template <class Functor, class... Args>
+auto invoke_of (Functor&& functor, Args&&... args) ->
+  decltype(std::forward<Functor>(functor)(std::forward<Args>(args)...));
+
+template <bool, class... Args> struct result_of { };
+template <class... Args>
+struct result_of<true, Args...> {
+  using type = decltype(invoke_of(std::declval<Args>()...));
+};
+
+} /* namespace impl */
+
+template <class... Args> struct invoke_of {
+  using type = decltype(impl::invoke_of(std::declval<Args>()...));
+};
+
+template <class... Args> struct invokable : std::integral_constant<
+  bool,
+  not std::is_same<invoke_of_t<Args...>, impl::undefined>::value
+> { };
+
+template <class F, class... Args>
+struct result_of<F(Args...)> : impl::result_of<
+  invokable<F, Args...>::value, F, Args...
+> { };
 
 }} /* namespace core::v1 */
 
