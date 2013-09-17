@@ -87,10 +87,10 @@ struct undefined { undefined (...); };
 
 /* Get the result of an attempt at the INVOKE expression */
 /* fallback */
-template <class... Args> auto invoke_of (undefined, Args&&...) -> undefined;
+template <class... Args> auto invoke (undefined, Args&&...) -> undefined;
 
 template <class Functor, class Object, class... Args>
-auto invoke_of (Functor&& fun, Object&& obj, Args&&... args) -> enable_if_t<
+auto invoke (Functor&& fun, Object&& obj, Args&&... args) -> enable_if_t<
   std::is_member_function_pointer<remove_reference_t<Functor>>::value and
   std::is_base_of<
     class_of_t<remove_reference_t<Functor>>,
@@ -100,7 +100,7 @@ auto invoke_of (Functor&& fun, Object&& obj, Args&&... args) -> enable_if_t<
 >;
 
 template <class Functor, class Object, class... Args>
-auto invoke_of (Functor&& fun, Object&& obj, Args&&... args) -> enable_if_t<
+auto invoke (Functor&& fun, Object&& obj, Args&&... args) -> enable_if_t<
   std::is_member_function_pointer<remove_reference_t<Functor>>::value and
   not std::is_base_of<
     class_of_t<remove_reference_t<Functor>>,
@@ -110,7 +110,7 @@ auto invoke_of (Functor&& fun, Object&& obj, Args&&... args) -> enable_if_t<
 >;
 
 template <class Functor, class Object>
-auto invoke_of (Functor&& functor, Object&& object) -> enable_if_t<
+auto invoke (Functor&& functor, Object&& object) -> enable_if_t<
   std::is_member_object_pointer<remove_reference_t<Functor>>::value and
   std::is_base_of<
     class_of_t<remove_reference_t<Functor>>,
@@ -120,7 +120,7 @@ auto invoke_of (Functor&& functor, Object&& object) -> enable_if_t<
 >;
 
 template <class Functor, class Object>
-auto invoke_of (Functor&& functor, Object&& object) -> enable_if_t<
+auto invoke (Functor&& functor, Object&& object) -> enable_if_t<
   std::is_member_object_pointer<remove_reference_t<Functor>>::value and
   not std::is_base_of<
     class_of_t<remove_reference_t<Functor>>,
@@ -130,30 +130,31 @@ auto invoke_of (Functor&& functor, Object&& object) -> enable_if_t<
 >;
 
 template <class Functor, class... Args>
-auto invoke_of (Functor&& functor, Args&&... args) ->
+auto invoke (Functor&& functor, Args&&... args) ->
   decltype(std::forward<Functor>(functor)(std::forward<Args>(args)...));
 
-template <bool, class... Args> struct result_of { };
+template <bool, class... Args> struct invoke_of { };
 template <class... Args>
-struct result_of<true, Args...> {
-  using type = decltype(invoke_of(std::declval<Args>()...));
+struct invoke_of<true, Args...> {
+  using type = decltype(invoke(std::declval<Args>()...));
 };
 
 } /* namespace impl */
 
-template <class... Args> struct invoke_of {
-  using type = decltype(impl::invoke_of(std::declval<Args>()...));
-};
-
 template <class... Args> struct invokable : std::integral_constant<
   bool,
-  not std::is_same<invoke_of_t<Args...>, impl::undefined>::value
+  not std::is_same<
+    decltype(impl::invoke(std::declval<Args>()...)),
+    impl::undefined
+  >::value
 > { };
 
+template <class... Args> struct invoke_of :
+  impl::invoke_of<invokable<Args...>::value, Args...>
+{ };
+
 template <class F, class... Args>
-struct result_of<F(Args...)> : impl::result_of<
-  invokable<F, Args...>::value, F, Args...
-> { };
+struct result_of<F(Args...)> : invoke_of<F, Args...> { };
 
 }} /* namespace core::v1 */
 
