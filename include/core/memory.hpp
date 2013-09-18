@@ -1,7 +1,6 @@
 #ifndef CORE_MEMORY_HPP
 #define CORE_MEMORY_HPP
 
-#include <type_traits>
 #include <stdexcept>
 #include <typeinfo>
 #include <memory>
@@ -9,33 +8,24 @@
 
 #include <cstddef>
 
+#include <core/type_traits.hpp>
+
 namespace core {
 inline namespace v1 {
 namespace impl {
 
-template <typename U>
-using remove_extent = typename std::remove_extent<U>::type;
-
-template <typename T>
-using add_lvalue_reference = typename std::add_lvalue_reference<T>::type;
-
-template <typename T> using result_of = typename std::result_of<T>::type;
-
-template <typename T>
-using remove_reference = typename std::remove_reference<T>::type;
-
-template <typename T>
-using deep_lvalue = typename std::conditional<
+template <class T>
+using deep_lvalue = conditional_t<
   std::is_reference<T>::value, T, T const&
->::type;
+>;
 
-template <typename T, typename D>
+template <class T, class D>
 class pointer {
-  template <typename U>
+  template <class U>
   static auto check (typename U::pointer*) noexcept -> typename U::pointer;
-  template <typename> static auto check (...) noexcept(false) -> T*;
+  template <class> static auto check (...) noexcept(false) -> T*;
 
-  using deleter_type = typename std::remove_reference<D>::type;
+  using deleter_type = remove_reference_t<D>;
 
 public:
   static constexpr bool value = noexcept(check<deleter_type>(nullptr));
@@ -45,7 +35,7 @@ public:
 } /* namespace impl */
 
 /* poly_ptr copier */
-template <typename T, typename D, typename U>
+template <class T, class D, class U>
 std::unique_ptr<T, D> default_poly_copy (std::unique_ptr<T, D> const& ptr) {
   auto value = *dynamic_cast<U*>(ptr.get());
   auto const& deleter = ptr.get_deleter();
@@ -53,19 +43,19 @@ std::unique_ptr<T, D> default_poly_copy (std::unique_ptr<T, D> const& ptr) {
 }
 
 /* null-state poly_ptr copier (don't copy that poly!) */
-template <typename T, typename D>
+template <class T, class D>
 std::unique_ptr<T, D> null_poly_copy (std::unique_ptr<T, D> const&) noexcept {
   return std::unique_ptr<T, D> { };
 }
 
 /* deep_ptr copier */
-template <typename T>
+template <class T>
 struct default_copy {
   using allocator_type = std::allocator<T>;
   using pointer = T*;
 
   constexpr default_copy () noexcept { }
-  template <typename U>
+  template <class U>
   default_copy (default_copy<U> const& copier) noexcept;
 
   pointer operator ()(pointer const ptr) const {
@@ -88,7 +78,7 @@ struct bad_polymorphic_reset : std::logic_error {
   virtual ~bad_polymorphic_reset () noexcept { }
 };
 
-template <typename T, typename Deleter=std::default_delete<T>>
+template <class T, class Deleter=std::default_delete<T>>
 struct poly_ptr final {
   using unique_type = std::unique_ptr<T, Deleter>;
   using element_type = typename unique_type::element_type;
@@ -96,12 +86,12 @@ struct poly_ptr final {
   using copier_type = unique_type (*)(unique_type const&);
   using pointer = typename unique_type::pointer;
 
-  template <typename U>
+  template <class U>
   explicit poly_ptr (U* ptr) noexcept :
     poly_ptr { ptr, deleter_type { } }
   { }
 
-  template <typename U, typename E>
+  template <class U, class E>
   explicit poly_ptr (
     std::unique_ptr<U, E>&& ptr,
     copier_type copier=default_poly_copy<element_type, deleter_type, U>
@@ -116,7 +106,7 @@ struct poly_ptr final {
     static_assert(base, "cannot create poly_ptr with non-derived type");
   }
 
-  template <typename U, typename E>
+  template <class U, class E>
   poly_ptr (
     U* ptr, E&& deleter,
     copier_type copier=default_poly_copy<element_type, deleter_type, U>
@@ -140,13 +130,13 @@ struct poly_ptr final {
 
   ~poly_ptr () noexcept { }
 
-  template <typename U, typename E>
+  template <class U, class E>
   poly_ptr& operator = (std::unique_ptr<U, E>&& ptr) {
     poly_ptr { std::move(ptr) }.swap(*this);
     return *this;
   }
 
-  template <typename U>
+  template <class U>
   poly_ptr& operator = (U* ptr) {
     poly_ptr { ptr }.swap(*this);
     return *this;
@@ -182,7 +172,7 @@ struct poly_ptr final {
   }
   */
 
-  impl::add_lvalue_reference<element_type> operator * () const noexcept {
+  add_lvalue_reference_t<element_type> operator * () const noexcept {
     return *this->ptr;
   }
 
@@ -233,9 +223,9 @@ private:
 };
 
 template <
-  typename T,
-  typename Deleter=std::default_delete<T>,
-  typename Copier=default_copy<T>
+  class T,
+  class Deleter=std::default_delete<T>,
+  class Copier=default_copy<T>
 > struct deep_ptr final {
 
   using element_type = T;
@@ -244,7 +234,7 @@ template <
   using pointer = typename impl::pointer<element_type, deleter_type>::type;
 
   static_assert(
-    std::is_same<impl::result_of<copier_type(pointer)>, pointer>::value,
+    std::is_same<result_of_t<copier_type(pointer)>, pointer>::value,
     "deleter_type and copier_type have differing pointer types"
   );
 
@@ -258,13 +248,13 @@ template <
 
   deep_ptr (
     pointer ptr,
-    impl::remove_reference<deleter_type>&& deleter,
-    impl::remove_reference<copier_type>&& copier
+    remove_reference_t<deleter_type>&& deleter,
+    remove_reference_t<copier_type>&& copier
   ) noexcept :
     data { std::move(ptr), std::move(deleter), std::move(copier) }
   { }
 
-  template <typename U, typename E>
+  template <class U, class E>
   deep_ptr (std::unique_ptr<U, E>&& that) noexcept :
     deep_ptr { that.release(), std::move(that.get_deleter()), copier_type { } }
   { }
@@ -316,7 +306,7 @@ template <
 
   explicit operator bool () const noexcept { return this->get(); }
 
-  impl::add_lvalue_reference<element_type> operator * () const noexcept {
+  add_lvalue_reference_t<element_type> operator * () const noexcept {
     return *this->get();
   }
   pointer operator -> () const noexcept { return this->get(); }
@@ -356,37 +346,37 @@ private:
 /* poly_ptr convention for type and deleter is:
  * T, D : U, E
  */
-template <typename T, typename D, typename U, typename E>
+template <class T, class D, class U, class E>
 bool operator == (
   poly_ptr<T, D> const& lhs,
   poly_ptr<U, E> const& rhs
 ) noexcept { return lhs.get() == rhs.get(); }
 
-template <typename T, typename D, typename U, typename E>
+template <class T, class D, class U, class E>
 bool operator != (
   poly_ptr<T, D> const& lhs,
   poly_ptr<U, E> const& rhs
 ) noexcept { return lhs.get() != rhs.get(); }
 
-template <typename T, typename D, typename U, typename E>
+template <class T, class D, class U, class E>
 bool operator >= (
   poly_ptr<T, D> const& lhs,
   poly_ptr<U, E> const& rhs
 ) noexcept { return not (lhs < rhs); }
 
-template <typename T, typename D, typename U, typename E>
+template <class T, class D, class U, class E>
 bool operator <= (
   poly_ptr<T, D> const& lhs,
   poly_ptr<U, E> const& rhs
 ) noexcept { return not (rhs < lhs); }
 
-template <typename T, typename D, typename U, typename E>
+template <class T, class D, class U, class E>
 bool operator > (
   poly_ptr<T, D> const& lhs,
   poly_ptr<U, E> const& rhs
 ) noexcept { return rhs < lhs; }
 
-template <typename T, typename D, typename U, typename E>
+template <class T, class D, class U, class E>
 bool operator < (
   poly_ptr<T, D> const& lhs,
   poly_ptr<U, E> const& rhs
@@ -401,180 +391,169 @@ bool operator < (
 /* deep_ptr convention for type, deleter, copier is
  * T, D, C : U, E, K
  */
-template <
-  typename T, typename D, typename C,
-  typename U, typename E, typename K
-> bool operator == (
+template <class T, class D, class C, class U, class E, class K>
+bool operator == (
   deep_ptr<T, D, C> const& lhs,
   deep_ptr<U, E, K> const& rhs
 ) noexcept { return lhs.get() == rhs.get(); }
 
-template <
-  typename T, typename D, typename C,
-  typename U, typename E, typename K
-> bool operator != (
+template <class T, class D, class C, class U, class E, class K>
+bool operator != (
   deep_ptr<T, D, C> const& lhs,
   deep_ptr<U, E, K> const& rhs
 ) noexcept { return lhs.get() != rhs.get(); }
 
-template <
-  typename T, typename D, typename C,
-  typename U, typename E, typename K
-> bool operator >= (
+template <class T, class D, class C, class U, class E, class K>
+bool operator >= (
   deep_ptr<T, D, C> const& lhs,
   deep_ptr<U, E, K> const& rhs
 ) noexcept { return not (lhs < rhs); }
 
-template <
-  typename T, typename D, typename C,
-  typename U, typename E, typename K
-> bool operator <= (
+template <class T, class D, class C, class U, class E, class K>
+bool operator <= (
   deep_ptr<T, D, C> const& lhs,
   deep_ptr<U, E, K> const& rhs
 ) noexcept { return not (rhs < lhs); }
 
-template <
-  typename T, typename D, typename C,
-  typename U, typename E, typename K
-> bool operator > (
+template <class T, class D, class C, class U, class E, class K>
+bool operator > (
   deep_ptr<T, D, C> const& lhs,
   deep_ptr<U, E, K> const& rhs
 ) noexcept { return rhs < lhs; }
 
-template <
-  typename T, typename D, typename C,
-  typename U, typename E, typename K
-> bool operator < (
+template <class T, class D, class C, class U, class E, class K>
+bool operator < (
   deep_ptr<T, D, C> const& lhs,
   deep_ptr<U, E, K> const& rhs
 ) noexcept {
-  using common_type = typename std::common_type<
+  using common_type = common_type_t<
     typename deep_ptr<T, D, C>::pointer,
     typename deep_ptr<U, E, K>::pointer
-  >::type;
+  >;
   return std::less<common_type> { }(lhs.get(), rhs.get());
 }
 
 /* poly_ptr nullptr operator overloads */
-template <typename T, typename D>
+template <class T, class D>
 bool operator == (poly_ptr<T, D> const& lhs, std::nullptr_t) noexcept {
   return not lhs;
 }
 
-template <typename T, typename D>
+template <class T, class D>
 bool operator == (std::nullptr_t, poly_ptr<T, D> const& rhs) noexcept {
   return not rhs;
 }
 
-template <typename T, typename D>
+template <class T, class D>
 bool operator != (poly_ptr<T, D> const& lhs, std::nullptr_t) noexcept {
   return bool(lhs);
 }
 
-template <typename T, typename D>
+template <class T, class D>
 bool operator != (std::nullptr_t, poly_ptr<T, D> const& rhs) noexcept {
   return bool(rhs);
 }
 
-template <typename T, typename D>
+template <class T, class D>
 bool operator >= (poly_ptr<T, D> const& lhs, std::nullptr_t) noexcept {
   return not (lhs < nullptr);
 }
 
-template <typename T, typename D>
+template <class T, class D>
 bool operator >= (std::nullptr_t, poly_ptr<T, D> const& rhs) noexcept {
   return not (nullptr < rhs);
 }
 
-template <typename T, typename D>
+template <class T, class D>
 bool operator <= (poly_ptr<T, D> const& lhs, std::nullptr_t) noexcept {
   return not (nullptr < lhs);
 }
 
-template <typename T, typename D>
+template <class T, class D>
 bool operator <= (std::nullptr_t, poly_ptr<T, D> const& rhs) noexcept {
   return not (rhs < nullptr);
 }
 
-template <typename T, typename D>
+template <class T, class D>
 bool operator > (poly_ptr<T, D> const& lhs, std::nullptr_t) noexcept {
   return nullptr < lhs;
 }
 
-template <typename T, typename D>
+template <class T, class D>
 bool operator > (std::nullptr_t, poly_ptr<T, D> const& rhs) noexcept {
   return rhs < nullptr;
 }
 
-template <typename T, typename D>
+template <class T, class D>
 bool operator < (poly_ptr<T, D> const& lhs, std::nullptr_t) noexcept {
   using pointer = typename poly_ptr<T, D>::pointer;
   return std::less<pointer> { }(lhs.get(), nullptr);
 }
 
-template <typename T, typename D>
+template <class T, class D>
 bool operator < (std::nullptr_t, poly_ptr<T, D> const& rhs) noexcept {
   using pointer = typename poly_ptr<T, D>::pointer;
   return std::less<pointer> { }(nullptr, rhs.get());
 }
 
 /* deep_ptr nullptr operator overloads */
-template <typename T, typename D, typename C>
+template <class T, class D, class C>
 bool operator == (deep_ptr<T, D, C> const& lhs, std::nullptr_t) noexcept {
   return not lhs;
 }
 
-template <typename T, typename D, typename C>
+template <class T, class D, class C>
 bool operator == (std::nullptr_t, deep_ptr<T, D, C> const& rhs) noexcept {
   return not rhs;
 }
 
-template <typename T, typename D, typename C>
+template <class T, class D, class C>
 bool operator != (deep_ptr<T, D, C> const& lhs, std::nullptr_t) noexcept {
   return bool(lhs);
 }
 
-template <typename T, typename D, typename C>
+template <class T, class D, class C>
 bool operator != (std::nullptr_t, deep_ptr<T, D, C> const& rhs) noexcept {
   return bool(rhs);
 }
-template <typename T, typename D, typename C>
+
+template <class T, class D, class C>
 bool operator >= (deep_ptr<T, D, C> const& lhs, std::nullptr_t) noexcept {
   return not (lhs < nullptr);
 }
 
-template <typename T, typename D, typename C>
+template <class T, class D, class C>
 bool operator >= (std::nullptr_t, deep_ptr<T, D, C> const& rhs) noexcept {
   return not (nullptr < rhs);
 }
 
-template <typename T, typename D, typename C>
+template <class T, class D, class C>
 bool operator <= (deep_ptr<T, D, C> const& lhs, std::nullptr_t) noexcept {
   return not (nullptr < lhs);
 }
 
-template <typename T, typename D, typename C>
+template <class T, class D, class C>
 bool operator <= (std::nullptr_t, deep_ptr<T, D, C> const& rhs) noexcept {
   return not (rhs < nullptr);
 }
 
-template <typename T, typename D, typename C>
+template <class T, class D, class C>
 bool operator > (deep_ptr<T, D, C> const& lhs, std::nullptr_t) noexcept {
   return nullptr < lhs;
 }
 
-template <typename T, typename D, typename C>
+template <class T, class D, class C>
 bool operator > (std::nullptr_t, deep_ptr<T, D, C> const& rhs) noexcept {
   return rhs < nullptr;
 }
 
-template <typename T, typename D, typename C>
+template <class T, class D, class C>
 bool operator < (deep_ptr<T, D, C> const& lhs, std::nullptr_t) noexcept {
   using pointer = typename deep_ptr<T, D, C>::pointer;
   return std::less<pointer> { }(lhs.get(), nullptr);
 }
 
-template <typename T, typename D, typename C>
+template <class T, class D, class C>
 bool operator < (std::nullptr_t, deep_ptr<T, D, C> const& rhs) noexcept {
   using pointer = typename deep_ptr<T, D, C>::pointer;
   return std::less<pointer> { }(nullptr, rhs.get());
@@ -582,65 +561,65 @@ bool operator < (std::nullptr_t, deep_ptr<T, D, C> const& rhs) noexcept {
 
 /* make_poly */
 template <
-  typename T,
-  typename U,
-  typename=typename std::enable_if<
+  class T,
+  class U,
+  class=enable_if_t<
     std::is_polymorphic<T>::value and std::is_base_of<T, U>::value
-  >::type
+  >
 > auto make_poly (U&& value) -> poly_ptr<T> {
   return poly_ptr<T> { new U { std::forward<U>(value) } };
 }
 
 /* make_deep */
 template <
-  typename T,
-  typename=typename std::enable_if<not std::is_array<T>::value>::type,
-  typename... Args
+  class T,
+  class=enable_if_t<not std::is_array<T>::value>,
+  class... Args
 > auto make_deep (Args&&... args) -> deep_ptr<T> {
   return deep_ptr<T> { new T { std::forward<Args>(args)... } };
 }
 
 /* make_unique */
 template <
-  typename Type,
-  typename=typename std::enable_if<not std::is_array<Type>::value>::type,
-  typename... Args
+  class Type,
+  class=enable_if_t<not std::is_array<Type>::value>,
+  class... Args
 > auto make_unique(Args&&... args) -> std::unique_ptr<Type> {
   return std::unique_ptr<Type> { new Type { std::forward<Args>(args)... } };
 }
 
 template <
-  typename Type,
-  typename=typename std::enable_if<std::is_array<Type>::value>::type,
-  typename=typename std::enable_if<not std::extent<Type>::value>::type
+  class Type,
+  class=enable_if_t<std::is_array<Type>::value>,
+  class=enable_if_t<not std::extent<Type>::value>
 > auto make_unique(std::size_t size) -> std::unique_ptr<Type> {
-  return std::unique_ptr<Type> { new impl::remove_extent<Type>[size] { } };
+  return std::unique_ptr<Type> { new remove_extent_t<Type>[size] { } };
 }
 
 template <
-  typename Type,
-  typename=typename std::enable_if<std::is_array<Type>::value>::type,
-  typename=typename std::enable_if<std::extent<Type>::value>::type,
-  typename... Args
+  class Type,
+  class=enable_if_t<std::is_array<Type>::value>,
+  class=enable_if_t<std::extent<Type>::value>,
+  class... Args
 > auto make_unique(Args&&...) -> void = delete;
 
 }} /* namespace core::v1 */
 
 namespace std {
 
-template <typename T, typename D>
+template <class T, class D>
 void swap (
   core::v1::poly_ptr<T, D>& lhs,
   core::v1::poly_ptr<T, D>& rhs
 ) noexcept { lhs.swap(rhs); }
 
-template <typename T, typename Deleter, typename Copier>
+template <class T, class Deleter, class Copier>
 void swap (
   core::v1::deep_ptr<T, Deleter, Copier>& lhs,
   core::v1::deep_ptr<T, Deleter, Copier>& rhs
 ) noexcept { lhs.swap(rhs); }
 
-template <typename T, typename D>
+template <class T, class D>
 struct hash<core::v1::poly_ptr<T, D>> {
   using value_type = core::v1::poly_ptr<T, D>;
   size_t operator ()(value_type const& value) const noexcept {
@@ -648,7 +627,7 @@ struct hash<core::v1::poly_ptr<T, D>> {
   }
 };
 
-template <typename T, typename Deleter, typename Copier>
+template <class T, class Deleter, class Copier>
 struct hash<core::v1::deep_ptr<T, Deleter, Copier>> {
   using value_type = core::v1::deep_ptr<T, Deleter, Copier>;
   size_t operator ()(value_type const& value) const noexcept {
