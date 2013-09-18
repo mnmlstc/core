@@ -2,11 +2,12 @@
 #define CORE_OPTIONAL_HPP
 
 #include <initializer_list>
-#include <type_traits>
 #include <functional>
 #include <stdexcept>
 #include <utility>
 #include <memory>
+
+#include <core/type_traits.hpp>
 
 namespace core {
 inline namespace v1 {
@@ -27,31 +28,27 @@ struct bad_optional_access final : public std::logic_error {
   { }
 
   ~bad_optional_access () noexcept { }
-
-  virtual char const* what () const noexcept {
-    return std::logic_error::what();
-  }
 };
 
-template <typename Type>
+template <class Type>
 struct optional final {
   static_assert(
-    not std::is_same<typename std::decay<Type>::type, nullopt_t>::value,
+    not std::is_same<decay_t<Type>, nullopt_t>::value,
     "Cannot have an optional<nullopt_t>"
   );
 
   static_assert(
-    not std::is_same<typename std::decay<Type>::type, in_place_t>::value,
+    not std::is_same<decay_t<Type>, in_place_t>::value,
     "Cannot have an optional<in_place_t>"
   );
 
   static_assert(
-    not std::is_same<typename std::decay<Type>::type, std::nullptr_t>::value,
+    not std::is_same<decay_t<Type>, std::nullptr_t>::value,
     "Cannot have an optional<std::nullptr_t>"
   );
 
   static_assert(
-    not std::is_same<typename std::decay<Type>::type, void>::value,
+    not std::is_same<decay_t<Type>, void>::value,
     "Cannot have an optional<void>"
   );
 
@@ -110,7 +107,7 @@ struct optional final {
     this->engaged = true;
   }
 
-  template <typename... Args>
+  template <class... Args>
   explicit optional (in_place_t, Args&&... args) :
     data { },
     engaged { false }
@@ -124,7 +121,7 @@ struct optional final {
     this->engaged = true;
   }
 
-  template <typename T, typename... Args>
+  template <class T, class... Args>
   explicit optional (
     in_place_t,
     std::initializer_list<T> list,
@@ -162,11 +159,11 @@ struct optional final {
   }
 
   template <
-    typename T,
-    typename=typename std::enable_if<
+    class T,
+    class=enable_if_t<
       std::is_constructible<value_type, T>::value and
       std::is_assignable<value_type, T>::value
-    >::type
+    >
   > optional& operator = (T&& value) {
     if (not this->engaged) { this->emplace(std::forward<T>(value)); }
     else { **this = std::forward<T>(value); }
@@ -211,13 +208,13 @@ struct optional final {
     throw bad_optional_access { "optional is disengaged" };
   }
 
-  template <typename T>
+  template <class T>
   value_type value_or (T&& val) const& {
     if (not this->engaged) { return value_type { std::forward<T>(val) }; }
     return **this;
   }
 
-  template <typename T>
+  template <class T>
   value_type value_or (T&& val) && {
     if (not this->engaged) { return value_type { std::forward<T>(val) }; }
     return value_type { std::move(**this) };
@@ -242,7 +239,7 @@ struct optional final {
     to_disengage = nullopt;
   }
 
-  template <typename U, typename... Args>
+  template <class U, class... Args>
   void emplace (std::initializer_list<U> list, Args&&... args) {
     if (this->engaged) { *this = nullopt; }
 
@@ -256,7 +253,7 @@ struct optional final {
     this->engaged = true;
   }
 
-  template <typename... Args>
+  template <class... Args>
   void emplace (Args&&... args) {
     if (this->engaged) { *this = nullopt; }
 
@@ -270,64 +267,64 @@ struct optional final {
   }
 
 private:
-  using data_type = typename std::aligned_storage<
+  using data_type = aligned_storage_t<
     sizeof(value_type),
     std::alignment_of<value_type>::value
-  >::type;
+  >;
 
   data_type data;
   bool engaged;
 };
 
 
-template <typename Type>
-auto make_optional (Type&& value) -> optional<typename std::decay<Type>::type> {
-  return optional<typename std::decay<Type>::type>(std::forward<Type>(value));
+template <class Type>
+auto make_optional (Type&& value) -> optional<decay_t<Type>> {
+  return optional<decay_t<Type>>(std::forward<Type>(value));
 }
 
-template <typename T>
+template <class T>
 bool operator == (optional<T> const& lhs, optional<T> const& rhs) noexcept {
   if (bool(lhs) != bool(rhs)) { return false; }
   if (not lhs and not rhs) { return true; }
   return *lhs == *rhs;
 }
 
-template <typename T>
+template <class T>
 bool operator < (optional<T> const& lhs, optional<T> const& rhs) noexcept {
   if (bool(rhs) == false) { return false; }
   if (bool(lhs) == false) { return true; }
   return std::less<T> { }(*lhs, *rhs);
 }
 
-template <typename T>
+template <class T>
 bool operator == (optional<T> const& lhs, nullopt_t) noexcept {
   return not lhs;
 }
 
-template <typename T>
+template <class T>
 bool operator == (nullopt_t, optional<T> const&) noexcept { return false; }
 
-template <typename T>
+template <class T>
 bool operator < (optional<T> const& lhs, nullopt_t) noexcept {
   return not lhs;
 }
 
-template <typename T>
+template <class T>
 bool operator < (nullopt_t, optional<T> const& rhs) noexcept {
   return bool(rhs);
 }
 
-template <typename T>
+template <class T>
 bool operator == (optional<T> const& opt, T const& value) noexcept {
   return bool(opt) ? *opt == value : false;
 }
 
-template <typename T>
+template <class T>
 bool operator == (T const& value, optional<T> const& opt) noexcept {
   return bool(opt) ? value == *opt : false;
 }
 
-template <typename T>
+template <class T>
 bool operator < (optional<T> const& opt, T const& value) noexcept {
   return bool(opt) ? std::less<T>{ }(*opt, value) : true;
 }
@@ -336,12 +333,12 @@ bool operator < (optional<T> const& opt, T const& value) noexcept {
 
 namespace std {
 
-template <typename Type>
+template <class Type>
 void swap (core::optional<Type>& lhs, core::optional<Type>& rhs) noexcept(
   noexcept(lhs.swap(rhs))
 ) { lhs.swap(rhs); }
 
-template <typename Type>
+template <class Type>
 struct hash<core::optional<Type>> {
   using result_type = typename hash<Type>::result_type;
 
