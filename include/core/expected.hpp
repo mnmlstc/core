@@ -1,11 +1,12 @@
 #ifndef CORE_EXPECTED_HPP
 #define CORE_EXPECTED_HPP
 
-#include <type_traits>
 #include <exception>
 #include <stdexcept>
 #include <utility>
 #include <memory>
+
+#include <core/type_traits.hpp>
 
 namespace core {
 inline namespace v1 {
@@ -26,7 +27,7 @@ struct bad_expected_type : public std::logic_error {
   }
 };
 
-template <typename T>
+template <class T>
 struct expected final {
   using value_type = T;
 
@@ -124,13 +125,13 @@ struct expected final {
     return this->ptr;
   }
 
-  template <typename U>
+  template <class U>
   value_type value_or (U&& val) const& {
     if (not this->valid) { return value_type { std::forward<U>(val) }; }
     return this->val;
   }
 
-  template <typename U>
+  template <class U>
   value_type value_or (U&& val) && {
     if (not this->valid) { return value_type { std::forward<U>(val) }; }
     return value_type { std::move(this->val) };
@@ -159,7 +160,7 @@ struct expected final {
     to_invalidate = ptr;
   }
 
-  template <typename E>
+  template <class E>
   E expect () const noexcept(false) {
     try { this->raise(); }
     catch (E const& e) { return e; }
@@ -234,44 +235,44 @@ private:
   std::exception_ptr ptr;
 };
 
-template <typename T>
+template <class T>
 bool operator == (expected<T> const& lhs, expected<T> const& rhs) noexcept {
   if (bool(lhs) and bool(rhs)) { return lhs.value() == rhs.value(); }
   return false;
 }
 
-template <typename T>
+template <class T>
 bool operator == (expected<T> const& lhs, std::exception_ptr rhs) {
   if (bool(lhs)) { return false; }
   return lhs.get_ptr() == rhs;
 }
 
-template <typename T>
+template <class T>
 bool operator == (std::exception_ptr lhs, expected<T> const& rhs) {
   if (bool(rhs)) { return false; }
   return lhs == rhs.get_ptr();
 }
 
-template <typename T>
+template <class T>
 bool operator == (expected<T> const& lhs, T const& rhs) noexcept {
   if (not lhs) { return false; }
   return lhs.value() == rhs;
 }
 
-template <typename T>
+template <class T>
 bool operator == (T const& lhs, expected<T> const& rhs) noexcept {
   if (not rhs) { return false; };
   return lhs == rhs.value();
 }
 
-template <typename T>
+template <class T>
 bool operator < (expected<T> const& lhs, expected<T> const& rhs) noexcept {
   if (not lhs) { return false; }
   if (not rhs) { return true; }
   return std::less<T> { }(lhs.value(), rhs.value());
 }
 
-template <typename T>
+template <class T>
 bool operator < (expected<T> const& lhs, T const& rhs) noexcept {
   if (not lhs) { return true; }
   return std::less<T>{ }(lhs.value(), rhs);
@@ -284,12 +285,12 @@ bool operator == <void>(
   expected<void> const& rhs
 ) noexcept { return lhs.get_ptr() == rhs.get_ptr(); }
 
-template <typename T>
-auto make_expected (T&& value) noexcept -> expected<
-  typename std::decay<T>::type
-> { return expected<typename std::decay<T>::type> { std::forward<T>(value) }; }
+template <class T>
+auto make_expected (T&& value) noexcept -> expected<decay_t<T>> {
+  return expected<decay_t<T>> { std::forward<T>(value) };
+}
 
-template <typename T>
+template <class T>
 auto make_expected (std::exception_ptr error) noexcept -> expected<T> {
   return expected<T> { error };
 }
@@ -298,7 +299,7 @@ auto make_expected (std::exception_ptr error) noexcept -> expected<T> {
 
 namespace std {
 
-template <typename T>
+template <class T>
 void swap (core::v1::expected<T>& lhs, core::v1::expected<T>& rhs) noexcept(
   noexcept(lhs.swap(rhs))
 ) { lhs.swap(rhs); }
