@@ -8,13 +8,15 @@
 
 #include <cstdlib>
 
+#include <core/type_traits.hpp>
+
 namespace core {
 inline namespace v1 {
 namespace impl {
 
-template <typename T>
+template <class T>
 class begin {
-  template <typename U>
+  template <class U>
   static auto check (U&& u) noexcept -> decltype(std::begin(u));
   static void check (...) noexcept(false);
 public:
@@ -22,9 +24,9 @@ public:
   static constexpr bool value = noexcept(check(std::declval<T>()));
 };
 
-template <typename T>
+template <class T>
 class end {
-  template <typename U>
+  template <class U>
   static auto check (U&& u) noexcept -> decltype(std::end(u));
   static void check (...) noexcept(false);
 public:
@@ -34,12 +36,12 @@ public:
 
 } /* namespace impl */
 
-template <typename R>
+template <class R>
 struct is_range : std::integral_constant<bool,
   impl::begin<R>::value and impl::end<R>::value
 > { };
 
-template <typename Iterator>
+template <class Iterator>
 struct range {
   using traits = std::iterator_traits<Iterator>;
 
@@ -80,11 +82,11 @@ struct range {
 
   template <
     typename Range,
-    typename=typename std::enable_if<
+    typename=enable_if_t<
       not std::is_pointer<iterator>::value and
       is_range<Range>::value and
       std::is_convertible<typename impl::begin<Range>::type, iterator>::value
-    >::type
+    >
   > explicit range (Range&& r) noexcept :
     range { std::begin(r), std::end(r) }
   { }
@@ -265,26 +267,26 @@ private:
   iterator end_;
 };
 
-template <typename Iterator>
+template <class Iterator>
 auto make_range (Iterator begin, Iterator end) -> range<Iterator> {
   return range<Iterator> { begin, end };
 }
 
-template <typename Range>
+template <class Range>
 auto make_range (Range&& value) -> range<decltype(std::begin(value))> {
   return make_range(std::begin(value), std::end(value));
 }
 
-template <typename Range>
+template <class Range>
 auto make_ptr_range (Range&& value) -> range<
   decltype(std::addressof(*std::begin(value)))
 >;
 
 /* Used like: core::make_range<char>(std::cin) */
 template <
-  typename T,
-  typename CharT,
-  typename Traits=std::char_traits<CharT>
+  class T,
+  class CharT,
+  class Traits=std::char_traits<CharT>
 > auto make_range (std::basic_istream<CharT, Traits>& stream) -> range<
   std::istream_iterator<T, CharT, Traits>
 > {
@@ -292,7 +294,7 @@ template <
   return make_range(iterator { stream }, iterator { });
 }
 
-template <typename CharT, typename Traits=std::char_traits<CharT>>
+template <class CharT, class Traits=std::char_traits<CharT>>
 auto make_range (std::basic_streambuf<CharT, Traits>* buffer) -> range<
   std::istreambuf_iterator<CharT, Traits>
 > {
@@ -300,7 +302,7 @@ auto make_range (std::basic_streambuf<CharT, Traits>* buffer) -> range<
   return make_range(iterator { buffer }, iterator { });
 }
 
-template <typename CharT, typename Traits=std::char_traits<CharT>>
+template <class CharT, class Traits=std::char_traits<CharT>>
 auto make_range (std::basic_istream<CharT, Traits>& stream) -> range<
   std::istreambuf_iterator<CharT, Traits>
 > { return make_range(stream.rdbuf()); }
@@ -309,7 +311,7 @@ auto make_range (std::basic_istream<CharT, Traits>& stream) -> range<
 
 namespace std {
 
-template <typename Iterator>
+template <class Iterator>
 void swap (
   core::v1::range<Iterator>& lhs,
   core::v1::range<Iterator>& rhs
