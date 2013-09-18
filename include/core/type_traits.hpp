@@ -156,6 +156,8 @@ template <class... Args> struct invoke_of :
 template <class F, class... Args>
 struct result_of<F(Args...)> : invoke_of<F, Args...> { };
 
+template <class T> using result_of_t = typename result_of<T>::type;
+
 }} /* namespace core::v1 */
 
 #endif /* CORE_TYPE_TRAITS_HPP */
