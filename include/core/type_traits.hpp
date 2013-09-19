@@ -15,6 +15,18 @@ struct is_specialization_of : std::false_type { };
 template <template <class...> class Class, class... Args>
 struct is_specialization_of<Class<Args...>, Class> : std::true_type { };
 
+/* tuple_size is used by unpack, so we expect it to be available.
+ * We also expect std::get<N> to be available for the give type T
+ */
+template <class T>
+struct is_unpackable {
+  template <class U> using tuple_size_t = typename std::tuple_size<U>::type;
+  template <class U> static void check (tuple_size_t<U>*) noexcept;
+  template <class> static void check (...) noexcept(false);
+public:
+  static constexpr bool value = noexcept(check<T>(nullptr));
+};
+
 /* extracts the class of a member function ponter */
 template <class T> struct class_of { using type = T; };
 template <class Signature, class Type>

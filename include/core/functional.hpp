@@ -4,23 +4,10 @@
 #include <core/type_traits.hpp>
 #include <core/utility.hpp>
 #include <tuple>
+#include <array>
 
 namespace core {
 inline namespace v1 {
-namespace impl {
-
-template <class Functor, class Tuple, std::size_t... I>
-auto unpack (Functor&& functor, Tuple&& tuple, index_sequence<I...>&&) ->
-invoke_of_t<Functor, decltype(std::get<I>(std::forward<Tuple>(tuple)))...> {
-  return std::forward<Functor>(functor)(
-    std::get<I>(std::forward<Tuple>(tuple))...
-  );
-}
-
-} /* namespace impl */
-
-struct unpack_t final { };
-constexpr unpack_t unpack { };
 
 template <class Functor, class Object, class... Args>
 constexpr auto invoke (Functor&& functor, Object&& object, Args&&... args) ->
@@ -55,31 +42,67 @@ constexpr auto invoke (Functor&& functor, Object&& object) -> enable_if_t<
 > { return (*std::forward<Object>(object)).*functor; }
 
 template <class Functor, class... Args>
-constexpr auto invoke(Functor&& functor, Args&&... args) -> invoke_of_t<
+constexpr auto invoke (Functor&& functor, Args&&... args) -> invoke_of_t<
   Functor, Args...
 > { return std::forward<Functor>(functor)(std::forward<Args>(args)...); }
 
-template <class Functor, class Tuple>
-constexpr auto invoke(unpack_t, Functor&& functor, Tuple&& tuple) ->
+namespace impl {
+
+template <class Functor, class U, std::size_t... I>
+auto unpack (Functor&& functor, U&& unpackable, index_sequence<I...>&&) ->
+invoke_of_t<Functor, decltype(std::get<I>(std::forward<U>(unpackable)))...> {
+  return ::core::v1::invoke(std::forward<Functor>(functor),
+    std::get<I>(std::forward<U>(unpackable))...
+  );
+}
+
+template <class U, std::size_t... I>
+auto unpack (U&& unpackable, index_sequence<I...>&&) -> invoke_of_t<
+  decltype(std::get<I>(std::forward<U>(unpackable)))...
+> { return ::core::v1::invoke(std::get<I>(std::forward<U>(unpackable))...); }
+
+} /* namespace impl */
+
+struct unpack_t final { };
+constexpr unpack_t unpack { };
+
+template <class Functor, class Unpackable>
+constexpr auto invoke (unpack_t, Functor&& functor, Unpackable&& unpackable) ->
 enable_if_t<
-  core::is_specialization_of<decay_t<Tuple>, std::tuple>::value,
+  is_unpackable<decay_t<Unpackable>>::value,
   decltype(
     impl::unpack(
       std::forward<Functor>(functor),
-      std::forward<Tuple>(tuple),
-      make_index_sequence<std::tuple_size<decay_t<Tuple>>::value> { }
+      std::forward<Unpackable>(unpackable),
+      make_index_sequence<std::tuple_size<decay_t<Unpackable>>::value> { }
     )
   )
 > {
   return impl::unpack(
     std::forward<Functor>(functor),
-    std::forward<Tuple>(tuple),
-    make_index_sequence<std::tuple_size<decay_t<Tuple>>::value> { }
+    std::forward<Unpackable>(unpackable),
+    make_index_sequence<std::tuple_size<decay_t<Unpackable>>::value> { }
   );
 }
 
-}} /* namespace core::v1 */
+template <class Unpackable>
+constexpr auto invoke (unpack_t, Unpackable&& unpackable) ->
+enable_if_t<
+  is_unpackable<decay_t<Unpackable>>::value,
+  decltype(
+    impl::unpack(
+      std::forward<Unpackable>(unpackable),
+      make_index_sequence<std::tuple_size<decay_t<Unpackable>>::value> { }
+    )
+  )
+> {
+  return impl::unpack(
+    std::forward<Unpackable>(unpackable),
+    make_index_sequence<std::tuple_size<decay_t<Unpackable>>::value> { }
+  );
+}
 
-//auto result = core::invoke(core::unpack
+
+}} /* namespace core::v1 */
 
 #endif /* CORE_FUNCTIONAL_HPP */
