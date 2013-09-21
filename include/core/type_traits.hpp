@@ -19,9 +19,19 @@ struct is_specialization_of<Class<Args...>, Class> : std::true_type { };
  * We also expect std::get<N> to be available for the give type T
  */
 template <class T>
-struct is_unpackable {
+class is_unpackable {
   template <class U> using tuple_size_t = typename std::tuple_size<U>::type;
   template <class U> static void check (tuple_size_t<U>*) noexcept;
+  template <class> static void check (...) noexcept(false);
+public:
+  static constexpr bool value = noexcept(check<T>(nullptr));
+};
+
+/* Used for types that have a .at(size_type) member function */
+template <class T>
+class is_runpackable {
+  template <class U>
+  static auto check (U* u) noexcept -> decltype(u->at(0), void());
   template <class> static void check (...) noexcept(false);
 public:
   static constexpr bool value = noexcept(check<T>(nullptr));
@@ -31,6 +41,11 @@ public:
 template <class T> struct class_of { using type = T; };
 template <class Signature, class Type>
 struct class_of<Signature Type::*> { using type = Type; };
+
+/* extracts the signature of a member function pointer */
+template <class T> struct signature_of { using type = T; };
+template <class Signature, class Type>
+struct signature_of<Signature Type::*> { using type = Signature; };
 
 /* forward declaration */
 template <class... Args> struct invokable;
