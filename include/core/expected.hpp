@@ -12,19 +12,7 @@ namespace core {
 inline namespace v1 {
 
 struct bad_expected_type : public std::logic_error {
-  explicit bad_expected_type (std::string const& what_arg) :
-    std::logic_error { what_arg }
-  { }
-
-  explicit bad_expected_type (char const* what_arg) noexcept :
-    std::logic_error { what_arg }
-  { }
-
-  ~bad_expected_type () noexcept { }
-
-  virtual char const* what () const noexcept {
-    return std::logic_error::what();
-  }
+  using std::logic_error::logic_error;
 };
 
 template <class T>
