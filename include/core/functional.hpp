@@ -96,7 +96,11 @@ auto unpack (U&& unpackable, index_sequence<I...>&&) -> invoke_of_t<
 template <class Functor, class U, std::size_t... I>
 auto runpack (Functor&& functor, U&& runpackable, index_sequence<I...>&&) ->
 invoke_of_t<Functor, decltype(std::forward<U>(runpackable).at(I))...>
-{ return ::core::v1::invoke(std::forward<U>(runpackable).at(I)...); }
+{
+  return ::core::v1::invoke(
+    std::forward<Functor>(functor),
+    std::forward<U>(runpackable).at(I)...);
+}
 
 template <class U, std::size_t... I>
 auto runpack (U&& runpackable, index_sequence<I...>&&) -> invoke_of_t<
@@ -147,19 +151,40 @@ enable_if_t<
   );
 }
 
-template <class RuntimeUnpackable, std::size_t N>
-constexpr auto invoke (runpack<N>, RuntimeUnpackable&& unpackable) ->
-enable_if_t<
-  is_runpackable<decay_t<RuntimeUnpackable>>::value,
+template <class Functor, class Runpackable, std::size_t N>
+constexpr auto invoke (
+  runpack<N>,
+  Functor&& functor,
+  Runpackable&& unpackable
+) -> enable_if_t<
+  is_runpackable<decay_t<Runpackable>>::value,
   decltype(
     impl::runpack(
-      std::forward<RuntimeUnpackable>(unpackable),
+      std::forward<Functor>(functor),
+      std::forward<Runpackable>(unpackable),
       make_index_sequence<N> { }
     )
   )
 > {
   return impl::runpack(
-    std::forward<RuntimeUnpackable>(unpackable),
+    std::forward<Functor>(functor),
+    std::forward<Runpackable>(unpackable),
+    make_index_sequence<N> { }
+  );
+}
+
+template <class Runpackable, std::size_t N>
+constexpr auto invoke (runpack<N>, Runpackable&& unpackable) -> enable_if_t<
+  is_runpackable<decay_t<Runpackable>>::value,
+  decltype(
+    impl::runpack(
+      std::forward<Runpackable>(unpackable),
+      make_index_sequence<N> { }
+    )
+  )
+> {
+  return impl::runpack(
+    std::forward<Runpackable>(unpackable),
     make_index_sequence<N> { }
   );
 }
