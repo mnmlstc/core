@@ -23,7 +23,7 @@ int main () {
       };
 
       auto result = core::invoke(
-        core::runpack<3> { },
+        core::runpack,
         [](std::string& a, std::string& b, std::string& c) -> std::string {
           return a + b + c;
         },
@@ -36,7 +36,7 @@ int main () {
     task("invoke-runtime-unpack-basic-string") = [] {
       std::string string { "hi!" };
       auto result = core::invoke(
-        core::runpack<3> { },
+        core::runpack,
         [] (char a, char b, char c) -> std::string {
           std::ostringstream stream;
           stream << a << b << c;
@@ -48,7 +48,7 @@ int main () {
       assert::equal(string, result);
       assert::throws<std::out_of_range>([string] {
         std::ignore = core::invoke(
-          core::runpack<4> { },
+          core::runpack,
           [] (char a, char b, char c, char d) -> std::string {
             return std::string { };
           },
@@ -61,7 +61,7 @@ int main () {
     task("invoke-runtime-unpack-vector") = [] {
       std::vector<int> values { 1, 2, 3 };
       auto result = core::invoke(
-        core::runpack<3> { },
+        core::runpack,
         [](int x, int y, int z) -> int { return x + y + z; },
         values
       );
@@ -72,7 +72,7 @@ int main () {
     task("invoke-runtime-unpack-deque") = [] {
       std::deque<int> values { 1, 2, 3 };
       auto result = core::invoke(
-        core::runpack<3> { },
+        core::runpack,
         [](int x, int y, int z) -> int { return x + y + z; },
         values
       );
@@ -83,7 +83,7 @@ int main () {
     task("invoke-runtime-unpack-array") = [] {
       std::array<int, 3> values { { 1, 2, 3 } };
       auto result = core::invoke(
-        core::runpack<3> { },
+        core::runpack,
         [](int x, int y, int z) -> int { return x + y + z; },
         values
       );
@@ -97,11 +97,10 @@ int main () {
         { 1, "second" },
         { 2, "third" }
       };
-      auto result = core::invoke(
-        core::runpack<2> { },
-        [] (std::string x, std::string y) { return x + y; },
-        values
-      );
+
+      auto lambda = [] (std::string x, std::string y) { return x + y; };
+
+      auto result = core::invoke(core::runpack, lambda, values);
       assert::equal(result, std::string { "firstsecond" });
     },
 
@@ -115,7 +114,16 @@ int main () {
       assert::equal(result, std::string { "4unpack" });
     },
 
-    task("invoke-unpack-array") = [] { assert::fail(); },
+    task("invoke-unpack-array") = [] {
+      std::array<int, 3> values = { 1, 2, 3 };
+      auto result = core::invoke(
+        core::unpack,
+        [](int x, int y, int z) { return x + y + z; },
+        values
+      );
+
+      assert::equal(result, 6);
+    },
 
     task("invoke-unpack-pair") = [] {
       auto result = core::invoke(
@@ -125,10 +133,31 @@ int main () {
       );
 
       assert::equal(result, std::string { "7unpack" });
+
+      auto str = std::string { "unpacked" };
+      auto result2 = core::invoke(
+        core::unpack, std::make_pair(&std::string::size, str)
+      );
+      assert::equal(result2, 8);
     },
 
-    task("invoke") = [] { assert::fail(); },
-    task("function-traits") = [] { assert::fail(); },
+    task("function-traits") = [] {
+      auto empty_lambda = []{};
+      auto empty_arity = core::function_traits<decltype(empty_lambda)>::arity;
+      auto mem_fn_arity = core::function_traits<
+        decltype(&std::string::size)
+      >::arity;
+
+      static_assert(
+        std::is_same<
+          std::string const&,
+          core::function_traits<decltype(&std::string::size)>::argument<0>
+        >::value,
+        "function-traits-arity incorrect size"
+      );
+      assert::equal(mem_fn_arity, 1);
+      assert::equal(empty_arity, 0);
+    },
   };
 
   monitor::run();
