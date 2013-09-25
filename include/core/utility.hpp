@@ -40,8 +40,7 @@ struct typelist_index {
 template <std::size_t Index, class T, class... Types>
 struct typelist_index<Index, T, T, Types...> {
   using type = typelist_index;
-  static constexpr size_t value = Index;
-/* std::get<typelist_index<0, T, Types...>::type::value> */
+  static constexpr std::size_t value = Index;
 };
 
 } /* namespace impl */
@@ -57,6 +56,39 @@ using make_integer_sequence = typename impl::sequence_generator<T, N, N>::type;
 
 template <std::size_t N>
 using make_index_sequence = make_integer_sequence<std::size_t, N>;
+
+/* Allows us to properly get values from a constexpr
+ * std::pair at compile time. Follows the new get<type> convention
+ */
+template <class T, class U>
+constexpr auto get (std::pair<T, U> const& pair) noexcept -> T const& {
+  return pair.first;
+}
+
+template <class T, class U>
+constexpr auto get (std::pair<U, T> const& pair) noexcept -> T const& {
+  return pair.second;
+}
+
+template <class T, class U>
+constexpr auto get (std::pair<T, U>&& pair) noexcept -> T&& {
+  return std::move(pair.first);
+}
+
+template <class T, class U>
+constexpr auto get (std::pair<U, T>&& pair) noexcept -> T&& {
+  return std::move(pair.second);
+}
+
+template <class T, class U>
+constexpr auto get (std::pair<T, U>& pair) noexcept -> T& {
+  return pair.first;
+}
+
+template <class T, class U>
+constexpr auto get (std::pair<U, T>& pair) noexcept -> T& {
+  return pair.second;
+}
 
 }} /* namespace core::v1 */
 
