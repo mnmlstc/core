@@ -40,6 +40,7 @@ template <class R, class... Args>
 struct function_traits<R(Args...)> {
   using return_type = R;
 
+  using pointer = return_type(*)(Args...);
   static constexpr std::size_t arity = sizeof...(Args);
 
   template <std::size_t N>
@@ -49,6 +50,7 @@ struct function_traits<R(Args...)> {
 template <class F> struct function_traits {
   using functor_type = function_traits<decltype(&decay_t<F>::operator())>;
   using return_type = typename functor_type::return_type;
+  using pointer = typename functor_type::pointer;
   static constexpr std::size_t arity = functor_type::arity - 1;
   template <std::size_t N>
   using argument = typename functor_type::template argument<N>;
