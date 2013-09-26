@@ -19,15 +19,7 @@ constexpr in_place_t in_place { };
 constexpr nullopt_t nullopt { };
 
 struct bad_optional_access final : public std::logic_error {
-  explicit bad_optional_access (std::string const& what_arg) :
-    std::logic_error { what_arg }
-  { }
-
-  explicit bad_optional_access (char const* what_arg) noexcept :
-    std::logic_error { what_arg }
-  { }
-
-  ~bad_optional_access () noexcept { }
+  using std::logic_error::logic_error;
 };
 
 template <class Type>
