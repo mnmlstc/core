@@ -177,9 +177,7 @@ public:
 
   template <
     class ValueType,
-    class=enable_if_t<
-      not std::is_same<any, decay_t<ValueType>>::value
-    >
+    class=enable_if_t<not std::is_same<any, decay_t<ValueType>>::value>
   > any (ValueType&& value) :
     any { std::forward<ValueType>(value), impl::is_small<ValueType> { } }
   { }

@@ -8,13 +8,6 @@ namespace core {
 inline namespace v1 {
 
 /* custom type traits */
-/* Check if template class is given class */
-template <class T, template <class...> class Class>
-struct is_specialization_of : std::false_type { };
-
-template <template <class...> class Class, class... Args>
-struct is_specialization_of<Class<Args...>, Class> : std::true_type { };
-
 /* tuple_size is used by unpack, so we expect it to be available.
  * We also expect std::get<N> to be available for the give type T
  */
@@ -31,7 +24,7 @@ public:
 template <class T>
 class is_runpackable {
   template <class U>
-  static auto check (U* u) noexcept -> decltype(u->at(0), void());
+  static auto check (U* u) noexcept -> decltype(u->at(0ul), void());
   template <class> static void check (...) noexcept(false);
 public:
   static constexpr bool value = noexcept(check<T>(nullptr));
@@ -41,11 +34,6 @@ public:
 template <class T> struct class_of { using type = T; };
 template <class Signature, class Type>
 struct class_of<Signature Type::*> { using type = Type; };
-
-/* extracts the signature of a member function pointer */
-template <class T> struct signature_of { using type = T; };
-template <class Signature, class Type>
-struct signature_of<Signature Type::*> { using type = Signature; };
 
 /* forward declaration */
 template <class... Args> struct invokable;
@@ -113,11 +101,12 @@ namespace impl {
 struct undefined { undefined (...); };
 
 /* Get the result of an attempt at the INVOKE expression */
+
 /* fallback */
-template <class... Args> auto invoke (undefined, Args&&...) -> undefined;
+template <class... Args> auto invoke_expr (undefined, Args&&...) -> undefined;
 
 template <class Functor, class Object, class... Args>
-auto invoke (Functor&& fun, Object&& obj, Args&&... args) -> enable_if_t<
+auto invoke_expr (Functor&& fun, Object&& obj, Args&&... args) -> enable_if_t<
   std::is_member_function_pointer<remove_reference_t<Functor>>::value and
   std::is_base_of<
     class_of_t<remove_reference_t<Functor>>,
@@ -127,7 +116,7 @@ auto invoke (Functor&& fun, Object&& obj, Args&&... args) -> enable_if_t<
 >;
 
 template <class Functor, class Object, class... Args>
-auto invoke (Functor&& fun, Object&& obj, Args&&... args) -> enable_if_t<
+auto invoke_expr (Functor&& fun, Object&& obj, Args&&... args) -> enable_if_t<
   std::is_member_function_pointer<remove_reference_t<Functor>>::value and
   not std::is_base_of<
     class_of_t<remove_reference_t<Functor>>,
@@ -137,7 +126,7 @@ auto invoke (Functor&& fun, Object&& obj, Args&&... args) -> enable_if_t<
 >;
 
 template <class Functor, class Object>
-auto invoke (Functor&& functor, Object&& object) -> enable_if_t<
+auto invoke_expr (Functor&& functor, Object&& object) -> enable_if_t<
   std::is_member_object_pointer<remove_reference_t<Functor>>::value and
   std::is_base_of<
     class_of_t<remove_reference_t<Functor>>,
@@ -147,7 +136,7 @@ auto invoke (Functor&& functor, Object&& object) -> enable_if_t<
 >;
 
 template <class Functor, class Object>
-auto invoke (Functor&& functor, Object&& object) -> enable_if_t<
+auto invoke_expr (Functor&& functor, Object&& object) -> enable_if_t<
   std::is_member_object_pointer<remove_reference_t<Functor>>::value and
   not std::is_base_of<
     class_of_t<remove_reference_t<Functor>>,
@@ -157,13 +146,14 @@ auto invoke (Functor&& functor, Object&& object) -> enable_if_t<
 >;
 
 template <class Functor, class... Args>
-auto invoke (Functor&& functor, Args&&... args) ->
-  decltype(std::forward<Functor>(functor)(std::forward<Args>(args)...));
+auto invoke_expr (Functor&& functor, Args&&... args) -> decltype(
+  std::forward<Functor>(functor)(std::forward<Args>(args)...)
+);
 
 template <bool, class... Args> struct invoke_of { };
 template <class... Args>
 struct invoke_of<true, Args...> {
-  using type = decltype(invoke(std::declval<Args>()...));
+  using type = decltype(invoke_expr(std::declval<Args>()...));
 };
 
 } /* namespace impl */
@@ -171,7 +161,7 @@ struct invoke_of<true, Args...> {
 template <class... Args> struct invokable : std::integral_constant<
   bool,
   not std::is_same<
-    decltype(impl::invoke(std::declval<Args>()...)),
+    decltype(impl::invoke_expr(std::declval<Args>()...)),
     impl::undefined
   >::value
 > { };
