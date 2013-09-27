@@ -44,7 +44,6 @@ struct typelist_index<Index, T, T, Types...> {
 };
 
 } /* namespace impl */
-
 template <class T, T... I>
 using integer_sequence = impl::integer_sequence<T, I...>;
 
@@ -56,6 +55,23 @@ using make_integer_sequence = typename impl::sequence_generator<T, N, N>::type;
 
 template <std::size_t N>
 using make_index_sequence = make_integer_sequence<std::size_t, N>;
+
+/* N3761 */
+template <std::size_t N, class T, class... Ts>
+struct type_at { using type = typename type_at<N - 1, Ts...>::type; };
+
+template <class T, class... Ts>
+struct type_at<0ul, T, Ts...> { using type = T; };
+
+template <std::size_t N, class T, class... Ts>
+auto value_at(T&&, Ts&&... values) ->  typename type_at<N - 1, T, Ts...>::type {
+  return value_at<N - 1, Ts...>(std::forward<Ts>(values)...);
+}
+
+template <class T, class... Ts>
+auto value_at(T&& value, Ts&&...) -> decltype(std::forward<T>(value)) {
+  return std::forward<T>(value);
+}
 
 }} /* namespace core::v1 */
 
