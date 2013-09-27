@@ -54,7 +54,9 @@ struct expected final {
     valid { true }
   { }
 
-  ~expected () { if (this->valid) { this->val.~value_type(); } }
+  ~expected () {
+    this->valid ? this->val.~value_type() : this->ptr.~exception_ptr();
+  }
 
   expected& operator = (expected const& that) {
     expected { that }.swap(*this);
