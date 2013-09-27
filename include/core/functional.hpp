@@ -57,15 +57,13 @@ template <class F> struct function_traits {
 };
 
 template <class Functor, class Object, class... Args>
-constexpr auto invoke (Functor&& functor, Object&& object, Args&&... args) ->
-enable_if_t<
+auto invoke (Functor&& functor, Object&& object, Args&&... args) -> enable_if_t<
   invokable<Functor, Object, Args...>::value,
   decltype((object.*functor)(std::forward<Args>(args)...))
 > { return (object.*functor)(std::forward<Args>(args)...); }
 
 template <class Functor, class Object, class... Args>
-constexpr auto invoke (Functor&& functor, Object&& object, Args&&... args) ->
-enable_if_t<
+auto invoke (Functor&& functor, Object&& object, Args&&... args) -> enable_if_t<
   invokable<Functor, Object, Args...>::value,
   decltype(
     ((*std::forward<Object>(object)).*functor)(std::forward<Args>(args)...)
@@ -77,19 +75,19 @@ enable_if_t<
 }
 
 template <class Functor, class Object>
-constexpr auto invoke (Functor&& functor, Object&& object) -> enable_if_t<
+auto invoke (Functor&& functor, Object&& object) -> enable_if_t<
   invokable<Functor, Object>::value,
   decltype(object.*functor)
 > { return object.*functor; }
 
 template <class Functor, class Object>
-constexpr auto invoke (Functor&& functor, Object&& object) -> enable_if_t<
+auto invoke (Functor&& functor, Object&& object) -> enable_if_t<
   invokable<Functor, Object>::value,
   decltype((*std::forward<Object>(object)).*functor)
 > { return (*std::forward<Object>(object)).*functor; }
 
 template <class Functor, class... Args>
-constexpr auto invoke (Functor&& functor, Args&&... args) -> enable_if_t<
+auto invoke (Functor&& functor, Args&&... args) -> enable_if_t<
   invokable<Functor, Args...>::value,
   decltype(std::forward<Functor>(functor)(std::forward<Args>(args)...))
 > { return std::forward<Functor>(functor)(std::forward<Args>(args)...); }
@@ -110,9 +108,11 @@ auto unpack (U&& unpackable, index_sequence<I...>&&) -> invoke_of_t<
 > { return ::core::v1::invoke(std::get<I>(std::forward<U>(unpackable))...); }
 
 template <class Functor, class U, std::size_t... I>
-auto runpack (Functor&& functor, U&& runpackable, index_sequence<I...>&&) ->
-invoke_of_t<Functor, decltype(std::forward<U>(runpackable).at(I))...>
-{
+auto runpack (
+  Functor&& functor,
+  U&& runpackable,
+  index_sequence<I...>&&
+) -> invoke_of_t<Functor, decltype(std::forward<U>(runpackable).at(I))...> {
   return ::core::v1::invoke(
     std::forward<Functor>(functor),
     std::forward<U>(runpackable).at(I)...);
@@ -127,7 +127,7 @@ struct runpack_t final { };
 constexpr runpack_t runpack { };
 
 template <class Functor, class Unpackable>
-constexpr auto invoke (unpack_t, Functor&& functor, Unpackable&& unpackable) ->
+auto invoke (unpack_t, Functor&& functor, Unpackable&& unpackable) ->
 enable_if_t<
   is_unpackable<decay_t<Unpackable>>::value,
   decltype(
@@ -146,7 +146,7 @@ enable_if_t<
 }
 
 template <class Unpackable>
-constexpr auto invoke (unpack_t, Unpackable&& unpackable) ->
+auto invoke (unpack_t, Unpackable&& unpackable) ->
 enable_if_t<
   is_unpackable<decay_t<Unpackable>>::value,
   decltype(
@@ -163,7 +163,7 @@ enable_if_t<
 }
 
 template <class Functor, class Runpackable>
-constexpr auto invoke (
+auto invoke (
   runpack_t,
   Functor&& functor,
   Runpackable&& unpackable
