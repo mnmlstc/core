@@ -302,11 +302,6 @@ auto make_range (std::basic_streambuf<CharT, Traits>* buffer) -> range<
   return make_range(iterator { buffer }, iterator { });
 }
 
-template <class CharT, class Traits=std::char_traits<CharT>>
-auto make_range (std::basic_istream<CharT, Traits>& stream) -> range<
-  std::istreambuf_iterator<CharT, Traits>
-> { return make_range(stream.rdbuf()); }
-
 }} /* namespace core::v1 */
 
 namespace std {

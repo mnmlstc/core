@@ -421,7 +421,24 @@ int main () {
         std::string { string_range.begin(), string_range.end() }
       );
 
-      assert::fail();
+      std::istringstream stream { value };
+      auto stream_range = core::make_range<char>(stream);
+
+      std::ostringstream ostream { };
+      for (auto ch : stream_range) { ostream << ch; }
+
+      assert::equal(
+        value,
+        ostream.str()
+      );
+
+      std::istringstream stream2 { value };
+      auto buf_range = core::make_range(stream2.rdbuf());
+
+      assert::equal(
+        value,
+        std::string { buf_range.begin(), buf_range.end() }
+      );
     }
   };
 
