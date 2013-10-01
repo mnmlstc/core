@@ -8,10 +8,12 @@
 #include <string>
 #include <limits>
 
+#include <cstring>
+
 namespace core {
 inline namespace v1 {
 
-template <class CharT, class Trait=std::char_traits<CharT>>
+template <class CharT, class Traits=std::char_traits<CharT>>
 struct basic_string_ref {
   using difference_type = std::ptrdiff_t;
   using value_type = CharT;
@@ -84,7 +86,7 @@ struct basic_string_ref {
   }
 
   const_reverse_iterator rend () const noexcept {
-    return const_reverse_iterator { this->begin() - 1; };
+    return const_reverse_iterator { this->begin() - 1 };
   }
 
   const_reverse_iterator crbegin () const noexcept { return this->rbegin(); }
@@ -242,7 +244,7 @@ bool operator < (
 
 template <class CharT, class Traits>
 std::basic_ostream<CharT, Traits>& operator << (
-  std::basic_ostream& os,
+  std::basic_ostream<CharT, Traits>& os,
   basic_string_ref<CharT, Traits> const& str
 );
 
