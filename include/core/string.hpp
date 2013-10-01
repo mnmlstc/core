@@ -3,6 +3,7 @@
 
 #include <initializer_list>
 #include <stdexcept>
+#include <algorithm>
 #include <iterator>
 #include <string>
 #include <limits>
@@ -70,40 +71,69 @@ struct basic_string_ref {
     };
   }
 
-  constexpr const_iterator begin () const { return this->str; }
-  constexpr const_iterator end () const { return this->str + this->size(); }
+  constexpr const_iterator begin () const noexcept { return this->str; }
+  constexpr const_iterator end () const noexcept {
+    return this->str + this->size();
+  }
 
-  constexpr const_iterator cbegin () const;
-  constexpr const_iterator cend () const;
+  constexpr const_iterator cbegin () const noexcept { return this->begin(); }
+  constexpr const_iterator cend () const noexcept { return this->end(); }
 
-  const_reverse_iterator rbegin () const;
-  const_reverse_iterator rend () const;
+  const_reverse_iterator rbegin () const noexcept {
+    return const_reverse_iterator { this->end() - 1 };
+  }
 
-  const_reverse_iterator crbegin () const;
-  const_reverse_iterator crend () const;
+  const_reverse_iterator rend () const noexcept {
+    return const_reverse_iterator { this->begin() - 1; };
+  }
 
-  constexpr size_type max_size () const;
-  constexpr size_type length () const { return this->size(); }
-  constexpr size_type size () const { return this->len; }
+  const_reverse_iterator crbegin () const noexcept { return this->rbegin(); }
+  const_reverse_iterator crend () const noexcept { return this->rend(); }
 
-  constexpr bool empty () const { return this->len == 0; }
+  constexpr size_type max_size () const noexcept { return npos - 1; }
+  constexpr size_type length () const noexcept { return this->size(); }
+  constexpr size_type size () const noexcept { return this->len; }
+
+  constexpr bool empty () const noexcept { return this->size() == 0; }
 
   constexpr reference operator [] (size_type idx) const {
     return this->str[idx];
   }
 
-  constexpr reference front () const;
-  constexpr reference back () const;
-  constexpr pointer data () const;
+  constexpr reference front () const { return this->str[0]; }
+  constexpr reference back () const { return this->str[this->size() - 1]; }
+  constexpr pointer data () const { return this->str; }
 
-  void remove_prefix (size_type n);
-  void remove_suffix (size_type n);
-  void clear ();
+  void remove_prefix (size_type n) { this->str += n; }
+  void remove_suffix (size_type n) { this->len -= n; }
 
-  constexpr basic_string_ref substr (size_type pos, size_type n=npos) const;
-  bool starts_with (basic_string_ref that) const;
-  bool ends_with (basic_string_ref that) const;
-  int compare (basic_string_ref that) const;
+  void clear () {
+    this->str = nullptr;
+    this->len = 0;
+  }
+
+  constexpr basic_string_ref substr (size_type pos, size_type n=npos) const {
+    return n == npos or (pos + n) >= this->size()
+      ? basic_string_ref { this->str, this->size() }
+      : basic_string_ref { this->str + pos, pos + n };
+  }
+
+  bool starts_with (basic_string_ref that) const {
+    if (that.size() > this->size()) { return false; }
+    return this->compare(that) == 0;
+  }
+
+  bool ends_with (basic_string_ref that) const {
+    if (that.size() > this->size()) { return false; }
+    auto start = this->size() - that.size();
+    basic_string_ref ref { this->str + start, that.size() };
+    return ref.compare(that) == 0;
+  }
+
+  difference_type compare (basic_string_ref that) const {
+    auto max_len = std::min(this->size(), that.size());
+    return std::strncmp(this->str, that.str, max_len);
+  }
 
   reference at (size_type idx) const {
     if (idx > this->size()) {
@@ -112,19 +142,52 @@ struct basic_string_ref {
     return (*this)[idx];
   }
 
-  size_type find_first_not_of (basic_string_ref that) const;
-  size_type find_last_not_of (basic_string_ref that) const;
-  size_type find_first_of (basic_string_ref that) const;
-  size_type find_last_of (basic_string_ref that) const;
-  size_type rfind (basic_string_ref that) const;
-  size_type find (basic_string_ref that) const;
+  /* Does the value_type search but per character in basic_string_ref? */
+  size_type find_first_not_of (basic_string_ref that) const { return npos; }
+  size_type find_last_not_of (basic_string_ref that) const { return npos; }
+  size_type find_first_of (basic_string_ref that) const { return npos; }
+  size_type find_last_of (basic_string_ref that) const { return npos; }
+  size_type rfind (basic_string_ref that) const { return npos; }
+  size_type find (basic_string_ref that) const { return npos; }
 
-  size_type find_first_not_of (value_type value) const;
-  size_type find_last_not_of (value_type value) const;
-  size_type find_first_of (value_type value) const;
-  size_type find_last_of (value_type value) const;
-  size_type rfind (value_type value) const;
-  size_type find (value_type value) const;
+  size_type find_first_not_of (value_type value) const {
+    auto end = std::end(*this);
+    auto iter = std::find_if_not(
+      this->begin(),
+      end,
+      [value](value_type val) { return Traits::eq(val, value); }
+    );
+    if (iter == end) { return npos; }
+    return std::distance(this->begin(), iter);
+  }
+
+  size_type find_last_not_of (value_type value) const {
+    auto end = this->rend();
+    auto iter = std::find_if_not(
+      this->rbegin(),
+      end,
+      [value](value_type val) { return Traits::eq(val, value); }
+    );
+    if (iter == end) { return npos; }
+    return std::distance(this->rbegin(), iter);
+  }
+
+  size_type find_first_of (value_type value) const { return this->find(value); }
+  size_type find_last_of (value_type value) const { return this->rfind(value); }
+
+  size_type rfind (value_type value) const {
+    auto end = this->rend();
+    auto iter = std::find(this->rbegin(), end, value);
+    if (iter == end) { return npos; }
+    return std::distance(this->rbegin(), iter);
+  }
+
+  size_type find (value_type value) const {
+    auto end = this->end();
+    auto iter = std::find(this->begin(), end, value);
+    if (iter == end) { return npos; }
+    return std::distance(this->begin(), iter);
+  }
 
   void swap (basic_string_ref& that) noexcept {
     std::swap(this->str, that.str);
