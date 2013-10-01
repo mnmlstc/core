@@ -8,11 +8,10 @@
 #include <string>
 #include <limits>
 
-#include <cstring>
-
 namespace core {
 inline namespace v1 {
 
+/* N3422 */
 template <class CharT, class Traits=std::char_traits<CharT>>
 struct basic_string_ref {
   using difference_type = std::ptrdiff_t;
@@ -31,6 +30,8 @@ struct basic_string_ref {
   using const_reverse_iterator = std::reverse_iterator<const_iterator>;
   using reverse_iterator = const_reverse_iterator;
 
+  using traits = Traits;
+
   static constexpr size_type npos = std::numeric_limits<size_type>::max();
 
   template <class Allocator>
@@ -39,15 +40,13 @@ struct basic_string_ref {
     len { that.size() }
   { }
 
-  basic_string_ref (std::initializer_list<CharT> il);
-
   constexpr basic_string_ref (pointer str, size_type len) noexcept :
     str { str },
     len { len }
   { }
 
   basic_string_ref (pointer str) noexcept :
-    basic_string_ref { str, std::strlen(str) }
+    basic_string_ref { str, traits::length(str) }
   { }
 
   constexpr basic_string_ref (basic_string_ref const& that) noexcept :
@@ -68,31 +67,31 @@ struct basic_string_ref {
   template <class Allocator>
   explicit operator std::basic_string<CharT, Traits, Allocator> () const {
     return std::basic_string<CharT, Traits, Allocator> {
-      this->str,
-      this->len
+      this->data(),
+      this->size()
     };
   }
 
-  constexpr const_iterator begin () const noexcept { return this->str; }
+  constexpr const_iterator begin () const noexcept { return this->data(); }
   constexpr const_iterator end () const noexcept {
-    return this->str + this->size();
+    return this->data() + this->size();
   }
 
   constexpr const_iterator cbegin () const noexcept { return this->begin(); }
   constexpr const_iterator cend () const noexcept { return this->end(); }
 
   const_reverse_iterator rbegin () const noexcept {
-    return const_reverse_iterator { this->end() - 1 };
+    return const_reverse_iterator { this->end()};
   }
 
   const_reverse_iterator rend () const noexcept {
-    return const_reverse_iterator { this->begin() - 1 };
+    return const_reverse_iterator { this->begin() };
   }
 
   const_reverse_iterator crbegin () const noexcept { return this->rbegin(); }
   const_reverse_iterator crend () const noexcept { return this->rend(); }
 
-  constexpr size_type max_size () const noexcept { return npos - 1; }
+  constexpr size_type max_size () const noexcept { return this->size(); }
   constexpr size_type length () const noexcept { return this->size(); }
   constexpr size_type size () const noexcept { return this->len; }
 
@@ -106,8 +105,16 @@ struct basic_string_ref {
   constexpr reference back () const { return this->str[this->size() - 1]; }
   constexpr pointer data () const { return this->str; }
 
-  void remove_prefix (size_type n) { this->str += n; }
-  void remove_suffix (size_type n) { this->len -= n; }
+  void remove_prefix (size_type n) {
+    if (n > this->size()) { n = this->size(); }
+    this->str += n;
+    this->len -= n;
+  }
+
+  void remove_suffix (size_type n) {
+    if (n > this->size()) { n = this->size(); }
+    this->len -= n;
+  }
 
   void clear () {
     this->str = nullptr;
@@ -115,43 +122,98 @@ struct basic_string_ref {
   }
 
   constexpr basic_string_ref substr (size_type pos, size_type n=npos) const {
-    return n == npos or (pos + n) >= this->size()
-      ? basic_string_ref { this->str, this->size() }
-      : basic_string_ref { this->str + pos, pos + n };
+    return pos > this->size()
+      ? throw std::out_of_range { "start position out of range" }
+      : basic_string_ref {
+        this->data() + pos,
+        n == npos or pos + n > this->size()
+          ? (this->size() - pos)
+          : n
+      };
   }
 
-  bool starts_with (basic_string_ref that) const {
-    if (that.size() > this->size()) { return false; }
-    return this->compare(that) == 0;
+  bool starts_with (value_type value) const noexcept {
+    return not this->empty() and traits::eq(value, this->front());
   }
 
-  bool ends_with (basic_string_ref that) const {
-    if (that.size() > this->size()) { return false; }
-    auto start = this->size() - that.size();
-    basic_string_ref ref { this->str + start, that.size() };
-    return ref.compare(that) == 0;
+  bool ends_with (value_type value) const noexcept {
+    return not this->empty() and traits::eq(value, this->back());
+  }
+
+  bool starts_with (basic_string_ref that) const noexcept {
+    return this->size() >= that.size() and
+      traits::compare(this->data(), that.data(), that.size()) == 0;
+  }
+
+  bool ends_with (basic_string_ref that) const noexcept {
+    return this->size() >= that.size() and
+      traits::compare(
+        this->data() + this->size() - that.size(),
+        that.data(),
+        that.size()
+      ) == 0;
   }
 
   difference_type compare (basic_string_ref that) const {
-    auto max_len = std::min(this->size(), that.size());
-    return std::strncmp(this->str, that.str, max_len);
+    auto cmp = traits::compare(
+      this->data(),
+      that.data(),
+      std::min(this->size(), that.size())
+    );
+
+    if (cmp != 0) { return cmp; }
+    if (this->size() == that.size()) { return 0; }
+    if (this->size() < that.size()) { return -1; }
+    return 1;
   }
 
   reference at (size_type idx) const {
     if (idx > this->size()) {
       throw std::out_of_range { "requested index out of range" };
     }
-    return (*this)[idx];
+    return this->str[idx];
   }
 
-  /* Does the value_type search but per character in basic_string_ref? */
-  size_type find_first_not_of (basic_string_ref that) const { return npos; }
-  size_type find_last_not_of (basic_string_ref that) const { return npos; }
-  size_type find_first_of (basic_string_ref that) const { return npos; }
-  size_type find_last_of (basic_string_ref that) const { return npos; }
-  size_type rfind (basic_string_ref that) const { return npos; }
-  size_type find (basic_string_ref that) const { return npos; }
+  /* functions that take a string-ref */
+  size_type find_first_not_of (basic_string_ref that) const {
+    return npos;
+  }
 
+  size_type find_last_not_of (basic_string_ref that) const { return npos; }
+
+  size_type find_first_of (basic_string_ref that) const {
+    auto iter = std::find_first_of(
+      this->begin(), this->end(),
+      that.begin(), that.end(),
+      traits::eq
+    );
+    if (iter == this->end()) { return npos; }
+    return std::distance(this->begin(), iter);
+  }
+
+  size_type find_last_of (basic_string_ref that) const { return npos; }
+
+  size_type rfind (basic_string_ref that) const {
+    auto iter = std::search(
+      this->rbegin(), this->rend(),
+      that.rbegin(), that.rend(),
+      traits::eq
+    );
+    if (iter == this->rend()) { return npos; }
+    return std::distance(this->rbegin(), iter);
+  }
+
+  size_type find (basic_string_ref that) const {
+    auto iter = std::search(
+      this->begin(), this->end(),
+      that.begin(), that.end(),
+      traits::eq
+    );
+    if (iter == this->end()) { return npos; }
+    return std::distance(this->begin(), iter);
+  }
+
+  /* functions that take a single CharT */
   size_type find_first_not_of (value_type value) const {
     auto end = std::end(*this);
     auto iter = std::find_if_not(
@@ -210,43 +272,43 @@ template <class CharT, typename Traits>
 bool operator == (
   basic_string_ref<CharT, Traits> lhs,
   basic_string_ref<CharT, Traits> rhs
-) noexcept { return false; }
+) noexcept { return lhs.size() == rhs.size() and lhs.compare(rhs) == 0; }
 
 template <class CharT, typename Traits>
 bool operator != (
   basic_string_ref<CharT, Traits> lhs,
   basic_string_ref<CharT, Traits> rhs
-) noexcept { return false; }
+) noexcept { return lhs.size() != rhs.size() or lhs.compare(rhs) != 0; }
 
 template <class CharT, typename Traits>
 bool operator >= (
   basic_string_ref<CharT, Traits> lhs,
   basic_string_ref<CharT, Traits> rhs
-) noexcept { return false; }
+) noexcept { return lhs.compare(rhs) >= 0; }
 
 template <class CharT, typename Traits>
 bool operator <= (
   basic_string_ref<CharT, Traits> lhs,
   basic_string_ref<CharT, Traits> rhs
-) noexcept { return false; }
+) noexcept { return lhs.compare(rhs) <= 0; }
 
 template <class CharT, typename Traits>
 bool operator > (
   basic_string_ref<CharT, Traits> lhs,
   basic_string_ref<CharT, Traits> rhs
-) noexcept { return false; }
+) noexcept { return lhs.compare(rhs) > 0; }
 
 template <class CharT, typename Traits>
 bool operator < (
   basic_string_ref<CharT, Traits> lhs,
   basic_string_ref<CharT, Traits> rhs
-) noexcept { return false; }
+) noexcept { return lhs.compare(rhs) < 0; }
 
 template <class CharT, class Traits>
 std::basic_ostream<CharT, Traits>& operator << (
   std::basic_ostream<CharT, Traits>& os,
   basic_string_ref<CharT, Traits> const& str
-);
+) { for (auto ch : str) { os << ch; } return os; }
 
 }} /* namespace core::v1 */
 

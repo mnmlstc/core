@@ -1,18 +1,83 @@
 #include <core/string.hpp>
 
+#include <cstring>
+
 #include <unittest/unittest.hpp>
 
 int main () {
   using namespace unittest;
 
-  test("string") = {
-    task("default-constructor") = [] { assert::fail(); },
-    task("copy-constructor") = [] { assert::fail(); },
-    task("string-constructor") = [] { assert::fail(); },
-    task("pointer-constructor") = [] { assert::fail(); },
-    task("pointer-len-constructor") = [] { assert::fail(); },
-    task("copy-assignment-operator") = [] { assert::fail(); },
+  test("basic-string-ref") = {
+    task("default-constructor") = [] {
+      constexpr core::string_ref ref { };
+      assert::equal(ref.length(), 0);
+      assert::equal(ref.size(), 0);
+      assert::is_true(ref.empty());
+      assert::is_null(ref.data());
+    },
+
+    task("copy-constructor") = [] {
+      constexpr core::string_ref ref { "hello!", 6 };
+
+      assert::equal(ref.length(), 6);
+      assert::equal(ref.size(), 6);
+      assert::is_false(ref.empty());
+      assert::is_not_null(ref.data());
+
+      constexpr core::string_ref copy { ref };
+
+      assert::equal(copy.length(), ref.length());
+      assert::equal(copy.size(), ref.size());
+      assert::equal(copy.empty(), ref.empty());
+      assert::equal(copy.data(), ref.data());
+
+      assert::equal(copy, ref);
+    },
+
+    task("string-constructor") = [] {
+      std::string str { "string-ctor" };
+      core::string_ref ref { str };
+
+      assert::is_not_null(ref.data());
+      assert::is_false(ref.empty());
+      assert::equal(ref.size(), 11);
+      assert::is(ref.data(), str.data());
+    },
+
+    task("pointer-constructor") = [] {
+      auto str = "pointer-constructor";
+      core::string_ref ref { str };
+
+      assert::is_not_null(ref.data());
+      assert::is_false(ref.empty());
+
+      assert::equal(ref.size(), std::strlen(str));
+      assert::is(ref.data(), str);
+    },
+
+    task("pointer-len-constructor") = [] {
+      constexpr core::string_ref ref { "pointer-len", 11 };
+
+      assert::is_not_null(ref.data());
+      assert::is_false(ref.empty());
+      assert::equal(ref.size(), 11);
+    },
+
+    task("copy-assignment-operator") = [] {
+      core::string_ref ref { "copy-assign" };
+      core::string_ref copy { };
+      copy = ref;
+
+      assert::is_false(copy.empty());
+      assert::is_false(ref.empty());
+      assert::equal(copy.size(), ref.size());
+      assert::is(copy.data(), ref.data());
+
+      assert::equal(copy, ref);
+    },
+
     task("explicit-string-cast") = [] { assert::fail(); },
+
     task("begin") = [] { assert::fail(); },
     task("end") = [] { assert::fail(); },
     task("cbegin") = [] { assert::fail(); },
@@ -31,8 +96,30 @@ int main () {
     task("data") = [] { assert::fail(); },
     task("remove-prefix") = [] { assert::fail(); },
     task("remove-suffix") = [] { assert::fail(); },
-    task("clear") = [] { assert::fail(); },
-    task("substr") = [] { assert::fail(); },
+
+    task("clear") = [] {
+      core::string_ref ref { "hello", 5 };
+
+      assert::is_false(ref.empty());
+      assert::equal(ref.size(), 5);
+
+      ref.clear();
+
+      assert::is_true(ref.empty());
+      assert::is_null(ref.data());
+    },
+
+    task("substr") = [] {
+      using core::string_ref;
+      std::string str { "0123456789abcdefghij" };
+      string_ref ref { str };
+
+      assert::equal(ref.substr(10), string_ref { "abcdefghij" });
+      assert::equal(ref.substr(5, 3), string_ref { "567" });
+      assert::equal(ref.substr(12, 100), string_ref { "cdefghij" });
+      assert::equal(ref.substr(ref.size() - 3, 50), string_ref { "hij" });
+    },
+
     task("starts-with") = [] { assert::fail(); },
     task("ends-with") = [] { assert::fail(); },
     task("compare") = [] { assert::fail(); },
