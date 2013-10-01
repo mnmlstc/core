@@ -2,6 +2,7 @@
 #define CORE_STRING_HPP
 
 #include <initializer_list>
+#include <functional>
 #include <stdexcept>
 #include <algorithm>
 #include <iterator>
@@ -176,10 +177,24 @@ struct basic_string_ref {
 
   /* functions that take a string-ref */
   size_type find_first_not_of (basic_string_ref that) const {
-    return npos;
+    auto iter = std::find_first_of(
+      this->begin(), this->end(),
+      that.begin(), that.end(),
+      std::not2(traits::eq)
+    );
+    if (iter == this->end()) { return npos; }
+    return std::distance(this->begin(), iter);
   }
 
-  size_type find_last_not_of (basic_string_ref that) const { return npos; }
+  size_type find_last_not_of (basic_string_ref that) const {
+    auto iter = std::find_first_of(
+      this->rbegin(), this->end(),
+      that.rbegin(), that.rend(),
+      std::not2(traits::eq)
+    );
+    if (iter == this->end()) { return npos; }
+    return std::distance(this->rbegin(), iter);
+  }
 
   size_type find_first_of (basic_string_ref that) const {
     auto iter = std::find_first_of(
@@ -191,7 +206,15 @@ struct basic_string_ref {
     return std::distance(this->begin(), iter);
   }
 
-  size_type find_last_of (basic_string_ref that) const { return npos; }
+  size_type find_last_of (basic_string_ref that) const {
+    auto iter = std::find_first_of(
+      this->rbegin(), this->rend(),
+      that.rbegin(), that.rend(),
+      traits::eq
+    );
+    if (iter == this->rend()) { return npos; }
+    return std::distance(this->rbegin(), iter);
+  }
 
   size_type rfind (basic_string_ref that) const {
     auto iter = std::search(
@@ -215,11 +238,11 @@ struct basic_string_ref {
 
   /* functions that take a single CharT */
   size_type find_first_not_of (value_type value) const {
-    auto end = std::end(*this);
+    auto end = this->end();
     auto iter = std::find_if_not(
       this->begin(),
       end,
-      [value](value_type val) { return Traits::eq(val, value); }
+      [value](value_type val) { return traits::eq(val, value); }
     );
     if (iter == end) { return npos; }
     return std::distance(this->begin(), iter);
@@ -227,11 +250,9 @@ struct basic_string_ref {
 
   size_type find_last_not_of (value_type value) const {
     auto end = this->rend();
-    auto iter = std::find_if_not(
-      this->rbegin(),
-      end,
-      [value](value_type val) { return Traits::eq(val, value); }
-    );
+    auto iter = std::find_if_not(this->rbegin(), end, [value](value_type val) {
+      return traits::eq(val, value);
+    });
     if (iter == end) { return npos; }
     return std::distance(this->rbegin(), iter);
   }
