@@ -44,6 +44,11 @@ struct optional final {
     "Cannot have an optional<void>"
   );
 
+  static_assert(
+    not std::is_same<decay_t<Type>, bool>::value,
+    "Cannot have an optional<bool>"
+  );
+
   using value_type = Type;
   using allocator_type = std::allocator<value_type>;
 
