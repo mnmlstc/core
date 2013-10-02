@@ -341,10 +341,15 @@ void swap (
   core::v1::basic_string_ref<CharT, Traits>& rhs
 ) noexcept { return lhs.swap(rhs); }
 
-template <> struct hash<core::v1::u32string_ref>;
-template <> struct hash<core::v1::u16string_ref>;
-template <> struct hash<core::v1::wstring_ref>;
-template <> struct hash<core::v1::string_ref>;
+template <typename CharT, typename Traits>
+struct hash<core::v1::basic_string_ref<CharT, Traits>> {
+  using argument_type = core::v1::basic_string_ref<CharT, Traits>;
+  using result_type = std::size_t;
+
+  std::size_t operator ()(argument_type const& ref) const noexcept {
+    return hash<typename argument_type::pointer> { }(ref.data());
+  }
+};
 
 } /* namespace std */
 
