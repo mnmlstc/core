@@ -120,8 +120,16 @@ int main () {
       assert::equal(ref.substr(ref.size() - 3, 50), string_ref { "hij" });
     },
 
-    task("starts-with") = [] { assert::fail(); },
-    task("ends-with") = [] { assert::fail(); },
+    task("starts-with") = [] {
+      core::string_ref ref { "starts-with" };
+      assert::is_true(ref.starts_with("starts"));
+    },
+
+    task("ends-with") = [] {
+      core::string_ref ref { "ends-with" };
+      assert::is_true(ref.ends_with("with"));
+    },
+
     task("compare") = [] { assert::fail(); },
 
     task("at") = [] {
