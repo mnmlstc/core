@@ -145,7 +145,18 @@ int main () {
 
     task("find-last-of") = [] { assert::fail(); },
     task("rfind") = [] { assert::fail(); },
-    task("find") = [] { assert::fail(); },
+
+    task("find") = [] {
+      core::string_ref ref { "find" };
+      auto npos = core::string_ref::npos;
+
+      assert::equal(ref.find(core::string_ref { "in" }), 1);
+      assert::equal(ref.find('d'), 3);
+
+      assert::equal(ref.find(core::string_ref { "string" }), npos);
+      assert::equal(ref.find('x'), npos);
+    },
+
     task("swap") = [] { assert::fail(); },
     task("operator-equal") = [] { assert::fail(); },
     task("operator-not-equal") = [] { assert::fail(); },
