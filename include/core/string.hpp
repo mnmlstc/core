@@ -193,7 +193,7 @@ struct basic_string_ref {
       std::not2(traits::eq)
     );
     if (iter == this->end()) { return npos; }
-    return std::distance(this->rbegin(), iter);
+    return this->size() - std::distance(this->rbegin(), iter) - 1;
   }
 
   size_type find_first_of (basic_string_ref that) const {
@@ -213,7 +213,7 @@ struct basic_string_ref {
       traits::eq
     );
     if (iter == this->rend()) { return npos; }
-    return std::distance(this->rbegin(), iter);
+    return this->size() - std::distance(this->rbegin(), iter) - 1;
   }
 
   size_type rfind (basic_string_ref that) const {
@@ -223,7 +223,7 @@ struct basic_string_ref {
       traits::eq
     );
     if (iter == this->rend()) { return npos; }
-    return std::distance(this->rbegin(), iter);
+    return this->size() - std::distance(this->rbegin(), iter) - 1;
   }
 
   size_type find (basic_string_ref that) const {
@@ -254,7 +254,7 @@ struct basic_string_ref {
       return traits::eq(val, value);
     });
     if (iter == end) { return npos; }
-    return std::distance(this->rbegin(), iter);
+    return this->size() - std::distance(this->rbegin(), iter) - 1;
   }
 
   size_type find_first_of (value_type value) const { return this->find(value); }
@@ -264,7 +264,7 @@ struct basic_string_ref {
     auto end = this->rend();
     auto iter = std::find(this->rbegin(), end, value);
     if (iter == end) { return npos; }
-    return std::distance(this->rbegin(), iter);
+    return this->size() - std::distance(this->rbegin(), iter) -1;
   }
 
   size_type find (value_type value) const {
