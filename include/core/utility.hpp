@@ -56,6 +56,12 @@ using make_integer_sequence = typename impl::sequence_generator<T, N, N>::type;
 template <std::size_t N>
 using make_index_sequence = make_integer_sequence<std::size_t, N>;
 
+template <class T, class... Ts>
+using typelist_index = std::integral_constant<
+  std::size_t,
+  impl::typelist_index<0, T, Ts...>::type::value
+>;
+
 /* N3761 */
 template <std::size_t N, class T, class... Ts>
 struct type_at { using type = typename type_at<N - 1, Ts...>::type; };
