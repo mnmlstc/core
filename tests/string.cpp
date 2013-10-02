@@ -126,7 +126,23 @@ int main () {
     task("at") = [] { assert::fail(); },
     task("find-first-not-of") = [] { assert::fail(); },
     task("find-last-not-of") = [] { assert::fail(); },
-    task("find-first-of") = [] { assert::fail(); },
+
+    task("find-first-of") = [] {
+      core::string_ref ref { "find-first-of" };
+      auto npos = core::string_ref::npos; /* used to solve linker issue */
+
+      /* char comparisons */
+      assert::equal(ref.find_first_of('x'), npos);
+      assert::equal(ref.find_first_of('f'), 0);
+
+      /* string-ref comparisons */
+      core::string_ref search_pass { "pass" };
+      core::string_ref search_fail { "que?" };
+
+      assert::equal(ref.find_first_of(search_fail), npos);
+      assert::equal(ref.find_first_of(search_pass), 8);
+    },
+
     task("find-last-of") = [] { assert::fail(); },
     task("rfind") = [] { assert::fail(); },
     task("find") = [] { assert::fail(); },
