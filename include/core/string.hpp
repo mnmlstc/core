@@ -169,7 +169,7 @@ struct basic_string_ref {
   }
 
   reference at (size_type idx) const {
-    if (idx > this->size()) {
+    if (idx >= this->size()) {
       throw std::out_of_range { "requested index out of range" };
     }
     return this->str[idx];
@@ -180,7 +180,8 @@ struct basic_string_ref {
     auto iter = std::find_first_of(
       this->begin(), this->end(),
       that.begin(), that.end(),
-      std::not2(traits::eq)
+      /* TODO: Change to a lambda */
+      std::not2(std::function<decltype(traits::eq)> { traits::eq })
     );
     if (iter == this->end()) { return npos; }
     return std::distance(this->begin(), iter);
@@ -346,7 +347,7 @@ struct hash<core::v1::basic_string_ref<CharT, Traits>> {
   using argument_type = core::v1::basic_string_ref<CharT, Traits>;
   using result_type = std::size_t;
 
-  std::size_t operator ()(argument_type const& ref) const noexcept {
+  result_type operator ()(argument_type const& ref) const noexcept {
     return hash<typename argument_type::pointer> { }(ref.data());
   }
 };

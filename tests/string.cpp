@@ -123,12 +123,49 @@ int main () {
     task("starts-with") = [] { assert::fail(); },
     task("ends-with") = [] { assert::fail(); },
     task("compare") = [] { assert::fail(); },
-    task("at") = [] { assert::fail(); },
-    task("find-first-not-of") = [] { assert::fail(); },
+
+    task("at") = [] {
+      core::string_ref ref { "string-ref-at" };
+
+      assert::equal(ref.at(0), 's');
+      assert::equal(ref.at(1), 't');
+      assert::equal(ref.at(2), 'r');
+      assert::equal(ref.at(3), 'i');
+      assert::equal(ref.at(4), 'n');
+      assert::equal(ref.at(5), 'g');
+      assert::equal(ref.at(6), '-');
+      assert::equal(ref.at(7), 'r');
+      assert::equal(ref.at(8), 'e');
+      assert::equal(ref.at(9), 'f');
+      assert::equal(ref.at(10), '-');
+      assert::equal(ref.at(11), 'a');
+      assert::equal(ref.at(12), 't');
+
+      assert::throws<std::out_of_range>([ref] { std::ignore = ref.at(13); });
+    },
+
+    task("find-first-not-of") = [] {
+      core::string_ref ref { "find-first-not-of" };
+      core::string_ref search_pass { "findrst" };
+      core::string_ref search_fail { "findrsto" };
+      auto npos = core::string_ref::npos;
+
+      /* char comparisons */
+      assert::equal(ref.find_first_not_of('x'), 0);
+      assert::equal(ref.find_first_not_of('f'), 1);
+
+      /* string-ref comparisons */
+      assert::equal(ref.find_first_not_of(search_pass), 12);
+      assert::equal(ref.find_first_not_of(search_fail), npos);
+    },
+
     task("find-last-not-of") = [] { assert::fail(); },
 
     task("find-first-of") = [] {
       core::string_ref ref { "find-first-of" };
+      core::string_ref search_pass { "pass" };
+      core::string_ref search_fail { "que?" };
+
       auto npos = core::string_ref::npos; /* used to solve linker issue */
 
       /* char comparisons */
@@ -136,9 +173,6 @@ int main () {
       assert::equal(ref.find_first_of('f'), 0);
 
       /* string-ref comparisons */
-      core::string_ref search_pass { "pass" };
-      core::string_ref search_fail { "que?" };
-
       assert::equal(ref.find_first_of(search_fail), npos);
       assert::equal(ref.find_first_of(search_pass), 8);
     },
