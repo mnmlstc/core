@@ -226,7 +226,16 @@ int main () {
     },
 
     task("find-last-of") = [] { assert::fail(); },
-    task("rfind") = [] { assert::fail(); },
+    task("rfind") = [] {
+      core::string_ref ref { "rfind" };
+      auto npos = core::string_ref::npos;
+
+      assert::equal(ref.find("in"), 2);
+      assert::equal(ref.find('d'), ref.size() - 1);
+
+      assert::equal(ref.find("string"), npos);
+      assert::equal(ref.find('x'), npos);
+    },
 
     task("find") = [] {
       core::string_ref ref { "find" };
