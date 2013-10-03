@@ -76,24 +76,64 @@ int main () {
       assert::equal(copy, ref);
     },
 
-    task("explicit-string-cast") = [] { assert::fail(); },
+    task("explicit-string-cast") = [] {
+      core::string_ref ref { "explicit-string-cast" };
+      auto str = static_cast<std::string>(ref);
 
-    task("begin") = [] { assert::fail(); },
-    task("end") = [] { assert::fail(); },
-    task("cbegin") = [] { assert::fail(); },
-    task("cend") = [] { assert::fail(); },
-    task("rbegin") = [] { assert::fail(); },
-    task("rend") = [] { assert::fail(); },
-    task("crbegin") = [] { assert::fail(); },
-    task("crend") = [] { assert::fail(); },
-    task("max-size") = [] { assert::fail(); },
-    task("length") = [] { assert::fail(); },
-    task("size") = [] { assert::fail(); },
-    task("empty") = [] { assert::fail(); },
-    task("subscript-operator") = [] { assert::fail(); },
-    task("front") = [] { assert::fail(); },
-    task("back") = [] { assert::fail(); },
-    task("data") = [] { assert::fail(); },
+      assert::is_true(std::is_same<decltype(str), std::string>::value);
+      assert::equal(str, std::string { "explicit-string-cast" });
+    },
+
+    task("max-size") = [] {
+      constexpr core::string_ref ref { };
+
+      assert::equal(ref.max_size(), 0);
+    },
+
+    task("size") = [] {
+      constexpr core::string_ref ref { "size", 4 };
+
+      assert::equal(ref.size(), 4);
+    },
+
+    task("empty") = [] {
+      constexpr core::string_ref empty_ref { };
+      constexpr core::string_ref valid_ref { "valid", 5 };
+
+      assert::is_false(valid_ref.empty());
+      assert::is_true(empty_ref.empty());
+    },
+
+    task("subscript-operator") = [] {
+      core::string_ref ref { "subscript" };
+
+      assert::equal(ref[0], 's');
+      assert::equal(ref[1], 'u');
+      assert::equal(ref[2], 'b');
+      assert::equal(ref[3], 's');
+      assert::equal(ref[4], 'c');
+      assert::equal(ref[5], 'r');
+      assert::equal(ref[6], 'i');
+      assert::equal(ref[7], 'p');
+      assert::equal(ref[8], 't');
+    },
+
+    task("front") = [] {
+      core::string_ref ref { "front" };
+      assert::equal('f', ref.front());
+    },
+
+    task("back") = [] {
+      core::string_ref ref { "back" };
+      assert::equal('k', ref.back());
+    },
+
+    task("data") = [] {
+      auto literal = "data-test";
+      core::string_ref ref { literal };
+      assert::is(ref.data(), literal);
+    },
+
     task("remove-prefix") = [] { assert::fail(); },
     task("remove-suffix") = [] { assert::fail(); },
 
