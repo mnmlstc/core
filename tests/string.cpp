@@ -195,7 +195,7 @@ int main () {
     task("find-first-not-of") = [] {
       core::string_ref ref { "find-first-not-of" };
       core::string_ref search_pass { "findrst" };
-      core::string_ref search_fail { "findrsto" };
+      core::string_ref search_fail { "findrsto-" };
       auto npos = core::string_ref::npos;
 
       /* char comparisons */
@@ -203,7 +203,7 @@ int main () {
       assert::equal(ref.find_first_not_of('f'), 1);
 
       /* string-ref comparisons */
-      assert::equal(ref.find_first_not_of(search_pass), 12);
+      assert::equal(ref.find_first_not_of(search_pass), 4);
       assert::equal(ref.find_first_not_of(search_fail), npos);
     },
 
@@ -252,8 +252,20 @@ int main () {
       assert::equal(rhs, core::string_ref { "lhs" });
     },
 
-    task("operator-equal") = [] { assert::fail(); },
-    task("operator-not-equal") = [] { assert::fail(); },
+    task("operator-equal") = [] {
+      core::string_ref lhs { "operator-equal" };
+      core::string_ref rhs { "operator-equal" };
+
+      assert::equal(lhs, rhs);
+    },
+
+    task("operator-not-equal") = [] {
+      core::string_ref lhs { "operator-not-equal" };
+      core::string_ref rhs { "rhs" };
+
+      assert::not_equal(lhs, rhs);
+    },
+
     task("operator-greater-equal") = [] { assert::fail(); },
     task("operator-less-equal") = [] { assert::fail(); },
     task("operator-greater") = [] { assert::fail(); },
