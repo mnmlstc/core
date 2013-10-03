@@ -225,7 +225,20 @@ int main () {
       assert::equal(ref.find_first_of(search_pass), 8);
     },
 
-    task("find-last-of") = [] { assert::fail(); },
+    task("find-last-of") = [] {
+      core::string_ref ref { "find-last-of" };
+      core::string_ref pass { "pass" };
+      core::string_ref fail { "exqu" };
+
+      auto npos = core::string_ref::npos;
+
+      assert::equal(ref.find_last_of('f'), ref.size() - 1);
+      assert::equal(ref.find_last_of('x'), npos);
+
+      assert::equal(ref.find_last_of(fail), npos);
+      assert::equal(ref.find_last_of(pass), 7);
+    },
+
     task("rfind") = [] {
       core::string_ref ref { "rfind" };
       auto npos = core::string_ref::npos;
@@ -241,10 +254,10 @@ int main () {
       core::string_ref ref { "find" };
       auto npos = core::string_ref::npos;
 
-      assert::equal(ref.find(core::string_ref { "in" }), 1);
+      assert::equal(ref.find("in"), 1);
       assert::equal(ref.find('d'), 3);
 
-      assert::equal(ref.find(core::string_ref { "string" }), npos);
+      assert::equal(ref.find("string"), npos);
       assert::equal(ref.find('x'), npos);
     },
 
