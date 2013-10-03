@@ -239,7 +239,19 @@ int main () {
       assert::equal(ref.find('x'), npos);
     },
 
-    task("swap") = [] { assert::fail(); },
+    task("swap") = [] {
+      core::string_ref lhs { "lhs" };
+      core::string_ref rhs { "rhs" };
+
+      assert::equal(lhs, core::string_ref { "lhs" });
+      assert::equal(rhs, core::string_ref { "rhs" });
+
+      std::swap(lhs, rhs);
+
+      assert::equal(lhs, core::string_ref { "rhs" });
+      assert::equal(rhs, core::string_ref { "lhs" });
+    },
+
     task("operator-equal") = [] { assert::fail(); },
     task("operator-not-equal") = [] { assert::fail(); },
     task("operator-greater-equal") = [] { assert::fail(); },
