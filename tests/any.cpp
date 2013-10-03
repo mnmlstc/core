@@ -96,6 +96,13 @@ int main () {
       assert::is_false(to_swap.empty());
     },
 
+    task("clear") = [] {
+      core::any value { std::string { "clear" } };
+      assert::is_false(value.empty());
+      value.clear();
+      assert::is_true(value.empty());
+    },
+
     task("type") = [] {
       std::uint64_t integer = 42;
       core::any value { integer };
@@ -106,7 +113,7 @@ int main () {
       std::uint64_t integer = 42;
       core::any const value { integer };
       auto integer_value = core::any_cast<std::uint64_t>(value);
-      
+
       assert::equal(integer_value, integer);
       assert::throws<core::bad_any_cast>([&value] {
         core::any_cast<double>(value);

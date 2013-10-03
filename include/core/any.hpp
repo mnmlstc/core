@@ -182,7 +182,7 @@ public:
     any { std::forward<ValueType>(value), impl::is_small<ValueType> { } }
   { }
 
-  ~any () noexcept { this->table->destroy(std::addressof(this->data)); }
+  ~any () noexcept { this->clear(); }
 
   any& operator = (any const& that) {
     any { that }.swap(*this);
@@ -197,6 +197,11 @@ public:
   void swap (any& that) noexcept {
     std::swap(this->table, that.table);
     std::swap(this->data, that.data);
+  }
+
+  void clear () noexcept {
+    this->table->destroy(std::addressof(this->data));
+    this->table = impl::get_any_dispatch<void>();
   }
 
   std::type_info const& type () const noexcept { return this->table->type(); }
