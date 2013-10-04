@@ -177,24 +177,19 @@ struct basic_string_ref {
 
   /* functions that take a string-ref */
   size_type find_first_not_of (basic_string_ref that) const {
-    auto iter = std::find_first_of(
-      this->begin(), this->end(),
-      that.begin(), that.end(),
-      /* TODO: Change to a lambda */
-      std::not2(std::function<decltype(traits::eq)> { traits::eq })
-    );
-    if (iter == this->end()) { return npos; }
-    return std::distance(this->begin(), iter);
+    for (auto iter = this->begin(); iter != this->end(); ++iter) {
+      if (traits::find(that.data(), that.size(), *iter)) { continue; }
+      return std::distance(this->begin(), iter);
+    }
+    return npos;
   }
 
   size_type find_last_not_of (basic_string_ref that) const {
-    auto iter = std::find_first_of(
-      this->rbegin(), this->end(),
-      that.rbegin(), that.rend(),
-      std::not2(traits::eq)
-    );
-    if (iter == this->end()) { return npos; }
-    return this->size() - std::distance(this->rbegin(), iter) - 1;
+    for (auto iter = this->rbegin(); iter != this->rend(); ++iter) {
+      if (traits::find(that.data(), that.size(), *iter)) { continue; }
+      return this->size() - std::distance(this->rbegin(), iter) - 1;
+    }
+    return npos;
   }
 
   size_type find_first_of (basic_string_ref that) const {

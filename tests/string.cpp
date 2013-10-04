@@ -194,7 +194,7 @@ int main () {
 
     task("find-first-not-of") = [] {
       core::string_ref ref { "find-first-not-of" };
-      core::string_ref search_pass { "findrst" };
+      core::string_ref search_pass { "findrsto" };
       core::string_ref search_fail { "findrsto-" };
       auto npos = core::string_ref::npos;
 
@@ -207,7 +207,20 @@ int main () {
       assert::equal(ref.find_first_not_of(search_fail), npos);
     },
 
-    task("find-last-not-of") = [] { assert::fail(); },
+    task("find-last-not-of") = [] {
+      core::string_ref ref { "find-last-not-of" };
+      core::string_ref search_pass { "findlasto" };
+      core::string_ref search_fail { "findlasto-" };
+      auto npos = core::string_ref::npos;
+
+      /* char comparisons */
+      assert::equal(ref.find_last_not_of('x'), ref.size() - 1);
+      assert::equal(ref.find_last_not_of('f'), ref.size() - 2);
+
+      /* string-ref comparisons */
+      assert::equal(ref.find_last_not_of(search_pass), 13);
+      assert::equal(ref.find_last_not_of(search_fail), npos);
+    },
 
     task("find-first-of") = [] {
       core::string_ref ref { "find-first-of" };
