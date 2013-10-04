@@ -95,9 +95,6 @@ public:
 };
 
 class any final {
-  template <class ValueType> friend ValueType any_cast (any const&);
-  template <class ValueType> friend ValueType any_cast (any&);
-
   template <class ValueType>
   friend ValueType const* any_cast (any const*) noexcept;
   template <class ValueType> friend ValueType* any_cast (any*) noexcept;
@@ -213,21 +210,6 @@ public:
 };
 
 template <class ValueType>
-ValueType any_cast (any const& operand) {
-  using type = remove_reference_t<ValueType>;
-  using return_type = add_const_t<type>;
-  if (operand.type() != typeid(type)) { throw bad_any_cast { }; }
-  return *operand.cast<return_type>(impl::is_small<ValueType> { });
-}
-
-template <class ValueType>
-ValueType any_cast (any& operand) {
-  using return_type = remove_reference_t<ValueType>;
-  if (operand.type() != typeid(return_type)) { throw bad_any_cast { }; }
-  return *operand.cast<return_type>(impl::is_small<ValueType> { });
-}
-
-template <class ValueType>
 ValueType const* any_cast (any const* operand) noexcept {
   return operand and operand->type() == typeid(ValueType)
     ? operand->cast<ValueType>(impl::is_small<ValueType> { })
@@ -239,6 +221,45 @@ ValueType* any_cast (any* operand) noexcept {
   return operand and operand->type() == typeid(ValueType)
     ? operand->cast<ValueType>(impl::is_small<ValueType> { })
     : nullptr;
+}
+
+template <
+  class ValueType,
+  class=enable_if_t<
+    std::is_reference<ValueType>::value or
+    std::is_copy_constructible<ValueType>::value
+  >
+> ValueType any_cast (any const& operand) {
+  using type = remove_reference_t<ValueType>;
+  auto pointer = any_cast<add_const_t<type>>(std::addressof(operand));
+  if (not pointer) { throw bad_any_cast { }; }
+  return *pointer;
+}
+
+template <
+  class ValueType,
+  class=enable_if_t<
+    std::is_reference<ValueType>::value or
+    std::is_copy_constructible<ValueType>::value
+  >
+> ValueType any_cast (any&& operand) {
+  using type = remove_reference_t<ValueType>;
+  auto pointer = any_cast<type>(std::addressof(operand));
+  if (not pointer) { throw bad_any_cast { }; }
+  return *pointer;
+};
+
+template <
+  class ValueType,
+  class=enable_if_t<
+    std::is_reference<ValueType>::value or
+    std::is_copy_constructible<ValueType>::value
+  >
+> ValueType any_cast (any& operand) {
+  using type = remove_reference_t<ValueType>;
+  auto pointer = any_cast<type>(std::addressof(operand));
+  if (not pointer) { throw bad_any_cast { }; }
+  return *pointer;
 }
 
 }} /* namespace core::v1 */
