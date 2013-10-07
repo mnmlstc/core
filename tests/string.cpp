@@ -1,5 +1,6 @@
 #include <core/string.hpp>
 
+#include <unordered_map>
 #include <cstring>
 
 #include <unittest/unittest.hpp>
@@ -134,8 +135,19 @@ int main () {
       assert::is(ref.data(), literal);
     },
 
-    task("remove-prefix") = [] { assert::fail(); },
-    task("remove-suffix") = [] { assert::fail(); },
+    task("remove-prefix") = [] {
+      core::string_ref ref { "remove-prefix" };
+      ref.remove_prefix(7);
+      assert::equal(ref, core::string_ref { "prefix" });
+      assert::equal(ref.size(), 6);
+    },
+
+    task("remove-suffix") = [] {
+      core::string_ref ref { "remove-suffix" };
+      ref.remove_suffix(7);
+      assert::equal(ref, core::string_ref { "remove" });
+      assert::equal(ref.size(), 6);
+    },
 
     task("clear") = [] {
       core::string_ref ref { "hello", 5 };
@@ -306,7 +318,18 @@ int main () {
     task("operator-greater") = [] { assert::fail(); },
     task("operator-less") = [] { assert::fail(); },
     task("operator-stream-insert") = [] { assert::fail(); },
-    task("hash") = [] { assert::fail(); }
+
+    task("hash") = [] {
+      std::unordered_map<core::string_ref, int> values = {
+        { "one", 1 },
+        { "two", 2 },
+        { "thr", 3 }
+      };
+
+      assert::equal(values["one"], 1);
+      assert::equal(values["two"], 2);
+      assert::equal(values["thr"], 3);
+    }
   };
 
   monitor::run();
