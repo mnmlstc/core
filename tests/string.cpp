@@ -183,7 +183,16 @@ int main () {
       assert::is_true(ref.ends_with("with"));
     },
 
-    task("compare") = [] { assert::fail(); },
+    task("compare") = [] {
+      core::string_ref ref { "compare" };
+
+      assert::greater(ref.compare("comparable"), 0);
+      assert::greater(ref.compare("bompare"), 0);
+      assert::greater(ref.compare("comp"), 0);
+      assert::equal(ref.compare("compare"), 0);
+      assert::less(ref.compare("comparu"), 0);
+      assert::less(ref.compare("dompare"), 0);
+    },
 
     task("at") = [] {
       core::string_ref ref { "string-ref-at" };
