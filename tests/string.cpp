@@ -1,6 +1,7 @@
 #include <core/string.hpp>
 
 #include <unordered_map>
+#include <sstream>
 #include <cstring>
 
 #include <unittest/unittest.hpp>
@@ -336,8 +337,22 @@ int main () {
       assert::greater(lhs, rhs);
     },
 
-    task("operator-less") = [] { assert::fail(); },
-    task("operator-stream-insert") = [] { assert::fail(); },
+    task("operator-less") = [] {
+      core::string_ref lhs { "abcde" };
+      core::string_ref rhs { "fghij" };
+
+      assert::less(lhs, rhs);
+    },
+
+    task("operator-stream-insert") = [] {
+      std::string str { "operator-stream-insert" };
+      core::string_ref ref { str };
+
+      std::ostringstream stream;
+      stream << ref;
+
+      assert::equal(stream.str(), str);
+    },
 
     task("hash") = [] {
       std::unordered_map<core::string_ref, int> values = {
