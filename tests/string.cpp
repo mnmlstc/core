@@ -313,9 +313,29 @@ int main () {
       assert::not_equal(lhs, rhs);
     },
 
-    task("operator-greater-equal") = [] { assert::fail(); },
-    task("operator-less-equal") = [] { assert::fail(); },
-    task("operator-greater") = [] { assert::fail(); },
+    task("operator-greater-equal") = [] {
+      core::string_ref lhs { "fghij" };
+      core::string_ref rhs { "abcde" };
+
+      assert::greater_equal(lhs, rhs);
+      assert::greater_equal(lhs, lhs);
+    },
+
+    task("operator-less-equal") = [] {
+      core::string_ref lhs { "abcde" };
+      core::string_ref rhs { "bcdef" };
+
+      assert::less_equal(lhs, rhs);
+      assert::less_equal(lhs, lhs);
+    },
+
+    task("operator-greater") = [] {
+      core::string_ref lhs { "bcdef" };
+      core::string_ref rhs { "abcde" };
+
+      assert::greater(lhs, rhs);
+    },
+
     task("operator-less") = [] { assert::fail(); },
     task("operator-stream-insert") = [] { assert::fail(); },
 
