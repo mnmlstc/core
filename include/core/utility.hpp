@@ -69,6 +69,9 @@ struct type_at { using type = typename type_at<N - 1, Ts...>::type; };
 template <class T, class... Ts>
 struct type_at<0ul, T, Ts...> { using type = T; };
 
+template <std::size_t N, class... Ts>
+using type_at_t = typename type_at<N, Ts...>::type;
+
 template <std::size_t N, class T, class... Ts>
 auto value_at(T&&, Ts&&... values) ->  typename type_at<N - 1, T, Ts...>::type {
   return value_at<N - 1, Ts...>(std::forward<Ts>(values)...);
