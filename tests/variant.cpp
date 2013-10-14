@@ -1,5 +1,6 @@
 #include <core/variant.hpp>
 
+#include <unordered_map>
 #include <string>
 #include <vector>
 
@@ -67,7 +68,10 @@ int main () {
       assert::equal(std::get<1>(second), real);
     },
 
-    task("move-assignment-operator") = [] { assert::fail(); },
+    task("move-assignment-operator") = [] {
+      assert::fail();
+    },
+
     task("copy-assignment-operator") = [] { assert::fail(); },
 
     task("visit") = [] { assert::fail(); },
@@ -211,7 +215,17 @@ int main () {
       assert::equal(std::get<1>(rhs_str), 0.8);
     },
 
-    task("hash") = [] { assert::fail(); }
+    task("hash") = [] {
+      using variant_type = core::variant<std::string, double>;
+      using unordered_map = std::unordered_map<variant_type, int>;
+
+      unordered_map map;
+      map[variant_type { "hash" }] = 9;
+      map[variant_type { 9.8 }] = 12;
+
+      assert::equal(map[variant_type { "hash" }], 9);
+      assert::equal(map[variant_type { 9.8 }], 12);
+    }
   };
 
   monitor::run();
