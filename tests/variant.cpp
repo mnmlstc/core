@@ -16,8 +16,18 @@ int main () {
       assert::equal(typeid(std::string), variant.type());
     },
 
-    task("variadic-argument-constructor") = [] { assert::fail(); },
-    task("value-constructor") = [] { assert::fail(); },
+    task("value-constructor") = [] {
+      using variant_type = core::variant<std::string, std::uint64_t>;
+
+      variant_type string { "value-constructor" };
+      variant_type integer { 64 };
+
+      assert::equal(string.type(), typeid(std::string));
+      assert::equal(integer.type(), typeid(std::uint64_t));
+
+      assert::equal(std::get<0>(string), std::string { "value-constructor" });
+      assert::equal(std::get<1>(integer), 64);
+    },
 
     task("move-constructor") = [] {
       using variant_type = core::variant<std::string, double>;
@@ -38,7 +48,25 @@ int main () {
       assert::equal(variant, copy);
     },
 
-    task("value-assignment-operator") = [] { assert::fail(); },
+    task("value-assignment-operator") = [] {
+      using variant_type = core::variant<std::string, double>;
+      std::string string { "value" };
+      double real { 0.6 };
+
+      variant_type first { };
+      variant_type second { };
+
+      first = string;
+
+      assert::equal(first.type(), typeid(std::string));
+      assert::equal(std::get<0>(first), string);
+
+      second = real;
+
+      assert::equal(second.type(), typeid(double));
+      assert::equal(std::get<1>(second), real);
+    },
+
     task("move-assignment-operator") = [] { assert::fail(); },
     task("copy-assignment-operator") = [] { assert::fail(); },
 

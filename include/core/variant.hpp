@@ -58,7 +58,7 @@ auto make_overload(Lambdas&&... lambdas) -> overload<Lambdas...> {
 }
 
 template <class Visitor, class Type, class Data, class Result, class... Args>
-constexpr auto visitor_gen () -> Result {
+auto visitor_gen () -> Result {
   return [](Visitor&& visitor, Data& data, Args&&... args) {
     return invoke(
       std::forward<Visitor>(visitor),
@@ -103,19 +103,6 @@ class variant final {
 
   template <std::size_t N>
   using element = typename std::tuple_element<N, tuple_type>::type;
-
-  /* internal visitors */
-  struct constructer final {
-    using data_type = std::reference_wrapper<storage_type>;
-    data_type data;
-
-    template <class T>
-    void operator ()(T&& value) noexcept {
-      new (std::addressof(this->data.get())) decay_t<T> {
-        std::forward<T>(value)
-      };
-    }
-  };
 
   struct copier final {
     using data_type = std::reference_wrapper<storage_type>;
@@ -179,16 +166,47 @@ class variant final {
     }
   };
 
+  template <
+    std::size_t N,
+    class=enable_if_t<N < sizeof...(Ts)>,
+    class T
+  > explicit variant (
+    std::integral_constant<std::size_t, N>&&,
+    std::false_type&&,
+    T&& value
+  ) : variant {
+    std::integral_constant<std::size_t, N + 1> { },
+    std::is_constructible<type_at_t<N + 1, Ts...>, T> { },
+    std::forward<T>(value)
+  } { }
+
+  template <
+    std::size_t N,
+    class=enable_if_t<N < sizeof...(Ts)>,
+    class T
+  > explicit variant (
+    std::integral_constant<std::size_t, N>&&,
+    std::true_type&&,
+    T&& value
+  ) : data { }, tag { N }
+  {
+    new (std::addressof(this->data)) type_at_t<N, Ts...> (
+      std::forward<T>(value)
+    );
+  }
+
 public:
+
   template <
     class T,
     class=enable_if_t<not std::is_same<decay_t<T>, variant>::value>
-  > variant (T&& value) :
-    data { }, tag { 0 }
-  {
-    new (std::addressof(this->data)) decay_t<T> { std::forward<T>(value) };
-    this->tag = typelist_index<decay_t<T>, Ts...>::value;
-  }
+  > explicit variant (T&& value) :
+    variant {
+      std::integral_constant<std::size_t, 0> { },
+      std::is_constructible<type_at_t<0, Ts...>, T> { },
+      std::forward<T>(value)
+    }
+  { }
 
   variant (variant const& that) :
     data { }, tag { that.tag }
@@ -198,12 +216,18 @@ public:
     data { }, tag { that.tag }
   { that.visit(mover { std::ref(this->data) }); }
 
-  variant () noexcept : variant { type_at_t<0, Ts...> { } } { }
+  template <
+    class=enable_if_t<
+      std::is_default_constructible<type_at_t<0, Ts...>>::value
+    >
+  > variant () : variant { type_at_t<0, Ts...> { } } { }
 
   ~variant () { this->visit(destroyer { }); }
 
-  template <class T>
-  variant& operator = (T&& value) {
+  template <
+    class T,
+    class=enable_if_t<not std::is_same<decay_t<T>, variant>::value>
+  > variant& operator = (T&& value) {
     variant { std::forward<T>(value) }.swap(*this);
     return *this;
   }
@@ -216,7 +240,7 @@ public:
   variant& operator = (variant&& that) noexcept {
     this->visit(destroyer { });
     this->tag = that.tag;
-    that.visit(constructer { std::ref(this->data) });
+    that.visit(mover { std::ref(this->data) });
     return *this;
   }
 
@@ -308,19 +332,19 @@ public:
   template <std::size_t N>
   auto get () const& noexcept(false) -> element<N> const& {
     if (this->tag != N) { throw bad_variant_get { "incorrect type" }; }
-    return reinterpret_cast<element<N> const&>(*this);
+    return reinterpret_cast<element<N> const&>(this->data);
   }
 
   template <std::size_t N>
   auto get () && noexcept(false) -> element<N>&& {
     if (this->tag != N) { throw bad_variant_get { "incorrect type" }; }
-    return std::move(reinterpret_cast<element<N>&>(*this));
+    return std::move(reinterpret_cast<element<N>&>(this->data));
   }
 
   template <std::size_t N>
   auto get () & noexcept(false) -> element<N>& {
     if (this->tag != N) { throw bad_variant_get { "incorrect type" }; }
-    return reinterpret_cast<element<N>&>(*this);
+    return reinterpret_cast<element<N>&>(this->data);
   }
 
   std::type_info const& type () const noexcept {
