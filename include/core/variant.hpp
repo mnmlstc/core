@@ -104,6 +104,9 @@ class variant final {
   template <std::size_t N>
   using element = typename std::tuple_element<N, tuple_type>::type;
 
+  template <std::size_t N>
+  using index = std::integral_constant<std::size_t, N>;
+
   struct copier final {
     using data_type = std::reference_wrapper<storage_type>;
     data_type data;
@@ -170,25 +173,20 @@ class variant final {
     std::size_t N,
     class=enable_if_t<N < sizeof...(Ts)>,
     class T
-  > explicit variant (
-    std::integral_constant<std::size_t, N>&&,
-    std::false_type&&,
-    T&& value
-  ) : variant {
-    std::integral_constant<std::size_t, N + 1> { },
-    std::is_constructible<type_at_t<N + 1, Ts...>, T> { },
-    std::forward<T>(value)
-  } { }
+  > explicit variant (index<N>&&, std::false_type&&, T&& value) :
+    variant {
+      index<N + 1> { },
+      std::is_constructible<type_at_t<N + 1, Ts...>, T> { },
+      std::forward<T>(value)
+    }
+  { }
 
   template <
     std::size_t N,
     class=enable_if_t<N < sizeof...(Ts)>,
     class T
-  > explicit variant (
-    std::integral_constant<std::size_t, N>&&,
-    std::true_type&&,
-    T&& value
-  ) : data { }, tag { N }
+  > explicit variant (index<N>&&, std::true_type&&, T&& value) :
+    data { }, tag { N }
   {
     new (std::addressof(this->data)) type_at_t<N, Ts...> (
       std::forward<T>(value)
@@ -202,7 +200,7 @@ public:
     class=enable_if_t<not std::is_same<decay_t<T>, variant>::value>
   > explicit variant (T&& value) :
     variant {
-      std::integral_constant<std::size_t, 0> { },
+      index<0> { },
       std::is_constructible<type_at_t<0, Ts...>, T> { },
       std::forward<T>(value)
     }
