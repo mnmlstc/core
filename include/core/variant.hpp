@@ -25,12 +25,6 @@ union discriminate<T, Ts...> {
   discriminate<Ts...> rest;
 };
 
-template <class... Ts>
-using variant_storage = typename std::aligned_storage<
-  sizeof(impl::discriminate<Ts...>),
-  std::alignment_of<impl::discriminate<Ts...>>::value
->::type;
-
 /* Used to provide lambda based pattern matching for the variant
  * Based off of Dave Abrahams C++11 'generic lambda' example.
  */
