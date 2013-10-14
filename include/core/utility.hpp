@@ -59,7 +59,7 @@ using make_index_sequence = make_integer_sequence<std::size_t, N>;
 template <class T, class... Ts>
 using typelist_index = std::integral_constant<
   std::size_t,
-  impl::typelist_index<0, T, Ts...>::type::value
+  impl::typelist_index<0ul, T, Ts...>::type::value
 >;
 
 /* N3761 */
