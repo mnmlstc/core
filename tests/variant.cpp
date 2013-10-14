@@ -72,7 +72,17 @@ int main () {
       assert::fail();
     },
 
-    task("copy-assignment-operator") = [] { assert::fail(); },
+    task("copy-assignment-operator") = [] {
+      using variant_type = core::variant<std::string, double>;
+      variant_type variant { 9.8 };
+      variant_type copy { };
+
+      copy = variant;
+
+      assert::equal(copy.type(), typeid(double));
+      assert::equal(std::get<1>(copy), 9.8);
+      assert::equal(copy, variant);
+    },
 
     task("visit") = [] { assert::fail(); },
     task("match") = [] {
