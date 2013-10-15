@@ -12,7 +12,6 @@
 namespace core {
 inline namespace v1 {
 
-/* N3422 */
 template <class CharT, class Traits=std::char_traits<CharT>>
 struct basic_string_ref {
   using difference_type = std::ptrdiff_t;
