@@ -92,7 +92,29 @@ int main () {
       assert::equal(copy, variant);
     },
 
-    task("visit") = [] { assert::fail(); },
+    task("visit") = [] {
+      using variant_type = core::variant<
+        std::uint64_t,
+        std::string,
+        std::vector<int>
+      >;
+
+      variant_type vector { std::vector<int> { 1, 2, 3 } };
+
+      struct visitor final {
+        std::string operator ()(std::string const& str) const { return str; }
+        std::string operator ()(std::uint64_t const& val) const {
+          return std::to_string(val);
+        }
+        std::string operator ()(std::vector<int> const& vec) const {
+          auto value = vec.at(0) + vec.at(1) + vec.at(2);
+          return std::to_string(value);
+        }
+      };
+
+      auto str = vector.visit(visitor { });
+      assert::equal(str, std::string { "6" });
+    },
 
     task("match") = [] {
       using variant_type = core::variant<
