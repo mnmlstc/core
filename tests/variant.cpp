@@ -69,7 +69,15 @@ int main () {
     },
 
     task("move-assignment-operator") = [] {
-      assert::fail();
+      using variant_type = core::variant<std::string, double>;
+      variant_type variant { "move" };
+      variant_type move { 9.8 };
+
+      move = std::move(variant);
+
+      assert::equal(move.type(), typeid(std::string));
+      assert::equal(std::get<0>(move), std::string { "move" });
+      assert::is_true(std::get<0>(variant).empty());
     },
 
     task("copy-assignment-operator") = [] {
@@ -85,6 +93,7 @@ int main () {
     },
 
     task("visit") = [] { assert::fail(); },
+
     task("match") = [] {
       using variant_type = core::variant<
         std::uint64_t,
