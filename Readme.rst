@@ -20,14 +20,14 @@ Some components provided by MNMLSTC Core are:
  * ``expected<T>``
  * ``deep_ptr<T>``
  * ``poly_ptr<T>``
+ * ``string_ref``
  * ``range<T>``
  * ``any``
 
-And others. Details on each component can be found in MNMLSTC Core's
-documentation. All of the MNMLSTC Core components reside in the ``core``
-namespace. The library is organized equivalent to the standard library e.g.,
-components related to memory are in the memory header, functional components
-in the functional header, etc.
+Details on each component can be found in MNMLSTC Core's documentation. All of
+the MNMLSTC Core components reside in the ``core`` namespace. The library is
+organized equivalent to the standard library e.g., components related to memory
+are in the memory header, functional components in the functional header, etc.
 
 Requirements
 ------------
