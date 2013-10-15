@@ -89,9 +89,6 @@ using conditional_t = typename std::conditional<B, T, F>::type;
 template <class T>
 using underlying_type_t = typename std::underlying_type<T>::type;
 
-template <class... T>
-using common_type_t = typename std::common_type<T...>::type;
-
 /* custom type trait specializations */
 template <class... Args> using invoke_of_t = typename invoke_of<Args...>::type;
 template <class T> using class_of_t = typename class_of<T>::type;
@@ -174,6 +171,24 @@ template <class F, class... Args>
 struct result_of<F(Args...)> : invoke_of<F, Args...> { };
 
 template <class T> using result_of_t = typename result_of<T>::type;
+
+template <class... Ts> struct common_type;
+
+template <class T> struct common_type<T> { using type = decay_t<T>; };
+template <class T, class U>
+struct common_type<T, U> {
+  using type = decay_t<decltype(true ? std::declval<T>() : std::declval<U>())>;
+};
+
+template <class T, class U, class... Ts>
+struct common_type<T, U, Ts...> {
+  using type = typename common_type<
+    typename common_type<T, U>::type,
+    Ts...
+  >::type;
+};
+
+template <class... T> using common_type_t = typename common_type<T...>::type;
 
 }} /* namespace core::v1 */
 

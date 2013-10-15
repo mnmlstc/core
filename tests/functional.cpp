@@ -115,7 +115,7 @@ int main () {
     },
 
     task("invoke-unpack-array") = [] {
-      std::array<int, 3> values = { 1, 2, 3 };
+      std::array<int, 3> values = {{ 1, 2, 3 }};
       auto result = core::invoke(
         core::unpack,
         [](int x, int y, int z) { return x + y + z; },
@@ -133,12 +133,6 @@ int main () {
       );
 
       assert::equal(result, std::string { "7unpack" });
-
-      auto str = std::string { "unpacked" };
-      auto result2 = core::invoke(
-        core::unpack, std::make_pair(&std::string::size, str)
-      );
-      assert::equal(result2, 8);
     },
 
     task("function-traits") = [] {
