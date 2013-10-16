@@ -126,8 +126,20 @@ if (CAN_USE_STD_CXX11)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${USE_STD_CXX11}")
 endif ()
 
+if (CAN_USE_PEDANTIC)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${USE_PEDANTIC}")
+endif ()
+
 if (CAN_WARN_ALL)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${WARN_ALL}")
+endif ()
+
+if (CAN_WARN_NOEXCEPT)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${WARN_NOEXCEPT}")
+endif ()
+
+if (CAN_WARN_EXTRA)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${WARN_EXTRA}")
 endif ()
 
 if (BUILD_TESTING)
@@ -136,3 +148,47 @@ if (BUILD_TESTING)
   set(TEST_BINARY_DIR "${PROJECT_BINARY_DIR}/tests")
   add_subdirectory("${TEST_SOURCE_DIR}" "${TEST_BINARY_DIR}" EXCLUDE_FROM_ALL)
 endif ()
+
+# TODO: Add BUILD_DOCS option and target
+
+#------------------------------------------------------------------------------
+# Install
+#------------------------------------------------------------------------------
+install(FILES
+  ${PROJECT_BINARY_DIR}/core-config-version.cmake
+  ${PROJECT_BINARY_DIR}/core-config.cmake
+  DESTINATION ${CMAKE_INSTALL_DIR}
+)
+
+install(DIRECTORY "${PROJECT_SOURCE_DIR}/include/core"
+  DESTINATION ${INCLUDE_INSTALL_DIR}
+  FILES_MATCHING PATTERN "*.hpp"
+)
+
+#------------------------------------------------------------------------------
+# Package
+#------------------------------------------------------------------------------
+# TODO: Allow for different generators to be selected at configuration time.
+
+set(CPACK_GENERATOR "WIX")
+set(CPACK_PACKAGE_NAME "MNMLSTC Core")
+set(CPACK_PACKAGE_VENDOR "MNMLSTC")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY
+  "MNMLSTC Core - A C++11 library to extend standard functionality"
+)
+set(CPACK_PACKAGE_DESCRIPTION_FILE "${PROJECT_SOURCE_DIR}/Readme.rst")
+set(CPACK_RESOURCE_FILE_LICENSE "${PROJECT_SOURCE_DIR}/License.rst")
+
+set(CPACK_PACKAGE_VERSION_MAJOR ${CORE_VERSION_MAJOR})
+set(CPACK_PACKAGE_VERSION_MINOR ${CORE_VERSION_MINOR})
+set(CPACK_PACKAGE_VERSION_PATCH ${CORE_VERSION_PATCH})
+
+set(CPACK_PACKAGE_INSTALL_DIRECTORY "mnmlstc/${PROJECT_NAME}")
+
+set(CPACK_WIX_UPGRADE_GUID "AE6C6986-200F-464C-83EF-C3A94C6C9995")
+set(CPACK_WIX_PRODUCT_GUID "*")
+set(CPACK_WIX_PRODUCT_ICON "${PROJECT_SOURCE_DIR}/package/mnmlstc.ico")
+set(CPACK_WIX_LICENSE_RTF "${PROJECT_SOURCE_DIR}/package/License.rtf")
+set(CPACK_WIX_UI_BANNER "${PROJECT_SOURCE_DIR}/package/banner.bmp")
+
+include(CPack)
