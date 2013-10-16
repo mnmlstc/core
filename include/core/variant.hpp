@@ -387,7 +387,7 @@ auto get (core::v1::variant<Ts...> const& variant) noexcept(false) -> decltype(
 template <size_t I, class... Ts>
 auto get (core::v1::variant<Ts...>&& variant) noexcept(false) -> decltype(
   variant.template get<I>()
-) { return variant.get<I>(); }
+) { return variant.template get<I>(); }
 
 template <size_t I, class... Ts>
 auto get (core::v1::variant<Ts...>& variant) noexcept (false) -> decltype(
