@@ -94,7 +94,9 @@ struct poly_ptr final {
   template <class U, class E>
   explicit poly_ptr (
     std::unique_ptr<U, E>&& ptr,
-    copier_type copier=default_poly_copy<element_type, deleter_type, U>
+    copier_type copier=std::addressof(
+      default_poly_copy<element_type, deleter_type, U>
+    )
   ) noexcept :
     copier { copier },
     ptr { std::move(ptr) }
@@ -109,7 +111,9 @@ struct poly_ptr final {
   template <class U, class E>
   poly_ptr (
     U* ptr, E&& deleter,
-    copier_type copier=default_poly_copy<element_type, deleter_type, U>
+    copier_type copier=std::addressof(
+      default_poly_copy<element_type, deleter_type, U>
+    )
   ) noexcept :
     poly_ptr {
       unique_type { std::move(ptr), std::forward<E>(deleter) }, copier
