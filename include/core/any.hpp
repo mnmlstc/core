@@ -247,7 +247,7 @@ template <
   auto pointer = any_cast<type>(std::addressof(operand));
   if (not pointer) { throw bad_any_cast { }; }
   return *pointer;
-};
+}
 
 template <
   class ValueType,
