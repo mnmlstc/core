@@ -3,26 +3,25 @@ String Component
 
 .. default-domain:: cpp
 
+.. |string_ref| replace:: :class:`string_ref <basic_string_ref\<T>>`
+
 The string component contains types related to strings, and utilities for
-strings. Specifically, the :class:`basic_string_ref\<T>` class resides in the
+strings. Specifically, the |string_ref| class resides in the
 string component.
 
 .. namespace:: core
 
 .. class:: basic_string_ref<T>
 
-   The string_ref type has been recreated in many different projects over the
-   years, especially where work on immutable strings is desired. A string_ref
+   The |string_ref| type has been recreated in many different projects over the
+   years, especially where work on immutable strings is desired. A |string_ref|
    provides an interface equivalent to a ``std::string const``, and any
    ``std::string`` or ``char const*`` is implicitly convertible to a
-   string_ref. A string_ref is ONLY valid as long as the data it *views* is
+   |string_ref|. A |string_ref| is ONLY valid as long as the data it *views* is
    valid.
 
-   The string_ref class is actually named :class:`basic_string_ref\<T>`, and
-   :type:`string_ref` is simply a type alias where ``T`` is ``char``.
-
-   .. warning:: Attempting to access a string_ref after the data it is viewing
-      has been destructed will result in undefined behavior.
+   .. warning:: Attempting to access a |string_ref| after the data it is
+      viewing has been destructed will result in undefined behavior.
 
    .. type:: difference_type
 
@@ -80,8 +79,8 @@ string component.
       Copies the object given, such that they are equivalent in every
       way.
 
-      .. note:: Because copying a :class:`basic_string_ref\<T>` is cheap, no
-         move constructor is defined.
+      .. note:: Because copying a |string_ref| is cheap, no move constructor is
+         defined.
 
    .. function:: constexpr basic_string_ref ()
 
@@ -92,7 +91,7 @@ string component.
    .. function:: operator std::basic_string<T> () const
 
       Marked as *explicit*. Creates a new ``std::basic_string`` from the
-      string_ref.
+      |string_ref|.
 
    .. function:: constexpr const_iterator begin () const noexcept
                  constexpr const_iterator end () const noexcept
@@ -119,16 +118,16 @@ string component.
 
 .. type:: string_ref
 
-   A type alias for :class:`basic_string_ref\<T>` where ``T`` is ``char``.
+   A type alias for |string_ref| where ``T`` is ``char``.
 
 .. type:: wstring_ref
 
-   A type alias for :class:`basic_string_ref\<T>` where ``T`` is ``wchar_t``.
+   A type alias for |string_ref| where ``T`` is ``wchar_t``.
 
 .. type:: u16string_ref
 
-   A type alias for :class:`basic_string_ref\<T>` where ``T`` is ``char16_t``.
+   A type alias for |string_ref| where ``T`` is ``char16_t``.
 
 .. type:: u32string_ref
 
-   A type alias for :class:`basic_string_ref\<T>` where ``T`` is ``char32_t``.
+   A type alias for |string_ref| where ``T`` is ``char32_t``.
