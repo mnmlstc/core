@@ -146,10 +146,12 @@ class variant final {
 
     template <class T>
     bool operator ()(T const& value) {
-      return reinterpret_cast<T const&>(this->data.get()) == value;
-    };
+      return std::equal_to<T> { }(
+        reinterpret_cast<T const&>(this->data.get()),
+        value
+      );
+    }
   };
-
 
   struct less_than final {
     using data_type = std::reference_wrapper<storage_type const>;
@@ -157,14 +159,16 @@ class variant final {
 
     template <class T>
     bool operator ()(T const& value) noexcept {
-      return reinterpret_cast<T const&>(this->data.get()) < value;
+      return std::less<T> { }(
+        reinterpret_cast<T const&>(this->data.get()),
+        value
+      );
     }
   };
 
-
   struct type_info final {
     template <class T>
-    std::type_info const* operator ()(T&& value) const noexcept {
+    std::type_info const* operator ()(T&&) const noexcept {
       return std::addressof(typeid(decay_t<T>));
     }
   };
