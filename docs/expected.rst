@@ -8,13 +8,13 @@ Expected Component
 
 The |expected| component is closely related to the ``Expected<T>`` put
 forth by Andrei Alexandrescu in his 2012 talk *Systematic Error Handling in
-C++*. It can be considered a combination between :class:`core::optional\<T>`
-and a :class:`core::variant\<Ts>` with a type of
+C++*. It can be considered a combination between :class:`optional\<T>`
+and a :class:`variant\<Ts>` with a type of
 ``variant<T, std::exception_ptr>``. It differs from that of Alexandrescu's
 talk, by adding additional functionality, the ability to rethrow the contained
 exception (if any), as well as the ability to *extract* the contained exception
 without the need of a try-catch block placed by the user. Finally, a
-specialization for ``expected<void>`` exists, allowing a function that normally
+specialization for |expected-v| exists, allowing a function that normally
 returns void (but which may throw an exception) to return the error by way
 of |expected|.
 
