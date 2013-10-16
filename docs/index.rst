@@ -14,10 +14,11 @@ rather than by feature.
    :maxdepth: 1
 
    Using MNMLSTC Core <usage>
-   optional
    expected
-   <variant>
    iterator
+   optional
+   variant
    memory
-   <range>
+   string
+   range
    any
