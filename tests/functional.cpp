@@ -49,7 +49,7 @@ int main () {
       assert::throws<std::out_of_range>([string] {
         std::ignore = core::invoke(
           core::runpack,
-          [] (char a, char b, char c, char d) -> std::string {
+          [] (char, char, char, char) -> std::string {
             return std::string { };
           },
           string
