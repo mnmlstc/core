@@ -3,7 +3,9 @@ Any Component
 
 .. default-domain:: cpp
 
-The :class:`any` component is currently available in Boost (and has been for
+.. |any| replace:: :class:`any`
+
+The |any| component is currently available in Boost (and has been for
 quite some time). There is, at the time of this writing, a `draft proposal
 <http://beman.github.io/dot16/any-proposal.html>`_ for a standard any type,
 which has several API distinctions from the Boost.Any implementation, from which
@@ -12,8 +14,8 @@ make a small object optimization to avoid allocations for small and integral
 types. The MNMLSTC Core any implements this optimization, and attempts to
 follow the proposal as closely as possible.
 
-.. note:: The :class:`any` component does *not* implement the
-   *allocator.uses.construction* constructors defined in the any-proposal. The
+.. note:: The |any| component does *not* implement the
+   *allocator.uses.construction* constructors defined in the any proposal. The
    reason for this is due to:
 
     * Several libraries do not include the constructors necessary for types
@@ -48,14 +50,16 @@ follow the proposal as closely as possible.
 
       The default set of constructors work as one might imagine. The copy
       constructor is not marked as noexcept as the underlying type *may*
-      throw an exception, and due to the type erasure performed, the any has
+      throw an exception, and due to the type erasure performed, the |any| has
       no way of enforcing this at compile time.
 
    .. function:: any (ValueType&& value)
 
-      When constructing an any with any given ``ValueType``, it will perform a
+      When constructing an |any| with a given ``ValueType``, it will perform a
       series of compile time checks to see whether it should perform the small
-      object optimization.
+      object optimization. If the object is deemed small enough, it will not
+      allocate memory. Otherwise, a new ValueType will be allocated via
+      operator new, and constructed with the given *value*.
 
       :type value: ValueType&&
       :raises: Any exceptions thrown by the copy or move constructor
@@ -68,24 +72,24 @@ follow the proposal as closely as possible.
 
    .. function:: void any::swap (any&) noexcept
 
-      Swaps the object contained within the given any with the one contained
+      Swaps the object contained within the given |any| with the one contained
       within ``*this``.
 
    .. function:: std::type_info const& type () const noexcept
 
-      Returns the ``std::type_info`` for the type contained within. If the any
-      is empty, it will return ``typeid(void)``.
+      Returns the ``std::type_info`` for the type contained within. If the
+      |any| is empty, it will return ``typeid(void)``.
 
    .. function:: bool empty () const noexcept
 
-      If the any does not contain any data (i.e. :cpp:func:`any::type` returns
+      If the |any| does not contain any data (i.e. :func:`any::type` returns
       ``typeid(void)``), it will return true.
 
    .. function:: void clear () noexcept
 
       :postcondition: :func:`any::empty` == true
 
-      Destroys the object contained within the :class:`any`.
+      Destroys the object contained within the |any|.
 
 
 
