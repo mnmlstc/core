@@ -189,12 +189,33 @@ C++11 equivalent to C++14's :func:`make_unique\<T>`.
    :inherits: std::logic_error
 
    Thrown when a :func:`poly_ptr<T, Deleter>::reset` is passed a
-   non-null pointer and the |poly_ptr| does no manage an object, or if the
+   non-null pointer and the |poly_ptr| does not manage an object, or if the
    passed in pointer differs in type from the currently managed object.
 
 .. class:: default_copy<T>
 
-   .. todo:: fIll out this section
+   The default copy policy used by |deep_ptr| during a copy operation. There
+   are no partial specializations available. The default operation to perform
+   is to allocate a new *T* pointer with ``operator new``, and to initialize
+   this *T* with a ``T const&``.
+
+   .. type:: pointer
+
+      Represents ``T*``
+
+   .. function:: constexpr default_copy () = default;
+
+      Constructs the :class:`default_copy\<T>` object.
+
+   .. function:: default_copy (default_copy<U> const&) noexcept
+
+      Constructs a :class:`default_copy\<T>` from another
+      :class:`default_copy\<T>`.
+
+   .. function:: pointer operator ()(pointer const ptr)
+
+      Allocates a new :type:`pointer` and initializes it with the dereferenced
+      *ptr*, to invoke the copy constructor.
 
 .. function:: std::unique_ptr<T, D> default_poly_copy<T, D, U> (\
               std::unique_ptr<T, D> const&)
