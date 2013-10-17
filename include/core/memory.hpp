@@ -51,19 +51,12 @@ std::unique_ptr<T, D> null_poly_copy (std::unique_ptr<T, D> const&) noexcept {
 /* deep_ptr copier */
 template <class T>
 struct default_copy {
-  using allocator_type = std::allocator<T>;
   using pointer = T*;
 
-  constexpr default_copy () noexcept { }
-  template <class U>
-  default_copy (default_copy<U> const& copier) noexcept;
+  constexpr default_copy () = default;
+  template <class U> default_copy (default_copy<U> const& copier) noexcept { }
 
-  pointer operator ()(pointer const ptr) const {
-    allocator_type alloc { };
-    auto val = std::allocator_traits<allocator_type>::allocate(alloc, 1);
-    std::allocator_traits<allocator_type>::construct(alloc, val, *ptr);
-    return val;
-  }
+  pointer operator ()(pointer const ptr) const { return new T { *ptr }; }
 };
 
 struct bad_polymorphic_reset : std::logic_error {
