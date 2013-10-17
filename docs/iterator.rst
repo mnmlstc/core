@@ -4,11 +4,13 @@ Iterator Component
 .. default-domain:: cpp
 
 The iterator component provides the additional functions provided in C++14 with
-respect to iterators.
+respect to iterators. Specifically the free form functions that work like
+``std::begin`` and ``std::end``.
 
 .. namespace:: core
 
 .. function:: cbegin (Container const& container)
+
 
    :returns: ``std::begin(container)``
 

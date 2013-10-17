@@ -26,7 +26,7 @@ of |expected|.
 
 .. class:: expected<T>
 
-   The |expected| works much like :class:`optional\<T>` in that it
+   |expected| works much like :class:`optional\<T>` in that it
    contains an optionally instantiated type ``T``. However, unlike
    :class:`optional\<T>`, it is never in a 'null' state. It will instead hold
    an exception that was thrown at some level within the function that returned
@@ -91,28 +91,28 @@ of |expected|.
    .. function:: value_type const& operator * () const
                  value_type& operator * () const
 
-      Both overloads of this function are marked ``noexcept(false)``. Throws if
-      the |expected| is invalid.
+      Throws if the |expected| is invalid.
 
       :returns: The object managed by |expected|
       :throws: The exception managed by |expected|
+      :noexcept: false
 
    .. function:: value_type const& value () const
                  value_type& value () const
 
-      Both overloads of this function are marked ``noexcept(false)``. Throws if
-      the |expected| is invalid.
+      Throws if the |expected| is invalid.
 
       :returns: The object managed by |expected|
       :throws: The exception managed by |expected|
+      :noexcept: false
 
    .. function:: std::exception_ptr get_ptr () const
 
-      Mark as ``noexcept(false)``. Throws :class:`bad_expected_type` if the
-      |expected| is valid.
+      Throws :class:`bad_expected_type` if the |expected| is valid.
 
       :returns: The exception pointer managed by the |expected|
       :throws: :class:`bad_expected_type`
+      :noexcept: false
 
    .. function:: value_or<U>(U&& value)
 
@@ -127,31 +127,33 @@ of |expected|.
 
    .. function:: void swap (expected& that) noexcept
 
-      Noexcept only if ``std::is_nothrow_move_constructible<value_type>``
-      and ``noexcept(std::swap<value_type>)`` are true.
+      :noexcept: ``std::is_nothrow_move_constructible<value_type>`` and if
+                 ``std::swap`` for :type:`value_type` is *also* noexcept.
 
       If both |expected| are valid, then their values are swapped.
       If both |expected| are invalid, then their exception_ptr's are swapped
 
       Otherwise, the valid and invalid state between both |expected| is swapped
-      and the 'valid' object is moved into the 'invalid' object.
+      and the 'valid' object is moved into the 'invalid' object, and vice versa
 
    .. function:: E expect<E> () const
 
-      Marked as ``noexcept(false)``. This function will attempt to extract the
-      given exception type *E*. If the |expected| is valid,
-      :class:`bad_expected_type` is thrown. If the |expected| is invalid, but
-      the given type *E* is *not* the correct exception type,
-      :class:`std::nested_exception` with :class:`bad_expected_type` and the
-      actual exception are thrown.
+      :noexcept: false
+
+      This function will attempt to extract the given exception type *E*. If
+      the |expected| is valid, :class:`bad_expected_type` is thrown. If the
+      |expected| is invalid, but the given type *E* is *not* the correct 
+      exception type, :class:`std::nested_exception` with
+      :class:`bad_expected_type` and the actual exception are thrown.
 
    .. function:: void raise () const
 
-      Marked as ``noexcept(false)``. Throws the |expected| exception if the
-      exception is invalid, otherwise throws :class:`bad_expected_type`.
-      This function *always* throws and never returns.
+      :noexcept: false
+      :attributes: *noreturn*
 
-      Has the ``[[noreturn]]`` attribute.
+      Throws the |expected| exception if the exception is invalid, otherwise
+      throws :class:`bad_expected_type`. This function *always* throws and
+      never returns.
 
 .. class:: expected<void>
 
@@ -177,7 +179,8 @@ of |expected|.
 
    .. function:: expected& operator = (std::exception_ptr) noexcept
 
-      Invalidates the |expected-v| if it isn't already.
+      Invalidates the |expected-v| if it isn't already. If the |expected-v| is
+      invalid already, it will now store the incoming exception_ptr.
 
    .. function:: expected& operator = (expected const&) noexcept
                  expected& operator = (expected&&) noexcept
@@ -254,13 +257,20 @@ of |expected|.
 
 .. function:: auto make_expected<T>(std::exception_ptr) noexcept
 
-   Returns an invalidated |expected| containing the given exception_ptr.
+   Returns an invalidated |expected| containing the given exception_ptr. Can
+   be easily used in conjunction with ``std::make_exception_ptr``::
+
+      auto invalid_expected = make_expected<int>(
+        std::make_exception_ptr(std::logic_error { "something went wrong" })
+      );
 
 Specializations
 ---------------
 
 .. namespace:: std
 
-.. function:: void swap(expected<T>& lhs, expected<T>& rhs) noexcept
+.. function:: void swap(expected<T>& lhs, expected<T>& rhs)
 
-   Marked as ``noexcept(noexcept(lhs.swap(rhs)))``. Calls ``lhs.swap(rhs)``.
+   :noexcept: ``noexcept(lhs.swap(rhs))``
+
+   Calls ``lhs.swap(rhs)``.
