@@ -182,7 +182,90 @@ C++11 equivalent to C++14's :func:`make_unique\<T>`.
 
 .. class:: deep_ptr<T, Deleter, Copier>
 
-   .. todo:: Fill out this section
+   |deep_ptr| is a smart pointer for a type that retains sole ownership of the
+   pointer it manages and performs a *deep copy* on assignment or copy
+   construction. |deep_ptr| is much like ``std::unique_ptr`` with deep-copy
+   semantics. Unlike |poly_ptr|, |deep_ptr| is for concrete types where
+   polymorphism is not desired. |poly_ptr| has *some* storage overhead for
+   copying a polymorphic type, however |deep_ptr| performs the same
+   optimization as ``std::unique_ptr`` in that it is only ``sizeof(T*)``,
+   unless the given Deleter and Copier types hold state.
+
+   With the exception of the copy assignment and copy constructor, |deep_ptr|
+   has an interface identical to that of ``std::unique_ptr``, and exhibits the
+   same behavior as ``std::unique_ptr``
+
+   .. function:: deep_ptr (deep_ptr const& that)
+
+      Constructs a new object to be managed via *that*'s Copier object.
+
+   .. function:: deep_ptr (deep_ptr&& that) noexcept
+
+      Constructs a |deep_ptr| with the managed object, deleter, and copier of
+      *that* via move construction.
+
+      :postcondition: *that* is empty
+
+   .. function:: deep_ptr () noexcept
+
+      Default constructs a |deep_ptr| into an empty state.
+
+   .. function:: deep_ptr& operator = (std::unique_ptr<U, D>&& ptr) noexcept
+
+      Assigns the contents of *ptr* to ``*this``
+ 
+   .. function:: deep_ptr& operator = (deep_ptr const&) noexcept
+                 deep_ptr& operator = (deep_ptr&&) noexcept
+
+      Assigns the contents of the incoming |deep_ptr| to ``*this``
+
+   .. function:: operator bool () const noexcept
+
+      .. note:: This cast operator is marked as explicit
+
+      :returns: Whether the |deep_ptr| manages an object
+
+   .. function:: element_type& operator * () const
+
+      Attempting to dereference a |deep_ptr| that does not manage an object
+      will result in undefined behavior
+
+      :returns: an lvalue reference to the managed object
+
+   .. function:: pointer operator -> () const noexcept
+
+      :returns: a pointer to the managed object or ``nullptr`` if no such
+                object exists.
+
+   .. function:: pointer get () const noexcept
+
+      :returns: A pointer to the managed object, or ``nullptr`` if no such
+                object exists.
+
+   .. function:: deleter_type const& get_deleter () const noexcept
+                 deleter_type& get_deleter () noexcept
+
+      :returns: The deleter object used for destruction of the managed object.
+
+   .. function:: copier_type const& get_copier () const noexcept
+                 copier_type& get_copier () noexcept
+
+      :returns: The copier object used for copying the managed object.
+
+   .. function:: pointer release () noexcept
+
+      :postcondition: :func:`deep_ptr\<T, Deleter, Copier>::get` returns \
+                      ``nullptr``
+
+      Releases the ownership of the managed object, if any such object exists.
+
+   .. function:: void reset (pointer ptr = pointer { })
+
+      Replaces the currently managed object with *ptr*.
+
+   .. function:: void swap(deep_ptr&) noexcept
+
+      Swaps the managed object, copier object, and deleter object.
 
 .. class:: bad_polymorphic_reset
 
@@ -203,7 +286,7 @@ C++11 equivalent to C++14's :func:`make_unique\<T>`.
 
       Represents ``T*``
 
-   .. function:: constexpr default_copy () = default;
+   .. function:: constexpr default_copy ()
 
       Constructs the :class:`default_copy\<T>` object.
 
