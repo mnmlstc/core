@@ -195,9 +195,54 @@ C++11 equivalent to C++14's :func:`make_unique\<T>`.
    has an interface identical to that of ``std::unique_ptr``, and exhibits the
    same behavior as ``std::unique_ptr``
 
+   If the result of the :type:`copier_type` differs from :type:`pointer`, the
+   program will be malformed, and a static assertion will cause a compiler
+   error.
+
+   .. type:: element_type
+
+      The type of object managed by the |deep_ptr|.
+
+   .. type:: deleter_type
+
+      The deleter object used to destroy and deallocate the object managed by
+      the |deep_ptr|.
+
+   .. type:: copier_type
+
+      The copier object used to perform an allocation and deep copy the object
+      managed by |deep_ptr|.
+
+   .. type:: pointer
+
+      ``remove_reference_t<deleter_type>::pointer`` if the type exists,
+      otherwise, ``element_type*``.
+
+   .. function:: deep_ptr (pointer ptr, E&& deleter, C&& copier) noexcept
+
+      Actually two separate constructors, these follow the behavior of the
+      ``std::unique_ptr`` constructors that take a pointer, and deleter object.
+      The behavior extends to the type desired for the copier object as well.
+
+   .. function:: deep_ptr (std::unique_ptr<U, E>&&) noexcept
+
+      Constructs a |deep_ptr| with the contents of the unique_ptr. The given
+      type *U* must be a pointer convertible to :type:`pointer`, and *E* must
+      be a type that can construct a :type:`deleter_type`.
+
+   .. function:: explicit deep_ptr (pointer ptr) noexcept
+
+      Constructs a |deep_ptr| with the default deleter, default copier, and the
+      given pointer. The |deep_ptr| assumes ownership of *ptr*.
+
+   .. function:: deep_ptr (std::nullptr_t) noexcept
+
+      Delegates construction of the |deep_ptr| to the 
+      :ref:`default constructor <deep-ptr-default-constructor>`.
+
    .. function:: deep_ptr (deep_ptr const& that)
 
-      Constructs a new object to be managed via *that*'s Copier object.
+      Constructs a new object to be managed via *that*'s object.
 
    .. function:: deep_ptr (deep_ptr&& that) noexcept
 
@@ -206,7 +251,9 @@ C++11 equivalent to C++14's :func:`make_unique\<T>`.
 
       :postcondition: *that* is empty
 
-   .. function:: deep_ptr () noexcept
+   .. _deep-ptr-default-constructor:
+
+   .. function:: constexpr deep_ptr () noexcept
 
       Default constructs a |deep_ptr| into an empty state.
 
@@ -218,6 +265,10 @@ C++11 equivalent to C++14's :func:`make_unique\<T>`.
                  deep_ptr& operator = (deep_ptr&&) noexcept
 
       Assigns the contents of the incoming |deep_ptr| to ``*this``
+
+   .. function:: deep_ptr& operator = (std::nullptr_t) noexcept
+
+      Resets the |deep_ptr| and the object it manages.
 
    .. function:: operator bool () const noexcept
 
@@ -319,6 +370,26 @@ C++11 equivalent to C++14's :func:`make_unique\<T>`.
 
    :returns: An empty ``std::unique_ptr<T, D>``
 
+.. function:: bool operator == (poly_ptr const&, poly_ptr const&) noexcept
+              bool operator != (poly_ptr const&, poly_ptr const&) noexcept
+              bool operator >= (poly_ptr const&, poly_ptr const&) noexcept
+              bool operator <= (poly_ptr const&, poly_ptr const&) noexcept
+              bool operator > (poly_ptr const&, poly_ptr const&) noexcept
+              bool operator < (poly_ptr const&, poly_ptr const&) noexcept
+
+   Compares two |poly_ptr|'s via :func:`poly_ptr\<T, Deleter>::get` with
+   the given operator.
+
+.. function:: bool operator == (deep_ptr const&, deep_ptr const&) noexcept
+              bool operator != (deep_ptr const&, deep_ptr const&) noexcept
+              bool operator >= (deep_ptr const&, deep_ptr const&) noexcept
+              bool operator <= (deep_ptr const&, deep_ptr const&) noexcept
+              bool operator > (deep_ptr const&, deep_ptr const&) noexcept
+              bool operator < (deep_ptr const&, deep_ptr const&) noexcept
+
+   Compares two |deep_ptr|'s via :func:`deep_ptr\<T, Deleter>::get` with
+   the given operator.
+
 .. function:: bool operator == (poly_ptr<T, D> const&, nullptr_t) noexcept
               bool operator != (poly_ptr<T, D> const&, nullptr_t) noexcept
               bool operator >= (poly_ptr<T, D> const&, nullptr_t) noexcept
@@ -335,6 +406,22 @@ C++11 equivalent to C++14's :func:`make_unique\<T>`.
    :returns: the result of comparing :func:`poly_ptr\<T, Deleter>::get` and
              ``nullptr`` with the given operator.
 
+.. function:: bool operator == (deep_ptr<T, D, C> const&, nullptr_t) noexcept
+              bool operator != (deep_ptr<T, D, C> const&, nullptr_t) noexcept
+              bool operator >= (deep_ptr<T, D, C> const&, nullptr_t) noexcept
+              bool operator <= (deep_ptr<T, D, C> const&, nullptr_t) noexcept
+              bool operator > (deep_ptr<T, D, C> const&, nullptr_t) noexcept
+              bool operator < (deep_ptr<T, D, C> const&, nullptr_t) noexcept
+              bool operator == (nullptr_t, deep_ptr<T, D, C> const&) noexcept
+              bool operator != (nullptr_t, deep_ptr<T, D, C> const&) noexcept
+              bool operator >= (nullptr_t, deep_ptr<T, D, C> const&) noexcept
+              bool operator <= (nullptr_t, deep_ptr<T, D, C> const&) noexcept
+              bool operator > (nullptr_t, deep_ptr<T, D, C> const&) noexcept
+              bool operator < (nullptr_t, deep_ptr<T, D, C> const&) noexcept
+
+   :returns: The result of comparing :func:`deep_ptr\<T, Deleter, Copier>::get`
+             and ``nullptr`` with the given operator.
+
 .. function:: poly_ptr<T, Deleter> make_poly<T>(U&& args)
 
    Provided to supplement the ``std::make_shared<T>`` and
@@ -342,6 +429,14 @@ C++11 equivalent to C++14's :func:`make_unique\<T>`.
    ``element_type`` of *T*, taking derived universal reference *U*. This
    function internally calls :func:`make_unique\<T>` to create the
    |poly_ptr|.
+
+.. function:: deep_ptr<T> make_deep<T>(args)
+
+   Used to supplement the :func:`make_unique\<T>`, :func:`make_poly\<T>`,
+   and `make_shared<T>` functions. Takes a variadic number of arguments to
+   construct a *T* with. This *T* is allocated via operator new (the default
+   allocation scheme) and passed to a |deep_ptr| for construction. This
+   |deep_ptr| is then returned by the function.
 
 .. function:: std::unique_ptr<T> make_unique<T>(args)
               std::unique_ptr<T> make_unique<T>(size)
@@ -392,9 +487,15 @@ the C++ standard library.
    expression
    ``std::hash<typename deep_ptr<T, Deleter, Copier>::pointer> { }(ptr.get())``
 
-.. function:: void swap<T, D>(poly_ptr<T, D>& lhs, poly_ptr<T, D>& rhs) \
+.. function:: void swap(poly_ptr<T, D>& lhs, poly_ptr<T, D>& rhs) \
               noexcept
 
    A specialization of ``std::swap`` that calls
    :func:`poly_ptr<T, Deleter>::swap`.
+
+.. function:: void swap(deep_ptr<T, D, C>& lhs, deep_ptr<T, D, C>& rhs) \
+              noexcept
+
+   A specialization of ``std::swap`` that calls
+   :func:`deep_ptr<T, Deleter, Copier>::swap`.
 
