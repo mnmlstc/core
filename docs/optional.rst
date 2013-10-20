@@ -71,15 +71,110 @@ possible.
       *disengaged* |optional|.
 
 
+   .. warning:: An |optional|'s :type:`value_type` *may not* be:
+
+      * :class:`in_place_t`
+      * :class:`nullopt_t`
+      * ``std::nullptr_t``
+      * ``void``
+      * ``bool``
+
+      The decision to disallow an ``optional<bool>`` is due to the explicit
+      boolean conversion operator. It was decided that getting the true or
+      false state would be error prone and too easy to miss.
+
    .. type:: value_type
 
       Represents the underlying type stored within an |optional|.
 
+   .. function:: optional (optional const&)
+
+      Copies the contents of the incoming |optional|. If the incoming
+      |optional| is engaged, the contents of it are initialized into the
+      new |optional| object.
+
+   .. function:: optional (optional&& that)
+
+      Constructs a new |optional| by moving the state of the incoming
+      |optional|. If the invoming |optional| is engaged, its contents will be
+      moved into the new object.
+
+      :postcondition: ``that.empty() == true``
+      :noexcept: ``std::is_nothrow_move_constructible<value_type>``
+
+   .. function:: constexpr optional (nullopt_tr) noexcept
+                 constexpr optional () noexcept
+
+      Constructs a new |optional| into a disengaged state.
+
+   .. function:: optional (value_type const&)
+                 optional (value_type&&)
+
+      Constructs a new |optional| into an *engaged* state with the contents of
+      the value_type.
+
+      :noexcept: ``std::is_nothrow_move_constructible<value_type>``
+
+   .. function:: explicit optional (in_place_t, std::initializer_list<T>, args)
+                 explicit optional (in_place_t, args)
+
+      Constructs a new |optional| into an *engaged* state by constructing a
+      :type:`value_type` in place.
+
+   .. function:: optional& operator = (optional const&)
+                 optional& operator = (optional&&)
+
+      :noexcept: ``std::is_nothrow_move_assignable<value_type>`` and
+                 ``std::is_nothrow_move_constructible<value_type>``.
+
+      Assigns the state of the incoming |optional|. This is done by
+      constructing an |optional|, and then calling :func:`swap` on it and
+      ``*this``.
+
+   .. function:: optional& operator = (T&& value)
+
+      This assignment operator is only valid if :type:`value_type` is
+      constructible *and* assignable from *value*.
+
+      If ``*this`` is *disengaged*, it will be placed into an *engaged* state
+      afterwards. If ``*this`` is already engaged, it will call the assignment
+      constructor of :type:`value_type`.
+
+   .. function:: optional& operator = (nullopt_t)
+
+      If ``*this`` is in an engaged state, it will be placed into a
+      *disengaged* state.
+
+   .. function:: value_type const* operator -> () const
+                 value_type* operator -> ()
+
+      Accessing the managed object when the |optional| is in a disengaged state
+      will result in undefined behavior.
+
+      :returns: pointer to the object managed by the |optional|
+
+   .. function:: value_type const& operator * () const
+                 value_type& operator * ()
+
+      If the |optional| does not manage an object, dereferencing the 
+      |optional| will result in undefined behavior.
+
+      :returns: An lvalue reference to the object managed by the |optional|
+
    .. function:: operator bool () const
+
+      This conversion operator is *explicit*.
 
       :returns: true if the object is *engaged*, false otherwise.
 
    .. function value_type value_or<U>(U&& value)
+
+      If ``*this`` is an lvalue reference the :type`value_type` will be copy
+      constructed. If ``*this`` is an rvalue reference, the :type:`value_type`
+      is move constructed.
+
+      :returns: the object managed by |optional| or a :type:`value_type`
+                constructed from *value*.
 
    .. function:: value_type const& value () const
                  value_type& value ()
@@ -104,9 +199,12 @@ possible.
        * If both ``*this`` and ``that`` are *engaged*, their contained values
          are swapped with ``std::swap(**this, *that)``.
 
-   .. function:: void emplace (Args&&)
+   .. function:: void emplace (std::initializer_list<U>, args)
+                 void emplace (args)
 
-      .. todo:: discuss behavior
+      Constructs the object managed by the |optional|. If the |optional| is
+      already engaged, it will first destruct the object it is currently
+      managing.
 
 .. function:: optional<T> make_optional<T>(T&& value)
 
@@ -116,4 +214,31 @@ possible.
 
        optional<typename std::decay<T>::type>(std::forward<T>(value));
 
+.. function:: bool operator == (optional const&, optional const&) noexcept
+              bool operator == (optional const&, nullopt_t) noexcept
+              bool operator == (nullopt_t, optional const&) noexcept
+              bool operator == (optional<T> const&, T const&) noexcept
+              bool operator == (T const&, optional<T> const&) noexcept
 
+   .. todo:: add descriptions of behavior.
+
+Specializations
+---------------
+
+.. namespace:: std
+
+Several specializations for the standard namespace are overloaded for the
+|optional| component.
+
+.. function:: void swap (optional<T>& lhs, optional<T>& rhs)
+
+   Calls :func:`optional\<T>::swap`.
+
+   :noexcept: ``lhs.swap(rhs)``
+
+.. class:: hash<optional<T>>
+
+   Requires that the :type:`optional\<T>::value_type` be specialized for
+   ``std::hash``. If the |optional| is engaged it will return the hash
+   value for ``hash<value_type>``. Otherwise, it will return a default
+   constructed ``std::hash<value_type>::result_type``.
