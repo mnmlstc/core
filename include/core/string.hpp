@@ -116,7 +116,7 @@ struct basic_string_ref {
     this->len -= n;
   }
 
-  void clear () {
+  void clear () noexcept {
     this->str = nullptr;
     this->len = 0;
   }

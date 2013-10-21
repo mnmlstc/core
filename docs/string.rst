@@ -4,6 +4,7 @@ String Component
 .. default-domain:: cpp
 
 .. |string_ref| replace:: :class:`string_ref <basic_string_ref\<T>>`
+.. |npos| replace:: :member:`npos <basic_string_ref\<T>::npos>`
 
 The string component contains types related to strings, and utilities for
 strings. Specifically, the |string_ref| class resides in the
@@ -55,19 +56,25 @@ string component.
 
       ``std::reverse_iterator<const_iterator>``
 
+   .. member:: static constexpr npos
+
+      :type: :type:`size_type`
+
+      equal to ``std::numeric_limits<size_type>::max()``
+
    .. function:: basic_string_ref (std::string const& str)
 
       Constructs the object such that it views the entire contents of the given
       string.
 
-      :postcondition: this->size() == str.size()
+      :postcondition: :func:`size` == *str*.size()
 
    .. function:: constexpr basic_string_ref (pointer str, size_type len)
 
       Constructs the object such that it views the given string and has a
       maximum length of the given length.
 
-      :postcondition: this->size() == len
+      :postcondition: :func:`size` == *len*
 
    .. function:: basic_string_ref (pointer str)
 
@@ -86,22 +93,32 @@ string component.
 
       Constructs the object to be empty.
 
-      :postcondition: this->empty() == true
+      :postcondition: :func:`empty` == true
 
    .. function:: operator std::basic_string<T> () const
 
       Marked as *explicit*. Creates a new ``std::basic_string`` from the
       |string_ref|.
 
-   .. function:: constexpr const_iterator begin () const noexcept
-                 constexpr const_iterator end () const noexcept
-                 constexpr const_iterator cbegin () const noexcept
-                 constexpr const_iterator cend () const noexcept
+   .. function:: constexpr const_iterator cbegin () const noexcept
+                 constexpr const_iterator begin () const noexcept
 
-   .. function:: const_reverse_iterator rbegin() const noexcept
+      :returns: Iterator to the beginning of the |string_ref|.
+
+   .. function:: constexpr const_iterator cend () const noexcept
+                 constexpr const_iterator end () const noexcept
+
+      :returns: Iterator to the end of the |string_ref|.
+
+   .. function:: const_reverse_iterator crbegin() const noexcept
+                 const_reverse_iterator rbegin () const noexcept
+
+      :returns: reverse iterator to the beginning of the |string_ref|
+
+   .. function:: const_reverse_iterator crend () const noexcept
                  const_reverse_iterator rend () const noexcept
-                 const_reverse_iterator crbegin () const noexcept
-                 const_reverse_iterator crend () const noexcept
+
+      :returns: reverse iterator to the beginning of the |string_ref|
 
    .. function:: constexpr size_type max_size () const noexcept
 
@@ -135,6 +152,131 @@ string component.
                 This pointer is not guaranteed to be null terminated, and
                 should be treated as such.
 
+   .. function:: void remove_prefix (size_type n)
+
+      Moves the front of the |string_ref| forward *n* characters or
+      :func:`size` if *n* is greater than :func:`size`.
+
+   .. function:: void remove_suffix (size_type n)
+
+      Moves the end of the |string_ref| backwards *n* characters or
+      :func:`size` if *n* is greater than :func:`size`.
+
+   .. function:: void clear () noexcept
+
+      Sets the |string_ref| to be empty.
+
+      :postconditions: :func:`empty` == true
+
+   .. function:: constexpr basic_string_ref substr \
+                 (size_type pos, size_type n=npos) const
+
+      :returns: a new |string_ref| with starting point *pos* and a length of
+                *n* characters. If *n* is equal to |npos|, or 
+                *pos* + *n* is greater than :func:`size`, the length will be
+                the remainder of the string. Otherwise it will be *n*
+                characters.
+      :throws: ``std::out_of_range`` if *pos* is greater than :func:`size`
+
+   .. function:: bool starts_with (basic_string_ref value) const noexcept
+                 bool starts_with (value_type value) const noexcept
+
+      :returns: Whether the |string_ref| starts with the given *value*.
+
+   .. function:: bool ends_with (basic_string_ref value) const noexcept
+                 bool ends_with (value_type value) const noexcept
+
+      :returns: Whether the |string_ref| ends with the given *value*.
+
+   .. function:: difference_type compare (basic_string_ref that) const
+
+      Compares two |string_ref|'s. First calculates the number of characters
+      to compare, then compares via a character by character lexicographical
+      comparison. If the result is 0, then their sizes are compared and the
+      return value is affected by their length.
+
+      :returns: negative value if this |string_ref| is less than the other,
+                zero if the both |string_ref|'s are equal,
+                positive value if this |string_ref| is greater than the other.
+
+   .. function:: reference at (size_type idx) const
+
+      :returns: :type:`value_type` located at *idx*.
+      :throws: ``std::out_of_range`` if *idx* is greater than or equal to
+               :func:`size`.
+
+   .. function:: size_type find_first_not_of (basic_string_ref) const
+                 size_type find_first_not_of (value_type) const
+
+      Finds the first character equal to none of the characters in the given
+      character sequence. 
+
+      :returns: index of the first character not in the given sequence, or
+                |npos| if no such character is found.
+
+   .. function:: size_type find_last_not_of (basic_string_ref) const
+                 size_type find_last_not_of (value_type) const
+
+      Finds the last character equal to none of the characters in the given
+      character sequence.
+
+      :returns: index of the last character not in the given sequence, or
+                |npos| if no such character is found.
+
+   .. function:: size_type find_first_of (basic_string_ref) const
+                 size_type find_first_of (value_type) const
+
+      Finds the first character equal to one of characters in the given
+      character sequence.
+
+      :returns: Index of the first character found, or |npos| if no such 
+                character is found.
+
+   .. function:: size_type find_last_of (basic_string_ref) const
+                 size_type find_last_of (value_type) const
+
+      Finds the last character equal to one of characters in the given
+      character sequence.
+
+      :returns: Index of the last character found, or |npos| is no such
+                character is found.
+
+   .. function:: size_type rfind (basic_string_ref) const
+                 size_type rfind (value_type) const
+
+      Finds the last substring equal to the given character sequence.
+
+      :returns: index of the desired substring, or |npos| if no such substring
+                was found.
+
+   .. function:: size_type find (basic_string_ref) const
+                 size_type find (value_type) const
+
+      Finds the first substring equal to the given character sequence.
+
+      :returns: index of the desired substring, or |npos| if no such substring
+                was found.
+
+   .. function:: void swap (basic_string_ref& that) noexcept
+
+      Swaps the contents of the |string_ref| with *that*.
+
+.. function:: bool operator == (basic_string_ref, basic_string_ref)
+              bool operator != (basic_string_ref, basic_string_ref)
+              bool operator >= (basic_string_ref, basic_string_ref)
+              bool operator <= (basic_string_ref, basic_string_ref)
+              bool operator > (basic_string_ref, basic_string_ref)
+              bool operator < (basic_string_ref, basic_string_ref)
+
+   :returns: Whether the given |string_ref|'s meet the requirements for the
+             given operator. Follows the same semantics as the ``std::string``
+             comparison operators.
+
+.. function:: std::basic_ostream<T>& operator << \
+              (std::basic_ostream<T>& os, basic_string_ref<T> const& str)
+
+   Overload to print a |string_ref| directly to the given stream *os*.
+
 .. type:: string_ref
 
    A type alias for |string_ref| where ``T`` is ``char``.
@@ -150,3 +292,18 @@ string component.
 .. type:: u32string_ref
 
    A type alias for |string_ref| where ``T`` is ``char32_t``.
+
+Specializations
+---------------
+
+.. namespace:: std
+
+Several specializations for standard code are provided
+
+.. function:: void swap(basic_string_ref&, basic_string_ref&)
+
+   Calls :func:`basic_string_ref\<T>::swap`
+
+.. class:: hash<basic_string_ref<T>>
+
+   Specialization hash for |string_ref|.
