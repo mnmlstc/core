@@ -3,17 +3,161 @@ Range Component
 
 .. default-domain:: cpp
 
+.. |range| replace:: :class:`range <range\<T>>`
+
 Ranges are a common concept in the C++ standard, and in the case of all the
 algorithms available, one usually has to supply a start and end to a range as
 adjacent arguments. This can be tiresome, and in the common case, unnecessary.
 
-The :class:`range\<T>` component works as a high level view. Rather than
-holding onto the container, it simply holds the start and end iterators to
-represent a range. The :class:`range<T>` component implements the interface and
-behavior discussed within N3350_. Some decisions pertaining to open questions
-were made, and these are discussed below.
+The |range| component works as a high level view. Rather than holding onto the
+container, it simply holds the start and end iterators to represent a range.
+The |range| component implements the interface and behavior discussed within
+N3350_. Some decisions pertaining to open questions were made, and these are
+discussed below.
 
 .. namespace:: cpp
+
+.. class:: is_range<R>
+
+   Type trait for determining if a type can return a value when ``std::begin``
+   and ``std::end`` are called on it.
+
+.. class:: range<T>
+
+
+   Represents an open-ended range of [begin, end). The category of range
+   depends on the category of its :type:`iterator`. All the type aliases
+   within the |range| depend on the use of ``std::iterator_traits<T>``.
+
+   The type *T* is actually an Iterator type.
+
+   .. type:: iterator_category
+
+      Represents ``std::iterator_traits<T>::iterator_category``
+
+   .. type:: difference_type
+
+      Represents ``std::iterator_traits<T>::difference_type``
+
+   .. type:: value_type
+
+      Represents ``std::iterator_traits<T>::value_type``
+
+   .. type:: reference
+
+      Represents ``std::iterator_traits<T>::reference``
+
+   .. type:: pointer
+
+      Represents ``std::iterator_traits<T>::pointer``
+
+   .. type:: iterator
+
+      Represents *T*.
+
+   .. function:: range (std::pair<iterator, iterator> pair) noexcept
+
+      Constructs a |range| with the first and second members of the pair to be
+      the begin and end of the |range| respectively.
+
+   .. function:: range (iterator begin, iterator end) noexcept
+
+      Constructs a |range| with the given iterators.
+
+   .. function:: range (range const& that)
+
+      Constructs a |range| with a copy of the iterators stored in *that*.
+
+   .. function:: range (range&& that) noexcept
+
+      Constructs a |range| by moving the iterators stored in *that*.
+
+   .. function:: range ()
+
+      Constructs a |range| by default constructing both its begin and end
+      iterators. The resulting range will be empty.
+
+      :postcondition: ``begin() == end()``
+
+   .. function:: range& operator = (range const&)
+                 range& operator = (range&&)
+
+      Assigns the contents of the incoming |range| to ``*this``.
+
+   .. function:: reference operator[](difference_type idx) const
+
+      :requires: :type:`iterator_category` be ``random_access_iterator_tag``.
+
+   .. function:: iterator begin () const
+
+      :returns: beginning of the range
+
+   .. function:: iterator end () const
+
+      :returns: end of the range.
+
+   .. function:: reference front () const
+
+      :returns: the value returned by dereferencing :func:`begin`
+
+   .. function:: reference back () const
+
+      :requires: :type:`iterator_category` be ``bidirectional_iterator_tag``.
+      :returns: the value returned by dereferencing the iterator before
+                :func:`end`
+   .. function:: bool empty () const
+
+      :returns: :func:`begin` == :func:`end`
+
+   .. function:: difference_type size () const
+
+      Will return the number of elements between :func:`begin` and :func:`end`.
+
+      :requires: :type:`iterator_category` be ``forward_iterator_tag``
+      :returns: ``std::distance(begin(), end())``
+
+   .. function:: range slice (difference_type start, difference_type stop) const
+
+      Slicing a |range| has the most complex behavior out of all the |range|
+      member functions. This is due to the behavior mimicking the slice
+      behavior exhibited by the python language's slicing syntax.
+
+      If *start* is negative, the begin marker is :func:`end` - *start*.
+      If *stop* is negative, the end marker is :func:`end` - *stop*.
+      If *start* is positive, the begin marker is :func:`begin` + *start*.
+      If *stop* is positive, the end marker is :func:`begin` + *stop*.
+
+      If *start* and *stop* are positive, and *stop* is less than or equal to
+      *start*, an empty |range| is returned.
+
+      If *start* and *stop* are negative and *stop* is less than or equal to
+      *start*, an empty |range| is returned.
+
+      If *start* is positive and *stop* is negative and ``abs(stop)`` + *start*
+      is greater or equal to :func:`size`, an empty |range| is returned.
+
+      If *start* is negative and *stop* is positive and :func:`size` + *start*
+      is greater or equal to *stop*, an empty range is returned.
+
+      These first two conditions can be computed cheaply, while the third and
+      fourth are a tad more expensive. However they *are* required in all
+      computations, no matter the :type:`iterator_category`. :func:`slice` does
+      not compute :func:`size` until after checking the first two conditions.
+
+      Some optimizations are taken to insure that finding the begin and end
+      iterators is at most an O(N) operation, rather than O(2N), as it *could*
+      be in some cases.
+
+      :requires: :type:`iterator_category` be ``forward_iterator_tag``.
+
+  .. function:: range slice (difference_type start) const
+
+     :requires: :type:`iterator_category` be ``forward_iterator_tag``.
+     :returns: An open ended range of [:func:`begin` + *start*, :func:`end`).
+
+  .. function:: std::pair<range, range> split (difference_type idx) const
+
+     :requires: :type:`iterator_category` be ``forward_iterator_tag``.
 
 Answers to Open Questions
 -------------------------
