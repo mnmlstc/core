@@ -1,3 +1,5 @@
+.. _core-iterator-component:
+
 Iterator Component
 ==================
 

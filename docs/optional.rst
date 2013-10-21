@@ -1,3 +1,5 @@
+.. _core-optional-component:
+
 Optional Component
 ==================
 

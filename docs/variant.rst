@@ -1,3 +1,5 @@
+.. _core-variant-component:
+
 Variant Component
 =================
 

@@ -1,3 +1,5 @@
+.. _core-string-component:
+
 String Component
 ================
 

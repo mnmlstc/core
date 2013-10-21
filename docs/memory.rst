@@ -1,3 +1,5 @@
+.. _core-memory-component:
+
 Memory Component
 ================
 

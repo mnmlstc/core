@@ -1,3 +1,5 @@
+.. _core-any-component:
+
 Any Component
 =============
 

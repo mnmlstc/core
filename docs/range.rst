@@ -1,3 +1,5 @@
+.. _core-range-component:
+
 Range Component
 ===============
 

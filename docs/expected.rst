@@ -1,3 +1,5 @@
+.. _core-expected-component:
+
 Expected Component
 ==================
 
