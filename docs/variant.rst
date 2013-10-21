@@ -36,7 +36,7 @@ switch statement*
    default constructing a |variant|, the first type in the |variant|'s typelist
    is initialized.
 
-   .. todo:: Add documentation for interface.
+
 
    .. function:: visit (Visitor&&, args) const
                  visit (Visitor&&, args)
@@ -58,5 +58,4 @@ switch statement*
    .. function:: match (Visitors&&) const
                  match (Visitors&&)
 
-      Takes a variadic number of arguments.
-
+      Takes a variadic number of arguments that are all callable objects.
