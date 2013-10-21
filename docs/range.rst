@@ -150,14 +150,73 @@ discussed below.
 
       :requires: :type:`iterator_category` be ``forward_iterator_tag``.
 
-  .. function:: range slice (difference_type start) const
+   .. function:: range slice (difference_type start) const
 
-     :requires: :type:`iterator_category` be ``forward_iterator_tag``.
-     :returns: An open ended range of [:func:`begin` + *start*, :func:`end`).
+      :requires: :type:`iterator_category` be ``forward_iterator_tag``.
+      :returns: An open ended range of [:func:`begin` + *start*, :func:`end`).
 
-  .. function:: std::pair<range, range> split (difference_type idx) const
+   .. function:: std::pair<range, range> split (difference_type idx) const
 
-     :requires: :type:`iterator_category` be ``forward_iterator_tag``.
+      :requires: :type:`iterator_category` be ``forward_iterator_tag``.
+
+   .. function:: void pop_front (difference_type n)
+                 void pop_front ()
+
+      Moves the start of the range 'forward' by *n*, via ``std::advance``. The
+      overload which takes no arguments moves the range forward by 1.
+
+   .. function:: void pop_back (difference_type n)
+                 void pop_back ()
+
+      :requires: :type:`iterator_category` be ``bidirectional_iterator_tag``.
+
+   .. function:: void pop_front_upto (difference_type n)
+
+      Moves the start of the range by *n* elements. A negative argument causes
+      no change.
+
+   .. function:: void pop_back_upto (difference_type n)
+
+      Moves the end of the range backwards by *n* elements. A negative argument
+      causes no change.
+
+      :requires: :type:`iterator_category` be ``bidirectional_iterator_tag``.
+
+   .. function:: void swap (range& that) noexcept
+
+      Swaps the begin and end of ``*this``, with *that*.
+
+.. function:: range<T> make_range (T begin, T end)
+
+   Creates a |range| from the iterators *begin* and *end*.
+
+.. function:: range<T> make_range(Range&&)
+
+   Constructs a |range| from the given type by calling ``std::begin`` and
+   ``std::end``.
+
+.. function:: range<std::istream_iterator<T, CharT, Traits>> make_range \
+              (std::basic_istream<CharT, Traits>& stream)
+
+   Constructs a |range| for iterating an istream. An example of usage is::
+
+      auto istream_range = make_range<double>(stream);
+
+.. function:: range<std::istreambuf_iterator<CharT, Traits>> make_range \
+              (std::basic_streambuf<CharT, Traits>* buffer)
+
+   Constructs a |range| for iterating a streambuf. An example of usage is::
+
+      auto streambuf_range = make_range(stream.rdbuf());
+
+Specialization
+--------------
+
+.. namespace:: std
+
+.. function:: void swap (range<Iterator>& lhs, range<Iterator>& rhs)
+
+   :noexcept: ``lhs.swap(rhs)``
 
 Answers to Open Questions
 -------------------------
@@ -184,7 +243,7 @@ Inherit from std::pair<Iterator, Iterator>
 
 The author of N3350_ mentions inheriting from ``std::pair<Iterator, Iterator>``.
 Rather than rely on inheritance to represent a range, it was decided to allow a
-:class:`range\<T>` to be constructed implicitly with a std::pair.
+|range| to be constructed implicitly with a std::pair.
 
 Remove member functions and replace as free algorithms
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -209,7 +268,7 @@ The author of N3350_ mentions taking an arbitrary number o indices and
 returning an N + 1 element ``tuple<>``. The author mentions that this would be
 tricky with negative indices and bidirectional iterators.
 
-It was decided that this is unnecessary, and if it is truly desired by a user
-they can write their own range component.
+It was decided that this is an unnecessary complication of the range
+component's internals.
 
 .. _N3350: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2012/n3350.html
