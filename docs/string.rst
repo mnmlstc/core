@@ -105,7 +105,7 @@ string component.
 
    .. function:: constexpr size_type max_size () const noexcept
 
-      :returns: :func:`basic_string_ref\<T>::size`
+      :returns: :func:`size`
 
    .. function:: constexpr size_type length () const noexcept
                  constexpr size_type size () const noexcept
@@ -115,6 +115,25 @@ string component.
    .. function:: constexpr bool empty () const noexcept
 
       :returns: Whether the object is a 'null view'
+
+   .. function:: constexpr reference operator [] (size_type idx) const
+
+      :returns: reference to the :type:`value_type` located at *idx*.
+
+   .. function:: constexpr reference front () const
+
+      :returns: reference to the :type:`value_type` located at the index 0.
+
+   .. function:: constexpr reference back () const
+
+      :returns: reference to the :type:`value_type` located at the end of the
+                |string_ref|.
+
+   .. function:: constexpr pointer data () const
+
+      :returns: :type:`pointer` to the data viewed by the |string_ref|.
+                This pointer is not guaranteed to be null terminated, and
+                should be treated as such.
 
 .. type:: string_ref
 
