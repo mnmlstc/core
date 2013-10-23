@@ -62,4 +62,35 @@ ability to discover the types of a given function's argument is also possible.
 .. function:: auto invoke (unpack_t, Functor&&, Unpackable&&)
               auto invoke (unpack_t, Unpackable&&)
 
+   :requires: *Unpackable* be capable of having ``std::get<N>`` called on it,
+              and an overload for ``std::tuple_size``.
+
+   This version of :func:`invoke` uses compile time unpacking semantics. It
+   will take every member of *Unpackable* and call ``std::get<N>``.
+   ``std::tuple_size`` is used to get the number of elements in *Unpackable*.
+
 .. function:: auto invoke (runpack_t, Functor&&, Runpackable&&)
+
+   :requires: *Runpackable* be have a member function named *at*, which returns
+              ``Runpackable::value_type``, and takes a ``std::size_t`` as its
+              parameters.
+   :throws: ``std::out_of_range``
+   :noexcept: false
+
+   This version of :func:`invoke` uses runtime unpacking semantics. It will
+   take the arity of *Functor*, and then unpack *Runpackable* via its ``at``
+   member function. As an example a *Functor* with 4 arguments, and a
+   *Runpackable* of type ``std::vector<int>`` would expand to::
+
+      core::invoke(
+        std::forward<Functor>(functor),
+        std::forward<Runpackable>(runpackable).at(N)...
+      );
+
+   As the standard containers all throw ``std::out_of_range``, this function
+   should be expected to as well.
+
+   .. note:: *ALL* standard containers with an ``at`` member function can be
+      used with this, including the associative containers, such as
+      ``std::map``, and ``std::unordered_map``. *However*, the requirement that
+      the ``at`` member function take a ``std::size_t`` remains.
