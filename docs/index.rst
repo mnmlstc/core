@@ -19,6 +19,7 @@ rather than by feature.
    iterator
    optional
    variant
+   utility
    memory
    string
    range
