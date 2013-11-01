@@ -1,1 +1,4 @@
 *.png binary
+*.ico binary
+*.bmp binary
+*.rtf binary
