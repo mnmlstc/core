@@ -11,6 +11,7 @@ include(CTest)
 
 set(INCLUDE_INSTALL_DIR "include" CACHE INTERNAL "Header Files")
 set(CMAKE_INSTALL_DIR "share/cmake/core" CACHE INTERNAL "CMake Files")
+set(DOCS_INSTALL_DIR "share/doc/mnmlstc/core" CACHE INTERNAL "Documentation")
 
 set(CORE_VERSION_MAJOR 1)
 set(CORE_VERSION_MINOR 0)
@@ -19,9 +20,10 @@ set(CORE_VERSION
   ${CORE_VERSION_MAJOR}.${CORE_VERSION_MINOR}.${CORE_VERSION_PATCH}
 )
 
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/configure")
+list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/configure")
 
 option(BUILD_WITH_LIBCXX "Use libc++ as stdlib" OFF)
+option(BUILD_DOCS "Build documentation with Sphinx Documentation Generator")
 
 if (APPLE AND ${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
   set(BUILD_WITH_LIBCXX ON CACHE BOOL "Use libc++ as stdlib" ON)
@@ -100,6 +102,14 @@ if (NOT HAVE_TUPLE)
   message(FATAL_ERROR "standard header <tuple> could not be found")
 endif ()
 
+if (NOT HAVE_CSTDINT)
+  message(FATAL_ERROR "standard header <cstdint> could not be found")
+endif ()
+
+if (NOT HAVE_CSTDDEF)
+  message(FATAL_ERROR "standard header <cstddef> could not be found")
+endif ()
+
 #------------------------------------------------------------------------------
 # Configuration
 #------------------------------------------------------------------------------
@@ -149,7 +159,11 @@ if (BUILD_TESTING)
   add_subdirectory("${TEST_SOURCE_DIR}" "${TEST_BINARY_DIR}" EXCLUDE_FROM_ALL)
 endif ()
 
-# TODO: Add BUILD_DOCS option and target
+if (BUILD_DOCS)
+  set(DOCS_SOURCE_DIR "${PROJECT_SOURCE_DIR}/docs")
+  set(DOCS_BINARY_DIR "${PROJECT_BINARY_DIR}/docs")
+  add_subdirectory("${DOCS_SOURCE_DIR}" "${DOCS_BINARY_DIR}" EXCLUDE_FROM_ALL)
+endif ()
 
 #------------------------------------------------------------------------------
 # Install
@@ -163,6 +177,11 @@ install(FILES
 install(DIRECTORY "${PROJECT_SOURCE_DIR}/include/core"
   DESTINATION ${INCLUDE_INSTALL_DIR}
   FILES_MATCHING PATTERN "*.hpp"
+)
+
+install(DIRECTORY "${DOCS_BINARY_DIR}/"
+  DESTINATION ${DOCS_INSTALL_DIR}
+  FILES_MATCHING PATTERN "*.*"
 )
 
 #------------------------------------------------------------------------------
