@@ -4,8 +4,8 @@ import os
 project = 'MNMLSTC Core'
 copyright = '2013, MNMLSTC'
 
-version = '0.1'
-release = '0.1'
+version = '1.0'
+release = '1.0'
 
 highlight_language = 'cpp'
 
