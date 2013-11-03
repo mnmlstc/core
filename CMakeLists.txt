@@ -20,6 +20,12 @@ set(CORE_VERSION
   ${CORE_VERSION_MAJOR}.${CORE_VERSION_MINOR}.${CORE_VERSION_PATCH}
 )
 
+set(TEST_SOURCE_DIR "${PROJECT_SOURCE_DIR}/tests")
+set(TEST_BINARY_DIR "${PROJECT_BINARY_DIR}/tests")
+
+set(DOCS_SOURCE_DIR "${PROJECT_SOURCE_DIR}/docs")
+set(DOCS_BINARY_DIR "${PROJECT_BINARY_DIR}/docs")
+
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/configure")
 
 option(BUILD_WITH_LIBCXX "Use libc++ as stdlib" OFF)
@@ -154,14 +160,10 @@ endif ()
 
 if (BUILD_TESTING)
   set(CMAKE_TEST_COMMAND ctest)
-  set(TEST_SOURCE_DIR "${PROJECT_SOURCE_DIR}/tests")
-  set(TEST_BINARY_DIR "${PROJECT_BINARY_DIR}/tests")
   add_subdirectory("${TEST_SOURCE_DIR}" "${TEST_BINARY_DIR}" EXCLUDE_FROM_ALL)
 endif ()
 
 if (BUILD_DOCS)
-  set(DOCS_SOURCE_DIR "${PROJECT_SOURCE_DIR}/docs")
-  set(DOCS_BINARY_DIR "${PROJECT_BINARY_DIR}/docs")
   add_subdirectory("${DOCS_SOURCE_DIR}" "${DOCS_BINARY_DIR}" EXCLUDE_FROM_ALL)
 endif ()
 
@@ -181,7 +183,7 @@ install(DIRECTORY "${PROJECT_SOURCE_DIR}/include/core"
 
 install(DIRECTORY "${DOCS_BINARY_DIR}/"
   DESTINATION ${DOCS_INSTALL_DIR}
-  FILES_MATCHING PATTERN "*.*"
+  FILES_MATCHING PATTERN "*"
 )
 
 #------------------------------------------------------------------------------
