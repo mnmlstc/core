@@ -1,4 +1,11 @@
+.buildinfo
 .DS_Store
+Makefile
+*.cmake
 *.swp
 *.pyc
 *~
+
+CMakeFiles/
+.doctrees/
+build/

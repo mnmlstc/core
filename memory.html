@@ -1,0 +1,959 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Memory Component &mdash; MNMLSTC Core 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/cloud.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noticia+Text|Open+Sans|Droid+Sans+Mono" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/jquery.cookie.js"></script>
+    <script type="text/javascript" src="_static/cloud.js"></script>
+    <link rel="top" title="MNMLSTC Core 0.1 documentation" href="index.html" />
+    <link rel="next" title="String Component" href="string.html" />
+    <link rel="prev" title="Utility Component" href="utility.html" /> 
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+  </head>
+  <body>
+    <div class="relbar-top">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="string.html" title="String Component"
+             accesskey="N">next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="utility.html" title="Utility Component"
+             accesskey="P">previous</a> &nbsp; &nbsp;</li>
+    <li><a href="index.html">MNMLSTC Core 0.1 documentation</a> &raquo;</li>
+ 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="memory-component">
+<span id="core-memory-component"></span><h1>Memory Component<a class="headerlink" href="#memory-component" title="Permalink to this headline">¶</a></h1>
+<p>This section discusses the memory component of MNMLSTC Core. Contained in this
+component are two new smart pointers (both with deep copy semantics) and a
+C++11 equivalent to C++14&#8217;s <a class="reference internal" href="#make_unique:T:__X" title="make_unique&lt;T&gt;"><tt class="xref cpp cpp-func docutils literal"><span class="pre">make_unique&lt;T&gt;()</span></tt></a>.</p>
+<dl class="class">
+<dt id="poly_ptr:T.Deleter:">
+<em class="property">class </em><tt class="descname">poly_ptr&lt;T, Deleter&gt;</tt><a class="headerlink" href="#poly_ptr:T.Deleter:" title="Permalink to this definition">¶</a></dt>
+<dd><p>The <a class="reference internal" href="#poly_ptr:T.Deleter:" title="poly_ptr&lt;T, Deleter&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">poly_ptr</span></tt></a> is a smart pointer for polymorphic types that
+retains sole ownership of the <em>polymorphic</em> type <tt class="docutils literal"><span class="pre">T</span></tt> and performs <em>deep
+copies</em> on assignment or copy construction.  This use is extremely close to
+the <a class="reference internal" href="any.html#any" title="any"><tt class="xref cpp cpp-class docutils literal"><span class="pre">any</span></tt></a>, however it affords the user the ability to ascertain what
+possible types the <a class="reference internal" href="#poly_ptr:T.Deleter:" title="poly_ptr&lt;T, Deleter&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">poly_ptr</span></tt></a> has while also allowing custom allocation,
+copying, and deallocation.  In this way, a <a class="reference internal" href="#poly_ptr:T.Deleter:" title="poly_ptr&lt;T, Deleter&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">poly_ptr</span></tt></a> can be seen as a
+<tt class="docutils literal"><span class="pre">std::unique_ptr</span></tt> with deep-copy semantics, and type erasure. <a class="reference internal" href="#poly_ptr:T.Deleter:" title="poly_ptr&lt;T, Deleter&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">poly_ptr</span></tt></a>
+has an interface equivalent to <tt class="docutils literal"><span class="pre">std::unique_ptr</span></tt>. Due to the type erasure
+that is used, the size of a <a class="reference internal" href="#poly_ptr:T.Deleter:" title="poly_ptr&lt;T, Deleter&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">poly_ptr</span></tt></a> is
+<tt class="docutils literal"><span class="pre">sizeof(std::unique_ptr&lt;T,</span> <span class="pre">Deleter&gt;</span> <span class="pre">+</span> <span class="pre">sizeof(function-ptr)</span></tt>.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Due to the lack of polymorphic allocators in C++, custom memory
+allocation is currently relegated to performing allocation within a
+user-supplied copier function. Because the copier function is a function
+pointer this means that <a class="reference internal" href="#poly_ptr:T.Deleter:" title="poly_ptr&lt;T, Deleter&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">poly_ptr</span></tt></a> is restricted to stateless lambdas
+or function pointers.</p>
+</div>
+<p>The <a class="reference internal" href="#poly_ptr:T.Deleter:" title="poly_ptr&lt;T, Deleter&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">poly_ptr</span></tt></a> requires that RTTI and exceptions be enabled. Because of
+the type-erasure used, RTTI is absolutely required to for the polymorphic
+deep-copy to take place.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last"><em>Only</em> a polymorphic type (that is, any type where the
+<tt class="docutils literal"><span class="pre">std::is_polymorphic</span></tt> type trait is true) may be used with <a class="reference internal" href="#poly_ptr:T.Deleter:" title="poly_ptr&lt;T, Deleter&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">poly_ptr</span></tt></a>.
+If deep-copy semantics with a <tt class="docutils literal"><span class="pre">std::unique_ptr</span></tt> are desired for a
+non-polymorphic type, use <a class="reference internal" href="#deep_ptr:T.Deleter.Copier:" title="deep_ptr&lt;T, Deleter, Copier&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">deep_ptr</span></tt></a> instead.</p>
+</div>
+<p>The <a class="reference internal" href="#poly_ptr:T.Deleter:" title="poly_ptr&lt;T, Deleter&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">poly_ptr</span></tt></a> is <em>not</em> polymorphic itself and is marked <tt class="docutils literal"><span class="pre">final</span></tt> to
+prevent user inheritance.</p>
+<dl class="type">
+<dt id="poly_ptr:T.Deleter:::unique_type">
+<em class="property">type </em><tt class="descname">unique_type</tt><a class="headerlink" href="#poly_ptr:T.Deleter:::unique_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Represents the <tt class="docutils literal"><span class="pre">std::unique_ptr</span></tt> used internally to hold the managed
+object.</p>
+</dd></dl>
+
+<dl class="type">
+<dt id="poly_ptr:T.Deleter:::element_type">
+<em class="property">type </em><tt class="descname">element_type</tt><a class="headerlink" href="#poly_ptr:T.Deleter:::element_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>A type equivalent to the expression
+<tt class="docutils literal"><span class="pre">typename</span> <span class="pre">unique_type::element_type</span></tt></p>
+</dd></dl>
+
+<dl class="type">
+<dt id="poly_ptr:T.Deleter:::deleter_type">
+<em class="property">type </em><tt class="descname">deleter_type</tt><a class="headerlink" href="#poly_ptr:T.Deleter:::deleter_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>A type equivalent to the expression
+<tt class="docutils literal"><span class="pre">typename</span> <span class="pre">unique_type::deleter_type</span></tt></p>
+</dd></dl>
+
+<dl class="type">
+<dt id="poly_ptr:T.Deleter:::copier_type">
+<em class="property">type </em><tt class="descname">copier_type</tt><a class="headerlink" href="#poly_ptr:T.Deleter:::copier_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>A type used to represent the copy function used to perform deep copies.
+It has the type signature of: <tt class="docutils literal"><span class="pre">unique_type</span> <span class="pre">(*)(unique_type</span> <span class="pre">const&amp;)</span></tt>.</p>
+</dd></dl>
+
+<dl class="type">
+<dt id="poly_ptr:T.Deleter:::pointer">
+<em class="property">type </em><tt class="descname">pointer</tt><a class="headerlink" href="#poly_ptr:T.Deleter:::pointer" title="Permalink to this definition">¶</a></dt>
+<dd><p>A type equivalent to the expression <tt class="docutils literal"><span class="pre">typename</span> <span class="pre">unique_type::pointer</span></tt>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="poly_ptr:T.Deleter:::poly_ptr__UP">
+<em class="property">explicit</em>  <tt class="descname">poly_ptr</tt><big>(</big>U* <em>ptr</em><big>)</big><a class="headerlink" href="#poly_ptr:T.Deleter:::poly_ptr__UP" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes a derived pointer to a given type <em>U</em>. <em>U</em> must be a non-abstract
+type and have <a class="reference internal" href="#poly_ptr:T.Deleter:::element_type" title="poly_ptr&lt;T, Deleter&gt;::element_type"><tt class="xref cpp cpp-type docutils literal"><span class="pre">element_type</span></tt></a> as a base class within its inheritance
+tree.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="poly_ptr:T.Deleter:::poly_ptr__X.X.X">
+ <tt class="descname">poly_ptr</tt><big>(</big><em>U*</em>, <em>E&amp;&amp;</em>, <em>copier_type</em><em>=default_poly_copy</em><big>)</big><a class="headerlink" href="#poly_ptr:T.Deleter:::poly_ptr__X.X.X" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes some derived type <em>U</em>, a universal reference <em>E</em>, and an optional
+copier function pointer. The universal reference <em>E</em> is forwarded to the
+internal std::unique_ptr, where it will handle the proper rules required
+to initialize the deleter_type.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="poly_ptr:T.Deleter:::poly_ptr__X.X">
+<em class="property">explicit</em>  <tt class="descname">poly_ptr</tt><big>(</big><em>std::unique_ptr&lt;U, E&gt;&amp;&amp;</em>, <em>copier_type</em><big>)</big><a class="headerlink" href="#poly_ptr:T.Deleter:::poly_ptr__X.X" title="Permalink to this definition">¶</a></dt>
+<dd><p>A unique_ptr of type <em>U</em> and deleter <em>E</em>, with an optional copier_type
+parameter that is by default <a class="reference internal" href="#default_poly_copy:T.D.U:__X" title="default_poly_copy&lt;T, D, U&gt;"><tt class="xref cpp cpp-func docutils literal"><span class="pre">default_poly_copy&lt;T,</span> <span class="pre">D,</span> <span class="pre">U&gt;()</span></tt></a>. As
+normal, <em>U</em> must have <a class="reference internal" href="#poly_ptr:T.Deleter:::element_type" title="poly_ptr&lt;T, Deleter&gt;::element_type"><tt class="xref cpp cpp-type docutils literal"><span class="pre">element_type</span></tt></a> in its hierarchy.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="poly_ptr:T.Deleter:::poly_ptr__poly_ptrCR">
+ <tt class="descname">poly_ptr</tt><big>(</big>poly_ptr const&amp; <em>that</em><big>)</big><a class="headerlink" href="#poly_ptr:T.Deleter:::poly_ptr__poly_ptrCR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs a deep copy with the object managed by <tt class="docutils literal"><span class="pre">that</span></tt>, if any such
+object exists.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="poly_ptr:T.Deleter:::poly_ptr__polymorphicRR">
+ <tt class="descname">poly_ptr</tt><big>(</big>polymorphic&amp;&amp; <em>that</em><big>)</big><a class="headerlink" href="#poly_ptr:T.Deleter:::poly_ptr__polymorphicRR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Moves <tt class="docutils literal"><span class="pre">that</span></tt>&#8216;s pointer and copier into <tt class="docutils literal"><span class="pre">*this</span></tt>, and then sets
+<tt class="docutils literal"><span class="pre">that</span></tt>&#8216;s copier to <a class="reference internal" href="#null_poly_copy:T.D:__X" title="null_poly_copy&lt;T, D&gt;"><tt class="xref cpp cpp-func docutils literal"><span class="pre">null_poly_copy&lt;T,</span> <span class="pre">D&gt;()</span></tt></a>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="poly_ptr:T.Deleter:::poly_ptr">
+ <tt class="descname">poly_ptr</tt><big>(</big><big>)</big><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#poly_ptr:T.Deleter:::poly_ptr" title="Permalink to this definition">¶</a></dt>
+<dd><p>The default constructor for a <a class="reference internal" href="#poly_ptr:T.Deleter:" title="poly_ptr&lt;T, Deleter&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">poly_ptr</span></tt></a> will place it into such a state
+that bool(<a class="reference internal" href="#poly_ptr:T.Deleter:" title="poly_ptr&lt;T, Deleter&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">poly_ptr</span></tt></a>) will return false;</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="poly_ptr:T.Deleter:::assign-operator__std::unique_ptr:U.D:RR">
+ <tt class="descname">operator=</tt><big>(</big>std::unique_ptr&lt;U, D&gt;&amp;&amp; <em>ptr</em><big>)</big><a class="headerlink" href="#poly_ptr:T.Deleter:::assign-operator__std::unique_ptr:U.D:RR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calls <tt class="docutils literal"><span class="pre">poly_ptr&lt;T,</span> <span class="pre">Deleter&gt;</span> <span class="pre">{</span> <span class="pre">std::move(ptr)</span> <span class="pre">}.swap(*this)</span></tt></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><tt class="docutils literal"><span class="pre">*this</span></tt></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="poly_ptr:T.Deleter:::assign-operator__poly_ptr:T.Deleter:RR">
+ <tt class="descname">operator=</tt><big>(</big>poly_ptr&lt;T, Deleter&gt;&amp;&amp; <em>that</em><big>)</big><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#poly_ptr:T.Deleter:::assign-operator__poly_ptr:T.Deleter:RR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calls <tt class="docutils literal"><span class="pre">poly_ptr&lt;T,</span> <span class="pre">Deleter&gt;</span> <span class="pre">{</span> <span class="pre">std::move(that)</span> <span class="pre">}.swap(*this)</span></tt></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><tt class="docutils literal"><span class="pre">*this</span></tt></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="poly_ptr:T.Deleter:::assign-operator__poly_ptr:T.Deleter:CR">
+ <tt class="descname">operator=</tt><big>(</big>poly_ptr&lt;T, Deleter&gt; const&amp; <em>that</em><big>)</big><a class="headerlink" href="#poly_ptr:T.Deleter:::assign-operator__poly_ptr:T.Deleter:CR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs a deep copy with the object managed by <tt class="docutils literal"><span class="pre">that</span></tt>, if such
+an object exists.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><tt class="docutils literal"><span class="pre">*this</span></tt></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="poly_ptr:T.Deleter:::castto-b-operatorC">
+ <tt class="descname">operator</tt> bool<big>(</big><big>)</big><tt class="descclassname"> const</tt><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#poly_ptr:T.Deleter:::castto-b-operatorC" title="Permalink to this definition">¶</a></dt>
+<dd><div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">This cast operator is marked as explicit.</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Whether <tt class="docutils literal"><span class="pre">*this</span></tt> owns an object</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="poly_ptr:T.Deleter:::mul-operatorC">
+<a class="reference internal" href="#poly_ptr:T.Deleter:::element_type" title="poly_ptr&lt;T, Deleter&gt;::element_type">element_type&amp;</a> <tt class="descname">operator*</tt><big>(</big><big>)</big><tt class="descclassname"> const</tt><a class="headerlink" href="#poly_ptr:T.Deleter:::mul-operatorC" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">an lvalue reference to the object owned by <tt class="docutils literal"><span class="pre">*this</span></tt>.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="poly_ptr:T.Deleter:::pointer-operatorC">
+<a class="reference internal" href="#poly_ptr:T.Deleter:::pointer" title="poly_ptr&lt;T, Deleter&gt;::pointer">pointer</a> <tt class="descname">operator-&gt;</tt><big>(</big><big>)</big><tt class="descclassname"> const</tt><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#poly_ptr:T.Deleter:::pointer-operatorC" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">a pointer to the object owned by <tt class="docutils literal"><span class="pre">*this</span></tt></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="poly_ptr:T.Deleter:::getC">
+<a class="reference internal" href="#poly_ptr:T.Deleter:::pointer" title="poly_ptr&lt;T, Deleter&gt;::pointer">pointer</a> <tt class="descname">get</tt><big>(</big><big>)</big><tt class="descclassname"> const</tt><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#poly_ptr:T.Deleter:::getC" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A pointer to the managed object, or <tt class="docutils literal"><span class="pre">nullptr</span></tt> if no such
+object exists.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="poly_ptr:T.Deleter:::get_deleterC">
+<a class="reference internal" href="#poly_ptr:T.Deleter:::deleter_type" title="poly_ptr&lt;T, Deleter&gt;::deleter_type">deleter_type const&amp;</a> <tt class="descname">get_deleter</tt><big>(</big><big>)</big><tt class="descclassname"> const</tt><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#poly_ptr:T.Deleter:::get_deleterC" title="Permalink to this definition">¶</a></dt>
+<dt id="poly_ptr:T.Deleter:::get_deleter">
+<a class="reference internal" href="#poly_ptr:T.Deleter:::deleter_type" title="poly_ptr&lt;T, Deleter&gt;::deleter_type">deleter_type&amp;</a> <tt class="descname">get_deleter</tt><big>(</big><big>)</big><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#poly_ptr:T.Deleter:::get_deleter" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The deleter object used for destruction of the managed object.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="poly_ptr:T.Deleter:::get_copierC">
+<a class="reference internal" href="#poly_ptr:T.Deleter:::copier_type" title="poly_ptr&lt;T, Deleter&gt;::copier_type">copier_type const&amp;</a> <tt class="descname">get_copier</tt><big>(</big><big>)</big><tt class="descclassname"> const</tt><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#poly_ptr:T.Deleter:::get_copierC" title="Permalink to this definition">¶</a></dt>
+<dt id="poly_ptr:T.Deleter:::get_copier">
+<a class="reference internal" href="#poly_ptr:T.Deleter:::copier_type" title="poly_ptr&lt;T, Deleter&gt;::copier_type">copier_type&amp;</a> <tt class="descname">get_copier</tt><big>(</big><big>)</big><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#poly_ptr:T.Deleter:::get_copier" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The function pointer used for copying the managed object.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="poly_ptr:T.Deleter:::release">
+<a class="reference internal" href="#poly_ptr:T.Deleter:::pointer" title="poly_ptr&lt;T, Deleter&gt;::pointer">pointer</a> <tt class="descname">release</tt><big>(</big><big>)</big><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#poly_ptr:T.Deleter:::release" title="Permalink to this definition">¶</a></dt>
+<dd><p>Releases the ownership of the managed object, if any such object exists.
+Any calls to <a class="reference internal" href="#poly_ptr:T.Deleter:::getC" title="poly_ptr&lt;T, Deleter&gt;::get"><tt class="xref cpp cpp-func docutils literal"><span class="pre">poly_ptr&lt;T,</span> <span class="pre">Deleter&gt;::get()</span></tt></a> will return <tt class="docutils literal"><span class="pre">nullptr</span></tt>
+after this call.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">pointer to the managed object or <tt class="docutils literal"><span class="pre">nullptr</span></tt> if the <a class="reference internal" href="#poly_ptr:T.Deleter:" title="poly_ptr&lt;T, Deleter&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">poly_ptr</span></tt></a>
+did not manage an object.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="poly_ptr:T.Deleter:::reset__pointer">
+void <tt class="descname">reset</tt><big>(</big><a class="reference internal" href="#poly_ptr:T.Deleter:::pointer" title="poly_ptr&lt;T, Deleter&gt;::pointer">pointer</a> <em>ptr</em><em>=pointer { }</em><big>)</big><a class="headerlink" href="#poly_ptr:T.Deleter:::reset__pointer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Replaces the managed object. Performs the following actions (these
+differ from the order of operations followed by <tt class="docutils literal"><span class="pre">std::unique_ptr</span></tt>).</p>
+<ul class="simple">
+<li>If the incoming pointer is <tt class="docutils literal"><span class="pre">nullptr</span></tt>, the order of operations
+follows those performed by <tt class="docutils literal"><span class="pre">std::unique_ptr</span></tt>, along with the value
+returned by <a class="reference internal" href="#poly_ptr:T.Deleter:::get_copierC" title="poly_ptr&lt;T, Deleter&gt;::get_copier"><tt class="xref cpp cpp-func docutils literal"><span class="pre">poly_ptr&lt;T,</span> <span class="pre">Deleter&gt;::get_copier()</span></tt></a> being set to a
+null copier.</li>
+<li>If the incoming pointer is <em>not</em> <tt class="docutils literal"><span class="pre">nullptr</span></tt>, and there is no
+managed object, a <a class="reference internal" href="#bad_polymorphic_reset" title="bad_polymorphic_reset"><tt class="xref cpp cpp-class docutils literal"><span class="pre">bad_polymorphic_reset</span></tt></a> exception is thrown.</li>
+<li>If the incoming pointer is <em>not</em> <tt class="docutils literal"><span class="pre">nullptr</span></tt>, a <tt class="docutils literal"><span class="pre">typeid</span></tt> comparison
+between the managed object and the incoming pointer is performed.
+If the <tt class="docutils literal"><span class="pre">std::type_info</span></tt> returned from both is not identical,
+a <a class="reference internal" href="#bad_polymorphic_reset" title="bad_polymorphic_reset"><tt class="xref cpp cpp-class docutils literal"><span class="pre">bad_polymorphic_reset</span></tt></a> is thrown.
+If the <tt class="docutils literal"><span class="pre">std::type_info</span></tt> is identical, the order of operations
+follows those performed by <tt class="docutils literal"><span class="pre">std::unique_ptr</span></tt>.</li>
+</ul>
+</dd></dl>
+
+<dl class="function">
+<dt id="poly_ptr:T.Deleter:::swap__X">
+void <tt class="descname">swap</tt><big>(</big><em>poly_ptr&amp;</em><big>)</big><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#poly_ptr:T.Deleter:::swap__X" title="Permalink to this definition">¶</a></dt>
+<dd><p>Swaps the managed object and copier function</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="deep_ptr:T.Deleter.Copier:">
+<em class="property">class </em><tt class="descname">deep_ptr&lt;T, Deleter, Copier&gt;</tt><a class="headerlink" href="#deep_ptr:T.Deleter.Copier:" title="Permalink to this definition">¶</a></dt>
+<dd><p><a class="reference internal" href="#deep_ptr:T.Deleter.Copier:" title="deep_ptr&lt;T, Deleter, Copier&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">deep_ptr</span></tt></a> is a smart pointer for a type that retains sole ownership of the
+pointer it manages and performs a <em>deep copy</em> on assignment or copy
+construction. <a class="reference internal" href="#deep_ptr:T.Deleter.Copier:" title="deep_ptr&lt;T, Deleter, Copier&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">deep_ptr</span></tt></a> is much like <tt class="docutils literal"><span class="pre">std::unique_ptr</span></tt> with deep-copy
+semantics. Unlike <a class="reference internal" href="#poly_ptr:T.Deleter:" title="poly_ptr&lt;T, Deleter&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">poly_ptr</span></tt></a>, <a class="reference internal" href="#deep_ptr:T.Deleter.Copier:" title="deep_ptr&lt;T, Deleter, Copier&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">deep_ptr</span></tt></a> is for concrete types where
+polymorphism is not desired. <a class="reference internal" href="#poly_ptr:T.Deleter:" title="poly_ptr&lt;T, Deleter&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">poly_ptr</span></tt></a> has <em>some</em> storage overhead for
+copying a polymorphic type, however <a class="reference internal" href="#deep_ptr:T.Deleter.Copier:" title="deep_ptr&lt;T, Deleter, Copier&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">deep_ptr</span></tt></a> performs the same
+optimization as <tt class="docutils literal"><span class="pre">std::unique_ptr</span></tt> in that it is only <tt class="docutils literal"><span class="pre">sizeof(T*)</span></tt>,
+unless the given Deleter and Copier types hold state.</p>
+<p>With the exception of the copy assignment and copy constructor, <a class="reference internal" href="#deep_ptr:T.Deleter.Copier:" title="deep_ptr&lt;T, Deleter, Copier&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">deep_ptr</span></tt></a>
+has an interface identical to that of <tt class="docutils literal"><span class="pre">std::unique_ptr</span></tt>, and exhibits the
+same behavior as <tt class="docutils literal"><span class="pre">std::unique_ptr</span></tt></p>
+<p>If the result of the <a class="reference internal" href="#deep_ptr:T.Deleter.Copier:::copier_type" title="deep_ptr&lt;T, Deleter, Copier&gt;::copier_type"><tt class="xref cpp cpp-type docutils literal"><span class="pre">copier_type</span></tt></a> differs from <a class="reference internal" href="#deep_ptr:T.Deleter.Copier:::pointer" title="deep_ptr&lt;T, Deleter, Copier&gt;::pointer"><tt class="xref cpp cpp-type docutils literal"><span class="pre">pointer</span></tt></a>, the
+program will be malformed, and a static assertion will cause a compiler
+error.</p>
+<dl class="type">
+<dt id="deep_ptr:T.Deleter.Copier:::element_type">
+<em class="property">type </em><tt class="descname">element_type</tt><a class="headerlink" href="#deep_ptr:T.Deleter.Copier:::element_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>The type of object managed by the <a class="reference internal" href="#deep_ptr:T.Deleter.Copier:" title="deep_ptr&lt;T, Deleter, Copier&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">deep_ptr</span></tt></a>.</p>
+</dd></dl>
+
+<dl class="type">
+<dt id="deep_ptr:T.Deleter.Copier:::deleter_type">
+<em class="property">type </em><tt class="descname">deleter_type</tt><a class="headerlink" href="#deep_ptr:T.Deleter.Copier:::deleter_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>The deleter object used to destroy and deallocate the object managed by
+the <a class="reference internal" href="#deep_ptr:T.Deleter.Copier:" title="deep_ptr&lt;T, Deleter, Copier&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">deep_ptr</span></tt></a>.</p>
+</dd></dl>
+
+<dl class="type">
+<dt id="deep_ptr:T.Deleter.Copier:::copier_type">
+<em class="property">type </em><tt class="descname">copier_type</tt><a class="headerlink" href="#deep_ptr:T.Deleter.Copier:::copier_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>The copier object used to perform an allocation and deep copy the object
+managed by <a class="reference internal" href="#deep_ptr:T.Deleter.Copier:" title="deep_ptr&lt;T, Deleter, Copier&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">deep_ptr</span></tt></a>.</p>
+</dd></dl>
+
+<dl class="type">
+<dt id="deep_ptr:T.Deleter.Copier:::pointer">
+<em class="property">type </em><tt class="descname">pointer</tt><a class="headerlink" href="#deep_ptr:T.Deleter.Copier:::pointer" title="Permalink to this definition">¶</a></dt>
+<dd><p><tt class="docutils literal"><span class="pre">remove_reference_t&lt;deleter_type&gt;::pointer</span></tt> if the type exists,
+otherwise, <tt class="docutils literal"><span class="pre">element_type*</span></tt>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_ptr:T.Deleter.Copier:::deep_ptr__pointer.ERR.CRR">
+ <tt class="descname">deep_ptr</tt><big>(</big><a class="reference internal" href="#deep_ptr:T.Deleter.Copier:::pointer" title="deep_ptr&lt;T, Deleter, Copier&gt;::pointer">pointer</a> <em>ptr</em>, E&amp;&amp; <em>deleter</em>, C&amp;&amp; <em>copier</em><big>)</big><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#deep_ptr:T.Deleter.Copier:::deep_ptr__pointer.ERR.CRR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Actually two separate constructors, these follow the behavior of the
+<tt class="docutils literal"><span class="pre">std::unique_ptr</span></tt> constructors that take a pointer, and deleter object.
+The behavior extends to the type desired for the copier object as well.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_ptr:T.Deleter.Copier:::deep_ptr__X">
+ <tt class="descname">deep_ptr</tt><big>(</big><em>std::unique_ptr&lt;U, E&gt;&amp;&amp;</em><big>)</big><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#deep_ptr:T.Deleter.Copier:::deep_ptr__X" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a <a class="reference internal" href="#deep_ptr:T.Deleter.Copier:" title="deep_ptr&lt;T, Deleter, Copier&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">deep_ptr</span></tt></a> with the contents of the unique_ptr. The given
+type <em>U</em> must be a pointer convertible to <a class="reference internal" href="#deep_ptr:T.Deleter.Copier:::pointer" title="deep_ptr&lt;T, Deleter, Copier&gt;::pointer"><tt class="xref cpp cpp-type docutils literal"><span class="pre">pointer</span></tt></a>, and <em>E</em> must
+be a type that can construct a <a class="reference internal" href="#deep_ptr:T.Deleter.Copier:::deleter_type" title="deep_ptr&lt;T, Deleter, Copier&gt;::deleter_type"><tt class="xref cpp cpp-type docutils literal"><span class="pre">deleter_type</span></tt></a>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_ptr:T.Deleter.Copier:::deep_ptr__pointer">
+<em class="property">explicit</em>  <tt class="descname">deep_ptr</tt><big>(</big><a class="reference internal" href="#deep_ptr:T.Deleter.Copier:::pointer" title="deep_ptr&lt;T, Deleter, Copier&gt;::pointer">pointer</a> <em>ptr</em><big>)</big><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#deep_ptr:T.Deleter.Copier:::deep_ptr__pointer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a <a class="reference internal" href="#deep_ptr:T.Deleter.Copier:" title="deep_ptr&lt;T, Deleter, Copier&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">deep_ptr</span></tt></a> with the default deleter, default copier, and the
+given pointer. The <a class="reference internal" href="#deep_ptr:T.Deleter.Copier:" title="deep_ptr&lt;T, Deleter, Copier&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">deep_ptr</span></tt></a> assumes ownership of <em>ptr</em>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt>
+ <tt class="descname">deep_ptr</tt><big>(</big><em>std::nullptr_t</em><big>)</big><tt class="descclassname"> noexcept</tt></dt>
+<dd><p>Delegates construction of the <a class="reference internal" href="#deep_ptr:T.Deleter.Copier:" title="deep_ptr&lt;T, Deleter, Copier&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">deep_ptr</span></tt></a> to the
+<a class="reference internal" href="#deep-ptr-default-constructor"><em>default constructor</em></a>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_ptr:T.Deleter.Copier:::deep_ptr__deep_ptrCR">
+ <tt class="descname">deep_ptr</tt><big>(</big>deep_ptr const&amp; <em>that</em><big>)</big><a class="headerlink" href="#deep_ptr:T.Deleter.Copier:::deep_ptr__deep_ptrCR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a new object to be managed via <em>that</em>&#8216;s object.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_ptr:T.Deleter.Copier:::deep_ptr__deep_ptrRR">
+ <tt class="descname">deep_ptr</tt><big>(</big>deep_ptr&amp;&amp; <em>that</em><big>)</big><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#deep_ptr:T.Deleter.Copier:::deep_ptr__deep_ptrRR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a <a class="reference internal" href="#deep_ptr:T.Deleter.Copier:" title="deep_ptr&lt;T, Deleter, Copier&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">deep_ptr</span></tt></a> with the managed object, deleter, and copier of
+<em>that</em> via move construction.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Postcondition :</th><td class="field-body"><em>that</em> is empty</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<span class="target" id="deep-ptr-default-constructor"></span><dl class="function">
+<dt id="deep_ptr:T.Deleter.Copier:::deep_ptrCE">
+<em class="property">constexpr</em>  <tt class="descname">deep_ptr</tt><big>(</big><big>)</big><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#deep_ptr:T.Deleter.Copier:::deep_ptrCE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Default constructs a <a class="reference internal" href="#deep_ptr:T.Deleter.Copier:" title="deep_ptr&lt;T, Deleter, Copier&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">deep_ptr</span></tt></a> into an empty state.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_ptr:T.Deleter.Copier:::assign-operator__std::unique_ptr:U.D:RR">
+deep_ptr&amp; <tt class="descname">operator=</tt><big>(</big>std::unique_ptr&lt;U, D&gt;&amp;&amp; <em>ptr</em><big>)</big><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#deep_ptr:T.Deleter.Copier:::assign-operator__std::unique_ptr:U.D:RR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Assigns the contents of <em>ptr</em> to <tt class="docutils literal"><span class="pre">*this</span></tt></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_ptr:T.Deleter.Copier:::assign-operator__X">
+deep_ptr&amp; <tt class="descname">operator=</tt><big>(</big><em>deep_ptr const&amp;</em><big>)</big><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#deep_ptr:T.Deleter.Copier:::assign-operator__X" title="Permalink to this definition">¶</a></dt>
+<dt>
+deep_ptr&amp; <tt class="descname">operator=</tt><big>(</big><em>deep_ptr&amp;&amp;</em><big>)</big><tt class="descclassname"> noexcept</tt></dt>
+<dd><p>Assigns the contents of the incoming <a class="reference internal" href="#deep_ptr:T.Deleter.Copier:" title="deep_ptr&lt;T, Deleter, Copier&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">deep_ptr</span></tt></a> to <tt class="docutils literal"><span class="pre">*this</span></tt></p>
+</dd></dl>
+
+<dl class="function">
+<dt>
+deep_ptr&amp; <tt class="descname">operator=</tt><big>(</big><em>std::nullptr_t</em><big>)</big><tt class="descclassname"> noexcept</tt></dt>
+<dd><p>Resets the <a class="reference internal" href="#deep_ptr:T.Deleter.Copier:" title="deep_ptr&lt;T, Deleter, Copier&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">deep_ptr</span></tt></a> and the object it manages.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_ptr:T.Deleter.Copier:::castto-b-operatorC">
+ <tt class="descname">operator</tt> bool<big>(</big><big>)</big><tt class="descclassname"> const</tt><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#deep_ptr:T.Deleter.Copier:::castto-b-operatorC" title="Permalink to this definition">¶</a></dt>
+<dd><div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">This cast operator is marked as explicit</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Whether the <a class="reference internal" href="#deep_ptr:T.Deleter.Copier:" title="deep_ptr&lt;T, Deleter, Copier&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">deep_ptr</span></tt></a> manages an object</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_ptr:T.Deleter.Copier:::mul-operatorC">
+<a class="reference internal" href="#deep_ptr:T.Deleter.Copier:::element_type" title="deep_ptr&lt;T, Deleter, Copier&gt;::element_type">element_type&amp;</a> <tt class="descname">operator*</tt><big>(</big><big>)</big><tt class="descclassname"> const</tt><a class="headerlink" href="#deep_ptr:T.Deleter.Copier:::mul-operatorC" title="Permalink to this definition">¶</a></dt>
+<dd><p>Attempting to dereference a <a class="reference internal" href="#deep_ptr:T.Deleter.Copier:" title="deep_ptr&lt;T, Deleter, Copier&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">deep_ptr</span></tt></a> that does not manage an object
+will result in undefined behavior</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">an lvalue reference to the managed object</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_ptr:T.Deleter.Copier:::pointer-operatorC">
+<a class="reference internal" href="#deep_ptr:T.Deleter.Copier:::pointer" title="deep_ptr&lt;T, Deleter, Copier&gt;::pointer">pointer</a> <tt class="descname">operator-&gt;</tt><big>(</big><big>)</big><tt class="descclassname"> const</tt><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#deep_ptr:T.Deleter.Copier:::pointer-operatorC" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">a pointer to the managed object or <tt class="docutils literal"><span class="pre">nullptr</span></tt> if no such
+object exists.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_ptr:T.Deleter.Copier:::getC">
+<a class="reference internal" href="#deep_ptr:T.Deleter.Copier:::pointer" title="deep_ptr&lt;T, Deleter, Copier&gt;::pointer">pointer</a> <tt class="descname">get</tt><big>(</big><big>)</big><tt class="descclassname"> const</tt><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#deep_ptr:T.Deleter.Copier:::getC" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A pointer to the managed object, or <tt class="docutils literal"><span class="pre">nullptr</span></tt> if no such
+object exists.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_ptr:T.Deleter.Copier:::get_deleterC">
+<a class="reference internal" href="#deep_ptr:T.Deleter.Copier:::deleter_type" title="deep_ptr&lt;T, Deleter, Copier&gt;::deleter_type">deleter_type const&amp;</a> <tt class="descname">get_deleter</tt><big>(</big><big>)</big><tt class="descclassname"> const</tt><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#deep_ptr:T.Deleter.Copier:::get_deleterC" title="Permalink to this definition">¶</a></dt>
+<dt id="deep_ptr:T.Deleter.Copier:::get_deleter">
+<a class="reference internal" href="#deep_ptr:T.Deleter.Copier:::deleter_type" title="deep_ptr&lt;T, Deleter, Copier&gt;::deleter_type">deleter_type&amp;</a> <tt class="descname">get_deleter</tt><big>(</big><big>)</big><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#deep_ptr:T.Deleter.Copier:::get_deleter" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The deleter object used for destruction of the managed object.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_ptr:T.Deleter.Copier:::get_copierC">
+<a class="reference internal" href="#deep_ptr:T.Deleter.Copier:::copier_type" title="deep_ptr&lt;T, Deleter, Copier&gt;::copier_type">copier_type const&amp;</a> <tt class="descname">get_copier</tt><big>(</big><big>)</big><tt class="descclassname"> const</tt><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#deep_ptr:T.Deleter.Copier:::get_copierC" title="Permalink to this definition">¶</a></dt>
+<dt id="deep_ptr:T.Deleter.Copier:::get_copier">
+<a class="reference internal" href="#deep_ptr:T.Deleter.Copier:::copier_type" title="deep_ptr&lt;T, Deleter, Copier&gt;::copier_type">copier_type&amp;</a> <tt class="descname">get_copier</tt><big>(</big><big>)</big><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#deep_ptr:T.Deleter.Copier:::get_copier" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The copier object used for copying the managed object.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_ptr:T.Deleter.Copier:::release">
+<a class="reference internal" href="#deep_ptr:T.Deleter.Copier:::pointer" title="deep_ptr&lt;T, Deleter, Copier&gt;::pointer">pointer</a> <tt class="descname">release</tt><big>(</big><big>)</big><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#deep_ptr:T.Deleter.Copier:::release" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Postcondition :</th><td class="field-body"><a class="reference internal" href="#deep_ptr:T.Deleter.Copier:::getC" title="deep_ptr&lt;T, Deleter, Copier&gt;::get"><tt class="xref cpp cpp-func docutils literal"><span class="pre">deep_ptr&lt;T,</span> <span class="pre">Deleter,</span> <span class="pre">Copier&gt;::get()</span></tt></a> returns <tt class="docutils literal"><span class="pre">nullptr</span></tt></td>
+</tr>
+</tbody>
+</table>
+<p>Releases the ownership of the managed object, if any such object exists.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_ptr:T.Deleter.Copier:::reset__pointer">
+void <tt class="descname">reset</tt><big>(</big><a class="reference internal" href="#deep_ptr:T.Deleter.Copier:::pointer" title="deep_ptr&lt;T, Deleter, Copier&gt;::pointer">pointer</a> <em>ptr</em><em>=pointer { }</em><big>)</big><a class="headerlink" href="#deep_ptr:T.Deleter.Copier:::reset__pointer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Replaces the currently managed object with <em>ptr</em>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_ptr:T.Deleter.Copier:::swap__X">
+void <tt class="descname">swap</tt><big>(</big><em>deep_ptr&amp;</em><big>)</big><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#deep_ptr:T.Deleter.Copier:::swap__X" title="Permalink to this definition">¶</a></dt>
+<dd><p>Swaps the managed object, copier object, and deleter object.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bad_polymorphic_reset">
+<em class="property">class </em><tt class="descname">bad_polymorphic_reset</tt><a class="headerlink" href="#bad_polymorphic_reset" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Inherits :</th><td class="field-body">std::logic_error</td>
+</tr>
+</tbody>
+</table>
+<p>Thrown when a <a class="reference internal" href="#poly_ptr:T.Deleter:::reset__pointer" title="poly_ptr&lt;T, Deleter&gt;::reset"><tt class="xref cpp cpp-func docutils literal"><span class="pre">poly_ptr&lt;T,</span> <span class="pre">Deleter&gt;::reset()</span></tt></a> is passed a
+non-null pointer and the <a class="reference internal" href="#poly_ptr:T.Deleter:" title="poly_ptr&lt;T, Deleter&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">poly_ptr</span></tt></a> does not manage an object, or if the
+passed in pointer differs in type from the currently managed object.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="default_copy:T:">
+<em class="property">class </em><tt class="descname">default_copy&lt;T&gt;</tt><a class="headerlink" href="#default_copy:T:" title="Permalink to this definition">¶</a></dt>
+<dd><p>The default copy policy used by <a class="reference internal" href="#deep_ptr:T.Deleter.Copier:" title="deep_ptr&lt;T, Deleter, Copier&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">deep_ptr</span></tt></a> during a copy operation. There
+are no partial specializations available. The default operation to perform
+is to allocate a new <em>T</em> pointer with <tt class="docutils literal"><span class="pre">operator</span> <span class="pre">new</span></tt>, and to initialize
+this <em>T</em> with a <tt class="docutils literal"><span class="pre">T</span> <span class="pre">const&amp;</span></tt>.</p>
+<dl class="type">
+<dt id="default_copy:T:::pointer">
+<em class="property">type </em><tt class="descname">pointer</tt><a class="headerlink" href="#default_copy:T:::pointer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Represents <tt class="docutils literal"><span class="pre">T*</span></tt></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="default_copy:T:::default_copyCE">
+<em class="property">constexpr</em>  <tt class="descname">default_copy</tt><big>(</big><big>)</big><a class="headerlink" href="#default_copy:T:::default_copyCE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs the <a class="reference internal" href="#default_copy:T:" title="default_copy&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">default_copy&lt;T&gt;</span></tt></a> object.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="default_copy:T:::default_copy__X">
+ <tt class="descname">default_copy</tt><big>(</big><em>default_copy&lt;U&gt; const&amp;</em><big>)</big><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#default_copy:T:::default_copy__X" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a <a class="reference internal" href="#default_copy:T:" title="default_copy&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">default_copy&lt;T&gt;</span></tt></a> from another
+<a class="reference internal" href="#default_copy:T:" title="default_copy&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">default_copy&lt;T&gt;</span></tt></a>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="default_copy:T:::call-operator__pointerC">
+<a class="reference internal" href="#default_copy:T:::pointer" title="default_copy&lt;T&gt;::pointer">pointer</a> <tt class="descname">operator()</tt><big>(</big><a class="reference internal" href="#default_copy:T:::pointer" title="default_copy&lt;T&gt;::pointer">pointer const</a> <em>ptr</em><big>)</big><a class="headerlink" href="#default_copy:T:::call-operator__pointerC" title="Permalink to this definition">¶</a></dt>
+<dd><p>Allocates a new <a class="reference internal" href="#default_copy:T:::pointer" title="default_copy&lt;T&gt;::pointer"><tt class="xref cpp cpp-type docutils literal"><span class="pre">pointer</span></tt></a> and initializes it with the dereferenced
+<em>ptr</em>, to invoke the copy constructor.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="default_poly_copy:T.D.U:__X">
+std::unique_ptr&lt;T, D&gt; <tt class="descname">default_poly_copy&lt;T, D, U&gt;</tt><big>(</big><em>std::unique_ptr&lt;T, D&gt; const&amp;</em><big>)</big><a class="headerlink" href="#default_poly_copy:T.D.U:__X" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function is used as the default copier when assigning a raw pointer or
+unique_ptr to a <a class="reference internal" href="#poly_ptr:T.Deleter:" title="poly_ptr&lt;T, Deleter&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">poly_ptr</span></tt></a>. It will perform a deep copy with a call to
+<tt class="xref cpp cpp-func docutils literal"><span class="pre">make_unique</span></tt>, with type <em>U</em> and dynamic_cast the stored pointer
+of <em>T</em> into <em>U</em> as it performs the assignment. The <tt class="xref cpp cpp-type docutils literal"><span class="pre">deleter_type</span></tt> of
+the given unique_ptr will <em>also</em> be copied.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><tt class="docutils literal"><span class="pre">std::unique_ptr&lt;T,</span> <span class="pre">D&gt;</span></tt> with a managed object.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="null_poly_copy:T.D:__X">
+std::unique_ptr&lt;T, D&gt; <tt class="descname">null_poly_copy&lt;T, D&gt;</tt><big>(</big><em>std::unique_ptr&lt;T, D&gt; const&amp;</em><big>)</big><a class="headerlink" href="#null_poly_copy:T.D:__X" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function is used within a <a class="reference internal" href="#poly_ptr:T.Deleter:" title="poly_ptr&lt;T, Deleter&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">poly_ptr</span></tt></a> for when it does not manage an
+object. Given any unique_ptr, it will return an empty unique_ptr.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">An empty <tt class="docutils literal"><span class="pre">std::unique_ptr&lt;T,</span> <span class="pre">D&gt;</span></tt></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="eq-operator__X.X">
+bool <tt class="descname">operator==</tt><big>(</big><em>poly_ptr const&amp;</em>, <em>poly_ptr const&amp;</em><big>)</big><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#eq-operator__X.X" title="Permalink to this definition">¶</a></dt>
+<dt id="neq-operator__X.X">
+bool <tt class="descname">operator!=</tt><big>(</big><em>poly_ptr const&amp;</em>, <em>poly_ptr const&amp;</em><big>)</big><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#neq-operator__X.X" title="Permalink to this definition">¶</a></dt>
+<dt id="gte-operator__X.X">
+bool <tt class="descname">operator&gt;=</tt><big>(</big><em>poly_ptr const&amp;</em>, <em>poly_ptr const&amp;</em><big>)</big><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#gte-operator__X.X" title="Permalink to this definition">¶</a></dt>
+<dt id="lte-operator__X.X">
+bool <tt class="descname">operator&lt;=</tt><big>(</big><em>poly_ptr const&amp;</em>, <em>poly_ptr const&amp;</em><big>)</big><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#lte-operator__X.X" title="Permalink to this definition">¶</a></dt>
+<dt id="gt-operator__X.X">
+bool <tt class="descname">operator&gt;</tt><big>(</big><em>poly_ptr const&amp;</em>, <em>poly_ptr const&amp;</em><big>)</big><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#gt-operator__X.X" title="Permalink to this definition">¶</a></dt>
+<dt id="lt-operator__X.X">
+bool <tt class="descname">operator&lt;</tt><big>(</big><em>poly_ptr const&amp;</em>, <em>poly_ptr const&amp;</em><big>)</big><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#lt-operator__X.X" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compares two <a class="reference internal" href="#poly_ptr:T.Deleter:" title="poly_ptr&lt;T, Deleter&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">poly_ptr</span></tt></a>&#8216;s via <a class="reference internal" href="#poly_ptr:T.Deleter:::getC" title="poly_ptr&lt;T, Deleter&gt;::get"><tt class="xref cpp cpp-func docutils literal"><span class="pre">poly_ptr&lt;T,</span> <span class="pre">Deleter&gt;::get()</span></tt></a> with
+the given operator.</p>
+</dd></dl>
+
+<dl class="function">
+<dt>
+bool <tt class="descname">operator==</tt><big>(</big><em>deep_ptr const&amp;</em>, <em>deep_ptr const&amp;</em><big>)</big><tt class="descclassname"> noexcept</tt></dt>
+<dt>
+bool <tt class="descname">operator!=</tt><big>(</big><em>deep_ptr const&amp;</em>, <em>deep_ptr const&amp;</em><big>)</big><tt class="descclassname"> noexcept</tt></dt>
+<dt>
+bool <tt class="descname">operator&gt;=</tt><big>(</big><em>deep_ptr const&amp;</em>, <em>deep_ptr const&amp;</em><big>)</big><tt class="descclassname"> noexcept</tt></dt>
+<dt>
+bool <tt class="descname">operator&lt;=</tt><big>(</big><em>deep_ptr const&amp;</em>, <em>deep_ptr const&amp;</em><big>)</big><tt class="descclassname"> noexcept</tt></dt>
+<dt>
+bool <tt class="descname">operator&gt;</tt><big>(</big><em>deep_ptr const&amp;</em>, <em>deep_ptr const&amp;</em><big>)</big><tt class="descclassname"> noexcept</tt></dt>
+<dt>
+bool <tt class="descname">operator&lt;</tt><big>(</big><em>deep_ptr const&amp;</em>, <em>deep_ptr const&amp;</em><big>)</big><tt class="descclassname"> noexcept</tt></dt>
+<dd><p>Compares two <a class="reference internal" href="#deep_ptr:T.Deleter.Copier:" title="deep_ptr&lt;T, Deleter, Copier&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">deep_ptr</span></tt></a>&#8216;s via <tt class="xref cpp cpp-func docutils literal"><span class="pre">deep_ptr&lt;T,</span> <span class="pre">Deleter&gt;::get()</span></tt> with
+the given operator.</p>
+</dd></dl>
+
+<dl class="function">
+<dt>
+bool <tt class="descname">operator==</tt><big>(</big><em>poly_ptr&lt;T, D&gt; const&amp;</em>, <em>nullptr_t</em><big>)</big><tt class="descclassname"> noexcept</tt></dt>
+<dt>
+bool <tt class="descname">operator!=</tt><big>(</big><em>poly_ptr&lt;T, D&gt; const&amp;</em>, <em>nullptr_t</em><big>)</big><tt class="descclassname"> noexcept</tt></dt>
+<dt>
+bool <tt class="descname">operator&gt;=</tt><big>(</big><em>poly_ptr&lt;T, D&gt; const&amp;</em>, <em>nullptr_t</em><big>)</big><tt class="descclassname"> noexcept</tt></dt>
+<dt>
+bool <tt class="descname">operator&lt;=</tt><big>(</big><em>poly_ptr&lt;T, D&gt; const&amp;</em>, <em>nullptr_t</em><big>)</big><tt class="descclassname"> noexcept</tt></dt>
+<dt>
+bool <tt class="descname">operator&gt;</tt><big>(</big><em>poly_ptr&lt;T, D&gt; const&amp;</em>, <em>nullptr_t</em><big>)</big><tt class="descclassname"> noexcept</tt></dt>
+<dt>
+bool <tt class="descname">operator&lt;</tt><big>(</big><em>poly_ptr&lt;T, D&gt; const&amp;</em>, <em>nullptr_t</em><big>)</big><tt class="descclassname"> noexcept</tt></dt>
+<dt>
+bool <tt class="descname">operator==</tt><big>(</big><em>nullptr_t</em>, <em>poly_ptr&lt;T, D&gt; const&amp;</em><big>)</big><tt class="descclassname"> noexcept</tt></dt>
+<dt>
+bool <tt class="descname">operator!=</tt><big>(</big><em>nullptr_t</em>, <em>poly_ptr&lt;T, D&gt; const&amp;</em><big>)</big><tt class="descclassname"> noexcept</tt></dt>
+<dt>
+bool <tt class="descname">operator&gt;=</tt><big>(</big><em>nullptr_t</em>, <em>poly_ptr&lt;T, D&gt; const&amp;</em><big>)</big><tt class="descclassname"> noexcept</tt></dt>
+<dt>
+bool <tt class="descname">operator&lt;=</tt><big>(</big><em>nullptr_t</em>, <em>poly_ptr&lt;T, D&gt; const&amp;</em><big>)</big><tt class="descclassname"> noexcept</tt></dt>
+<dt>
+bool <tt class="descname">operator&gt;</tt><big>(</big><em>nullptr_t</em>, <em>poly_ptr&lt;T, D&gt; const&amp;</em><big>)</big><tt class="descclassname"> noexcept</tt></dt>
+<dt>
+bool <tt class="descname">operator&lt;</tt><big>(</big><em>nullptr_t</em>, <em>poly_ptr&lt;T, D&gt; const&amp;</em><big>)</big><tt class="descclassname"> noexcept</tt></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the result of comparing <a class="reference internal" href="#poly_ptr:T.Deleter:::getC" title="poly_ptr&lt;T, Deleter&gt;::get"><tt class="xref cpp cpp-func docutils literal"><span class="pre">poly_ptr&lt;T,</span> <span class="pre">Deleter&gt;::get()</span></tt></a> and
+<tt class="docutils literal"><span class="pre">nullptr</span></tt> with the given operator.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt>
+bool <tt class="descname">operator==</tt><big>(</big><em>deep_ptr&lt;T, D, C&gt; const&amp;</em>, <em>nullptr_t</em><big>)</big><tt class="descclassname"> noexcept</tt></dt>
+<dt>
+bool <tt class="descname">operator!=</tt><big>(</big><em>deep_ptr&lt;T, D, C&gt; const&amp;</em>, <em>nullptr_t</em><big>)</big><tt class="descclassname"> noexcept</tt></dt>
+<dt>
+bool <tt class="descname">operator&gt;=</tt><big>(</big><em>deep_ptr&lt;T, D, C&gt; const&amp;</em>, <em>nullptr_t</em><big>)</big><tt class="descclassname"> noexcept</tt></dt>
+<dt>
+bool <tt class="descname">operator&lt;=</tt><big>(</big><em>deep_ptr&lt;T, D, C&gt; const&amp;</em>, <em>nullptr_t</em><big>)</big><tt class="descclassname"> noexcept</tt></dt>
+<dt>
+bool <tt class="descname">operator&gt;</tt><big>(</big><em>deep_ptr&lt;T, D, C&gt; const&amp;</em>, <em>nullptr_t</em><big>)</big><tt class="descclassname"> noexcept</tt></dt>
+<dt>
+bool <tt class="descname">operator&lt;</tt><big>(</big><em>deep_ptr&lt;T, D, C&gt; const&amp;</em>, <em>nullptr_t</em><big>)</big><tt class="descclassname"> noexcept</tt></dt>
+<dt>
+bool <tt class="descname">operator==</tt><big>(</big><em>nullptr_t</em>, <em>deep_ptr&lt;T, D, C&gt; const&amp;</em><big>)</big><tt class="descclassname"> noexcept</tt></dt>
+<dt>
+bool <tt class="descname">operator!=</tt><big>(</big><em>nullptr_t</em>, <em>deep_ptr&lt;T, D, C&gt; const&amp;</em><big>)</big><tt class="descclassname"> noexcept</tt></dt>
+<dt>
+bool <tt class="descname">operator&gt;=</tt><big>(</big><em>nullptr_t</em>, <em>deep_ptr&lt;T, D, C&gt; const&amp;</em><big>)</big><tt class="descclassname"> noexcept</tt></dt>
+<dt>
+bool <tt class="descname">operator&lt;=</tt><big>(</big><em>nullptr_t</em>, <em>deep_ptr&lt;T, D, C&gt; const&amp;</em><big>)</big><tt class="descclassname"> noexcept</tt></dt>
+<dt>
+bool <tt class="descname">operator&gt;</tt><big>(</big><em>nullptr_t</em>, <em>deep_ptr&lt;T, D, C&gt; const&amp;</em><big>)</big><tt class="descclassname"> noexcept</tt></dt>
+<dt>
+bool <tt class="descname">operator&lt;</tt><big>(</big><em>nullptr_t</em>, <em>deep_ptr&lt;T, D, C&gt; const&amp;</em><big>)</big><tt class="descclassname"> noexcept</tt></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The result of comparing <a class="reference internal" href="#deep_ptr:T.Deleter.Copier:::getC" title="deep_ptr&lt;T, Deleter, Copier&gt;::get"><tt class="xref cpp cpp-func docutils literal"><span class="pre">deep_ptr&lt;T,</span> <span class="pre">Deleter,</span> <span class="pre">Copier&gt;::get()</span></tt></a>
+and <tt class="docutils literal"><span class="pre">nullptr</span></tt> with the given operator.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="make_poly:T:__URR">
+poly_ptr&lt;T, Deleter&gt; <tt class="descname">make_poly&lt;T&gt;</tt><big>(</big>U&amp;&amp; <em>args</em><big>)</big><a class="headerlink" href="#make_poly:T:__URR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Provided to supplement the <tt class="docutils literal"><span class="pre">std::make_shared&lt;T&gt;</span></tt> and
+<a class="reference internal" href="#make_unique:T:__X" title="make_unique&lt;T&gt;"><tt class="xref cpp cpp-func docutils literal"><span class="pre">make_unique&lt;T&gt;()</span></tt></a> functions. Constructs a <a class="reference internal" href="#poly_ptr:T.Deleter:" title="poly_ptr&lt;T, Deleter&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">poly_ptr</span></tt></a> with an
+<tt class="docutils literal"><span class="pre">element_type</span></tt> of <em>T</em>, taking derived universal reference <em>U</em>. This
+function internally calls <a class="reference internal" href="#make_unique:T:__X" title="make_unique&lt;T&gt;"><tt class="xref cpp cpp-func docutils literal"><span class="pre">make_unique&lt;T&gt;()</span></tt></a> to create the
+<a class="reference internal" href="#poly_ptr:T.Deleter:" title="poly_ptr&lt;T, Deleter&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">poly_ptr</span></tt></a>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="make_deep:T:__X">
+deep_ptr&lt;T&gt; <tt class="descname">make_deep&lt;T&gt;</tt><big>(</big><em>args</em><big>)</big><a class="headerlink" href="#make_deep:T:__X" title="Permalink to this definition">¶</a></dt>
+<dd><p>Used to supplement the <a class="reference internal" href="#make_unique:T:__X" title="make_unique&lt;T&gt;"><tt class="xref cpp cpp-func docutils literal"><span class="pre">make_unique&lt;T&gt;()</span></tt></a>, <a class="reference internal" href="#make_poly:T:__URR" title="make_poly&lt;T&gt;"><tt class="xref cpp cpp-func docutils literal"><span class="pre">make_poly&lt;T&gt;()</span></tt></a>,
+and <cite>make_shared&lt;T&gt;</cite> functions. Takes a variadic number of arguments to
+construct a <em>T</em> with. This <em>T</em> is allocated via operator new (the default
+allocation scheme) and passed to a <a class="reference internal" href="#deep_ptr:T.Deleter.Copier:" title="deep_ptr&lt;T, Deleter, Copier&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">deep_ptr</span></tt></a> for construction. This
+<a class="reference internal" href="#deep_ptr:T.Deleter.Copier:" title="deep_ptr&lt;T, Deleter, Copier&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">deep_ptr</span></tt></a> is then returned by the function.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="make_unique:T:__X">
+std::unique_ptr&lt;T&gt; <tt class="descname">make_unique&lt;T&gt;</tt><big>(</big><em>args</em><big>)</big><a class="headerlink" href="#make_unique:T:__X" title="Permalink to this definition">¶</a></dt>
+<dt>
+std::unique_ptr&lt;T&gt; <tt class="descname">make_unique&lt;T&gt;</tt><big>(</big><em>size</em><big>)</big></dt>
+<dd><p><tt class="docutils literal"><span class="pre">make_unique</span></tt> is provided to help supplement the <tt class="docutils literal"><span class="pre">std::make_shared&lt;T&gt;</span></tt>
+function for the <tt class="docutils literal"><span class="pre">std::unique_ptr&lt;T&gt;</span></tt> type. The first overload will be
+used if the given type T is not an array. If the given type T is an array of
+an unknown bound (that is, <tt class="docutils literal"><span class="pre">std::extent&lt;T&gt;::value</span> <span class="pre">==</span> <span class="pre">0</span></tt>) the second
+overload is used. A third overload is provided to insure that the compiler</p>
+<p>will error. This third overload is available when the given type
+T is an array of a known bound (that is,
+<tt class="docutils literal"><span class="pre">std::extent&lt;T&gt;::value</span> <span class="pre">!=</span> <span class="pre">0</span></tt>).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>args</strong> &#8211; Variadic template arguments with which to construct
+a T</li>
+<li><strong>size</strong> &#8211; Extent of <tt class="docutils literal"><span class="pre">std::unique_ptr&lt;T[]&gt;</span></tt> desired.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Type args:</th><td class="field-body"><p class="first">Args&amp;&amp;...</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><tt class="docutils literal"><span class="pre">std::unique_ptr&lt;T&gt;</span></tt></p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Type size:</th><td class="field-body"><p class="first">std::size_t</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><tt class="docutils literal"><span class="pre">std::unique_ptr&lt;T[]&gt;</span></tt></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<div class="section" id="specializations">
+<h2>Specializations<a class="headerlink" href="#specializations" title="Permalink to this headline">¶</a></h2>
+<p>There are specializations for <a class="reference internal" href="#poly_ptr:T.Deleter:" title="poly_ptr&lt;T, Deleter&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">poly_ptr</span></tt></a> and <a class="reference internal" href="#deep_ptr:T.Deleter.Copier:" title="deep_ptr&lt;T, Deleter, Copier&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">deep_ptr</span></tt></a> for integration with
+the C++ standard library.</p>
+<dl class="class">
+<dt id="hash:poly_ptr:T.Deleter::">
+<em class="property">class </em><tt class="descname">hash&lt;poly_ptr&lt;T, Deleter&gt;&gt;</tt><a class="headerlink" href="#hash:poly_ptr:T.Deleter::" title="Permalink to this definition">¶</a></dt>
+<dd><p>This specialization of <tt class="xref cpp cpp-class docutils literal"><span class="pre">hash</span></tt> allows <a class="reference internal" href="#poly_ptr:T.Deleter:" title="poly_ptr&lt;T, Deleter&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">poly_ptr</span></tt></a> to be used as a
+key type in associative containers.</p>
+<p>For a given <a class="reference internal" href="#poly_ptr:T.Deleter:" title="poly_ptr&lt;T, Deleter&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">poly_ptr</span></tt></a> <em>ptr</em>, this specialization insures that
+<tt class="docutils literal"><span class="pre">std::hash&lt;poly_ptr&lt;T,</span> <span class="pre">Deleter&gt;&gt;</span> <span class="pre">{</span> <span class="pre">}(ptr)</span></tt> is equivalent to the expression
+<tt class="docutils literal"><span class="pre">std::hash&lt;typename</span> <span class="pre">poly_ptr&lt;T,</span> <span class="pre">Deleter&gt;::pointer&gt;</span> <span class="pre">{</span> <span class="pre">}(ptr.get())</span></tt></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="std::hash:deep_ptr:T.Deleter.Copier::">
+<em class="property">class </em><tt class="descclassname">std::</tt><tt class="descname">hash&lt;deep_ptr&lt;T, Deleter, Copier&gt;&gt;</tt><a class="headerlink" href="#std::hash:deep_ptr:T.Deleter.Copier::" title="Permalink to this definition">¶</a></dt>
+<dd><p>This specialization of <tt class="xref cpp cpp-class docutils literal"><span class="pre">hash</span></tt> allows <a class="reference internal" href="#deep_ptr:T.Deleter.Copier:" title="deep_ptr&lt;T, Deleter, Copier&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">deep_ptr</span></tt></a> to be used as a
+key type in associative containers.</p>
+<p>For a given <a class="reference internal" href="#deep_ptr:T.Deleter.Copier:" title="deep_ptr&lt;T, Deleter, Copier&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">deep_ptr</span></tt></a> <em>ptr</em>, this specialization insure that
+<tt class="docutils literal"><span class="pre">std::hash&lt;deep_ptr&lt;T,</span> <span class="pre">Deleter,</span> <span class="pre">Copier&gt;&gt;</span> <span class="pre">{</span> <span class="pre">}(ptr)</span></tt> is equivalent to the
+expression
+<tt class="docutils literal"><span class="pre">std::hash&lt;typename</span> <span class="pre">deep_ptr&lt;T,</span> <span class="pre">Deleter,</span> <span class="pre">Copier&gt;::pointer&gt;</span> <span class="pre">{</span> <span class="pre">}(ptr.get())</span></tt></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="swap__poly_ptr:T.D:R.poly_ptr:T.D:R">
+void <tt class="descname">swap</tt><big>(</big>poly_ptr&lt;T, D&gt;&amp; <em>lhs</em>, poly_ptr&lt;T, D&gt;&amp; <em>rhs</em><big>)</big><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#swap__poly_ptr:T.D:R.poly_ptr:T.D:R" title="Permalink to this definition">¶</a></dt>
+<dd><p>A specialization of <tt class="docutils literal"><span class="pre">std::swap</span></tt> that calls
+<a class="reference internal" href="#poly_ptr:T.Deleter:::swap__X" title="poly_ptr&lt;T, Deleter&gt;::swap"><tt class="xref cpp cpp-func docutils literal"><span class="pre">poly_ptr&lt;T,</span> <span class="pre">Deleter&gt;::swap()</span></tt></a>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="swap__deep_ptr:T.D.C:R.deep_ptr:T.D.C:R">
+void <tt class="descname">swap</tt><big>(</big>deep_ptr&lt;T, D, C&gt;&amp; <em>lhs</em>, deep_ptr&lt;T, D, C&gt;&amp; <em>rhs</em><big>)</big><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#swap__deep_ptr:T.D.C:R.deep_ptr:T.D.C:R" title="Permalink to this definition">¶</a></dt>
+<dd><p>A specialization of <tt class="docutils literal"><span class="pre">std::swap</span></tt> that calls
+<a class="reference internal" href="#deep_ptr:T.Deleter.Copier:::swap__X" title="deep_ptr&lt;T, Deleter, Copier&gt;::swap"><tt class="xref cpp cpp-func docutils literal"><span class="pre">deep_ptr&lt;T,</span> <span class="pre">Deleter,</span> <span class="pre">Copier&gt;::swap()</span></tt></a>.</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <div class="sphinxlocaltoc">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Memory Component</a><ul>
+<li><a class="reference internal" href="#specializations">Specializations</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="utility.html"
+                        title="previous chapter">Utility Component</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="string.html"
+                        title="next chapter">String Component</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/memory.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="string.html" title="String Component"
+             >next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="utility.html" title="Utility Component"
+             >previous</a> &nbsp; &nbsp;</li>
+    <li><a href="index.html">MNMLSTC Core 0.1 documentation</a> &raquo;</li>
+ 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2013, MNMLSTC.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+    <!-- cloud_sptheme 1.4 -->
+  </body>
+</html>

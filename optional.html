@@ -1,0 +1,495 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Optional Component &mdash; MNMLSTC Core 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/cloud.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noticia+Text|Open+Sans|Droid+Sans+Mono" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/jquery.cookie.js"></script>
+    <script type="text/javascript" src="_static/cloud.js"></script>
+    <link rel="top" title="MNMLSTC Core 0.1 documentation" href="index.html" />
+    <link rel="next" title="Variant Component" href="variant.html" />
+    <link rel="prev" title="Iterator Component" href="iterator.html" /> 
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+  </head>
+  <body>
+    <div class="relbar-top">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="variant.html" title="Variant Component"
+             accesskey="N">next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="iterator.html" title="Iterator Component"
+             accesskey="P">previous</a> &nbsp; &nbsp;</li>
+    <li><a href="index.html">MNMLSTC Core 0.1 documentation</a> &raquo;</li>
+ 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="optional-component">
+<span id="core-optional-component"></span><h1>Optional Component<a class="headerlink" href="#optional-component" title="Permalink to this headline">¶</a></h1>
+<p>The <a class="reference internal" href="#optional:T:" title="optional&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">optional</span></tt></a> component is currently available in Boost. However,
+this implementation of <a class="reference internal" href="#optional:T:" title="optional&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">optional</span></tt></a> follows the C++14 proposal as closely as
+possible.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>Due to the relaxation of rules regarding <tt class="docutils literal"><span class="pre">constexpr</span></tt> in C++14,
+<a class="reference internal" href="#optional:T:" title="optional&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">optional</span></tt></a> is not able to implement the entire interface. For those parts
+of the interface that cannot be used, a note much like this one will be in
+the function description.</p>
+<p class="last">Additionally, the current proposal states that one cannot use
+<tt class="docutils literal"><span class="pre">std::aligned_storage</span></tt> to hold the data contained within (this is a result
+of the number of constexpr constructors). This optional implementation
+ignores this, and uses <tt class="docutils literal"><span class="pre">std::aligned_storage</span></tt>.</p>
+</div>
+<dl class="class">
+<dt id="in_place_t">
+<em class="property">class </em><tt class="descname">in_place_t</tt><a class="headerlink" href="#in_place_t" title="Permalink to this definition">¶</a></dt>
+<dd><p><a class="reference internal" href="#in_place_t" title="in_place_t"><tt class="xref cpp cpp-class docutils literal"><span class="pre">in_place_t</span></tt></a> is an empty class type used to disambiguate
+the overloads and member functions of <a class="reference internal" href="#optional:T:" title="optional&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">optional</span></tt></a> that
+take arguments (such as <a class="reference internal" href="#optional:T:::emplace__X.X" title="optional&lt;T&gt;::emplace"><tt class="xref cpp cpp-func docutils literal"><span class="pre">optional&lt;T&gt;::emplace()</span></tt></a>) for
+in-place construction of some value.</p>
+<p>An object of this type is available under the name <tt class="docutils literal"><span class="pre">in_place</span></tt>.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="nullopt_t">
+<em class="property">class </em><tt class="descname">nullopt_t</tt><a class="headerlink" href="#nullopt_t" title="Permalink to this definition">¶</a></dt>
+<dd><p>nullopt_t is an empty class type used to indicate an
+<a class="reference internal" href="#optional:T:" title="optional&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">optional</span></tt></a> type with uninitialized state.</p>
+<p>An object of this type is available under the name <tt class="docutils literal"><span class="pre">nullopt</span></tt>.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="bad_optional_access">
+<em class="property">class </em><tt class="descname">bad_optional_access</tt><a class="headerlink" href="#bad_optional_access" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Inherits :</th><td class="field-body">std::logic_error</td>
+</tr>
+</tbody>
+</table>
+<p>Thrown when accessing an <a class="reference internal" href="#optional:T:" title="optional&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">optional</span></tt></a> that is in a disengaged state.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Accessing an <a class="reference internal" href="#optional:T:" title="optional&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">optional</span></tt></a> in a disengaged state does not refer to
+accessing the underlying object. Specifically it means calling <a class="reference internal" href="#optional:T:" title="optional&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">optional</span></tt></a>
+member functions, and not member functions of the underlying object it
+may or may not currently manage.</p>
+</div>
+</dd></dl>
+
+<dl class="class">
+<dt id="optional:T:">
+<em class="property">class </em><tt class="descname">optional&lt;T&gt;</tt><a class="headerlink" href="#optional:T:" title="Permalink to this definition">¶</a></dt>
+<dd><p>The <a class="reference internal" href="#optional:T:" title="optional&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">optional</span></tt></a> manages an <em>optional</em> value. This value may be in either an
+initialized state, or an uninitialized state. This value is guaranteed to be
+allocated within the <a class="reference internal" href="#optional:T:" title="optional&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">optional</span></tt></a>. Instead of modelling a pointer, such as
+<tt class="docutils literal"><span class="pre">std::unique_ptr&lt;T&gt;</span></tt> or <tt class="docutils literal"><span class="pre">std::shared_ptr&lt;T&gt;</span></tt>, <a class="reference internal" href="#optional:T:" title="optional&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">optional</span></tt></a> models an
+object, even though <a class="reference internal" href="#optional:T:::pointer-operatorC" title="optional&lt;T&gt;::operator-&gt;"><tt class="xref cpp cpp-func docutils literal"><span class="pre">optional&lt;T&gt;::operator-&gt;()</span></tt></a> and
+<a class="reference internal" href="#optional:T:::mul-operatorC" title="optional&lt;T&gt;::operator*"><tt class="xref cpp cpp-func docutils literal"><span class="pre">optional&lt;T&gt;::operator*()</span></tt></a> are provided.</p>
+<p>An <a class="reference internal" href="#optional:T:" title="optional&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">optional</span></tt></a> object is <em>engaged</em> when one of the following occurs:</p>
+<blockquote>
+<div><ul class="simple">
+<li>The object is initialized with a value of type T</li>
+<li>The object is assigned an <em>engaged</em> <a class="reference internal" href="#optional:T:" title="optional&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">optional</span></tt></a>.</li>
+</ul>
+</div></blockquote>
+<p>An <a class="reference internal" href="#optional:T:" title="optional&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">optional</span></tt></a> object is <em>disengaged</em> when one of the following occurs:</p>
+<blockquote>
+<div><ul class="simple">
+<li>The object is default-initialized.</li>
+<li>The object is initialized with an instance of <a class="reference internal" href="#nullopt_t" title="nullopt_t"><tt class="xref cpp cpp-class docutils literal"><span class="pre">nullopt_t</span></tt></a>  or a
+<em>disengaged</em> <a class="reference internal" href="#optional:T:" title="optional&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">optional</span></tt></a>.</li>
+<li>The object is assigned with an instance of <a class="reference internal" href="#nullopt_t" title="nullopt_t"><tt class="xref cpp cpp-class docutils literal"><span class="pre">nullopt_t</span></tt></a> or a
+<em>disengaged</em> <a class="reference internal" href="#optional:T:" title="optional&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">optional</span></tt></a>.</li>
+</ul>
+</div></blockquote>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p>An <a class="reference internal" href="#optional:T:" title="optional&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">optional</span></tt></a>&#8216;s <a class="reference internal" href="#optional:T:::value_type" title="optional&lt;T&gt;::value_type"><tt class="xref cpp cpp-type docutils literal"><span class="pre">value_type</span></tt></a> <em>may not</em> be:</p>
+<ul class="simple">
+<li><a class="reference internal" href="#in_place_t" title="in_place_t"><tt class="xref cpp cpp-class docutils literal"><span class="pre">in_place_t</span></tt></a></li>
+<li><a class="reference internal" href="#nullopt_t" title="nullopt_t"><tt class="xref cpp cpp-class docutils literal"><span class="pre">nullopt_t</span></tt></a></li>
+<li><tt class="docutils literal"><span class="pre">std::nullptr_t</span></tt></li>
+<li><tt class="docutils literal"><span class="pre">void</span></tt></li>
+<li><tt class="docutils literal"><span class="pre">bool</span></tt></li>
+</ul>
+<p class="last">The decision to disallow an <tt class="docutils literal"><span class="pre">optional&lt;bool&gt;</span></tt> is due to the explicit
+boolean conversion operator. It was decided that getting the true or
+false state would be error prone and too easy to miss.</p>
+</div>
+<dl class="type">
+<dt id="optional:T:::value_type">
+<em class="property">type </em><tt class="descname">value_type</tt><a class="headerlink" href="#optional:T:::value_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Represents the underlying type stored within an <a class="reference internal" href="#optional:T:" title="optional&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">optional</span></tt></a>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="optional:T:::optional__X">
+ <tt class="descname">optional</tt><big>(</big><em>optional const&amp;</em><big>)</big><a class="headerlink" href="#optional:T:::optional__X" title="Permalink to this definition">¶</a></dt>
+<dd><p>Copies the contents of the incoming <a class="reference internal" href="#optional:T:" title="optional&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">optional</span></tt></a>. If the incoming
+<a class="reference internal" href="#optional:T:" title="optional&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">optional</span></tt></a> is engaged, the contents of it are initialized into the
+new <a class="reference internal" href="#optional:T:" title="optional&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">optional</span></tt></a> object.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="optional:T:::optional__optionalRR">
+ <tt class="descname">optional</tt><big>(</big>optional&amp;&amp; <em>that</em><big>)</big><a class="headerlink" href="#optional:T:::optional__optionalRR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a new <a class="reference internal" href="#optional:T:" title="optional&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">optional</span></tt></a> by moving the state of the incoming
+<a class="reference internal" href="#optional:T:" title="optional&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">optional</span></tt></a>. If the invoming <a class="reference internal" href="#optional:T:" title="optional&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">optional</span></tt></a> is engaged, its contents will be
+moved into the new object.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Postcondition :</th><td class="field-body"><tt class="docutils literal"><span class="pre">that.empty()</span> <span class="pre">==</span> <span class="pre">true</span></tt></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Noexcept :</th><td class="field-body"><tt class="docutils literal"><span class="pre">std::is_nothrow_move_constructible&lt;value_type&gt;</span></tt></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="optional:T:::optional__XCE">
+<em class="property">constexpr</em>  <tt class="descname">optional</tt><big>(</big><em>nullopt_tr</em><big>)</big><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#optional:T:::optional__XCE" title="Permalink to this definition">¶</a></dt>
+<dt id="optional:T:::optionalCE">
+<em class="property">constexpr</em>  <tt class="descname">optional</tt><big>(</big><big>)</big><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#optional:T:::optionalCE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a new <a class="reference internal" href="#optional:T:" title="optional&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">optional</span></tt></a> into a disengaged state.</p>
+</dd></dl>
+
+<dl class="function">
+<dt>
+ <tt class="descname">optional</tt><big>(</big><em>value_type const&amp;</em><big>)</big></dt>
+<dt>
+ <tt class="descname">optional</tt><big>(</big><em>value_type&amp;&amp;</em><big>)</big></dt>
+<dd><p>Constructs a new <a class="reference internal" href="#optional:T:" title="optional&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">optional</span></tt></a> into an <em>engaged</em> state with the contents of
+the value_type.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Noexcept :</th><td class="field-body"><tt class="docutils literal"><span class="pre">std::is_nothrow_move_constructible&lt;value_type&gt;</span></tt></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="optional:T:::optional__X.X.X">
+<em class="property">explicit</em>  <tt class="descname">optional</tt><big>(</big><em>in_place_t</em>, <em>std::initializer_list&lt;T&gt;</em>, <em>args</em><big>)</big><a class="headerlink" href="#optional:T:::optional__X.X.X" title="Permalink to this definition">¶</a></dt>
+<dt id="optional:T:::optional__X.X">
+<em class="property">explicit</em>  <tt class="descname">optional</tt><big>(</big><em>in_place_t</em>, <em>args</em><big>)</big><a class="headerlink" href="#optional:T:::optional__X.X" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a new <a class="reference internal" href="#optional:T:" title="optional&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">optional</span></tt></a> into an <em>engaged</em> state by constructing a
+<a class="reference internal" href="#optional:T:::value_type" title="optional&lt;T&gt;::value_type"><tt class="xref cpp cpp-type docutils literal"><span class="pre">value_type</span></tt></a> in place.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="optional:T:::assign-operator__X">
+optional&amp; <tt class="descname">operator=</tt><big>(</big><em>optional const&amp;</em><big>)</big><a class="headerlink" href="#optional:T:::assign-operator__X" title="Permalink to this definition">¶</a></dt>
+<dt>
+optional&amp; <tt class="descname">operator=</tt><big>(</big><em>optional&amp;&amp;</em><big>)</big></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Noexcept :</th><td class="field-body"><tt class="docutils literal"><span class="pre">std::is_nothrow_move_assignable&lt;value_type&gt;</span></tt> and
+<tt class="docutils literal"><span class="pre">std::is_nothrow_move_constructible&lt;value_type&gt;</span></tt>.</td>
+</tr>
+</tbody>
+</table>
+<p>Assigns the state of the incoming <a class="reference internal" href="#optional:T:" title="optional&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">optional</span></tt></a>. This is done by
+constructing an <a class="reference internal" href="#optional:T:" title="optional&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">optional</span></tt></a>, and then calling <a class="reference internal" href="expected.html#swap__expected:T:R.expected:T:R" title="swap"><tt class="xref cpp cpp-func docutils literal"><span class="pre">swap()</span></tt></a> on it and
+<tt class="docutils literal"><span class="pre">*this</span></tt>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="optional:T:::assign-operator__TRR">
+optional&amp; <tt class="descname">operator=</tt><big>(</big>T&amp;&amp; <em>value</em><big>)</big><a class="headerlink" href="#optional:T:::assign-operator__TRR" title="Permalink to this definition">¶</a></dt>
+<dd><p>This assignment operator is only valid if <a class="reference internal" href="#optional:T:::value_type" title="optional&lt;T&gt;::value_type"><tt class="xref cpp cpp-type docutils literal"><span class="pre">value_type</span></tt></a> is
+constructible <em>and</em> assignable from <em>value</em>.</p>
+<p>If <tt class="docutils literal"><span class="pre">*this</span></tt> is <em>disengaged</em>, it will be placed into an <em>engaged</em> state
+afterwards. If <tt class="docutils literal"><span class="pre">*this</span></tt> is already engaged, it will call the assignment
+constructor of <a class="reference internal" href="#optional:T:::value_type" title="optional&lt;T&gt;::value_type"><tt class="xref cpp cpp-type docutils literal"><span class="pre">value_type</span></tt></a>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt>
+optional&amp; <tt class="descname">operator=</tt><big>(</big><em>nullopt_t</em><big>)</big></dt>
+<dd><p>If <tt class="docutils literal"><span class="pre">*this</span></tt> is in an engaged state, it will be placed into a
+<em>disengaged</em> state.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="optional:T:::pointer-operatorC">
+<a class="reference internal" href="#optional:T:::value_type" title="optional&lt;T&gt;::value_type">value_type const*</a> <tt class="descname">operator-&gt;</tt><big>(</big><big>)</big><tt class="descclassname"> const</tt><a class="headerlink" href="#optional:T:::pointer-operatorC" title="Permalink to this definition">¶</a></dt>
+<dt id="optional:T:::pointer-operator">
+<a class="reference internal" href="#optional:T:::value_type" title="optional&lt;T&gt;::value_type">value_type*</a> <tt class="descname">operator-&gt;</tt><big>(</big><big>)</big><a class="headerlink" href="#optional:T:::pointer-operator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Accessing the managed object when the <a class="reference internal" href="#optional:T:" title="optional&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">optional</span></tt></a> is in a disengaged state
+will result in undefined behavior.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">pointer to the object managed by the <a class="reference internal" href="#optional:T:" title="optional&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">optional</span></tt></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="optional:T:::mul-operatorC">
+<a class="reference internal" href="#optional:T:::value_type" title="optional&lt;T&gt;::value_type">value_type const&amp;</a> <tt class="descname">operator*</tt><big>(</big><big>)</big><tt class="descclassname"> const</tt><a class="headerlink" href="#optional:T:::mul-operatorC" title="Permalink to this definition">¶</a></dt>
+<dt id="optional:T:::mul-operator">
+<a class="reference internal" href="#optional:T:::value_type" title="optional&lt;T&gt;::value_type">value_type&amp;</a> <tt class="descname">operator*</tt><big>(</big><big>)</big><a class="headerlink" href="#optional:T:::mul-operator" title="Permalink to this definition">¶</a></dt>
+<dd><p>If the <a class="reference internal" href="#optional:T:" title="optional&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">optional</span></tt></a> does not manage an object, dereferencing the
+<a class="reference internal" href="#optional:T:" title="optional&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">optional</span></tt></a> will result in undefined behavior.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">An lvalue reference to the object managed by the <a class="reference internal" href="#optional:T:" title="optional&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">optional</span></tt></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="optional:T:::castto-b-operatorC">
+ <tt class="descname">operator</tt> bool<big>(</big><big>)</big><tt class="descclassname"> const</tt><a class="headerlink" href="#optional:T:::castto-b-operatorC" title="Permalink to this definition">¶</a></dt>
+<dd><p>This conversion operator is <em>explicit</em>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">true if the object is <em>engaged</em>, false otherwise.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="optional:T:::valueC">
+<a class="reference internal" href="#optional:T:::value_type" title="optional&lt;T&gt;::value_type">value_type const&amp;</a> <tt class="descname">value</tt><big>(</big><big>)</big><tt class="descclassname"> const</tt><a class="headerlink" href="#optional:T:::valueC" title="Permalink to this definition">¶</a></dt>
+<dt id="optional:T:::value">
+<a class="reference internal" href="#optional:T:::value_type" title="optional&lt;T&gt;::value_type">value_type&amp;</a> <tt class="descname">value</tt><big>(</big><big>)</big><a class="headerlink" href="#optional:T:::value" title="Permalink to this definition">¶</a></dt>
+<dd><div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The <tt class="docutils literal"><span class="pre">value_type</span> <span class="pre">const&amp;</span></tt> overload is marked <tt class="docutils literal"><span class="pre">constexpr</span></tt> in
+the C++14 interface.</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Raises :</th><td class="field-body"><a class="reference internal" href="#bad_optional_access" title="bad_optional_access"><tt class="xref cpp cpp-class docutils literal"><span class="pre">bad_optional_access</span></tt></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="optional:T:::swap__optionalR">
+void <tt class="descname">swap</tt><big>(</big>optional&amp; <em>that</em><big>)</big><a class="headerlink" href="#optional:T:::swap__optionalR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Swaps the contents of &#8216;this&#8217; with the given object. The behavior that is
+taken varies as such:</p>
+<blockquote>
+<div><ul class="simple">
+<li>If neither <tt class="docutils literal"><span class="pre">*this</span></tt>, nor <tt class="docutils literal"><span class="pre">that</span></tt> are <em>engaged</em>, this function is a
+no-op.</li>
+<li>If only one of either <tt class="docutils literal"><span class="pre">*this</span></tt> and <tt class="docutils literal"><span class="pre">that</span></tt> are <em>engaged</em>, the
+contained value of the <em>disengaged</em> object is initialized by moving
+the contained value of the <em>engaged</em> object. This is followed by the
+destruction of the originally <em>engaged</em> object&#8217;s value. The state of
+both objects has been switched.</li>
+<li>If both <tt class="docutils literal"><span class="pre">*this</span></tt> and <tt class="docutils literal"><span class="pre">that</span></tt> are <em>engaged</em>, their contained values
+are swapped with <tt class="docutils literal"><span class="pre">std::swap(**this,</span> <span class="pre">*that)</span></tt>.</li>
+</ul>
+</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="optional:T:::emplace__X.X">
+void <tt class="descname">emplace</tt><big>(</big><em>std::initializer_list&lt;U&gt;</em>, <em>args</em><big>)</big><a class="headerlink" href="#optional:T:::emplace__X.X" title="Permalink to this definition">¶</a></dt>
+<dt id="optional:T:::emplace__X">
+void <tt class="descname">emplace</tt><big>(</big><em>args</em><big>)</big><a class="headerlink" href="#optional:T:::emplace__X" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs the object managed by the <a class="reference internal" href="#optional:T:" title="optional&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">optional</span></tt></a>. If the <a class="reference internal" href="#optional:T:" title="optional&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">optional</span></tt></a> is
+already engaged, it will first destruct the object it is currently
+managing.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="make_optional:T:__TRR">
+optional&lt;T&gt; <tt class="descname">make_optional&lt;T&gt;</tt><big>(</big>T&amp;&amp; <em>value</em><big>)</big><a class="headerlink" href="#make_optional:T:__TRR" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Raises :</th><td class="field-body">Any exceptions thrown by the constructor of T</td>
+</tr>
+</tbody>
+</table>
+<p>Creates an <a class="reference internal" href="#optional:T:" title="optional&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">optional</span></tt></a> object from value. Effectively calls:</p>
+<div class="highlight-cpp"><div class="highlight"><pre><span class="n">optional</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">std</span><span class="o">::</span><span class="n">decay</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;::</span><span class="n">type</span><span class="o">&gt;</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">forward</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">(</span><span class="n">value</span><span class="p">));</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="eq-operator__X.X">
+bool <tt class="descname">operator==</tt><big>(</big><em>optional const&amp;</em>, <em>optional const&amp;</em><big>)</big><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#eq-operator__X.X" title="Permalink to this definition">¶</a></dt>
+<dt>
+bool <tt class="descname">operator==</tt><big>(</big><em>optional const&amp;</em>, <em>nullopt_t</em><big>)</big><tt class="descclassname"> noexcept</tt></dt>
+<dt>
+bool <tt class="descname">operator==</tt><big>(</big><em>nullopt_t</em>, <em>optional const&amp;</em><big>)</big><tt class="descclassname"> noexcept</tt></dt>
+<dt>
+bool <tt class="descname">operator==</tt><big>(</big><em>optional&lt;T&gt; const&amp;</em>, <em>T const&amp;</em><big>)</big><tt class="descclassname"> noexcept</tt></dt>
+<dt>
+bool <tt class="descname">operator==</tt><big>(</big><em>T const&amp;</em>, <em>optional&lt;T&gt; const&amp;</em><big>)</big><tt class="descclassname"> noexcept</tt></dt>
+<dd><div class="admonition-todo admonition" id="index-0">
+<p class="first admonition-title">Todo</p>
+<p class="last">add descriptions of behavior.</p>
+</div>
+</dd></dl>
+
+<div class="section" id="specializations">
+<h2>Specializations<a class="headerlink" href="#specializations" title="Permalink to this headline">¶</a></h2>
+<p>Several specializations for the standard namespace are overloaded for the
+<a class="reference internal" href="#optional:T:" title="optional&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">optional</span></tt></a> component.</p>
+<dl class="function">
+<dt id="swap__optional:T:R.optional:T:R">
+void <tt class="descname">swap</tt><big>(</big>optional&lt;T&gt;&amp; <em>lhs</em>, optional&lt;T&gt;&amp; <em>rhs</em><big>)</big><a class="headerlink" href="#swap__optional:T:R.optional:T:R" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calls <a class="reference internal" href="#optional:T:::swap__optionalR" title="optional&lt;T&gt;::swap"><tt class="xref cpp cpp-func docutils literal"><span class="pre">optional&lt;T&gt;::swap()</span></tt></a>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Noexcept :</th><td class="field-body"><tt class="docutils literal"><span class="pre">lhs.swap(rhs)</span></tt></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="hash:optional:T::">
+<em class="property">class </em><tt class="descname">hash&lt;optional&lt;T&gt;&gt;</tt><a class="headerlink" href="#hash:optional:T::" title="Permalink to this definition">¶</a></dt>
+<dd><p>Requires that the <a class="reference internal" href="#optional:T:::value_type" title="optional&lt;T&gt;::value_type"><tt class="xref cpp cpp-type docutils literal"><span class="pre">optional&lt;T&gt;::value_type</span></tt></a> be specialized for
+<tt class="docutils literal"><span class="pre">std::hash</span></tt>. If the <a class="reference internal" href="#optional:T:" title="optional&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">optional</span></tt></a> is engaged it will return the hash
+value for <tt class="docutils literal"><span class="pre">hash&lt;value_type&gt;</span></tt>. Otherwise, it will return a default
+constructed <tt class="docutils literal"><span class="pre">std::hash&lt;value_type&gt;::result_type</span></tt>.</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <div class="sphinxlocaltoc">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Optional Component</a><ul>
+<li><a class="reference internal" href="#specializations">Specializations</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="iterator.html"
+                        title="previous chapter">Iterator Component</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="variant.html"
+                        title="next chapter">Variant Component</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/optional.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="variant.html" title="Variant Component"
+             >next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="iterator.html" title="Iterator Component"
+             >previous</a> &nbsp; &nbsp;</li>
+    <li><a href="index.html">MNMLSTC Core 0.1 documentation</a> &raquo;</li>
+ 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2013, MNMLSTC.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+    <!-- cloud_sptheme 1.4 -->
+  </body>
+</html>

@@ -1,0 +1,189 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Utility Component &mdash; MNMLSTC Core 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/cloud.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noticia+Text|Open+Sans|Droid+Sans+Mono" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/jquery.cookie.js"></script>
+    <script type="text/javascript" src="_static/cloud.js"></script>
+    <link rel="top" title="MNMLSTC Core 0.1 documentation" href="index.html" />
+    <link rel="next" title="Memory Component" href="memory.html" />
+    <link rel="prev" title="Variant Component" href="variant.html" /> 
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+  </head>
+  <body>
+    <div class="relbar-top">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="memory.html" title="Memory Component"
+             accesskey="N">next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="variant.html" title="Variant Component"
+             accesskey="P">previous</a> &nbsp; &nbsp;</li>
+    <li><a href="index.html">MNMLSTC Core 0.1 documentation</a> &raquo;</li>
+ 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="utility-component">
+<span id="core-utility-component"></span><h1>Utility Component<a class="headerlink" href="#utility-component" title="Permalink to this headline">¶</a></h1>
+<p>The utility component provides additional functions and meta templates that
+cannot be categorized. Most of the utilities provided are for working with
+type lists.</p>
+<dl class="class">
+<dt id="integer_sequence:T.Is:">
+<em class="property">class </em><tt class="descname">integer_sequence&lt;T, Is&gt;</tt><a class="headerlink" href="#integer_sequence:T.Is:" title="Permalink to this definition">¶</a></dt>
+<dd><p>meta template to generate a series of <em>T</em> to allow easier unpacking.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="index_sequence:I:">
+<em class="property">class </em><tt class="descname">index_sequence&lt;I&gt;</tt><a class="headerlink" href="#index_sequence:I:" title="Permalink to this definition">¶</a></dt>
+<dd><p>A shortcut for <a class="reference internal" href="#integer_sequence:T.Is:" title="integer_sequence&lt;T, Is&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">integer_sequence&lt;T,</span> <span class="pre">Is&gt;</span></tt></a>.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="make_index_sequence:N:">
+<em class="property">class </em><tt class="descname">make_index_sequence&lt;N&gt;</tt><a class="headerlink" href="#make_index_sequence:N:" title="Permalink to this definition">¶</a></dt>
+<dd><p>Used to generate the <a class="reference internal" href="#index_sequence:I:" title="index_sequence&lt;I&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">index_sequence&lt;I&gt;</span></tt></a>, with <em>N</em> numbers.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="typelist_index:T.Ts:">
+<em class="property">class </em><tt class="descname">typelist_index&lt;T, Ts&gt;</tt><a class="headerlink" href="#typelist_index:T.Ts:" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Inherits :</th><td class="field-body"><tt class="docutils literal"><span class="pre">std::integral_constant&lt;std::size_t,</span> <span class="pre">N&gt;</span></tt></td>
+</tr>
+</tbody>
+</table>
+<p>The type of std::integral_constant that <a class="reference internal" href="#typelist_index:T.Ts:" title="typelist_index&lt;T, Ts&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">typelist_index&lt;T,</span> <span class="pre">Ts&gt;</span></tt></a> will
+inherit from depends on where <em>T</em> exists in the type list <em>Ts</em>. No attempts
+are made to allow multiple <em>T*s in *Ts</em>.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="type_at:N.Ts:">
+<em class="property">class </em><tt class="descname">type_at&lt;N, Ts&gt;</tt><a class="headerlink" href="#type_at:N.Ts:" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="type">
+<dt id="type_at:N.Ts:::type">
+<em class="property">type </em><tt class="descname">type</tt><a class="headerlink" href="#type_at:N.Ts:::type" title="Permalink to this definition">¶</a></dt>
+<dd><p>When accessed, provides the type at the index <em>N</em> in the type list <em>Ts</em></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="value_at:N.Ts:__X">
+auto <tt class="descname">value_at&lt;N, Ts&gt;</tt><big>(</big><em>Ts&amp;&amp;</em><big>)</big><a class="headerlink" href="#value_at:N.Ts:__X" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The value located at the index <em>N</em> in the type list <em>Ts</em>.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="variant.html"
+                        title="previous chapter">Variant Component</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="memory.html"
+                        title="next chapter">Memory Component</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/utility.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="memory.html" title="Memory Component"
+             >next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="variant.html" title="Variant Component"
+             >previous</a> &nbsp; &nbsp;</li>
+    <li><a href="index.html">MNMLSTC Core 0.1 documentation</a> &raquo;</li>
+ 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2013, MNMLSTC.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+    <!-- cloud_sptheme 1.4 -->
+  </body>
+</html>

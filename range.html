@@ -1,0 +1,556 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Range Component &mdash; MNMLSTC Core 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/cloud.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noticia+Text|Open+Sans|Droid+Sans+Mono" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/jquery.cookie.js"></script>
+    <script type="text/javascript" src="_static/cloud.js"></script>
+    <link rel="top" title="MNMLSTC Core 0.1 documentation" href="index.html" />
+    <link rel="next" title="Any Component" href="any.html" />
+    <link rel="prev" title="String Component" href="string.html" /> 
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+  </head>
+  <body>
+    <div class="relbar-top">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="any.html" title="Any Component"
+             accesskey="N">next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="string.html" title="String Component"
+             accesskey="P">previous</a> &nbsp; &nbsp;</li>
+    <li><a href="index.html">MNMLSTC Core 0.1 documentation</a> &raquo;</li>
+ 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="range-component">
+<span id="core-range-component"></span><h1>Range Component<a class="headerlink" href="#range-component" title="Permalink to this headline">¶</a></h1>
+<p>Ranges are a common concept in the C++ standard, and in the case of all the
+algorithms available, one usually has to supply a start and end to a range as
+adjacent arguments. This can be tiresome, and in the common case, unnecessary.</p>
+<p>The <a class="reference internal" href="#range:T:" title="range&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">range</span></tt></a> component works as a high level view. Rather than holding onto the
+container, it simply holds the start and end iterators to represent a range.
+The <a class="reference internal" href="#range:T:" title="range&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">range</span></tt></a> component implements the interface and behavior discussed within
+<a class="reference external" href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2012/n3350.html">N3350</a>. Some decisions pertaining to open questions were made, and these are
+discussed below.</p>
+<dl class="class">
+<dt id="is_range:R:">
+<em class="property">class </em><tt class="descname">is_range&lt;R&gt;</tt><a class="headerlink" href="#is_range:R:" title="Permalink to this definition">¶</a></dt>
+<dd><p>Type trait for determining if a type can return a value when <tt class="docutils literal"><span class="pre">std::begin</span></tt>
+and <tt class="docutils literal"><span class="pre">std::end</span></tt> are called on it.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="range:T:">
+<em class="property">class </em><tt class="descname">range&lt;T&gt;</tt><a class="headerlink" href="#range:T:" title="Permalink to this definition">¶</a></dt>
+<dd><p>Represents an open-ended range of [begin, end). The category of range
+depends on the category of its <a class="reference internal" href="#range:T:::iterator" title="range&lt;T&gt;::iterator"><tt class="xref cpp cpp-type docutils literal"><span class="pre">iterator</span></tt></a>. All the type aliases
+within the <a class="reference internal" href="#range:T:" title="range&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">range</span></tt></a> depend on the use of <tt class="docutils literal"><span class="pre">std::iterator_traits&lt;T&gt;</span></tt>.</p>
+<p>The type <em>T</em> is actually an Iterator type.</p>
+<dl class="type">
+<dt id="range:T:::iterator_category">
+<em class="property">type </em><tt class="descname">iterator_category</tt><a class="headerlink" href="#range:T:::iterator_category" title="Permalink to this definition">¶</a></dt>
+<dd><p>Represents <tt class="docutils literal"><span class="pre">std::iterator_traits&lt;T&gt;::iterator_category</span></tt></p>
+</dd></dl>
+
+<dl class="type">
+<dt id="range:T:::difference_type">
+<em class="property">type </em><tt class="descname">difference_type</tt><a class="headerlink" href="#range:T:::difference_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Represents <tt class="docutils literal"><span class="pre">std::iterator_traits&lt;T&gt;::difference_type</span></tt></p>
+</dd></dl>
+
+<dl class="type">
+<dt id="range:T:::value_type">
+<em class="property">type </em><tt class="descname">value_type</tt><a class="headerlink" href="#range:T:::value_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Represents <tt class="docutils literal"><span class="pre">std::iterator_traits&lt;T&gt;::value_type</span></tt></p>
+</dd></dl>
+
+<dl class="type">
+<dt id="range:T:::reference">
+<em class="property">type </em><tt class="descname">reference</tt><a class="headerlink" href="#range:T:::reference" title="Permalink to this definition">¶</a></dt>
+<dd><p>Represents <tt class="docutils literal"><span class="pre">std::iterator_traits&lt;T&gt;::reference</span></tt></p>
+</dd></dl>
+
+<dl class="type">
+<dt id="range:T:::pointer">
+<em class="property">type </em><tt class="descname">pointer</tt><a class="headerlink" href="#range:T:::pointer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Represents <tt class="docutils literal"><span class="pre">std::iterator_traits&lt;T&gt;::pointer</span></tt></p>
+</dd></dl>
+
+<dl class="type">
+<dt id="range:T:::iterator">
+<em class="property">type </em><tt class="descname">iterator</tt><a class="headerlink" href="#range:T:::iterator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Represents <em>T</em>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="range:T:::range__std::pair:iterator.iterator:">
+ <tt class="descname">range</tt><big>(</big>std::pair&lt;iterator, iterator&gt; <em>pair</em><big>)</big><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#range:T:::range__std::pair:iterator.iterator:" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a <a class="reference internal" href="#range:T:" title="range&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">range</span></tt></a> with the first and second members of the pair to be
+the begin and end of the <a class="reference internal" href="#range:T:" title="range&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">range</span></tt></a> respectively.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="range:T:::range__iterator.iterator">
+ <tt class="descname">range</tt><big>(</big><a class="reference internal" href="#range:T:::iterator" title="range&lt;T&gt;::iterator">iterator</a> <em>begin</em>, <a class="reference internal" href="#range:T:::iterator" title="range&lt;T&gt;::iterator">iterator</a> <em>end</em><big>)</big><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#range:T:::range__iterator.iterator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a <a class="reference internal" href="#range:T:" title="range&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">range</span></tt></a> with the given iterators.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="range:T:::range__rangeCR">
+ <tt class="descname">range</tt><big>(</big>range const&amp; <em>that</em><big>)</big><a class="headerlink" href="#range:T:::range__rangeCR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a <a class="reference internal" href="#range:T:" title="range&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">range</span></tt></a> with a copy of the iterators stored in <em>that</em>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="range:T:::range__rangeRR">
+ <tt class="descname">range</tt><big>(</big>range&amp;&amp; <em>that</em><big>)</big><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#range:T:::range__rangeRR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a <a class="reference internal" href="#range:T:" title="range&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">range</span></tt></a> by moving the iterators stored in <em>that</em>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="range:T:::range">
+ <tt class="descname">range</tt><big>(</big><big>)</big><a class="headerlink" href="#range:T:::range" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a <a class="reference internal" href="#range:T:" title="range&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">range</span></tt></a> by default constructing both its begin and end
+iterators. The resulting range will be empty.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Postcondition :</th><td class="field-body"><tt class="docutils literal"><span class="pre">begin()</span> <span class="pre">==</span> <span class="pre">end()</span></tt></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="range:T:::assign-operator__X">
+range&amp; <tt class="descname">operator=</tt><big>(</big><em>range const&amp;</em><big>)</big><a class="headerlink" href="#range:T:::assign-operator__X" title="Permalink to this definition">¶</a></dt>
+<dt>
+range&amp; <tt class="descname">operator=</tt><big>(</big><em>range&amp;&amp;</em><big>)</big></dt>
+<dd><p>Assigns the contents of the incoming <a class="reference internal" href="#range:T:" title="range&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">range</span></tt></a> to <tt class="docutils literal"><span class="pre">*this</span></tt>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="range:T:::subscript-operator__difference_typeC">
+<a class="reference internal" href="#range:T:::reference" title="range&lt;T&gt;::reference">reference</a> <tt class="descname">operator[]</tt><big>(</big><a class="reference internal" href="#range:T:::difference_type" title="range&lt;T&gt;::difference_type">difference_type</a> <em>idx</em><big>)</big><tt class="descclassname"> const</tt><a class="headerlink" href="#range:T:::subscript-operator__difference_typeC" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Requires :</th><td class="field-body"><a class="reference internal" href="#range:T:::iterator_category" title="range&lt;T&gt;::iterator_category"><tt class="xref cpp cpp-type docutils literal"><span class="pre">iterator_category</span></tt></a> be <tt class="docutils literal"><span class="pre">random_access_iterator_tag</span></tt>.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="range:T:::beginC">
+<a class="reference internal" href="#range:T:::iterator" title="range&lt;T&gt;::iterator">iterator</a> <tt class="descname">begin</tt><big>(</big><big>)</big><tt class="descclassname"> const</tt><a class="headerlink" href="#range:T:::beginC" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">beginning of the range</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="range:T:::endC">
+<a class="reference internal" href="#range:T:::iterator" title="range&lt;T&gt;::iterator">iterator</a> <tt class="descname">end</tt><big>(</big><big>)</big><tt class="descclassname"> const</tt><a class="headerlink" href="#range:T:::endC" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">end of the range.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="range:T:::frontC">
+<a class="reference internal" href="#range:T:::reference" title="range&lt;T&gt;::reference">reference</a> <tt class="descname">front</tt><big>(</big><big>)</big><tt class="descclassname"> const</tt><a class="headerlink" href="#range:T:::frontC" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the value returned by dereferencing <a class="reference internal" href="#range:T:::beginC" title="range&lt;T&gt;::begin"><tt class="xref cpp cpp-func docutils literal"><span class="pre">begin()</span></tt></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="range:T:::backC">
+<a class="reference internal" href="#range:T:::reference" title="range&lt;T&gt;::reference">reference</a> <tt class="descname">back</tt><big>(</big><big>)</big><tt class="descclassname"> const</tt><a class="headerlink" href="#range:T:::backC" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Requires :</th><td class="field-body"><a class="reference internal" href="#range:T:::iterator_category" title="range&lt;T&gt;::iterator_category"><tt class="xref cpp cpp-type docutils literal"><span class="pre">iterator_category</span></tt></a> be <tt class="docutils literal"><span class="pre">bidirectional_iterator_tag</span></tt>.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the value returned by dereferencing the iterator before
+<a class="reference internal" href="#range:T:::endC" title="range&lt;T&gt;::end"><tt class="xref cpp cpp-func docutils literal"><span class="pre">end()</span></tt></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="range:T:::emptyC">
+bool <tt class="descname">empty</tt><big>(</big><big>)</big><tt class="descclassname"> const</tt><a class="headerlink" href="#range:T:::emptyC" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><a class="reference internal" href="#range:T:::beginC" title="range&lt;T&gt;::begin"><tt class="xref cpp cpp-func docutils literal"><span class="pre">begin()</span></tt></a> == <a class="reference internal" href="#range:T:::endC" title="range&lt;T&gt;::end"><tt class="xref cpp cpp-func docutils literal"><span class="pre">end()</span></tt></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="range:T:::sizeC">
+<a class="reference internal" href="#range:T:::difference_type" title="range&lt;T&gt;::difference_type">difference_type</a> <tt class="descname">size</tt><big>(</big><big>)</big><tt class="descclassname"> const</tt><a class="headerlink" href="#range:T:::sizeC" title="Permalink to this definition">¶</a></dt>
+<dd><p>Will return the number of elements between <a class="reference internal" href="#range:T:::beginC" title="range&lt;T&gt;::begin"><tt class="xref cpp cpp-func docutils literal"><span class="pre">begin()</span></tt></a> and <a class="reference internal" href="#range:T:::endC" title="range&lt;T&gt;::end"><tt class="xref cpp cpp-func docutils literal"><span class="pre">end()</span></tt></a>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Requires :</th><td class="field-body"><a class="reference internal" href="#range:T:::iterator_category" title="range&lt;T&gt;::iterator_category"><tt class="xref cpp cpp-type docutils literal"><span class="pre">iterator_category</span></tt></a> be <tt class="docutils literal"><span class="pre">forward_iterator_tag</span></tt></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><tt class="docutils literal"><span class="pre">std::distance(begin(),</span> <span class="pre">end())</span></tt></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="range:T:::slice__difference_type.difference_typeC">
+range <tt class="descname">slice</tt><big>(</big><a class="reference internal" href="#range:T:::difference_type" title="range&lt;T&gt;::difference_type">difference_type</a> <em>start</em>, <a class="reference internal" href="#range:T:::difference_type" title="range&lt;T&gt;::difference_type">difference_type</a> <em>stop</em><big>)</big><tt class="descclassname"> const</tt><a class="headerlink" href="#range:T:::slice__difference_type.difference_typeC" title="Permalink to this definition">¶</a></dt>
+<dd><p>Slicing a <a class="reference internal" href="#range:T:" title="range&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">range</span></tt></a> has the most complex behavior out of all the <a class="reference internal" href="#range:T:" title="range&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">range</span></tt></a>
+member functions. This is due to the behavior mimicking the slice
+behavior exhibited by the python language&#8217;s slicing syntax.</p>
+<p>If <em>start</em> is negative, the begin marker is <a class="reference internal" href="#range:T:::endC" title="range&lt;T&gt;::end"><tt class="xref cpp cpp-func docutils literal"><span class="pre">end()</span></tt></a> - <em>start</em>.
+If <em>stop</em> is negative, the end marker is <a class="reference internal" href="#range:T:::endC" title="range&lt;T&gt;::end"><tt class="xref cpp cpp-func docutils literal"><span class="pre">end()</span></tt></a> - <em>stop</em>.
+If <em>start</em> is positive, the begin marker is <a class="reference internal" href="#range:T:::beginC" title="range&lt;T&gt;::begin"><tt class="xref cpp cpp-func docutils literal"><span class="pre">begin()</span></tt></a> + <em>start</em>.
+If <em>stop</em> is positive, the end marker is <a class="reference internal" href="#range:T:::beginC" title="range&lt;T&gt;::begin"><tt class="xref cpp cpp-func docutils literal"><span class="pre">begin()</span></tt></a> + <em>stop</em>.</p>
+<p>If <em>start</em> and <em>stop</em> are positive, and <em>stop</em> is less than or equal to
+<em>start</em>, an empty <a class="reference internal" href="#range:T:" title="range&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">range</span></tt></a> is returned.</p>
+<p>If <em>start</em> and <em>stop</em> are negative and <em>stop</em> is less than or equal to
+<em>start</em>, an empty <a class="reference internal" href="#range:T:" title="range&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">range</span></tt></a> is returned.</p>
+<p>If <em>start</em> is positive and <em>stop</em> is negative and <tt class="docutils literal"><span class="pre">abs(stop)</span></tt> + <em>start</em>
+is greater or equal to <a class="reference internal" href="#range:T:::sizeC" title="range&lt;T&gt;::size"><tt class="xref cpp cpp-func docutils literal"><span class="pre">size()</span></tt></a>, an empty <a class="reference internal" href="#range:T:" title="range&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">range</span></tt></a> is returned.</p>
+<p>If <em>start</em> is negative and <em>stop</em> is positive and <a class="reference internal" href="#range:T:::sizeC" title="range&lt;T&gt;::size"><tt class="xref cpp cpp-func docutils literal"><span class="pre">size()</span></tt></a> + <em>start</em>
+is greater or equal to <em>stop</em>, an empty range is returned.</p>
+<p>These first two conditions can be computed cheaply, while the third and
+fourth are a tad more expensive. However they <em>are</em> required in all
+computations, no matter the <a class="reference internal" href="#range:T:::iterator_category" title="range&lt;T&gt;::iterator_category"><tt class="xref cpp cpp-type docutils literal"><span class="pre">iterator_category</span></tt></a>. <a class="reference internal" href="#range:T:::slice__difference_type.difference_typeC" title="range&lt;T&gt;::slice"><tt class="xref cpp cpp-func docutils literal"><span class="pre">slice()</span></tt></a> does
+not compute <a class="reference internal" href="#range:T:::sizeC" title="range&lt;T&gt;::size"><tt class="xref cpp cpp-func docutils literal"><span class="pre">size()</span></tt></a> until after checking the first two conditions.</p>
+<p>Some optimizations are taken to insure that finding the begin and end
+iterators is at most an O(N) operation, rather than O(2N), as it <em>could</em>
+be in some cases.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Requires :</th><td class="field-body"><a class="reference internal" href="#range:T:::iterator_category" title="range&lt;T&gt;::iterator_category"><tt class="xref cpp cpp-type docutils literal"><span class="pre">iterator_category</span></tt></a> be <tt class="docutils literal"><span class="pre">forward_iterator_tag</span></tt>.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="range:T:::slice__difference_typeC">
+range <tt class="descname">slice</tt><big>(</big><a class="reference internal" href="#range:T:::difference_type" title="range&lt;T&gt;::difference_type">difference_type</a> <em>start</em><big>)</big><tt class="descclassname"> const</tt><a class="headerlink" href="#range:T:::slice__difference_typeC" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Requires :</th><td class="field-body"><a class="reference internal" href="#range:T:::iterator_category" title="range&lt;T&gt;::iterator_category"><tt class="xref cpp cpp-type docutils literal"><span class="pre">iterator_category</span></tt></a> be <tt class="docutils literal"><span class="pre">forward_iterator_tag</span></tt>.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">An open ended range of [<a class="reference internal" href="#range:T:::beginC" title="range&lt;T&gt;::begin"><tt class="xref cpp cpp-func docutils literal"><span class="pre">begin()</span></tt></a> + <em>start</em>, <a class="reference internal" href="#range:T:::endC" title="range&lt;T&gt;::end"><tt class="xref cpp cpp-func docutils literal"><span class="pre">end()</span></tt></a>).</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="range:T:::split__difference_typeC">
+std::pair&lt;range, range&gt; <tt class="descname">split</tt><big>(</big><a class="reference internal" href="#range:T:::difference_type" title="range&lt;T&gt;::difference_type">difference_type</a> <em>idx</em><big>)</big><tt class="descclassname"> const</tt><a class="headerlink" href="#range:T:::split__difference_typeC" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Requires :</th><td class="field-body"><a class="reference internal" href="#range:T:::iterator_category" title="range&lt;T&gt;::iterator_category"><tt class="xref cpp cpp-type docutils literal"><span class="pre">iterator_category</span></tt></a> be <tt class="docutils literal"><span class="pre">forward_iterator_tag</span></tt>.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="range:T:::pop_front__difference_type">
+void <tt class="descname">pop_front</tt><big>(</big><a class="reference internal" href="#range:T:::difference_type" title="range&lt;T&gt;::difference_type">difference_type</a> <em>n</em><big>)</big><a class="headerlink" href="#range:T:::pop_front__difference_type" title="Permalink to this definition">¶</a></dt>
+<dt id="range:T:::pop_front">
+void <tt class="descname">pop_front</tt><big>(</big><big>)</big><a class="headerlink" href="#range:T:::pop_front" title="Permalink to this definition">¶</a></dt>
+<dd><p>Moves the start of the range &#8216;forward&#8217; by <em>n</em>, via <tt class="docutils literal"><span class="pre">std::advance</span></tt>. The
+overload which takes no arguments moves the range forward by 1.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="range:T:::pop_back__difference_type">
+void <tt class="descname">pop_back</tt><big>(</big><a class="reference internal" href="#range:T:::difference_type" title="range&lt;T&gt;::difference_type">difference_type</a> <em>n</em><big>)</big><a class="headerlink" href="#range:T:::pop_back__difference_type" title="Permalink to this definition">¶</a></dt>
+<dt id="range:T:::pop_back">
+void <tt class="descname">pop_back</tt><big>(</big><big>)</big><a class="headerlink" href="#range:T:::pop_back" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Requires :</th><td class="field-body"><a class="reference internal" href="#range:T:::iterator_category" title="range&lt;T&gt;::iterator_category"><tt class="xref cpp cpp-type docutils literal"><span class="pre">iterator_category</span></tt></a> be <tt class="docutils literal"><span class="pre">bidirectional_iterator_tag</span></tt>.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="range:T:::pop_front_upto__difference_type">
+void <tt class="descname">pop_front_upto</tt><big>(</big><a class="reference internal" href="#range:T:::difference_type" title="range&lt;T&gt;::difference_type">difference_type</a> <em>n</em><big>)</big><a class="headerlink" href="#range:T:::pop_front_upto__difference_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Moves the start of the range by <em>n</em> elements. A negative argument causes
+no change.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="range:T:::pop_back_upto__difference_type">
+void <tt class="descname">pop_back_upto</tt><big>(</big><a class="reference internal" href="#range:T:::difference_type" title="range&lt;T&gt;::difference_type">difference_type</a> <em>n</em><big>)</big><a class="headerlink" href="#range:T:::pop_back_upto__difference_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Moves the end of the range backwards by <em>n</em> elements. A negative argument
+causes no change.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Requires :</th><td class="field-body"><a class="reference internal" href="#range:T:::iterator_category" title="range&lt;T&gt;::iterator_category"><tt class="xref cpp cpp-type docutils literal"><span class="pre">iterator_category</span></tt></a> be <tt class="docutils literal"><span class="pre">bidirectional_iterator_tag</span></tt>.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="range:T:::swap__rangeR">
+void <tt class="descname">swap</tt><big>(</big>range&amp; <em>that</em><big>)</big><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#range:T:::swap__rangeR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Swaps the begin and end of <tt class="docutils literal"><span class="pre">*this</span></tt>, with <em>that</em>.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="make_range__T.T">
+range&lt;T&gt; <tt class="descname">make_range</tt><big>(</big>T <em>begin</em>, T <em>end</em><big>)</big><a class="headerlink" href="#make_range__T.T" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a <a class="reference internal" href="#range:T:" title="range&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">range</span></tt></a> from the iterators <em>begin</em> and <em>end</em>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="make_range__X">
+range&lt;T&gt; <tt class="descname">make_range</tt><big>(</big><em>Range&amp;&amp;</em><big>)</big><a class="headerlink" href="#make_range__X" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a <a class="reference internal" href="#range:T:" title="range&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">range</span></tt></a> from the given type by calling <tt class="docutils literal"><span class="pre">std::begin</span></tt> and
+<tt class="docutils literal"><span class="pre">std::end</span></tt>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="make_range__std::basic_istream:CharT.Traits:R">
+range&lt;std::istream_iterator&lt;T, CharT, Traits&gt;&gt; <tt class="descname">make_range</tt><big>(</big>std::basic_istream&lt;CharT, Traits&gt;&amp; <em>stream</em><big>)</big><a class="headerlink" href="#make_range__std::basic_istream:CharT.Traits:R" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a <a class="reference internal" href="#range:T:" title="range&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">range</span></tt></a> for iterating an istream. An example of usage is:</p>
+<div class="highlight-cpp"><div class="highlight"><pre><span class="k">auto</span> <span class="n">istream_range</span> <span class="o">=</span> <span class="n">make_range</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span><span class="p">(</span><span class="n">stream</span><span class="p">);</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="make_range__std::basic_streambuf:CharT.Traits:P">
+range&lt;std::istreambuf_iterator&lt;CharT, Traits&gt;&gt; <tt class="descname">make_range</tt><big>(</big>std::basic_streambuf&lt;CharT, Traits&gt;* <em>buffer</em><big>)</big><a class="headerlink" href="#make_range__std::basic_streambuf:CharT.Traits:P" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a <a class="reference internal" href="#range:T:" title="range&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">range</span></tt></a> for iterating a streambuf. An example of usage is:</p>
+<div class="highlight-cpp"><div class="highlight"><pre><span class="k">auto</span> <span class="n">streambuf_range</span> <span class="o">=</span> <span class="n">make_range</span><span class="p">(</span><span class="n">stream</span><span class="p">.</span><span class="n">rdbuf</span><span class="p">());</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<div class="section" id="specialization">
+<h2>Specialization<a class="headerlink" href="#specialization" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="swap__range:Iterator:R.range:Iterator:R">
+void <tt class="descname">swap</tt><big>(</big>range&lt;Iterator&gt;&amp; <em>lhs</em>, range&lt;Iterator&gt;&amp; <em>rhs</em><big>)</big><a class="headerlink" href="#swap__range:Iterator:R.range:Iterator:R" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Noexcept :</th><td class="field-body"><tt class="docutils literal"><span class="pre">lhs.swap(rhs)</span></tt></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="answers-to-open-questions">
+<h2>Answers to Open Questions<a class="headerlink" href="#answers-to-open-questions" title="Permalink to this headline">¶</a></h2>
+<p>There are several questions raised in <a class="reference external" href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2012/n3350.html">N3350</a>. The decisions related to
+these are discussed below.</p>
+<div class="section" id="make-range">
+<h3>make_range<a class="headerlink" href="#make-range" title="Permalink to this headline">¶</a></h3>
+<p>The author of <a class="reference external" href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2012/n3350.html">N3350</a> mentions that they would like to be able to pass a single
+argument to a <a class="reference internal" href="#make_range__T.T" title="make_range"><tt class="xref cpp cpp-func docutils literal"><span class="pre">make_range()</span></tt></a> that is just the beginning of a range, where
+the end of the range is a default constructed iterator. This would make it
+helpful with iterators such as <tt class="docutils literal"><span class="pre">istream_iterator</span></tt>. The author is concerned
+that this will make the use of <a class="reference internal" href="#make_range__T.T" title="make_range"><tt class="xref cpp cpp-func docutils literal"><span class="pre">make_range()</span></tt></a> potentially confusing.</p>
+<p>It was decided that the author&#8217;s concerns are valid, however the ability to
+create an <tt class="docutils literal"><span class="pre">istream_iterator</span></tt> range (and <tt class="docutils literal"><span class="pre">istreambuf_iterator</span></tt> range) is
+a desirable feature. An overload for make_range is provided to take an
+<tt class="docutils literal"><span class="pre">istream</span></tt> and <tt class="docutils literal"><span class="pre">istreambuf</span></tt> to create a proper range.</p>
+</div>
+<div class="section" id="inherit-from-std-pair-iterator-iterator">
+<h3>Inherit from std::pair&lt;Iterator, Iterator&gt;<a class="headerlink" href="#inherit-from-std-pair-iterator-iterator" title="Permalink to this headline">¶</a></h3>
+<p>The author of <a class="reference external" href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2012/n3350.html">N3350</a> mentions inheriting from <tt class="docutils literal"><span class="pre">std::pair&lt;Iterator,</span> <span class="pre">Iterator&gt;</span></tt>.
+Rather than rely on inheritance to represent a range, it was decided to allow a
+<a class="reference internal" href="#range:T:" title="range&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">range</span></tt></a> to be constructed implicitly with a std::pair.</p>
+</div>
+<div class="section" id="remove-member-functions-and-replace-as-free-algorithms">
+<h3>Remove member functions and replace as free algorithms<a class="headerlink" href="#remove-member-functions-and-replace-as-free-algorithms" title="Permalink to this headline">¶</a></h3>
+<p>The author of <a class="reference external" href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2012/n3350.html">N3350</a> mentions that it might be worth placing some member
+functions such as <tt class="docutils literal"><span class="pre">pop_*</span></tt> and <a class="reference internal" href="#range:T:::slice__difference_type.difference_typeC" title="range&lt;T&gt;::slice"><tt class="xref cpp cpp-func docutils literal"><span class="pre">range&lt;T&gt;::slice()</span></tt></a> as non member
+functions, at the cost of some Iterator copying.</p>
+<p>It was decided that this was unnecessary, and the member functions will stay.</p>
+</div>
+<div class="section" id="range-category">
+<h3>Range Category<a class="headerlink" href="#range-category" title="Permalink to this headline">¶</a></h3>
+<p>The author of <a class="reference external" href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2012/n3350.html">N3350</a> proposes defining range categories.</p>
+<p>It was decided that these add nothing of use.</p>
+</div>
+<div class="section" id="split-takes-arbitrary-number-of-indices">
+<h3>Split takes arbitrary number of indices<a class="headerlink" href="#split-takes-arbitrary-number-of-indices" title="Permalink to this headline">¶</a></h3>
+<p>The author of <a class="reference external" href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2012/n3350.html">N3350</a> mentions taking an arbitrary number o indices and
+returning an N + 1 element <tt class="docutils literal"><span class="pre">tuple&lt;&gt;</span></tt>. The author mentions that this would be
+tricky with negative indices and bidirectional iterators.</p>
+<p>It was decided that this is an unnecessary complication of the range
+component&#8217;s internals.</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <div class="sphinxlocaltoc">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Range Component</a><ul>
+<li><a class="reference internal" href="#specialization">Specialization</a></li>
+<li><a class="reference internal" href="#answers-to-open-questions">Answers to Open Questions</a><ul>
+<li><a class="reference internal" href="#make-range">make_range</a></li>
+<li><a class="reference internal" href="#inherit-from-std-pair-iterator-iterator">Inherit from std::pair&lt;Iterator, Iterator&gt;</a></li>
+<li><a class="reference internal" href="#remove-member-functions-and-replace-as-free-algorithms">Remove member functions and replace as free algorithms</a></li>
+<li><a class="reference internal" href="#range-category">Range Category</a></li>
+<li><a class="reference internal" href="#split-takes-arbitrary-number-of-indices">Split takes arbitrary number of indices</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="string.html"
+                        title="previous chapter">String Component</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="any.html"
+                        title="next chapter">Any Component</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/range.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="any.html" title="Any Component"
+             >next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="string.html" title="String Component"
+             >previous</a> &nbsp; &nbsp;</li>
+    <li><a href="index.html">MNMLSTC Core 0.1 documentation</a> &raquo;</li>
+ 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2013, MNMLSTC.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+    <!-- cloud_sptheme 1.4 -->
+  </body>
+</html>

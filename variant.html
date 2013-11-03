@@ -1,0 +1,362 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Variant Component &mdash; MNMLSTC Core 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/cloud.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noticia+Text|Open+Sans|Droid+Sans+Mono" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/jquery.cookie.js"></script>
+    <script type="text/javascript" src="_static/cloud.js"></script>
+    <link rel="top" title="MNMLSTC Core 0.1 documentation" href="index.html" />
+    <link rel="next" title="Utility Component" href="utility.html" />
+    <link rel="prev" title="Optional Component" href="optional.html" /> 
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+  </head>
+  <body>
+    <div class="relbar-top">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="utility.html" title="Utility Component"
+             accesskey="N">next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="optional.html" title="Optional Component"
+             accesskey="P">previous</a> &nbsp; &nbsp;</li>
+    <li><a href="index.html">MNMLSTC Core 0.1 documentation</a> &raquo;</li>
+ 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="variant-component">
+<span id="core-variant-component"></span><h1>Variant Component<a class="headerlink" href="#variant-component" title="Permalink to this headline">¶</a></h1>
+<p>The <a class="reference internal" href="#variant:Ts:" title="variant&lt;Ts&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">variant</span></tt></a> component is a generic type-safe implementation of a
+discriminate union. It is equivalent to the Boost.Variant library, with several
+small exceptions.</p>
+<p>Specifically, the <a class="reference internal" href="#variant:Ts:" title="variant&lt;Ts&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">variant</span></tt></a> does not allow for recursive variants,
+and makes no attempt to support them in any capacity. It is the author&#8217;s
+opinion that a <a class="reference internal" href="#variant:Ts:" title="variant&lt;Ts&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">variant</span></tt></a> should be stack allocated only, and not
+have to handle or deal with allocating memory.</p>
+<p>Additionally, the <a class="reference internal" href="#variant:Ts:" title="variant&lt;Ts&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">variant</span></tt></a> has the ability to perform type-based
+pattern matching via lambdas. This allows a user to define the different code
+paths that are desired without requiring a user to implement a visitor functor
+separately. <em>This means that a variant is capable of performing a type-based
+switch statement</em></p>
+<dl class="class">
+<dt id="bad_variant_get">
+<em class="property">class </em><tt class="descname">bad_variant_get</tt><a class="headerlink" href="#bad_variant_get" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Inherits :</th><td class="field-body"><tt class="docutils literal"><span class="pre">std::logic_error</span></tt></td>
+</tr>
+</tbody>
+</table>
+<p>Used when the call to get the value out of a <a class="reference internal" href="#variant:Ts:" title="variant&lt;Ts&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">variant</span></tt></a> uses the incorrect
+index of the type list.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="variant:Ts:">
+<em class="property">class </em><tt class="descname">variant&lt;Ts&gt;</tt><a class="headerlink" href="#variant:Ts:" title="Permalink to this definition">¶</a></dt>
+<dd><p>The <a class="reference internal" href="#variant:Ts:" title="variant&lt;Ts&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">variant</span></tt></a> type represents a type-safe discriminate union. Much like
+the Boost.Variant, a <a class="reference internal" href="#variant:Ts:" title="variant&lt;Ts&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">variant</span></tt></a> is never in an uninitialized state. When
+default constructing a <a class="reference internal" href="#variant:Ts:" title="variant&lt;Ts&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">variant</span></tt></a>, the first type in the <a class="reference internal" href="#variant:Ts:" title="variant&lt;Ts&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">variant</span></tt></a>&#8216;s typelist
+is initialized.</p>
+<dl class="function">
+<dt id="variant:Ts:::variant__TRR">
+ <tt class="descname">variant</tt><big>(</big>T&amp;&amp; <em>value</em><big>)</big><a class="headerlink" href="#variant:Ts:::variant__TRR" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Requires :</th><td class="field-body"><em>T</em> be of a type from which any type in <em>Ts</em> is constructible.</td>
+</tr>
+</tbody>
+</table>
+<p>Constructs the first type in <em>Ts</em> which can be constructed from <em>T</em>. The
+way in which this construction takes place is a first come first serve
+construction. The reason for this is simply due to how the constructor
+delegation occurs internally. As such, it is recommended that a <a class="reference internal" href="#variant:Ts:" title="variant&lt;Ts&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">variant</span></tt></a>
+contain types that cannot be constructed from each other.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="variant:Ts:::variant__variantCR">
+ <tt class="descname">variant</tt><big>(</big>variant const&amp; <em>that</em><big>)</big><a class="headerlink" href="#variant:Ts:::variant__variantCR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a <a class="reference internal" href="#variant:Ts:" title="variant&lt;Ts&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">variant</span></tt></a> with the same type that is initialized in <em>that</em>.
+The object is initialized with the type&#8217;s copy constructor.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="variant:Ts:::variant__variantRR">
+ <tt class="descname">variant</tt><big>(</big>variant&amp;&amp; <em>that</em><big>)</big><a class="headerlink" href="#variant:Ts:::variant__variantRR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a <a class="reference internal" href="#variant:Ts:" title="variant&lt;Ts&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">variant</span></tt></a> with the same type that is initialized in <em>that</em>.
+The object is initialized with the type&#8217;s move constructor.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="variant:Ts:::variant">
+ <tt class="descname">variant</tt><big>(</big><big>)</big><a class="headerlink" href="#variant:Ts:::variant" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a <a class="reference internal" href="#variant:Ts:" title="variant&lt;Ts&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">variant</span></tt></a> by initializing the first type in its type list.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="variant:Ts:::assign-operator__X">
+variant&amp; <tt class="descname">operator=</tt><big>(</big><em>variant const&amp;</em><big>)</big><a class="headerlink" href="#variant:Ts:::assign-operator__X" title="Permalink to this definition">¶</a></dt>
+<dt>
+variant&amp; <tt class="descname">operator=</tt><big>(</big><em>variant&amp;&amp;</em><big>)</big></dt>
+<dd><p>Assigns the contents of the other <a class="reference internal" href="#variant:Ts:" title="variant&lt;Ts&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">variant</span></tt></a> to <tt class="docutils literal"><span class="pre">*this</span></tt>. The object
+contained within <tt class="docutils literal"><span class="pre">*this</span></tt> is destructed first.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="variant:Ts:::eq-operator__variantCRC">
+bool <tt class="descname">operator==</tt><big>(</big>variant const&amp; <em>that</em><big>)</big><tt class="descclassname"> const</tt><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#variant:Ts:::eq-operator__variantCRC" title="Permalink to this definition">¶</a></dt>
+<dd><p>If both <a class="reference internal" href="#variant:Ts:" title="variant&lt;Ts&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">variant</span></tt></a>&#8216;s <a class="reference internal" href="#variant:Ts:::whichC" title="variant&lt;Ts&gt;::which"><tt class="xref cpp cpp-func docutils literal"><span class="pre">which()</span></tt></a> is the same value, the values contained
+within are compared.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="variant:Ts:::lt-operator__variantCRC">
+bool <tt class="descname">operator&lt;</tt><big>(</big>variant const&amp; <em>that</em><big>)</big><tt class="descclassname"> const</tt><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#variant:Ts:::lt-operator__variantCRC" title="Permalink to this definition">¶</a></dt>
+<dd><p>If both <a class="reference internal" href="#variant:Ts:" title="variant&lt;Ts&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">variant</span></tt></a>&#8216;s <a class="reference internal" href="#variant:Ts:::whichC" title="variant&lt;Ts&gt;::which"><tt class="xref cpp cpp-func docutils literal"><span class="pre">which()</span></tt></a> are equal, the values contained are
+compared. Otherwise, the result of comparing <a class="reference internal" href="#variant:Ts:::whichC" title="variant&lt;Ts&gt;::which"><tt class="xref cpp cpp-func docutils literal"><span class="pre">which()</span></tt></a> is returned.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="variant:Ts:::swap__X">
+void <tt class="descname">swap</tt><big>(</big><em>variant&amp;</em><big>)</big><a class="headerlink" href="#variant:Ts:::swap__X" title="Permalink to this definition">¶</a></dt>
+<dd><p>Swaps the contents of both variants.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="variant:Ts:::visit__X.XC">
+ <tt class="descname">visit</tt><big>(</big><em>Visitor&amp;&amp;</em>, <em>args</em><big>)</big><tt class="descclassname"> const</tt><a class="headerlink" href="#variant:Ts:::visit__X.XC" title="Permalink to this definition">¶</a></dt>
+<dt id="variant:Ts:::visit__X.X">
+ <tt class="descname">visit</tt><big>(</big><em>Visitor&amp;&amp;</em>, <em>args</em><big>)</big><a class="headerlink" href="#variant:Ts:::visit__X.X" title="Permalink to this definition">¶</a></dt>
+<dd><p>Visiting a <a class="reference internal" href="#variant:Ts:" title="variant&lt;Ts&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">variant</span></tt></a> follows the following semantics. These semantics
+require that, when given a callable type <tt class="docutils literal"><span class="pre">Visitor</span></tt>, and variadic
+arguments <tt class="docutils literal"><span class="pre">Args...</span></tt>, that the return type of the visit will be
+a  result of <tt class="docutils literal"><span class="pre">common_type_t&lt;invoke_of_t&lt;Visitor,</span> <span class="pre">Ts,</span> <span class="pre">Args...&gt;...&gt;</span></tt>.</p>
+<p>If a common type cannot be found, then the visitation function will
+fail to compile properly. This means that a visitor <em>must</em> be capable of
+being invoked with all types in the <a class="reference internal" href="#variant:Ts:" title="variant&lt;Ts&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">variant</span></tt></a>&#8216;s typelist and the arguments
+given. The visitor is executed with the <em>INVOKE</em> psuedo expression.</p>
+<p>These same semantics are required for <a class="reference internal" href="#variant:Ts:::match__XC" title="variant&lt;Ts&gt;::match"><tt class="xref cpp cpp-func docutils literal"><span class="pre">match()</span></tt></a>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><tt class="docutils literal"><span class="pre">common_type_t&lt;invoke_of_t&lt;Visitor,</span> <span class="pre">Ts,</span> <span class="pre">Args...&gt;...&gt;</span></tt></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="variant:Ts:::match__XC">
+ <tt class="descname">match</tt><big>(</big><em>Visitors&amp;&amp;</em><big>)</big><tt class="descclassname"> const</tt><a class="headerlink" href="#variant:Ts:::match__XC" title="Permalink to this definition">¶</a></dt>
+<dt id="variant:Ts:::match__X">
+ <tt class="descname">match</tt><big>(</big><em>Visitors&amp;&amp;</em><big>)</big><a class="headerlink" href="#variant:Ts:::match__X" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes a variadic number of arguments that are all callable objects.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="variant:Ts:::get:N:">
+auto <tt class="descname">get&lt;N&gt;</tt><big>(</big><big>)</big><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#variant:Ts:::get:N:" title="Permalink to this definition">¶</a></dt>
+<dd><p>Depending on the value of <tt class="docutils literal"><span class="pre">*this</span></tt> (reference, const reference, rvalue)
+the type of the value returned will be affected as well.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Noexcept :</th><td class="field-body">false</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The element located at N in the type list.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Throws :</th><td class="field-body"><a class="reference internal" href="#bad_variant_get" title="bad_variant_get"><tt class="xref cpp cpp-class docutils literal"><span class="pre">bad_variant_get</span></tt></a> if N != <a class="reference internal" href="#variant:Ts:::whichC" title="variant&lt;Ts&gt;::which"><tt class="xref cpp cpp-func docutils literal"><span class="pre">which()</span></tt></a>.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="variant:Ts:::typeC">
+std::type_info const&amp; <tt class="descname">type</tt><big>(</big><big>)</big><tt class="descclassname"> const</tt><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#variant:Ts:::typeC" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The typeid of the value currently managed by the <a class="reference internal" href="#variant:Ts:" title="variant&lt;Ts&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">variant</span></tt></a>.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="variant:Ts:::whichC">
+std::uint32_t <tt class="descname">which</tt><big>(</big><big>)</big><tt class="descclassname"> const</tt><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#variant:Ts:::whichC" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">index into type list of which type is currently managed by the
+variant.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="variant:Ts:::emptyC">
+bool <tt class="descname">empty</tt><big>(</big><big>)</big><tt class="descclassname"> const</tt><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#variant:Ts:::emptyC" title="Permalink to this definition">¶</a></dt>
+<dd><p>Provided for compatibility with Boost.Variant, and to keep in line with
+the other &#8216;object containers&#8217; contained within this library.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">false</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<div class="section" id="specializations">
+<h2>Specializations<a class="headerlink" href="#specializations" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="hash:variant:Ts::">
+<em class="property">class </em><tt class="descname">hash&lt;variant&lt;Ts&gt;&gt;</tt><a class="headerlink" href="#hash:variant:Ts::" title="Permalink to this definition">¶</a></dt>
+<dd><p>A specialization of <tt class="docutils literal"><span class="pre">std::hash&lt;T&gt;</span></tt> for variants. Requires that all
+<em>Ts</em> in a <a class="reference internal" href="#variant:Ts:" title="variant&lt;Ts&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">variant</span></tt></a> be specialized for <tt class="docutils literal"><span class="pre">std::hash</span></tt>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="swap__variantR.variantR">
+void <tt class="descname">swap</tt><big>(</big>variant&amp; <em>lhs</em>, variant&amp; <em>rhs</em><big>)</big><a class="headerlink" href="#swap__variantR.variantR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calls <a class="reference internal" href="#variant:Ts:::swap__X" title="variant&lt;Ts&gt;::swap"><tt class="xref cpp cpp-func docutils literal"><span class="pre">variant&lt;Ts&gt;::swap()</span></tt></a></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="get:N:__X">
+auto const&amp; <tt class="descname">get&lt;N&gt;</tt><big>(</big><em>variant const&amp;</em><big>)</big><a class="headerlink" href="#get:N:__X" title="Permalink to this definition">¶</a></dt>
+<dt>
+auto&amp;&amp; <tt class="descname">get&lt;N&gt;</tt><big>(</big><em>variant&amp;&amp;</em><big>)</big></dt>
+<dt>
+auto&amp; <tt class="descname">get&lt;N&gt;</tt><big>(</big><em>variant&amp;</em><big>)</big></dt>
+<dd><p>Calls <tt class="xref cpp cpp-func docutils literal"><span class="pre">variant&lt;Ts&gt;::get()</span></tt>, and returns the value. This specialization
+is provided to interact with <tt class="docutils literal"><span class="pre">std::tuple</span></tt> and to provide <em>some</em> semblance
+of boost interoperability.</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <div class="sphinxlocaltoc">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Variant Component</a><ul>
+<li><a class="reference internal" href="#specializations">Specializations</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="optional.html"
+                        title="previous chapter">Optional Component</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="utility.html"
+                        title="next chapter">Utility Component</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/variant.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="utility.html" title="Utility Component"
+             >next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="optional.html" title="Optional Component"
+             >previous</a> &nbsp; &nbsp;</li>
+    <li><a href="index.html">MNMLSTC Core 0.1 documentation</a> &raquo;</li>
+ 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2013, MNMLSTC.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+    <!-- cloud_sptheme 1.4 -->
+  </body>
+</html>

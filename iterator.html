@@ -1,0 +1,217 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Iterator Component &mdash; MNMLSTC Core 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/cloud.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noticia+Text|Open+Sans|Droid+Sans+Mono" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/jquery.cookie.js"></script>
+    <script type="text/javascript" src="_static/cloud.js"></script>
+    <link rel="top" title="MNMLSTC Core 0.1 documentation" href="index.html" />
+    <link rel="next" title="Optional Component" href="optional.html" />
+    <link rel="prev" title="Expected Component" href="expected.html" /> 
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+  </head>
+  <body>
+    <div class="relbar-top">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="optional.html" title="Optional Component"
+             accesskey="N">next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="expected.html" title="Expected Component"
+             accesskey="P">previous</a> &nbsp; &nbsp;</li>
+    <li><a href="index.html">MNMLSTC Core 0.1 documentation</a> &raquo;</li>
+ 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="iterator-component">
+<span id="core-iterator-component"></span><h1>Iterator Component<a class="headerlink" href="#iterator-component" title="Permalink to this headline">¶</a></h1>
+<p>The iterator component provides the additional functions provided in C++14 with
+respect to iterators. Specifically the free form functions that work like
+<tt class="docutils literal"><span class="pre">std::begin</span></tt> and <tt class="docutils literal"><span class="pre">std::end</span></tt>.</p>
+<dl class="function">
+<dt id="cbegin__ContainerCR">
+ <tt class="descname">cbegin</tt><big>(</big>Container const&amp; <em>container</em><big>)</big><a class="headerlink" href="#cbegin__ContainerCR" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><tt class="docutils literal"><span class="pre">std::begin(container)</span></tt></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="cend__ContainerCR">
+ <tt class="descname">cend</tt><big>(</big>Container const&amp; <em>container</em><big>)</big><a class="headerlink" href="#cend__ContainerCR" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><tt class="docutils literal"><span class="pre">std::end(container)</span></tt></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="rbegin__ContainerCR">
+ <tt class="descname">rbegin</tt><big>(</big>Container const&amp; <em>container</em><big>)</big><a class="headerlink" href="#rbegin__ContainerCR" title="Permalink to this definition">¶</a></dt>
+<dt id="rbegin__ContainerR">
+ <tt class="descname">rbegin</tt><big>(</big>Container&amp; <em>container</em><big>)</big><a class="headerlink" href="#rbegin__ContainerR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Requires that the given <em>container</em> have a member function named <tt class="docutils literal"><span class="pre">rbegin</span></tt>.
+If no such member function exists, the function will fail to compile.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><tt class="docutils literal"><span class="pre">container.rbegin()</span></tt></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="crbegin__ContainerCR">
+ <tt class="descname">crbegin</tt><big>(</big>Container const&amp; <em>container</em><big>)</big><a class="headerlink" href="#crbegin__ContainerCR" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><tt class="docutils literal"><span class="pre">rbegin(container)</span></tt></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="rend__ContainerCR">
+ <tt class="descname">rend</tt><big>(</big>Container const&amp; <em>container</em><big>)</big><a class="headerlink" href="#rend__ContainerCR" title="Permalink to this definition">¶</a></dt>
+<dt id="rend__ContainerR">
+ <tt class="descname">rend</tt><big>(</big>Container&amp; <em>container</em><big>)</big><a class="headerlink" href="#rend__ContainerR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Requires that the given <em>container</em> have a member function named <tt class="docutils literal"><span class="pre">rend</span></tt>.
+If no such member function exists, the function will fail to compile.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><tt class="docutils literal"><span class="pre">container.rend()</span></tt></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="crend__ContainerCR">
+ <tt class="descname">crend</tt><big>(</big>Container const&amp; <em>container</em><big>)</big><a class="headerlink" href="#crend__ContainerCR" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><tt class="docutils literal"><span class="pre">rend(container)</span></tt></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="expected.html"
+                        title="previous chapter">Expected Component</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="optional.html"
+                        title="next chapter">Optional Component</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/iterator.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="optional.html" title="Optional Component"
+             >next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="expected.html" title="Expected Component"
+             >previous</a> &nbsp; &nbsp;</li>
+    <li><a href="index.html">MNMLSTC Core 0.1 documentation</a> &raquo;</li>
+ 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2013, MNMLSTC.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+    <!-- cloud_sptheme 1.4 -->
+  </body>
+</html>

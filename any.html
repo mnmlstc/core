@@ -1,0 +1,279 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Any Component &mdash; MNMLSTC Core 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/cloud.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noticia+Text|Open+Sans|Droid+Sans+Mono" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/jquery.cookie.js"></script>
+    <script type="text/javascript" src="_static/cloud.js"></script>
+    <link rel="top" title="MNMLSTC Core 0.1 documentation" href="index.html" />
+    <link rel="prev" title="Range Component" href="range.html" /> 
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+  </head>
+  <body>
+    <div class="relbar-top">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="range.html" title="Range Component"
+             accesskey="P">previous</a> &nbsp; &nbsp;</li>
+    <li><a href="index.html">MNMLSTC Core 0.1 documentation</a> &raquo;</li>
+ 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="any-component">
+<span id="core-any-component"></span><h1>Any Component<a class="headerlink" href="#any-component" title="Permalink to this headline">¶</a></h1>
+<p>The <a class="reference internal" href="#any" title="any"><tt class="xref cpp cpp-class docutils literal"><span class="pre">any</span></tt></a> component is currently available in Boost (and has been for
+quite some time). There is, at the time of this writing, a <a class="reference external" href="http://beman.github.io/dot16/any-proposal.html">draft proposal</a> for a standard any type,
+which has several API distinctions from the Boost.Any implementation, from which
+it is inspired. Instance, the proposal recommends that an any implementation
+make a small object optimization to avoid allocations for small and integral
+types. The MNMLSTC Core any implements this optimization, and attempts to
+follow the proposal as closely as possible.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>The <a class="reference internal" href="#any" title="any"><tt class="xref cpp cpp-class docutils literal"><span class="pre">any</span></tt></a> component does <em>not</em> implement the
+<em>allocator.uses.construction</em> constructors defined in the any proposal. The
+reason for this is due to:</p>
+<blockquote>
+<div><ul class="simple">
+<li>Several libraries do not include the constructors necessary for types
+that define them</li>
+<li>In most cases the compiler cannot properly disambiguate which constructor
+to use, even with the use of type traits. This was mentioned on the LLVM
+blog, and is mentioned as part of
+<a class="reference external" href="http://cplusplus.github.io/LWG/lwg-active.html#2255">LWG Defect 2255</a>.</li>
+</ul>
+</div></blockquote>
+<p class="last">Because this component was written for C++11, it was decided to omit these
+additional allocator aware constructors.</p>
+</div>
+<dl class="class">
+<dt id="bad_any_cast">
+<em class="property">class </em><tt class="descname">bad_any_cast</tt><a class="headerlink" href="#bad_any_cast" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Inherits :</th><td class="field-body">std::bad_cast</td>
+</tr>
+</tbody>
+</table>
+<p>This is the exception thrown when <a class="reference internal" href="#any_cast__X" title="any_cast"><tt class="xref cpp cpp-func docutils literal"><span class="pre">any_cast()</span></tt></a> fails.
+It inherits from <tt class="docutils literal"><span class="pre">std::bad_cast</span></tt>.</p>
+<dl class="function">
+<dt id="bad_any_cast::whatC">
+char const* <tt class="descname">what</tt><big>(</big><big>)</big><tt class="descclassname"> const</tt><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#bad_any_cast::whatC" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the string &#8220;bad any cast&#8221;. At some point in the future a more
+descriptive error may be given.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="any">
+<em class="property">class </em><tt class="descname">any</tt><a class="headerlink" href="#any" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="function">
+<dt id="any::any__X">
+ <tt class="descname">any</tt><big>(</big><em>any const&amp;</em><big>)</big><a class="headerlink" href="#any::any__X" title="Permalink to this definition">¶</a></dt>
+<dt>
+ <tt class="descname">any</tt><big>(</big><em>any&amp;&amp;</em><big>)</big><tt class="descclassname"> noexcept</tt></dt>
+<dt id="any::any">
+ <tt class="descname">any</tt><big>(</big><big>)</big><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#any::any" title="Permalink to this definition">¶</a></dt>
+<dd><p>The default set of constructors work as one might imagine. The copy
+constructor is not marked as noexcept as the underlying type <em>may</em>
+throw an exception, and due to the type erasure performed, the <a class="reference internal" href="#any" title="any"><tt class="xref cpp cpp-class docutils literal"><span class="pre">any</span></tt></a> has
+no way of enforcing this at compile time.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="any::any__ValueTypeRR">
+ <tt class="descname">any</tt><big>(</big>ValueType&amp;&amp; <em>value</em><big>)</big><a class="headerlink" href="#any::any__ValueTypeRR" title="Permalink to this definition">¶</a></dt>
+<dd><p>When constructing an <a class="reference internal" href="#any" title="any"><tt class="xref cpp cpp-class docutils literal"><span class="pre">any</span></tt></a> with a given <tt class="docutils literal"><span class="pre">ValueType</span></tt>, it will perform a
+series of compile time checks to see whether it should perform the small
+object optimization. If the object is deemed small enough, it will not
+allocate memory. Otherwise, a new ValueType will be allocated via
+operator new, and constructed with the given <em>value</em>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type value:</th><td class="field-body">ValueType&amp;&amp;</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises :</th><td class="field-body">Any exceptions thrown by the copy or move constructor
+of the given ValueType.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="any::assign-operator__X">
+any&amp; <tt class="descname">operator=</tt><big>(</big><em>any const&amp;</em><big>)</big><a class="headerlink" href="#any::assign-operator__X" title="Permalink to this definition">¶</a></dt>
+<dt>
+any&amp; <tt class="descname">operator=</tt><big>(</big><em>any&amp;&amp;</em><big>)</big><tt class="descclassname"> noexcept</tt></dt>
+<dd><p>Assigns the contents of the incoming any to <tt class="docutils literal"><span class="pre">*this</span></tt>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="any::any::swap__X">
+void <tt class="descclassname">any::</tt><tt class="descname">swap</tt><big>(</big><em>any&amp;</em><big>)</big><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#any::any::swap__X" title="Permalink to this definition">¶</a></dt>
+<dd><p>Swaps the object contained within the given <a class="reference internal" href="#any" title="any"><tt class="xref cpp cpp-class docutils literal"><span class="pre">any</span></tt></a> with the one contained
+within <tt class="docutils literal"><span class="pre">*this</span></tt>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="any::typeC">
+std::type_info const&amp; <tt class="descname">type</tt><big>(</big><big>)</big><tt class="descclassname"> const</tt><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#any::typeC" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the <tt class="docutils literal"><span class="pre">std::type_info</span></tt> for the type contained within. If the
+<a class="reference internal" href="#any" title="any"><tt class="xref cpp cpp-class docutils literal"><span class="pre">any</span></tt></a> is empty, it will return <tt class="docutils literal"><span class="pre">typeid(void)</span></tt>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="any::emptyC">
+bool <tt class="descname">empty</tt><big>(</big><big>)</big><tt class="descclassname"> const</tt><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#any::emptyC" title="Permalink to this definition">¶</a></dt>
+<dd><p>If the <a class="reference internal" href="#any" title="any"><tt class="xref cpp cpp-class docutils literal"><span class="pre">any</span></tt></a> does not contain any data (i.e. <a class="reference internal" href="#any::typeC" title="any::type"><tt class="xref cpp cpp-func docutils literal"><span class="pre">any::type()</span></tt></a> returns
+<tt class="docutils literal"><span class="pre">typeid(void)</span></tt>), it will return true.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="any::clear">
+void <tt class="descname">clear</tt><big>(</big><big>)</big><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#any::clear" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Postcondition :</th><td class="field-body"><a class="reference internal" href="#any::emptyC" title="any::empty"><tt class="xref cpp cpp-func docutils literal"><span class="pre">any::empty()</span></tt></a> == true</td>
+</tr>
+</tbody>
+</table>
+<p>Destroys the object contained within the <a class="reference internal" href="#any" title="any"><tt class="xref cpp cpp-class docutils literal"><span class="pre">any</span></tt></a>.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="any_cast__X">
+ValueType <tt class="descname">any_cast</tt><big>(</big><em>any const&amp;</em><big>)</big><a class="headerlink" href="#any_cast__X" title="Permalink to this definition">¶</a></dt>
+<dt>
+ValueType <tt class="descname">any_cast</tt><big>(</big><em>any&amp;&amp;</em><big>)</big></dt>
+<dt>
+ValueType <tt class="descname">any_cast</tt><big>(</big><em>any&amp;</em><big>)</big></dt>
+<dd><div class="admonition-todo admonition" id="index-0">
+<p class="first admonition-title">Todo</p>
+<p class="last">Discuss behavior and return value.</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Raises :</th><td class="field-body"><a class="reference internal" href="#bad_any_cast" title="bad_any_cast"><tt class="xref cpp cpp-class docutils literal"><span class="pre">bad_any_cast</span></tt></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt>
+ValueType const* <tt class="descname">any_cast</tt><big>(</big><em>any const*</em><big>)</big></dt>
+<dt>
+ValueType* <tt class="descname">any_cast</tt><big>(</big><em>any*</em><big>)</big></dt>
+<dd><div class="admonition-todo admonition" id="index-1">
+<p class="first admonition-title">Todo</p>
+<p class="last">Discuss behavior and return value</p>
+</div>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="range.html"
+                        title="previous chapter">Range Component</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/any.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="range.html" title="Range Component"
+             >previous</a> &nbsp; &nbsp;</li>
+    <li><a href="index.html">MNMLSTC Core 0.1 documentation</a> &raquo;</li>
+ 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2013, MNMLSTC.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+    <!-- cloud_sptheme 1.4 -->
+  </body>
+</html>

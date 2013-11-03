@@ -1,0 +1,257 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Functional Component &mdash; MNMLSTC Core 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/cloud.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noticia+Text|Open+Sans|Droid+Sans+Mono" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/jquery.cookie.js"></script>
+    <script type="text/javascript" src="_static/cloud.js"></script>
+    <link rel="top" title="MNMLSTC Core 0.1 documentation" href="index.html" />
+    <link rel="next" title="Expected Component" href="expected.html" />
+    <link rel="prev" title="Using MNMLSTC Core" href="usage.html" /> 
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+  </head>
+  <body>
+    <div class="relbar-top">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="expected.html" title="Expected Component"
+             accesskey="N">next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="usage.html" title="Using MNMLSTC Core"
+             accesskey="P">previous</a> &nbsp; &nbsp;</li>
+    <li><a href="index.html">MNMLSTC Core 0.1 documentation</a> &raquo;</li>
+ 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="functional-component">
+<span id="core-functional-component"></span><h1>Functional Component<a class="headerlink" href="#functional-component" title="Permalink to this headline">¶</a></h1>
+<p>The functional component contains several utilities to assist with functions.
+Among these are the implementation of the <em>INVOKE</em> pseudo-expression in code
+form, as well as an extension of this pseudo-expression with <em>unpack</em> semantics
+at both compile time and runtime.</p>
+<p>Additionally, the functional component provides a <a class="reference internal" href="#function_traits:T:" title="function_traits&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">function_traits&lt;T&gt;</span></tt></a>
+object to discern at compile time the return type and arity of a function. The
+ability to discover the types of a given function&#8217;s argument is also possible.</p>
+<dl class="class">
+<dt id="unpack_t">
+<em class="property">class </em><tt class="descname">unpack_t</tt><a class="headerlink" href="#unpack_t" title="Permalink to this definition">¶</a></dt>
+<dd><p>A sentinel class to represent that one wishes to call <a class="reference internal" href="#invoke__X" title="invoke"><tt class="xref cpp cpp-func docutils literal"><span class="pre">invoke()</span></tt></a> with
+unpack semantics. An instance is available under the name <tt class="docutils literal"><span class="pre">unpack</span></tt>.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="runpack_t">
+<em class="property">class </em><tt class="descname">runpack_t</tt><a class="headerlink" href="#runpack_t" title="Permalink to this definition">¶</a></dt>
+<dd><p>A sentinel class to represent that one wishes to call <a class="reference internal" href="#invoke__X" title="invoke"><tt class="xref cpp cpp-func docutils literal"><span class="pre">invoke()</span></tt></a> with
+runtime unpack semantics. An instance is available under the name
+<tt class="docutils literal"><span class="pre">runpack</span></tt>.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="function_traits:T:">
+<em class="property">class </em><tt class="descname">function_traits&lt;T&gt;</tt><a class="headerlink" href="#function_traits:T:" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function traits to discern various amounts of details for a given callable
+type <em>T</em>. The traits allow one to get the <a class="reference internal" href="#function_traits:T:::arity__constexpr" title="function_traits&lt;T&gt;::arity"><tt class="xref cpp cpp-member docutils literal"><span class="pre">arity</span></tt></a> of a callable,
+as well as explore the types of various argument indices.</p>
+<dl class="type">
+<dt id="function_traits:T:::return_type">
+<em class="property">type </em><tt class="descname">return_type</tt><a class="headerlink" href="#function_traits:T:::return_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>The return type of a given function <em>T</em>.</p>
+</dd></dl>
+
+<dl class="type">
+<dt id="function_traits:T:::pointer">
+<em class="property">type </em><tt class="descname">pointer</tt><a class="headerlink" href="#function_traits:T:::pointer" title="Permalink to this definition">¶</a></dt>
+<dd><p>A type alias that represents the callable as a function pointer.</p>
+</dd></dl>
+
+<dl class="member">
+<dt id="function_traits:T:::arity__constexpr">
+<em class="property">static</em> constexpr <tt class="descname">arity</tt><a class="headerlink" href="#function_traits:T:::arity__constexpr" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type :</th><td class="field-body"><tt class="docutils literal"><span class="pre">std::size_t</span></tt></td>
+</tr>
+</tbody>
+</table>
+<p>Represents the number of arguments the callable <em>T</em> takes.</p>
+</dd></dl>
+
+<dl class="type">
+<dt id="function_traits:T:::argument:N:">
+<em class="property">type </em><tt class="descname">argument&lt;N&gt;</tt><a class="headerlink" href="#function_traits:T:::argument:N:" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a <tt class="docutils literal"><span class="pre">std::size_t</span></tt> <em>N</em>, argument will be a type alias for the type
+located at the index in its parameter list.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="invoke__X">
+auto <tt class="descname">invoke</tt><big>(</big><em>...</em><big>)</big><a class="headerlink" href="#invoke__X" title="Permalink to this definition">¶</a></dt>
+<dd><p>There are 5 overloads available for this function. They are the
+implementation of the <em>INVOKE</em> pseudo-expression discussed in the C++11
+standard. These overloads <em>are not</em> constexpr however due to C++11 not
+marking <tt class="docutils literal"><span class="pre">std::forward</span></tt> as constexpr.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="invoke__X.X.X">
+auto <tt class="descname">invoke</tt><big>(</big><em>unpack_t</em>, <em>Functor&amp;&amp;</em>, <em>Unpackable&amp;&amp;</em><big>)</big><a class="headerlink" href="#invoke__X.X.X" title="Permalink to this definition">¶</a></dt>
+<dt id="invoke__X.X">
+auto <tt class="descname">invoke</tt><big>(</big><em>unpack_t</em>, <em>Unpackable&amp;&amp;</em><big>)</big><a class="headerlink" href="#invoke__X.X" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Requires :</th><td class="field-body"><em>Unpackable</em> be capable of having <tt class="docutils literal"><span class="pre">std::get&lt;N&gt;</span></tt> called on it,
+and an overload for <tt class="docutils literal"><span class="pre">std::tuple_size</span></tt>.</td>
+</tr>
+</tbody>
+</table>
+<p>This version of <a class="reference internal" href="#invoke__X" title="invoke"><tt class="xref cpp cpp-func docutils literal"><span class="pre">invoke()</span></tt></a> uses compile time unpacking semantics. It
+will take every member of <em>Unpackable</em> and call <tt class="docutils literal"><span class="pre">std::get&lt;N&gt;</span></tt>.
+<tt class="docutils literal"><span class="pre">std::tuple_size</span></tt> is used to get the number of elements in <em>Unpackable</em>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt>
+auto <tt class="descname">invoke</tt><big>(</big><em>runpack_t</em>, <em>Functor&amp;&amp;</em>, <em>Runpackable&amp;&amp;</em><big>)</big></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Requires :</th><td class="field-body"><em>Runpackable</em> be have a member function named <em>at</em>, which returns
+<tt class="docutils literal"><span class="pre">Runpackable::value_type</span></tt>, and takes a <tt class="docutils literal"><span class="pre">std::size_t</span></tt> as its
+parameters.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Throws :</th><td class="field-body"><tt class="docutils literal"><span class="pre">std::out_of_range</span></tt></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Noexcept :</th><td class="field-body">false</td>
+</tr>
+</tbody>
+</table>
+<p>This version of <a class="reference internal" href="#invoke__X" title="invoke"><tt class="xref cpp cpp-func docutils literal"><span class="pre">invoke()</span></tt></a> uses runtime unpacking semantics. It will
+take the arity of <em>Functor</em>, and then unpack <em>Runpackable</em> via its <tt class="docutils literal"><span class="pre">at</span></tt>
+member function. As an example a <em>Functor</em> with 4 arguments, and a
+<em>Runpackable</em> of type <tt class="docutils literal"><span class="pre">std::vector&lt;int&gt;</span></tt> would expand to:</p>
+<div class="highlight-cpp"><div class="highlight"><pre><span class="n">core</span><span class="o">::</span><span class="n">invoke</span><span class="p">(</span>
+  <span class="n">std</span><span class="o">::</span><span class="n">forward</span><span class="o">&lt;</span><span class="n">Functor</span><span class="o">&gt;</span><span class="p">(</span><span class="n">functor</span><span class="p">),</span>
+  <span class="n">std</span><span class="o">::</span><span class="n">forward</span><span class="o">&lt;</span><span class="n">Runpackable</span><span class="o">&gt;</span><span class="p">(</span><span class="n">runpackable</span><span class="p">).</span><span class="n">at</span><span class="p">(</span><span class="n">N</span><span class="p">)...</span>
+<span class="p">);</span>
+</pre></div>
+</div>
+<p>As the standard containers all throw <tt class="docutils literal"><span class="pre">std::out_of_range</span></tt>, this function
+should be expected to as well.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last"><em>ALL</em> standard containers with an <tt class="docutils literal"><span class="pre">at</span></tt> member function can be
+used with this, including the associative containers, such as
+<tt class="docutils literal"><span class="pre">std::map</span></tt>, and <tt class="docutils literal"><span class="pre">std::unordered_map</span></tt>. <em>However</em>, the requirement that
+the <tt class="docutils literal"><span class="pre">at</span></tt> member function take a <tt class="docutils literal"><span class="pre">std::size_t</span></tt> remains.</p>
+</div>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="usage.html"
+                        title="previous chapter">Using MNMLSTC Core</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="expected.html"
+                        title="next chapter">Expected Component</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/functional.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="expected.html" title="Expected Component"
+             >next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="usage.html" title="Using MNMLSTC Core"
+             >previous</a> &nbsp; &nbsp;</li>
+    <li><a href="index.html">MNMLSTC Core 0.1 documentation</a> &raquo;</li>
+ 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2013, MNMLSTC.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+    <!-- cloud_sptheme 1.4 -->
+  </body>
+</html>
