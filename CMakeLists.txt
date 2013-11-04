@@ -120,14 +120,14 @@ endif ()
 # Configuration
 #------------------------------------------------------------------------------
 write_basic_package_version_file(
-  ${PROJECT_BINARY_DIR}/core-config-version.cmake
+  "${PROJECT_BINARY_DIR}/${PROJECT_NAME}-config-version.cmake"
   VERSION ${CORE_VERSION}
   COMPATIBILITY SameMajorVersion
 )
 
 configure_package_config_file(
-  ${PROJECT_SOURCE_DIR}/configure/core-config.cmake.in
-  ${PROJECT_BINARY_DIR}/core-config.cmake
+  "${PROJECT_SOURCE_DIR}/configure/${PROJECT_NAME}-config.cmake.in"
+  "${PROJECT_BINARY_DIR}/${PROJECT_NAME}-config.cmake"
   INSTALL_DESTINATION "${CMAKE_INSTALL_DIR}"
   PATH_VARS INCLUDE_INSTALL_DIR CMAKE_INSTALL_DIR
 )
@@ -192,7 +192,7 @@ install(DIRECTORY "${DOCS_BINARY_DIR}/"
 # TODO: Allow for different generators to be selected at configuration time.
 
 set(CPACK_GENERATOR "WIX")
-set(CPACK_PACKAGE_NAME "MNMLSTC Core")
+set(CPACK_PACKAGE_NAME ${PROJECT_NAME})
 set(CPACK_PACKAGE_VENDOR "MNMLSTC")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY
   "MNMLSTC Core - A C++11 library to extend the standard library"
