@@ -40,3 +40,15 @@ type lists.
 .. function:: auto value_at<N, Ts>(Ts&&)
 
    :returns: The value located at the index *N* in the type list *Ts*.
+
+.. class:: scope
+
+   Acts as a scope-guard, akin to the Boost.ScopeExit library. It is an
+   unmovable, uncopyable object, and therefore can only live in the scope it
+   is defined. It can only be constructed with an rvalue reference to a 
+   ``std::function<void()>``. Additionally it can be assigned an rvalue
+   reference to a ``std::function<void()>``, allowing for 'no-op scope guards'
+   when assigned an empty lambda::
+
+      core::scope scope { [] { throw std::logic_error { "error" }; } };
+      if (some_flag) { scope = [] { }; }

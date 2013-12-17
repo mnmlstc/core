@@ -2,6 +2,7 @@
 #define CORE_UTILITY_HPP
 
 #include <type_traits>
+#include <functional>
 #include <utility>
 
 #include <cstddef>
@@ -82,6 +83,36 @@ auto value_at(T&& value, Ts&&...) -> decltype(std::forward<T>(value)) {
   return std::forward<T>(value);
 }
 
+struct scope final {
+  explicit scope (std::function<void()>&& call) : call { call } { }
+
+  scope (scope const&) = delete;
+  scope (scope&&) = delete;
+  scope () = delete;
+  ~scope () noexcept { if (this->call) { this->call(); } }
+
+  scope& operator = (std::function<void()>&& call) noexcept {
+    this->call = std::move(call);
+    return *this;
+  }
+
+  scope& operator = (scope const&) = delete;
+  scope& operator = (scope&&) = delete;
+
+  void swap (scope& that) noexcept { std::swap(this->call, that.call); }
+
+private:
+  std::function<void()> call;
+};
+
 }} /* namespace core::v1 */
+
+namespace std {
+
+inline void swap (core::v1::scope& lhs, core::v1::scope& rhs) noexcept(
+  noexcept(lhs.swap(rhs))
+) { return lhs.swap(rhs); }
+
+} /* namespace std */
 
 #endif /* CORE_UTILITY_HPP */
