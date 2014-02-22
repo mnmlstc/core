@@ -20,7 +20,7 @@ Some components provided by MNMLSTC Core are:
  * ``expected<T>``
  * ``deep_ptr<T>``
  * ``poly_ptr<T>``
- * ``string_ref``
+ * ``string_view``
  * ``range<T>``
  * ``any``
 

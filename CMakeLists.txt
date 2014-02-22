@@ -57,7 +57,6 @@ set(WARN_ALL "-Wall")
 # act together.
 if (MSVC)
   set(USE_EXCEPTIONS "/Ehsc")
-  set(USE_PEDANTIC "-Za")
 
   set(WARN_EVERYTHING "-Wall") # Yes, I am aware of the irony.
   set(WARN_ERROR "-Werror")

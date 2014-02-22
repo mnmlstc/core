@@ -13,7 +13,7 @@ namespace core {
 inline namespace v1 {
 
 template <class CharT, class Traits=std::char_traits<CharT>>
-struct basic_string_ref {
+struct basic_string_view {
   using difference_type = std::ptrdiff_t;
   using value_type = CharT;
   using size_type = std::size_t;
@@ -35,32 +35,32 @@ struct basic_string_ref {
   static constexpr size_type npos = std::numeric_limits<size_type>::max();
 
   template <class Allocator>
-  basic_string_ref (std::basic_string<CharT, Traits, Allocator> const& that) :
+  basic_string_view (std::basic_string<CharT, Traits, Allocator> const& that) :
     str { that.data() },
     len { that.size() }
   { }
 
-  constexpr basic_string_ref (pointer str, size_type len) noexcept :
+  constexpr basic_string_view (pointer str, size_type len) noexcept :
     str { str },
     len { len }
   { }
 
-  basic_string_ref (pointer str) noexcept :
-    basic_string_ref { str, traits::length(str) }
+  basic_string_view (pointer str) noexcept :
+    basic_string_view { str, traits::length(str) }
   { }
 
-  constexpr basic_string_ref (basic_string_ref const& that) noexcept :
+  constexpr basic_string_view (basic_string_view const& that) noexcept :
     str { that.str },
     len { that.len }
   { }
 
-  constexpr basic_string_ref () noexcept :
+  constexpr basic_string_view () noexcept :
     str { nullptr },
     len { 0 }
   { }
 
-  basic_string_ref& operator = (basic_string_ref const& that) noexcept {
-    basic_string_ref { that }.swap(*this);
+  basic_string_view& operator = (basic_string_view const& that) noexcept {
+    basic_string_view { that }.swap(*this);
     return *this;
   }
 
@@ -121,10 +121,10 @@ struct basic_string_ref {
     this->len = 0;
   }
 
-  constexpr basic_string_ref substr (size_type pos, size_type n=npos) const {
+  constexpr basic_string_view substr (size_type pos, size_type n=npos) const {
     return pos > this->size()
       ? throw std::out_of_range { "start position out of range" }
-      : basic_string_ref {
+      : basic_string_view {
         this->data() + pos,
         n == npos or pos + n > this->size()
           ? (this->size() - pos)
@@ -140,12 +140,12 @@ struct basic_string_ref {
     return not this->empty() and traits::eq(value, this->back());
   }
 
-  bool starts_with (basic_string_ref that) const noexcept {
+  bool starts_with (basic_string_view that) const noexcept {
     return this->size() >= that.size() and
       traits::compare(this->data(), that.data(), that.size()) == 0;
   }
 
-  bool ends_with (basic_string_ref that) const noexcept {
+  bool ends_with (basic_string_view that) const noexcept {
     return this->size() >= that.size() and
       traits::compare(
         this->data() + this->size() - that.size(),
@@ -154,7 +154,7 @@ struct basic_string_ref {
       ) == 0;
   }
 
-  difference_type compare (basic_string_ref that) const {
+  difference_type compare (basic_string_view that) const {
     auto cmp = traits::compare(
       this->data(),
       that.data(),
@@ -175,7 +175,7 @@ struct basic_string_ref {
   }
 
   /* functions that take a string-ref */
-  size_type find_first_not_of (basic_string_ref that) const {
+  size_type find_first_not_of (basic_string_view that) const {
     for (auto iter = this->begin(); iter != this->end(); ++iter) {
       if (traits::find(that.data(), that.size(), *iter)) { continue; }
       return std::distance(this->begin(), iter);
@@ -183,7 +183,7 @@ struct basic_string_ref {
     return npos;
   }
 
-  size_type find_last_not_of (basic_string_ref that) const {
+  size_type find_last_not_of (basic_string_view that) const {
     for (auto iter = this->rbegin(); iter != this->rend(); ++iter) {
       if (traits::find(that.data(), that.size(), *iter)) { continue; }
       return this->size() - std::distance(this->rbegin(), iter) - 1;
@@ -191,7 +191,7 @@ struct basic_string_ref {
     return npos;
   }
 
-  size_type find_first_of (basic_string_ref that) const {
+  size_type find_first_of (basic_string_view that) const {
     auto iter = std::find_first_of(
       this->begin(), this->end(),
       that.begin(), that.end(),
@@ -201,7 +201,7 @@ struct basic_string_ref {
     return std::distance(this->begin(), iter);
   }
 
-  size_type find_last_of (basic_string_ref that) const {
+  size_type find_last_of (basic_string_view that) const {
     auto iter = std::find_first_of(
       this->rbegin(), this->rend(),
       that.rbegin(), that.rend(),
@@ -211,7 +211,7 @@ struct basic_string_ref {
     return this->size() - std::distance(this->rbegin(), iter) - 1;
   }
 
-  size_type rfind (basic_string_ref that) const {
+  size_type rfind (basic_string_view that) const {
     auto iter = std::search(
       this->rbegin(), this->rend(),
       that.rbegin(), that.rend(),
@@ -221,7 +221,7 @@ struct basic_string_ref {
     return this->size() - std::distance(this->rbegin(), iter) - 1;
   }
 
-  size_type find (basic_string_ref that) const {
+  size_type find (basic_string_view that) const {
     auto iter = std::search(
       this->begin(), this->end(),
       that.begin(), that.end(),
@@ -269,7 +269,7 @@ struct basic_string_ref {
     return std::distance(this->begin(), iter);
   }
 
-  void swap (basic_string_ref& that) noexcept {
+  void swap (basic_string_view& that) noexcept {
     std::swap(this->str, that.str);
     std::swap(this->len, that.len);
   }
@@ -279,51 +279,51 @@ private:
   size_type len;
 };
 
-using u32string_ref = basic_string_ref<char32_t>;
-using u16string_ref = basic_string_ref<char16_t>;
-using wstring_ref = basic_string_ref<wchar_t>;
-using string_ref = basic_string_ref<char>;
+using u32string_view = basic_string_view<char32_t>;
+using u16string_view = basic_string_view<char16_t>;
+using wstring_view = basic_string_view<wchar_t>;
+using string_view = basic_string_view<char>;
 
 template <class CharT, typename Traits>
 bool operator == (
-  basic_string_ref<CharT, Traits> lhs,
-  basic_string_ref<CharT, Traits> rhs
+  basic_string_view<CharT, Traits> lhs,
+  basic_string_view<CharT, Traits> rhs
 ) noexcept { return lhs.size() == rhs.size() and lhs.compare(rhs) == 0; }
 
 template <class CharT, typename Traits>
 bool operator != (
-  basic_string_ref<CharT, Traits> lhs,
-  basic_string_ref<CharT, Traits> rhs
+  basic_string_view<CharT, Traits> lhs,
+  basic_string_view<CharT, Traits> rhs
 ) noexcept { return lhs.size() != rhs.size() or lhs.compare(rhs) != 0; }
 
 template <class CharT, typename Traits>
 bool operator >= (
-  basic_string_ref<CharT, Traits> lhs,
-  basic_string_ref<CharT, Traits> rhs
+  basic_string_view<CharT, Traits> lhs,
+  basic_string_view<CharT, Traits> rhs
 ) noexcept { return lhs.compare(rhs) >= 0; }
 
 template <class CharT, typename Traits>
 bool operator <= (
-  basic_string_ref<CharT, Traits> lhs,
-  basic_string_ref<CharT, Traits> rhs
+  basic_string_view<CharT, Traits> lhs,
+  basic_string_view<CharT, Traits> rhs
 ) noexcept { return lhs.compare(rhs) <= 0; }
 
 template <class CharT, typename Traits>
 bool operator > (
-  basic_string_ref<CharT, Traits> lhs,
-  basic_string_ref<CharT, Traits> rhs
+  basic_string_view<CharT, Traits> lhs,
+  basic_string_view<CharT, Traits> rhs
 ) noexcept { return lhs.compare(rhs) > 0; }
 
 template <class CharT, typename Traits>
 bool operator < (
-  basic_string_ref<CharT, Traits> lhs,
-  basic_string_ref<CharT, Traits> rhs
+  basic_string_view<CharT, Traits> lhs,
+  basic_string_view<CharT, Traits> rhs
 ) noexcept { return lhs.compare(rhs) < 0; }
 
 template <class CharT, class Traits>
 std::basic_ostream<CharT, Traits>& operator << (
   std::basic_ostream<CharT, Traits>& os,
-  basic_string_ref<CharT, Traits> const& str
+  basic_string_view<CharT, Traits> const& str
 ) { for (auto ch : str) { os << ch; } return os; }
 
 }} /* namespace core::v1 */
@@ -332,13 +332,13 @@ namespace std {
 
 template <class CharT, class Traits>
 void swap (
-  core::v1::basic_string_ref<CharT, Traits>& lhs,
-  core::v1::basic_string_ref<CharT, Traits>& rhs
+  core::v1::basic_string_view<CharT, Traits>& lhs,
+  core::v1::basic_string_view<CharT, Traits>& rhs
 ) noexcept { return lhs.swap(rhs); }
 
 template <typename CharT, typename Traits>
-struct hash<core::v1::basic_string_ref<CharT, Traits>> {
-  using argument_type = core::v1::basic_string_ref<CharT, Traits>;
+struct hash<core::v1::basic_string_view<CharT, Traits>> {
+  using argument_type = core::v1::basic_string_view<CharT, Traits>;
   using result_type = std::size_t;
 
   result_type operator ()(argument_type const& ref) const noexcept {
