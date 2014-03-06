@@ -437,6 +437,33 @@ int main () {
     }
   };
 
+  test("observer-ptr") = {
+    task("default-constructor") = [] {
+      core::observer_ptr<int> value { };
+      assert::is_true(not value);
+    },
+
+    task("value-constructor") = [] { assert::fail(); },
+    task("copy-constructor") = [] { assert::fail(); },
+    task("copy-assign") = [] { assert::fail(); },
+    task("null-assign") = [] { assert::fail(); },
+    task("swap") = [] { assert::fail(); },
+    task("const-pointer-conversion") = [] { assert::fail(); },
+    task("pointer-conversion") = [] { assert::fail(); },
+    task("deref-operator") = [] { assert::fail(); },
+    task("arrow-operator") = [] { assert::fail(); },
+    task("get") = [] { assert::fail(); },
+    task("release") = [] { assert::fail(); },
+    task("reset") = [] { assert::fail(); },
+    task("operator-equal") = [] { assert::fail(); },
+    task("operator-not-equal") = [] { assert::fail(); },
+    task("operator-greater-equal") = [] { assert::fail(); },
+    task("operator-less-equal") = [] { assert::fail(); },
+    task("operator-greater") = [] { assert::fail(); },
+    task("operator-less") = [] { assert::fail(); },
+    task("make-observer") = [] { assert::fail(); }
+  };
+
   test("make-unique") = {
     task("make-unique-single") = []{
       auto unique = core::make_unique<std::vector<int>>(

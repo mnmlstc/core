@@ -340,6 +340,79 @@ private:
   data_type data;
 };
 
+template <class W>
+struct observer_ptr final {
+  using value_type = W;
+
+  using const_pointer = add_pointer_t<add_const_t<W>>;
+  using pointer = add_pointer_t<W>;
+
+  using const_reference = add_lvalue_reference_t<add_const_t<W>>;
+  using reference = add_lvalue_reference_t<W>;
+
+  constexpr observer_ptr (std::nullptr_t) noexcept : ptr { nullptr } { }
+  explicit observer_ptr (pointer ptr) noexcept : ptr { ptr } { }
+
+  template <
+    class T,
+    class=enable_if_t<std::is_convertible<pointer, add_pointer_t<T>>::value>
+  > explicit observer_ptr (add_pointer_t<T> ptr) noexcept :
+    ptr { dynamic_cast<pointer>(ptr) }
+  { }
+
+  template <
+    class T,
+    class=enable_if_t<std::is_convertible<pointer, add_pointer_t<T>>::value>
+  > observer_ptr (observer_ptr<T> const& that) noexcept :
+    observer_ptr { that.get() }
+  { }
+
+  constexpr observer_ptr () noexcept : observer_ptr { nullptr } { }
+  ~observer_ptr () noexcept { this->ptr = nullptr; }
+
+  template <
+    class T,
+    class=enable_if_t<std::is_convertible<pointer, add_pointer_t<T>>::value>
+  > observer_ptr& operator = (add_pointer_t<T> ptr) noexcept {
+    observer_ptr { ptr }.swap(*this);
+    return *this;
+  }
+
+  template <
+    class T,
+    class=enable_if_t<std::is_convertible<pointer, add_pointer_t<T>>::value>
+  > observer_ptr& operator = (observer_ptr<T> const& that) noexcept {
+    observer_ptr { that }.swap(*this);
+    return *this;
+  }
+
+  observer_ptr& operator = (std::nullptr_t) noexcept {
+    this->reset();
+    return *this;
+  }
+
+  void swap (observer_ptr& that) noexcept { std::swap(this->ptr, that.ptr); }
+
+  explicit operator const_pointer () const noexcept { return this->get(); }
+  explicit operator pointer () noexcept { return this->get(); }
+  explicit operator bool () noexcept { return this->get(); }
+
+  reference operator * () const noexcept { return *this->get(); }
+  pointer operator -> () const noexcept { return this->get(); }
+  pointer get () const noexcept { return this->ptr; }
+
+  pointer release () noexcept {
+    auto result = this->get();
+    this->reset();
+    return result;
+  }
+
+  void reset (pointer ptr = nullptr) noexcept { this->ptr = ptr; }
+
+private:
+  pointer ptr;
+};
+
 /* poly_ptr convention for type and deleter is:
  * T, D : U, E
  */
@@ -556,6 +629,94 @@ bool operator < (std::nullptr_t, deep_ptr<T, D, C> const& rhs) noexcept {
   return std::less<pointer> { }(nullptr, rhs.get());
 }
 
+/* observer_ptr and nullptr overloads */
+template <class T, class U>
+bool operator == (
+  observer_ptr<T> const& lhs,
+  observer_ptr<U> const& rhs
+) noexcept { return lhs.get() == rhs.get(); }
+
+template <class T, class U>
+bool operator != (
+  observer_ptr<T> const& lhs,
+  observer_ptr<U> const& rhs
+) noexcept { return lhs.get() != rhs.get(); }
+
+template <class T>
+bool operator == (observer_ptr<T> const& lhs, std::nullptr_t) noexcept {
+  return lhs.get() == nullptr;
+}
+
+template <class T>
+bool operator != (observer_ptr<T> const& lhs, std::nullptr_t) noexcept {
+  return lhs.get() != nullptr;
+}
+
+template <class T>
+bool operator == (std::nullptr_t, observer_ptr<T> const& rhs) noexcept {
+  return nullptr == rhs.get();
+}
+
+template <class T>
+bool operator != (std::nullptr_t, observer_ptr<T> const& rhs) noexcept {
+  return nullptr != rhs.get();
+}
+
+template <class T, class U>
+bool operator >= (
+  observer_ptr<T> const& lhs,
+  observer_ptr<U> const& rhs
+) noexcept { return lhs.get() >= rhs.get(); }
+
+template <class T, class U>
+bool operator <= (
+  observer_ptr<T> const& lhs,
+  observer_ptr<U> const& rhs
+) noexcept { return lhs.get() <= rhs.get(); }
+
+template <class T, class U>
+bool operator > (
+  observer_ptr<T> const& lhs,
+  observer_ptr<U> const& rhs
+) noexcept { return lhs.get() > rhs.get(); }
+
+template <class T, class U>
+bool operator < (
+  observer_ptr<T> const& lhs,
+  observer_ptr<U> const& rhs
+) noexcept { return lhs.get() < rhs.get(); }
+
+/* make_observer */
+template <class W>
+observer_ptr<W> make_observer (add_pointer_t<W> ptr) noexcept {
+  return observer_ptr<W> { ptr };
+}
+
+template <class W>
+observer_ptr<W> make_observer (std::unique_ptr<W> const& ptr) noexcept {
+  return observer_ptr<W> { ptr };
+}
+
+template <class W>
+observer_ptr<W> make_observer (std::shared_ptr<W> const& ptr) noexcept {
+  return observer_ptr<W> { ptr.get() };
+}
+
+template <class W>
+observer_ptr<W> make_observer (std::weak_ptr<W> const& ptr) noexcept {
+  return make_observer(ptr.lock());
+}
+
+template <class W>
+observer_ptr<W> make_observer (deep_ptr<W> const& ptr) noexcept {
+  return observer_ptr<W> { ptr.get() };
+}
+
+template <class W>
+observer_ptr<W> make_observer (poly_ptr<W> const& ptr) noexcept {
+  return observer_ptr<W> { ptr.get() };
+}
+
 /* make_poly */
 template <
   class T,
@@ -616,6 +777,12 @@ void swap (
   core::v1::deep_ptr<T, Deleter, Copier>& rhs
 ) noexcept { lhs.swap(rhs); }
 
+template <class W>
+void swap (
+  core::v1::observer_ptr<W>& lhs,
+  core::v1::observer_ptr<W>& rhs
+) noexcept { lhs.swap(rhs); }
+
 template <class T, class D>
 struct hash<core::v1::poly_ptr<T, D>> {
   using value_type = core::v1::poly_ptr<T, D>;
@@ -627,6 +794,14 @@ struct hash<core::v1::poly_ptr<T, D>> {
 template <class T, class Deleter, class Copier>
 struct hash<core::v1::deep_ptr<T, Deleter, Copier>> {
   using value_type = core::v1::deep_ptr<T, Deleter, Copier>;
+  size_t operator ()(value_type const& value) const noexcept {
+    return hash<typename value_type::pointer> { }(value.get());
+  }
+};
+
+template <class W>
+struct hash<core::v1::observer_ptr<W>> {
+  using value_type = core::v1::observer_ptr<W>;
   size_t operator ()(value_type const& value) const noexcept {
     return hash<typename value_type::pointer> { }(value.get());
   }
