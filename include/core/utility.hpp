@@ -83,36 +83,34 @@ auto value_at(T&& value, Ts&&...) -> decltype(std::forward<T>(value)) {
   return std::forward<T>(value);
 }
 
-struct scope final {
-  explicit scope (std::function<void()>&& call) : call { call } { }
+template <class Callable>
+struct scope_guard final {
 
-  scope (scope const&) = delete;
-  scope (scope&&) = delete;
-  scope () = delete;
-  ~scope () noexcept { if (this->call) { this->call(); } }
+  explicit scope_guard (Callable callable) noexcept :
+    callable { std::move(callable) }
+  { }
 
-  scope& operator = (std::function<void()>&& call) noexcept {
-    this->call = std::move(call);
-    return *this;
-  }
+  scope_guard (scope_guard const&) = delete;
+  scope_guard (scope_guard&&) = default;
+  scope_guard () = delete;
+  ~scope_guard () noexcept { callable(); }
 
-  scope& operator = (scope const&) = delete;
-  scope& operator = (scope&&) = delete;
-
-  void swap (scope& that) noexcept { std::swap(this->call, that.call); }
+  scope_guard& operator = (scope_guard const&) = delete;
+  scope_guard& operator = (scope_guard&&) = default;
 
 private:
-  std::function<void()> call;
+  Callable callable;
 };
 
+template <class Callable>
+auto make_scope_guard(Callable&& callable) -> scope_guard<
+  typename std::decay<Callable>::type
+> {
+  return scope_guard<typename std::decay<Callable>::type> {
+    std::forward<Callable>(callable)
+  };
+}
+
 }} /* namespace core::v1 */
-
-namespace std {
-
-inline void swap (core::v1::scope& lhs, core::v1::scope& rhs) noexcept(
-  noexcept(lhs.swap(rhs))
-) { return lhs.swap(rhs); }
-
-} /* namespace std */
 
 #endif /* CORE_UTILITY_HPP */
