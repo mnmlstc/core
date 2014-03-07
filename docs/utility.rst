@@ -41,14 +41,20 @@ type lists.
 
    :returns: The value located at the index *N* in the type list *Ts*.
 
-.. class:: scope
+.. class:: scope_guard<Callable>
 
-   Acts as a scope-guard, akin to the Boost.ScopeExit library. It is an
-   unmovable, uncopyable object, and therefore can only live in the scope it
-   is defined. It can only be constructed with an rvalue reference to a 
-   ``std::function<void()>``. Additionally it can be assigned an rvalue
-   reference to a ``std::function<void()>``, allowing for 'no-op scope guards'
-   when assigned an empty lambda::
+   Scope guard acts much like the Boost.ScopeExit library. It is non-copyable,
+   but movable. It can be constructed with any callable type *Callable*. The
+   type *Callable* must be move assignable and move constructible, and marked
+   as *noexcept*. *Callable* must have a function arity of 0 (that is, it takes
+   no arguments). It does not matter whether or not *Callable* returns a value,
+   as it will be ignored. To easily construct a scope_guard, a function named
+   :func:`make_scope_guard` is provided for type inference. This can easily
+   be used to give a scope_guard a lambda. As an example::
 
-      core::scope scope { [] { throw std::logic_error { "error" }; } };
-      if (some_flag) { scope = [] { }; }
+      int x = new int { 4 }
+      auto scope_guard = core::make_scope_guard([x] { delete x; });
+
+.. function:: make_scope_guard(Callable callable) noexcept
+
+   Constructs a :class:`scope_guard\<Callable>` from the given *callable*.
