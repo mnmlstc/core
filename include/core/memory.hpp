@@ -688,13 +688,13 @@ bool operator < (
 
 /* make_observer */
 template <class W>
-observer_ptr<W> make_observer (add_pointer_t<W> ptr) noexcept {
+observer_ptr<W> make_observer (W* ptr) noexcept {
   return observer_ptr<W> { ptr };
 }
 
-template <class W>
-observer_ptr<W> make_observer (std::unique_ptr<W> const& ptr) noexcept {
-  return observer_ptr<W> { ptr };
+template <class W, class D>
+observer_ptr<W> make_observer (std::unique_ptr<W, D> const& ptr) noexcept {
+  return observer_ptr<W> { ptr.get() };
 }
 
 template <class W>
@@ -707,13 +707,13 @@ observer_ptr<W> make_observer (std::weak_ptr<W> const& ptr) noexcept {
   return make_observer(ptr.lock());
 }
 
-template <class W>
-observer_ptr<W> make_observer (deep_ptr<W> const& ptr) noexcept {
+template <class W, class C, class D>
+observer_ptr<W> make_observer (deep_ptr<W, C, D> const& ptr) noexcept {
   return observer_ptr<W> { ptr.get() };
 }
 
-template <class W>
-observer_ptr<W> make_observer (poly_ptr<W> const& ptr) noexcept {
+template <class W, class D>
+observer_ptr<W> make_observer (poly_ptr<W, D> const& ptr) noexcept {
   return observer_ptr<W> { ptr.get() };
 }
 

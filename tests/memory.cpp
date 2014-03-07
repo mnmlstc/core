@@ -443,25 +443,177 @@ int main () {
       assert::is_true(not value);
     },
 
-    task("value-constructor") = [] { assert::fail(); },
-    task("copy-constructor") = [] { assert::fail(); },
-    task("copy-assign") = [] { assert::fail(); },
-    task("null-assign") = [] { assert::fail(); },
-    task("swap") = [] { assert::fail(); },
-    task("const-pointer-conversion") = [] { assert::fail(); },
-    task("pointer-conversion") = [] { assert::fail(); },
-    task("deref-operator") = [] { assert::fail(); },
-    task("arrow-operator") = [] { assert::fail(); },
-    task("get") = [] { assert::fail(); },
-    task("release") = [] { assert::fail(); },
-    task("reset") = [] { assert::fail(); },
-    task("operator-equal") = [] { assert::fail(); },
-    task("operator-not-equal") = [] { assert::fail(); },
-    task("operator-greater-equal") = [] { assert::fail(); },
-    task("operator-less-equal") = [] { assert::fail(); },
-    task("operator-greater") = [] { assert::fail(); },
-    task("operator-less") = [] { assert::fail(); },
-    task("make-observer") = [] { assert::fail(); }
+    task("value-constructor") = [] {
+      int value { 42 };
+      core::observer_ptr<int> observer { std::addressof(value) };
+      assert::equal(std::addressof(value), observer.get());
+    },
+
+    task("copy-constructor") = [] {
+      int value { 42 };
+      core::observer_ptr<int> observer { std::addressof(value) };
+      core::observer_ptr<int> copy { observer };
+      assert::equal(copy.get(), std::addressof(value));
+      assert::equal(copy.get(), observer.get());
+    },
+
+    task("copy-assign") = [] {
+      int value { 42 };
+      core::observer_ptr<int> observer { std::addressof(value) };
+      core::observer_ptr<int> copy { };
+
+      assert::is_null(copy.get());
+      copy = observer;
+      assert::equal(observer.get(), copy.get());
+    },
+
+    task("null-assign") = [] {
+      int value { 42 };
+      core::observer_ptr<int> observer { std::addressof(value) };
+      assert::is_not_null(observer.get());
+      observer = nullptr;
+      assert::is_null(observer.get());
+    },
+
+    task("swap") = [] {
+      int value_one { 42 };
+      int value_two { 43 };
+
+      core::observer_ptr<int> lhs { std::addressof(value_one) };
+      core::observer_ptr<int> rhs { std::addressof(value_two) };
+
+      assert::equal(std::addressof(value_one), lhs.get());
+      assert::equal(std::addressof(value_two), rhs.get());
+
+      std::swap(lhs, rhs);
+
+      assert::equal(std::addressof(value_one), rhs.get());
+      assert::equal(std::addressof(value_two), lhs.get());
+    },
+
+    task("const-pointer-conversion") = [] {
+      int value { 42 };
+      core::observer_ptr<int> observer { std::addressof(value) };
+      auto const ptr = static_cast<int const*>(observer);
+      assert::equal(observer.get(), ptr);
+    },
+
+    task("pointer-conversion") = [] {
+      int value { 42 };
+      core::observer_ptr<int> observer { std::addressof(value) };
+      auto ptr = static_cast<int*>(observer);
+      assert::equal(observer.get(), ptr);
+    },
+
+    task("deref-operator") = [] {
+      int value { 42 };
+      core::observer_ptr<int> observer { std::addressof(value) };
+      assert::equal(42, *observer);
+    },
+
+    task("arrow-operator") = [] {
+      std::string value { "arrow" };
+      core::observer_ptr<std::string const> observer { std::addressof(value) };
+      assert::equal(observer->size(), 5);
+    },
+
+    task("release") = [] {
+      int value { 42 };
+      core::observer_ptr<int> observer { std::addressof(value) };
+
+      assert::is_not_null(observer.get());
+
+      auto ptr = observer.release();
+
+      assert::is_null(observer.get());
+      assert::equal(ptr, std::addressof(value));
+    },
+
+    task("reset") = [] {
+      int value { 42 };
+      int reset { 47 };
+      core::observer_ptr<int> observer { std::addressof(value) };
+      assert::is_not_null(observer.get());
+      assert::equal(std::addressof(value), observer.get());
+
+      observer.reset(std::addressof(reset));
+      assert::is_not_null(observer.get());
+      assert::equal(std::addressof(reset), observer.get());
+
+      observer.reset();
+      assert::is_null(observer.get());
+    },
+
+    task("operator-equal") = [] {
+      int value { 42 };
+      core::observer_ptr<int> lhs { std::addressof(value) };
+      core::observer_ptr<int> rhs { std::addressof(value) };
+      assert::equal(core::observer_ptr<int> { }, nullptr);
+      assert::equal(nullptr, core::observer_ptr<int> { });
+      assert::equal(lhs, rhs);
+    },
+
+    task("operator-not-equal") = [] {
+      int value { 42 };
+      int other { };
+      core::observer_ptr<int> lhs { std::addressof(value) };
+      core::observer_ptr<int> rhs { std::addressof(other) };
+      assert::not_equal(lhs, nullptr);
+      assert::not_equal(nullptr, rhs);
+      assert::not_equal(lhs, rhs);
+    },
+
+    task("operator-greater-equal") = [] {
+      int value { };
+      core::observer_ptr<int> lhs { std::addressof(value) };
+      core::observer_ptr<int> rhs1 { lhs };
+      core::observer_ptr<int> rhs2 { };
+      assert::greater_equal(lhs, rhs1);
+      assert::greater_equal(lhs, rhs2);
+    },
+
+    task("operator-less-equal") = [] {
+      int value { };
+      core::observer_ptr<int> lhs { };
+      core::observer_ptr<int> rhs1 { };
+      core::observer_ptr<int> rhs2 { std::addressof(value) };
+      assert::less_equal(lhs, rhs1);
+      assert::less_equal(lhs, rhs2);
+    },
+
+    task("operator-greater") = [] {
+      int value { };
+      core::observer_ptr<int> lhs { std::addressof(value) };
+      core::observer_ptr<int> rhs { };
+      assert::greater(lhs, rhs);
+    },
+
+    task("operator-less") = [] {
+      int value { };
+      core::observer_ptr<int> lhs { };
+      core::observer_ptr<int> rhs { std::addressof(value) };
+      assert::less(lhs, rhs);
+    },
+
+    task("make-observer") = [] {
+      std::unique_ptr<int> unique { new int { } };
+      std::shared_ptr<int> shared { new int { } };
+      core::deep_ptr<int> deep { new int { } };
+      std::weak_ptr<int> weak { shared };
+      int value { };
+
+      auto unique_observer = core::make_observer(unique);
+      auto shared_observer = core::make_observer(shared);
+      auto deep_observer = core::make_observer(deep);
+      auto weak_observer = core::make_observer(weak);
+      auto ptr_observer = core::make_observer(std::addressof(value));
+
+      assert::equal(unique_observer.get(), unique.get());
+      assert::equal(shared_observer.get(), shared.get());
+      assert::equal(deep_observer.get(), deep.get());
+      assert::equal(weak_observer.get(), shared.get());
+      assert::equal(ptr_observer.get(), std::addressof(value));
+    }
   };
 
   test("make-unique") = {
@@ -478,7 +630,7 @@ int main () {
     },
 
     task("make-unique-array") = []{
-      auto unique = core::make_unique<int>(7);
+      auto unique = core::make_unique<int[]>(7);
       assert::is_not_null(unique.get());
     }
   };
