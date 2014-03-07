@@ -86,6 +86,11 @@ auto value_at(T&& value, Ts&&...) -> decltype(std::forward<T>(value)) {
 template <class Callable>
 struct scope_guard final {
 
+  static_assert(
+    std::is_nothrow_move_constructible<Callable>::value,
+    "Given type must be nothrow move constructible"
+  );
+
   explicit scope_guard (Callable callable) noexcept :
     callable { std::move(callable) }
   { }
