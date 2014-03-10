@@ -9,6 +9,7 @@ This section discusses the memory component of MNMLSTC Core. Contained in this
 component are two new smart pointers (both with deep copy semantics) and a
 C++11 equivalent to C++14's :func:`make_unique\<T>`.
 
+.. |observer_ptr| replace:: :class:`observer_ptr <observer_ptr\<T>>`
 .. |poly_ptr| replace:: :class:`poly_ptr <poly_ptr\<T, Deleter>>`
 .. |deep_ptr| replace:: :class:`deep_ptr <deep_ptr\<T, Deleter, Copier>>`
 
@@ -320,6 +321,89 @@ C++11 equivalent to C++14's :func:`make_unique\<T>`.
 
       Swaps the managed object, copier object, and deleter object.
 
+.. class:: observer_ptr<T>
+
+   |observer_ptr| is "the dumbest smart pointer", in that it is only ever used
+   in the place of a raw pointer. The idea is to inform the user that the
+   |observer_ptr| does not *own* the pointer it *watches*. It can be treated
+   like a raw pointer, except that there is no need to read the documentation
+   to see if the user needs to manage a raw pointer or not. Because the
+   |observer_ptr| is a non-owning smart pointer, the need for a move
+   constructor and assignment operator is superfluous as copying a pointer
+   is just as cheap as moving one.
+
+   .. type:: element_type
+
+      The type of the object managed by |observer_ptr|.
+
+   .. type:: const_pointer
+             pointer
+
+      ``add_pointer_t<add_const_t<element_type>`` and
+      ``add_pointer_t<element_type>`` respectively.
+
+   .. type:: const_reference
+             reference
+
+      ``add_lvalue_reference<add_const_t<element_type>`` and
+      ``add_lvalue_reference<element_type>`` respectively.
+
+   .. function:: observer_ptr (std::nullptr_t ptr)
+                 observer_ptr (pointer ptr)
+                 observer_ptr (add_pointer_t<T> ptr)
+
+      Constructs the |observer_ptr| with the given pointer. If *ptr* is
+      convertible to :type:`observer_ptr\<T>::pointer`, it will construct it
+      that way (via a dynamic_cast).
+
+   .. function:: void swap (observer_ptr<T>&)
+
+      Swaps the contents of the |observer_ptr| with the other.
+
+   .. function:: operator const_pointer () const
+                 operator pointer ()
+
+      :noexcept: true
+      :explicit: Yes
+
+      Allows an |observer_ptr| to be explicitly converted to
+      :type:`observer_ptr\<T>::const_pointer` or
+      :type:`observer_ptr\<T>::pointer` respectively.
+
+   .. function:: operator bool () const
+
+      :noexcept: true
+      :explicit: Yes
+
+      Allows the |observer_ptr| to be explicitly converted to a boolean.
+
+   .. function:: reference operator * () const
+
+      :noexcept: true
+      :returns: reference to the object watched by the |observer_ptr|.
+
+   .. function:: pointer operator -> () const
+
+      :noexcept: true
+      :returns: the object watched by the |observer_ptr|
+
+   .. function:: pointer get () const
+
+      :noexcept: true
+      :returns: The object watched by the |observer_ptr|
+
+   .. function:: pointer release () noexcept
+
+      :noexcept: true
+      :returns: the object watched by the |observer_ptr|. The |observer_ptr| is
+                then set to ``nullptr``.
+
+   .. function:: void reset (pointer ptr=nullptr)
+
+      :noexcept: true
+
+      Resets the object watched by the |observer_ptr| with *ptr*.
+
 .. class:: bad_polymorphic_reset
 
    :inherits: std::logic_error
@@ -348,7 +432,7 @@ C++11 equivalent to C++14's :func:`make_unique\<T>`.
       Constructs a :class:`default_copy\<T>` from another
       :class:`default_copy\<T>`.
 
-   .. function:: pointer operator ()(pointer const ptr)
+   .. function:: pointer operator () (pointer const ptr)
 
       Allocates a new :type:`pointer` and initializes it with the dereferenced
       *ptr*, to invoke the copy constructor.
@@ -423,6 +507,35 @@ C++11 equivalent to C++14's :func:`make_unique\<T>`.
 
    :returns: The result of comparing :func:`deep_ptr\<T, Deleter, Copier>::get`
              and ``nullptr`` with the given operator.
+
+.. function:: bool operator == (observer_ptr const&, observer_ptr const&)
+              bool operator != (observer_ptr const&, observer_ptr const&)
+              bool operator >= (observer_ptr const&, observer_ptr const&)
+              bool operator <= (observer_ptr const&, observer_ptr const&)
+              bool operator  > (observer_ptr const&, observer_ptr const&)
+              bool operator  < (observer_ptr const&, observer_ptr const&)
+
+   :returns: The result of comparing the objects watched by |observer_ptr| via
+             the given operator.
+
+.. function:: bool operator == (observer_ptr const&, std::nullptr_t)
+              bool operator != (observer_ptr const&, std::nullptr_t)
+              bool operator == (std::nullptr_t, observer_const&)
+              bool operator != (std::nullptr_t, observer_const&)
+
+   :returns: The result of comparing the objects watched by |observer_ptr| with
+             ``nullptr`` via the given operator
+
+.. function:: observer_ptr<T> make_observer(W* ptr)
+              observer_ptr<T> make_observer(std::unique_ptr<W, D> const& ptr)
+              observer_ptr<T> make_observer(std::shared_ptr<W> const& ptr)
+              observer_ptr<T> make_observer(std::weak_ptr<W> const& ptr)
+              observer_ptr<T> make_observer(deep_ptr<W, C, D> const& ptr)
+              observer_ptr<T> make_observer(poly_ptr<W, D> const& ptr)
+
+   Provided to supplement the other ``make_*`` functions for smart pointers,
+   the make_observer function will create an observer from any C++11 standard
+   smart pointer, a raw pointer, or the smart pointers provided by MNMLSTC Core
 
 .. function:: poly_ptr<T, Deleter> make_poly<T>(U&& args)
 
