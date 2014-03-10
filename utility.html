@@ -124,6 +124,29 @@ auto <tt class="descname">value_at&lt;N, Ts&gt;</tt><big>(</big><em>Ts&amp;&amp;
 </table>
 </dd></dl>
 
+<dl class="class">
+<dt id="scope_guard:Callable:">
+<em class="property">class </em><tt class="descname">scope_guard&lt;Callable&gt;</tt><a class="headerlink" href="#scope_guard:Callable:" title="Permalink to this definition">¶</a></dt>
+<dd><p>Scope guard acts much like the Boost.ScopeExit library. It is non-copyable,
+but movable. It can be constructed with any callable type <em>Callable</em>. The
+type <em>Callable</em> must be move assignable and move constructible, and marked
+as <em>noexcept</em>. <em>Callable</em> must have a function arity of 0 (that is, it takes
+no arguments). It does not matter whether or not <em>Callable</em> returns a value,
+as it will be ignored. To easily construct a scope_guard, a function named
+<a class="reference internal" href="#make_scope_guard__Callable" title="make_scope_guard"><tt class="xref cpp cpp-func docutils literal"><span class="pre">make_scope_guard()</span></tt></a> is provided for type inference. This can easily
+be used to give a scope_guard a lambda. As an example:</p>
+<div class="highlight-cpp"><div class="highlight"><pre><span class="kt">int</span> <span class="n">x</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">int</span> <span class="p">{</span> <span class="mi">4</span> <span class="p">}</span>
+<span class="k">auto</span> <span class="n">scope_guard</span> <span class="o">=</span> <span class="n">core</span><span class="o">::</span><span class="n">make_scope_guard</span><span class="p">([</span><span class="n">x</span><span class="p">]</span> <span class="p">{</span> <span class="k">delete</span> <span class="n">x</span><span class="p">;</span> <span class="p">});</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="make_scope_guard__Callable">
+ <tt class="descname">make_scope_guard</tt><big>(</big>Callable <em>callable</em><big>)</big><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#make_scope_guard__Callable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a <a class="reference internal" href="#scope_guard:Callable:" title="scope_guard&lt;Callable&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">scope_guard&lt;Callable&gt;</span></tt></a> from the given <em>callable</em>.</p>
+</dd></dl>
+
 </div>
 
 

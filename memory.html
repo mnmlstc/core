@@ -595,6 +595,172 @@ void <tt class="descname">swap</tt><big>(</big><em>deep_ptr&amp;</em><big>)</big
 </dd></dl>
 
 <dl class="class">
+<dt id="observer_ptr:T:">
+<em class="property">class </em><tt class="descname">observer_ptr&lt;T&gt;</tt><a class="headerlink" href="#observer_ptr:T:" title="Permalink to this definition">¶</a></dt>
+<dd><p><a class="reference internal" href="#observer_ptr:T:" title="observer_ptr&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">observer_ptr</span></tt></a> is &#8220;the dumbest smart pointer&#8221;, in that it is only ever used
+in the place of a raw pointer. The idea is to inform the user that the
+<a class="reference internal" href="#observer_ptr:T:" title="observer_ptr&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">observer_ptr</span></tt></a> does not <em>own</em> the pointer it <em>watches</em>. It can be treated
+like a raw pointer, except that there is no need to read the documentation
+to see if the user needs to manage a raw pointer or not. Because the
+<a class="reference internal" href="#observer_ptr:T:" title="observer_ptr&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">observer_ptr</span></tt></a> is a non-owning smart pointer, the need for a move
+constructor and assignment operator is superfluous as copying a pointer
+is just as cheap as moving one.</p>
+<dl class="type">
+<dt id="observer_ptr:T:::element_type">
+<em class="property">type </em><tt class="descname">element_type</tt><a class="headerlink" href="#observer_ptr:T:::element_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>The type of the object managed by <a class="reference internal" href="#observer_ptr:T:" title="observer_ptr&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">observer_ptr</span></tt></a>.</p>
+</dd></dl>
+
+<dl class="type">
+<dt id="observer_ptr:T:::const_pointer">
+<em class="property">type </em><tt class="descname">const_pointer</tt><a class="headerlink" href="#observer_ptr:T:::const_pointer" title="Permalink to this definition">¶</a></dt>
+<dt id="observer_ptr:T:::pointer">
+<em class="property">type </em><tt class="descname">pointer</tt><a class="headerlink" href="#observer_ptr:T:::pointer" title="Permalink to this definition">¶</a></dt>
+<dd><p><tt class="docutils literal"><span class="pre">add_pointer_t&lt;add_const_t&lt;element_type&gt;</span></tt> and
+<tt class="docutils literal"><span class="pre">add_pointer_t&lt;element_type&gt;</span></tt> respectively.</p>
+</dd></dl>
+
+<dl class="type">
+<dt id="observer_ptr:T:::const_reference">
+<em class="property">type </em><tt class="descname">const_reference</tt><a class="headerlink" href="#observer_ptr:T:::const_reference" title="Permalink to this definition">¶</a></dt>
+<dt id="observer_ptr:T:::reference">
+<em class="property">type </em><tt class="descname">reference</tt><a class="headerlink" href="#observer_ptr:T:::reference" title="Permalink to this definition">¶</a></dt>
+<dd><p><tt class="docutils literal"><span class="pre">add_lvalue_reference&lt;add_const_t&lt;element_type&gt;</span></tt> and
+<tt class="docutils literal"><span class="pre">add_lvalue_reference&lt;element_type&gt;</span></tt> respectively.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="observer_ptr:T:::observer_ptr__std::nullptr_t">
+ <tt class="descname">observer_ptr</tt><big>(</big>std::nullptr_t <em>ptr</em><big>)</big><a class="headerlink" href="#observer_ptr:T:::observer_ptr__std::nullptr_t" title="Permalink to this definition">¶</a></dt>
+<dt id="observer_ptr:T:::observer_ptr__pointer">
+ <tt class="descname">observer_ptr</tt><big>(</big><a class="reference internal" href="#observer_ptr:T:::pointer" title="observer_ptr&lt;T&gt;::pointer">pointer</a> <em>ptr</em><big>)</big><a class="headerlink" href="#observer_ptr:T:::observer_ptr__pointer" title="Permalink to this definition">¶</a></dt>
+<dt id="observer_ptr:T:::observer_ptr__add_pointer_t:T:">
+ <tt class="descname">observer_ptr</tt><big>(</big>add_pointer_t&lt;T&gt; <em>ptr</em><big>)</big><a class="headerlink" href="#observer_ptr:T:::observer_ptr__add_pointer_t:T:" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs the <a class="reference internal" href="#observer_ptr:T:" title="observer_ptr&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">observer_ptr</span></tt></a> with the given pointer. If <em>ptr</em> is
+convertible to <a class="reference internal" href="#observer_ptr:T:::pointer" title="observer_ptr&lt;T&gt;::pointer"><tt class="xref cpp cpp-type docutils literal"><span class="pre">observer_ptr&lt;T&gt;::pointer</span></tt></a>, it will construct it
+that way (via a dynamic_cast).</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="observer_ptr:T:::swap__X">
+void <tt class="descname">swap</tt><big>(</big><em>observer_ptr&lt;T&gt;&amp;</em><big>)</big><a class="headerlink" href="#observer_ptr:T:::swap__X" title="Permalink to this definition">¶</a></dt>
+<dd><p>Swaps the contents of the <a class="reference internal" href="#observer_ptr:T:" title="observer_ptr&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">observer_ptr</span></tt></a> with the other.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="observer_ptr:T:::castto-const_pointer-operatorC">
+ <tt class="descname">operator</tt> <a class="reference internal" href="#observer_ptr:T:::const_pointer" title="observer_ptr&lt;T&gt;::const_pointer">const_pointer</a><big>(</big><big>)</big><tt class="descclassname"> const</tt><a class="headerlink" href="#observer_ptr:T:::castto-const_pointer-operatorC" title="Permalink to this definition">¶</a></dt>
+<dt id="observer_ptr:T:::castto-pointer-operator">
+ <tt class="descname">operator</tt> <a class="reference internal" href="#observer_ptr:T:::pointer" title="observer_ptr&lt;T&gt;::pointer">pointer</a><big>(</big><big>)</big><a class="headerlink" href="#observer_ptr:T:::castto-pointer-operator" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Noexcept :</th><td class="field-body">true</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Explicit :</th><td class="field-body">Yes</td>
+</tr>
+</tbody>
+</table>
+<p>Allows an <a class="reference internal" href="#observer_ptr:T:" title="observer_ptr&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">observer_ptr</span></tt></a> to be explicitly converted to
+<a class="reference internal" href="#observer_ptr:T:::const_pointer" title="observer_ptr&lt;T&gt;::const_pointer"><tt class="xref cpp cpp-type docutils literal"><span class="pre">observer_ptr&lt;T&gt;::const_pointer</span></tt></a> or
+<a class="reference internal" href="#observer_ptr:T:::pointer" title="observer_ptr&lt;T&gt;::pointer"><tt class="xref cpp cpp-type docutils literal"><span class="pre">observer_ptr&lt;T&gt;::pointer</span></tt></a> respectively.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="observer_ptr:T:::castto-b-operatorC">
+ <tt class="descname">operator</tt> bool<big>(</big><big>)</big><tt class="descclassname"> const</tt><a class="headerlink" href="#observer_ptr:T:::castto-b-operatorC" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Noexcept :</th><td class="field-body">true</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Explicit :</th><td class="field-body">Yes</td>
+</tr>
+</tbody>
+</table>
+<p>Allows the <a class="reference internal" href="#observer_ptr:T:" title="observer_ptr&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">observer_ptr</span></tt></a> to be explicitly converted to a boolean.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="observer_ptr:T:::mul-operatorC">
+<a class="reference internal" href="#observer_ptr:T:::reference" title="observer_ptr&lt;T&gt;::reference">reference</a> <tt class="descname">operator*</tt><big>(</big><big>)</big><tt class="descclassname"> const</tt><a class="headerlink" href="#observer_ptr:T:::mul-operatorC" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Noexcept :</th><td class="field-body">true</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">reference to the object watched by the <a class="reference internal" href="#observer_ptr:T:" title="observer_ptr&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">observer_ptr</span></tt></a>.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="observer_ptr:T:::pointer-operatorC">
+<a class="reference internal" href="#observer_ptr:T:::pointer" title="observer_ptr&lt;T&gt;::pointer">pointer</a> <tt class="descname">operator-&gt;</tt><big>(</big><big>)</big><tt class="descclassname"> const</tt><a class="headerlink" href="#observer_ptr:T:::pointer-operatorC" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Noexcept :</th><td class="field-body">true</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the object watched by the <a class="reference internal" href="#observer_ptr:T:" title="observer_ptr&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">observer_ptr</span></tt></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="observer_ptr:T:::getC">
+<a class="reference internal" href="#observer_ptr:T:::pointer" title="observer_ptr&lt;T&gt;::pointer">pointer</a> <tt class="descname">get</tt><big>(</big><big>)</big><tt class="descclassname"> const</tt><a class="headerlink" href="#observer_ptr:T:::getC" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Noexcept :</th><td class="field-body">true</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The object watched by the <a class="reference internal" href="#observer_ptr:T:" title="observer_ptr&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">observer_ptr</span></tt></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="observer_ptr:T:::release">
+<a class="reference internal" href="#observer_ptr:T:::pointer" title="observer_ptr&lt;T&gt;::pointer">pointer</a> <tt class="descname">release</tt><big>(</big><big>)</big><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#observer_ptr:T:::release" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Noexcept :</th><td class="field-body">true</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the object watched by the <a class="reference internal" href="#observer_ptr:T:" title="observer_ptr&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">observer_ptr</span></tt></a>. The <a class="reference internal" href="#observer_ptr:T:" title="observer_ptr&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">observer_ptr</span></tt></a> is
+then set to <tt class="docutils literal"><span class="pre">nullptr</span></tt>.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="observer_ptr:T:::reset__pointer">
+void <tt class="descname">reset</tt><big>(</big><a class="reference internal" href="#observer_ptr:T:::pointer" title="observer_ptr&lt;T&gt;::pointer">pointer</a> <em>ptr</em><em>=nullptr</em><big>)</big><a class="headerlink" href="#observer_ptr:T:::reset__pointer" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Noexcept :</th><td class="field-body">true</td>
+</tr>
+</tbody>
+</table>
+<p>Resets the object watched by the <a class="reference internal" href="#observer_ptr:T:" title="observer_ptr&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">observer_ptr</span></tt></a> with <em>ptr</em>.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
 <dt id="bad_polymorphic_reset">
 <em class="property">class </em><tt class="descname">bad_polymorphic_reset</tt><a class="headerlink" href="#bad_polymorphic_reset" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
@@ -782,6 +948,48 @@ and <tt class="docutils literal"><span class="pre">nullptr</span></tt> with the 
 </tr>
 </tbody>
 </table>
+</dd></dl>
+
+<dl class="function">
+<dt>
+bool <tt class="descname">operator==</tt><big>(</big><em>observer_ptr const&amp;</em>, <em>observer_ptr const&amp;</em><big>)</big></dt>
+<dt>
+bool <tt class="descname">operator!=</tt><big>(</big><em>observer_ptr const&amp;</em>, <em>observer_ptr const&amp;</em><big>)</big></dt>
+<dt>
+bool <tt class="descname">operator&gt;=</tt><big>(</big><em>observer_ptr const&amp;</em>, <em>observer_ptr const&amp;</em><big>)</big></dt>
+<dt>
+bool <tt class="descname">operator&lt;=</tt><big>(</big><em>observer_ptr const&amp;</em>, <em>observer_ptr const&amp;</em><big>)</big></dt>
+<dt>
+bool <tt class="descname">operator&gt;</tt><big>(</big><em>observer_ptr const&amp;</em>, <em>observer_ptr const&amp;</em><big>)</big></dt>
+<dt>
+bool <tt class="descname">operator&lt;</tt><big>(</big><em>observer_ptr const&amp;</em>, <em>observer_ptr const&amp;</em><big>)</big></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The result of comparing the objects watched by <a class="reference internal" href="#observer_ptr:T:" title="observer_ptr&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">observer_ptr</span></tt></a> via
+the given operator.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="make_observer__WP">
+observer_ptr&lt;T&gt; <tt class="descname">make_observer</tt><big>(</big>W* <em>ptr</em><big>)</big><a class="headerlink" href="#make_observer__WP" title="Permalink to this definition">¶</a></dt>
+<dt id="make_observer__std::unique_ptr:W.D:CR">
+observer_ptr&lt;T&gt; <tt class="descname">make_observer</tt><big>(</big>std::unique_ptr&lt;W, D&gt; const&amp; <em>ptr</em><big>)</big><a class="headerlink" href="#make_observer__std::unique_ptr:W.D:CR" title="Permalink to this definition">¶</a></dt>
+<dt id="make_observer__std::shared_ptr:W:CR">
+observer_ptr&lt;T&gt; <tt class="descname">make_observer</tt><big>(</big>std::shared_ptr&lt;W&gt; const&amp; <em>ptr</em><big>)</big><a class="headerlink" href="#make_observer__std::shared_ptr:W:CR" title="Permalink to this definition">¶</a></dt>
+<dt id="make_observer__std::weak_ptr:W:CR">
+observer_ptr&lt;T&gt; <tt class="descname">make_observer</tt><big>(</big>std::weak_ptr&lt;W&gt; const&amp; <em>ptr</em><big>)</big><a class="headerlink" href="#make_observer__std::weak_ptr:W:CR" title="Permalink to this definition">¶</a></dt>
+<dt id="make_observer__deep_ptr:W.C.D:CR">
+observer_ptr&lt;T&gt; <tt class="descname">make_observer</tt><big>(</big>deep_ptr&lt;W, C, D&gt; const&amp; <em>ptr</em><big>)</big><a class="headerlink" href="#make_observer__deep_ptr:W.C.D:CR" title="Permalink to this definition">¶</a></dt>
+<dt id="make_observer__poly_ptr:W.D:CR">
+observer_ptr&lt;T&gt; <tt class="descname">make_observer</tt><big>(</big>poly_ptr&lt;W, D&gt; const&amp; <em>ptr</em><big>)</big><a class="headerlink" href="#make_observer__poly_ptr:W.D:CR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Provided to supplement the other <tt class="docutils literal"><span class="pre">make_*</span></tt> functions for smart pointers,
+the make_observer function will create an observer from any C++11 standard
+smart pointer, a raw pointer, or the smart pointers provided by MNMLSTC Core</p>
 </dd></dl>
 
 <dl class="function">

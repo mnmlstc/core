@@ -43,3 +43,9 @@ respect to iterators. Specifically the free form functions that work like
 .. function:: crend (Container const& container)
 
    :returns: ``rend(container)``
+
+.. class:: infix_ostream_iterator<T>
+
+   The :class:`infix_ostream_iterator\<T>` is used as a replacement for
+   ``std::ostream_iterator``, where the delimiter is not desired for the last
+   element. This iterator comes in use when one might wish to print a list.

@@ -64,80 +64,80 @@
   <div class="section" id="string-component">
 <span id="core-string-component"></span><h1>String Component<a class="headerlink" href="#string-component" title="Permalink to this headline">¶</a></h1>
 <p>The string component contains types related to strings, and utilities for
-strings. Specifically, the <a class="reference internal" href="#basic_string_ref:T:" title="basic_string_ref&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">string_ref</span></tt></a> class resides in the
+strings. Specifically, the <a class="reference internal" href="#basic_string_view:T:" title="basic_string_view&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">string_view</span></tt></a> class resides in the
 string component.</p>
 <dl class="class">
-<dt id="basic_string_ref:T:">
-<em class="property">class </em><tt class="descname">basic_string_ref&lt;T&gt;</tt><a class="headerlink" href="#basic_string_ref:T:" title="Permalink to this definition">¶</a></dt>
-<dd><p>The <a class="reference internal" href="#basic_string_ref:T:" title="basic_string_ref&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">string_ref</span></tt></a> type has been recreated in many different projects over the
-years, especially where work on immutable strings is desired. A <a class="reference internal" href="#basic_string_ref:T:" title="basic_string_ref&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">string_ref</span></tt></a>
+<dt id="basic_string_view:T:">
+<em class="property">class </em><tt class="descname">basic_string_view&lt;T&gt;</tt><a class="headerlink" href="#basic_string_view:T:" title="Permalink to this definition">¶</a></dt>
+<dd><p>The <a class="reference internal" href="#basic_string_view:T:" title="basic_string_view&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">string_view</span></tt></a> type has been recreated in many different projects over the
+years, especially where work on immutable strings is desired. A <a class="reference internal" href="#basic_string_view:T:" title="basic_string_view&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">string_view</span></tt></a>
 provides an interface equivalent to a <tt class="docutils literal"><span class="pre">std::string</span> <span class="pre">const</span></tt>, and any
 <tt class="docutils literal"><span class="pre">std::string</span></tt> or <tt class="docutils literal"><span class="pre">char</span> <span class="pre">const*</span></tt> is implicitly convertible to a
-<a class="reference internal" href="#basic_string_ref:T:" title="basic_string_ref&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">string_ref</span></tt></a>. A <a class="reference internal" href="#basic_string_ref:T:" title="basic_string_ref&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">string_ref</span></tt></a> is ONLY valid as long as the data it <em>views</em> is
+<a class="reference internal" href="#basic_string_view:T:" title="basic_string_view&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">string_view</span></tt></a>. A <a class="reference internal" href="#basic_string_view:T:" title="basic_string_view&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">string_view</span></tt></a> is ONLY valid as long as the data it <em>views</em> is
 valid.</p>
 <div class="admonition warning">
 <p class="first admonition-title">Warning</p>
-<p class="last">Attempting to access a <a class="reference internal" href="#basic_string_ref:T:" title="basic_string_ref&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">string_ref</span></tt></a> after the data it is
+<p class="last">Attempting to access a <a class="reference internal" href="#basic_string_view:T:" title="basic_string_view&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">string_view</span></tt></a> after the data it is
 viewing has been destructed will result in undefined behavior.</p>
 </div>
 <dl class="type">
-<dt id="basic_string_ref:T:::difference_type">
-<em class="property">type </em><tt class="descname">difference_type</tt><a class="headerlink" href="#basic_string_ref:T:::difference_type" title="Permalink to this definition">¶</a></dt>
+<dt id="basic_string_view:T:::difference_type">
+<em class="property">type </em><tt class="descname">difference_type</tt><a class="headerlink" href="#basic_string_view:T:::difference_type" title="Permalink to this definition">¶</a></dt>
 <dd><p>An alias of <tt class="docutils literal"><span class="pre">std::ptrdiff_t</span></tt></p>
 </dd></dl>
 
 <dl class="type">
-<dt id="basic_string_ref:T:::value_type">
-<em class="property">type </em><tt class="descname">value_type</tt><a class="headerlink" href="#basic_string_ref:T:::value_type" title="Permalink to this definition">¶</a></dt>
+<dt id="basic_string_view:T:::value_type">
+<em class="property">type </em><tt class="descname">value_type</tt><a class="headerlink" href="#basic_string_view:T:::value_type" title="Permalink to this definition">¶</a></dt>
 <dd><p>An alias of <tt class="docutils literal"><span class="pre">T</span></tt></p>
 </dd></dl>
 
 <dl class="type">
-<dt id="basic_string_ref:T:::size_type">
-<em class="property">type </em><tt class="descname">size_type</tt><a class="headerlink" href="#basic_string_ref:T:::size_type" title="Permalink to this definition">¶</a></dt>
+<dt id="basic_string_view:T:::size_type">
+<em class="property">type </em><tt class="descname">size_type</tt><a class="headerlink" href="#basic_string_view:T:::size_type" title="Permalink to this definition">¶</a></dt>
 <dd><p>An alias of <tt class="docutils literal"><span class="pre">std::size_t</span></tt></p>
 </dd></dl>
 
 <dl class="type">
-<dt id="basic_string_ref:T:::const_reference">
-<em class="property">type </em><tt class="descname">const_reference</tt><a class="headerlink" href="#basic_string_ref:T:::const_reference" title="Permalink to this definition">¶</a></dt>
-<dt id="basic_string_ref:T:::reference">
-<em class="property">type </em><tt class="descname">reference</tt><a class="headerlink" href="#basic_string_ref:T:::reference" title="Permalink to this definition">¶</a></dt>
+<dt id="basic_string_view:T:::const_reference">
+<em class="property">type </em><tt class="descname">const_reference</tt><a class="headerlink" href="#basic_string_view:T:::const_reference" title="Permalink to this definition">¶</a></dt>
+<dt id="basic_string_view:T:::reference">
+<em class="property">type </em><tt class="descname">reference</tt><a class="headerlink" href="#basic_string_view:T:::reference" title="Permalink to this definition">¶</a></dt>
 <dd><p><tt class="docutils literal"><span class="pre">value_type</span> <span class="pre">const&amp;</span></tt></p>
 </dd></dl>
 
 <dl class="type">
-<dt id="basic_string_ref:T:::const_pointer">
-<em class="property">type </em><tt class="descname">const_pointer</tt><a class="headerlink" href="#basic_string_ref:T:::const_pointer" title="Permalink to this definition">¶</a></dt>
-<dt id="basic_string_ref:T:::pointer">
-<em class="property">type </em><tt class="descname">pointer</tt><a class="headerlink" href="#basic_string_ref:T:::pointer" title="Permalink to this definition">¶</a></dt>
+<dt id="basic_string_view:T:::const_pointer">
+<em class="property">type </em><tt class="descname">const_pointer</tt><a class="headerlink" href="#basic_string_view:T:::const_pointer" title="Permalink to this definition">¶</a></dt>
+<dt id="basic_string_view:T:::pointer">
+<em class="property">type </em><tt class="descname">pointer</tt><a class="headerlink" href="#basic_string_view:T:::pointer" title="Permalink to this definition">¶</a></dt>
 <dd><p><tt class="docutils literal"><span class="pre">value_type</span> <span class="pre">const*</span></tt></p>
 </dd></dl>
 
 <dl class="type">
-<dt id="basic_string_ref:T:::const_iterator">
-<em class="property">type </em><tt class="descname">const_iterator</tt><a class="headerlink" href="#basic_string_ref:T:::const_iterator" title="Permalink to this definition">¶</a></dt>
-<dt id="basic_string_ref:T:::iterator">
-<em class="property">type </em><tt class="descname">iterator</tt><a class="headerlink" href="#basic_string_ref:T:::iterator" title="Permalink to this definition">¶</a></dt>
-<dd><p><a class="reference internal" href="#basic_string_ref:T:::pointer" title="basic_string_ref&lt;T&gt;::pointer"><tt class="xref cpp cpp-type docutils literal"><span class="pre">pointer</span></tt></a></p>
+<dt id="basic_string_view:T:::const_iterator">
+<em class="property">type </em><tt class="descname">const_iterator</tt><a class="headerlink" href="#basic_string_view:T:::const_iterator" title="Permalink to this definition">¶</a></dt>
+<dt id="basic_string_view:T:::iterator">
+<em class="property">type </em><tt class="descname">iterator</tt><a class="headerlink" href="#basic_string_view:T:::iterator" title="Permalink to this definition">¶</a></dt>
+<dd><p><a class="reference internal" href="#basic_string_view:T:::pointer" title="basic_string_view&lt;T&gt;::pointer"><tt class="xref cpp cpp-type docutils literal"><span class="pre">pointer</span></tt></a></p>
 </dd></dl>
 
 <dl class="type">
-<dt id="basic_string_ref:T:::const_reverse_iterator">
-<em class="property">type </em><tt class="descname">const_reverse_iterator</tt><a class="headerlink" href="#basic_string_ref:T:::const_reverse_iterator" title="Permalink to this definition">¶</a></dt>
-<dt id="basic_string_ref:T:::reverse_iterator">
-<em class="property">type </em><tt class="descname">reverse_iterator</tt><a class="headerlink" href="#basic_string_ref:T:::reverse_iterator" title="Permalink to this definition">¶</a></dt>
+<dt id="basic_string_view:T:::const_reverse_iterator">
+<em class="property">type </em><tt class="descname">const_reverse_iterator</tt><a class="headerlink" href="#basic_string_view:T:::const_reverse_iterator" title="Permalink to this definition">¶</a></dt>
+<dt id="basic_string_view:T:::reverse_iterator">
+<em class="property">type </em><tt class="descname">reverse_iterator</tt><a class="headerlink" href="#basic_string_view:T:::reverse_iterator" title="Permalink to this definition">¶</a></dt>
 <dd><p><tt class="docutils literal"><span class="pre">std::reverse_iterator&lt;const_iterator&gt;</span></tt></p>
 </dd></dl>
 
 <dl class="member">
-<dt id="basic_string_ref:T:::npos__constexpr">
-<em class="property">static</em> constexpr <tt class="descname">npos</tt><a class="headerlink" href="#basic_string_ref:T:::npos__constexpr" title="Permalink to this definition">¶</a></dt>
+<dt id="basic_string_view:T:::npos__constexpr">
+<em class="property">static</em> constexpr <tt class="descname">npos</tt><a class="headerlink" href="#basic_string_view:T:::npos__constexpr" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Type :</th><td class="field-body"><a class="reference internal" href="#basic_string_ref:T:::size_type" title="basic_string_ref&lt;T&gt;::size_type"><tt class="xref cpp cpp-type docutils literal"><span class="pre">size_type</span></tt></a></td>
+<tr class="field-odd field"><th class="field-name">Type :</th><td class="field-body"><a class="reference internal" href="#basic_string_view:T:::size_type" title="basic_string_view&lt;T&gt;::size_type"><tt class="xref cpp cpp-type docutils literal"><span class="pre">size_type</span></tt></a></td>
 </tr>
 </tbody>
 </table>
@@ -145,153 +145,153 @@ viewing has been destructed will result in undefined behavior.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="basic_string_ref:T:::basic_string_ref__ssCR">
- <tt class="descname">basic_string_ref</tt><big>(</big>std::string const&amp; <em>str</em><big>)</big><a class="headerlink" href="#basic_string_ref:T:::basic_string_ref__ssCR" title="Permalink to this definition">¶</a></dt>
+<dt id="basic_string_view:T:::basic_string_view__ssCR">
+ <tt class="descname">basic_string_view</tt><big>(</big>std::string const&amp; <em>str</em><big>)</big><a class="headerlink" href="#basic_string_view:T:::basic_string_view__ssCR" title="Permalink to this definition">¶</a></dt>
 <dd><p>Constructs the object such that it views the entire contents of the given
 string.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Postcondition :</th><td class="field-body"><a class="reference internal" href="#basic_string_ref:T:::sizeCCE" title="basic_string_ref&lt;T&gt;::size"><tt class="xref cpp cpp-func docutils literal"><span class="pre">size()</span></tt></a> == <em>str</em>.size()</td>
+<tr class="field-odd field"><th class="field-name">Postcondition :</th><td class="field-body"><a class="reference internal" href="#basic_string_view:T:::sizeCCE" title="basic_string_view&lt;T&gt;::size"><tt class="xref cpp cpp-func docutils literal"><span class="pre">size()</span></tt></a> == <em>str</em>.size()</td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
 <dl class="function">
-<dt id="basic_string_ref:T:::basic_string_ref__pointer.size_typeCE">
-<em class="property">constexpr</em>  <tt class="descname">basic_string_ref</tt><big>(</big><a class="reference internal" href="#basic_string_ref:T:::pointer" title="basic_string_ref&lt;T&gt;::pointer">pointer</a> <em>str</em>, <a class="reference internal" href="#basic_string_ref:T:::size_type" title="basic_string_ref&lt;T&gt;::size_type">size_type</a> <em>len</em><big>)</big><a class="headerlink" href="#basic_string_ref:T:::basic_string_ref__pointer.size_typeCE" title="Permalink to this definition">¶</a></dt>
+<dt id="basic_string_view:T:::basic_string_view__pointer.size_typeCE">
+<em class="property">constexpr</em>  <tt class="descname">basic_string_view</tt><big>(</big><a class="reference internal" href="#basic_string_view:T:::pointer" title="basic_string_view&lt;T&gt;::pointer">pointer</a> <em>str</em>, <a class="reference internal" href="#basic_string_view:T:::size_type" title="basic_string_view&lt;T&gt;::size_type">size_type</a> <em>len</em><big>)</big><a class="headerlink" href="#basic_string_view:T:::basic_string_view__pointer.size_typeCE" title="Permalink to this definition">¶</a></dt>
 <dd><p>Constructs the object such that it views the given string and has a
 maximum length of the given length.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Postcondition :</th><td class="field-body"><a class="reference internal" href="#basic_string_ref:T:::sizeCCE" title="basic_string_ref&lt;T&gt;::size"><tt class="xref cpp cpp-func docutils literal"><span class="pre">size()</span></tt></a> == <em>len</em></td>
+<tr class="field-odd field"><th class="field-name">Postcondition :</th><td class="field-body"><a class="reference internal" href="#basic_string_view:T:::sizeCCE" title="basic_string_view&lt;T&gt;::size"><tt class="xref cpp cpp-func docutils literal"><span class="pre">size()</span></tt></a> == <em>len</em></td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
 <dl class="function">
-<dt id="basic_string_ref:T:::basic_string_ref__pointer">
- <tt class="descname">basic_string_ref</tt><big>(</big><a class="reference internal" href="#basic_string_ref:T:::pointer" title="basic_string_ref&lt;T&gt;::pointer">pointer</a> <em>str</em><big>)</big><a class="headerlink" href="#basic_string_ref:T:::basic_string_ref__pointer" title="Permalink to this definition">¶</a></dt>
+<dt id="basic_string_view:T:::basic_string_view__pointer">
+ <tt class="descname">basic_string_view</tt><big>(</big><a class="reference internal" href="#basic_string_view:T:::pointer" title="basic_string_view&lt;T&gt;::pointer">pointer</a> <em>str</em><big>)</big><a class="headerlink" href="#basic_string_view:T:::basic_string_view__pointer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Constructs the object such that it views the given string, and has a
 length of the entire null terminated string.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="basic_string_ref:T:::basic_string_ref__X">
- <tt class="descname">basic_string_ref</tt><big>(</big><em>basic_string_ref const&amp;</em><big>)</big><a class="headerlink" href="#basic_string_ref:T:::basic_string_ref__X" title="Permalink to this definition">¶</a></dt>
+<dt id="basic_string_view:T:::basic_string_view__X">
+ <tt class="descname">basic_string_view</tt><big>(</big><em>basic_string_view const&amp;</em><big>)</big><a class="headerlink" href="#basic_string_view:T:::basic_string_view__X" title="Permalink to this definition">¶</a></dt>
 <dd><p>Copies the object given, such that they are equivalent in every
 way.</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p class="last">Because copying a <a class="reference internal" href="#basic_string_ref:T:" title="basic_string_ref&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">string_ref</span></tt></a> is cheap, no move constructor is
+<p class="last">Because copying a <a class="reference internal" href="#basic_string_view:T:" title="basic_string_view&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">string_view</span></tt></a> is cheap, no move constructor is
 defined.</p>
 </div>
 </dd></dl>
 
 <dl class="function">
-<dt id="basic_string_ref:T:::basic_string_refCE">
-<em class="property">constexpr</em>  <tt class="descname">basic_string_ref</tt><big>(</big><big>)</big><a class="headerlink" href="#basic_string_ref:T:::basic_string_refCE" title="Permalink to this definition">¶</a></dt>
+<dt id="basic_string_view:T:::basic_string_viewCE">
+<em class="property">constexpr</em>  <tt class="descname">basic_string_view</tt><big>(</big><big>)</big><a class="headerlink" href="#basic_string_view:T:::basic_string_viewCE" title="Permalink to this definition">¶</a></dt>
 <dd><p>Constructs the object to be empty.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Postcondition :</th><td class="field-body"><a class="reference internal" href="#basic_string_ref:T:::emptyCCE" title="basic_string_ref&lt;T&gt;::empty"><tt class="xref cpp cpp-func docutils literal"><span class="pre">empty()</span></tt></a> == true</td>
+<tr class="field-odd field"><th class="field-name">Postcondition :</th><td class="field-body"><a class="reference internal" href="#basic_string_view:T:::emptyCCE" title="basic_string_view&lt;T&gt;::empty"><tt class="xref cpp cpp-func docutils literal"><span class="pre">empty()</span></tt></a> == true</td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
 <dl class="function">
-<dt id="basic_string_ref:T:::castto-std::basic_string:T:-operatorC">
- <tt class="descname">operator</tt> std::basic_string&lt;T&gt;<big>(</big><big>)</big><tt class="descclassname"> const</tt><a class="headerlink" href="#basic_string_ref:T:::castto-std::basic_string:T:-operatorC" title="Permalink to this definition">¶</a></dt>
+<dt id="basic_string_view:T:::castto-std::basic_string:T:-operatorC">
+ <tt class="descname">operator</tt> std::basic_string&lt;T&gt;<big>(</big><big>)</big><tt class="descclassname"> const</tt><a class="headerlink" href="#basic_string_view:T:::castto-std::basic_string:T:-operatorC" title="Permalink to this definition">¶</a></dt>
 <dd><p>Marked as <em>explicit</em>. Creates a new <tt class="docutils literal"><span class="pre">std::basic_string</span></tt> from the
-<a class="reference internal" href="#basic_string_ref:T:" title="basic_string_ref&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">string_ref</span></tt></a>.</p>
+<a class="reference internal" href="#basic_string_view:T:" title="basic_string_view&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">string_view</span></tt></a>.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="basic_string_ref:T:::cbeginCCE">
-<em class="property">constexpr</em> <a class="reference internal" href="#basic_string_ref:T:::const_iterator" title="basic_string_ref&lt;T&gt;::const_iterator">const_iterator</a> <tt class="descname">cbegin</tt><big>(</big><big>)</big><tt class="descclassname"> const</tt><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#basic_string_ref:T:::cbeginCCE" title="Permalink to this definition">¶</a></dt>
-<dt id="basic_string_ref:T:::beginCCE">
-<em class="property">constexpr</em> <a class="reference internal" href="#basic_string_ref:T:::const_iterator" title="basic_string_ref&lt;T&gt;::const_iterator">const_iterator</a> <tt class="descname">begin</tt><big>(</big><big>)</big><tt class="descclassname"> const</tt><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#basic_string_ref:T:::beginCCE" title="Permalink to this definition">¶</a></dt>
+<dt id="basic_string_view:T:::cbeginCCE">
+<em class="property">constexpr</em> <a class="reference internal" href="#basic_string_view:T:::const_iterator" title="basic_string_view&lt;T&gt;::const_iterator">const_iterator</a> <tt class="descname">cbegin</tt><big>(</big><big>)</big><tt class="descclassname"> const</tt><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#basic_string_view:T:::cbeginCCE" title="Permalink to this definition">¶</a></dt>
+<dt id="basic_string_view:T:::beginCCE">
+<em class="property">constexpr</em> <a class="reference internal" href="#basic_string_view:T:::const_iterator" title="basic_string_view&lt;T&gt;::const_iterator">const_iterator</a> <tt class="descname">begin</tt><big>(</big><big>)</big><tt class="descclassname"> const</tt><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#basic_string_view:T:::beginCCE" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Iterator to the beginning of the <a class="reference internal" href="#basic_string_ref:T:" title="basic_string_ref&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">string_ref</span></tt></a>.</td>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Iterator to the beginning of the <a class="reference internal" href="#basic_string_view:T:" title="basic_string_view&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">string_view</span></tt></a>.</td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
 <dl class="function">
-<dt id="basic_string_ref:T:::cendCCE">
-<em class="property">constexpr</em> <a class="reference internal" href="#basic_string_ref:T:::const_iterator" title="basic_string_ref&lt;T&gt;::const_iterator">const_iterator</a> <tt class="descname">cend</tt><big>(</big><big>)</big><tt class="descclassname"> const</tt><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#basic_string_ref:T:::cendCCE" title="Permalink to this definition">¶</a></dt>
-<dt id="basic_string_ref:T:::endCCE">
-<em class="property">constexpr</em> <a class="reference internal" href="#basic_string_ref:T:::const_iterator" title="basic_string_ref&lt;T&gt;::const_iterator">const_iterator</a> <tt class="descname">end</tt><big>(</big><big>)</big><tt class="descclassname"> const</tt><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#basic_string_ref:T:::endCCE" title="Permalink to this definition">¶</a></dt>
+<dt id="basic_string_view:T:::cendCCE">
+<em class="property">constexpr</em> <a class="reference internal" href="#basic_string_view:T:::const_iterator" title="basic_string_view&lt;T&gt;::const_iterator">const_iterator</a> <tt class="descname">cend</tt><big>(</big><big>)</big><tt class="descclassname"> const</tt><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#basic_string_view:T:::cendCCE" title="Permalink to this definition">¶</a></dt>
+<dt id="basic_string_view:T:::endCCE">
+<em class="property">constexpr</em> <a class="reference internal" href="#basic_string_view:T:::const_iterator" title="basic_string_view&lt;T&gt;::const_iterator">const_iterator</a> <tt class="descname">end</tt><big>(</big><big>)</big><tt class="descclassname"> const</tt><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#basic_string_view:T:::endCCE" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Iterator to the end of the <a class="reference internal" href="#basic_string_ref:T:" title="basic_string_ref&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">string_ref</span></tt></a>.</td>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Iterator to the end of the <a class="reference internal" href="#basic_string_view:T:" title="basic_string_view&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">string_view</span></tt></a>.</td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
 <dl class="function">
-<dt id="basic_string_ref:T:::crbeginC">
-<a class="reference internal" href="#basic_string_ref:T:::const_reverse_iterator" title="basic_string_ref&lt;T&gt;::const_reverse_iterator">const_reverse_iterator</a> <tt class="descname">crbegin</tt><big>(</big><big>)</big><tt class="descclassname"> const</tt><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#basic_string_ref:T:::crbeginC" title="Permalink to this definition">¶</a></dt>
-<dt id="basic_string_ref:T:::rbeginC">
-<a class="reference internal" href="#basic_string_ref:T:::const_reverse_iterator" title="basic_string_ref&lt;T&gt;::const_reverse_iterator">const_reverse_iterator</a> <tt class="descname">rbegin</tt><big>(</big><big>)</big><tt class="descclassname"> const</tt><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#basic_string_ref:T:::rbeginC" title="Permalink to this definition">¶</a></dt>
+<dt id="basic_string_view:T:::crbeginC">
+<a class="reference internal" href="#basic_string_view:T:::const_reverse_iterator" title="basic_string_view&lt;T&gt;::const_reverse_iterator">const_reverse_iterator</a> <tt class="descname">crbegin</tt><big>(</big><big>)</big><tt class="descclassname"> const</tt><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#basic_string_view:T:::crbeginC" title="Permalink to this definition">¶</a></dt>
+<dt id="basic_string_view:T:::rbeginC">
+<a class="reference internal" href="#basic_string_view:T:::const_reverse_iterator" title="basic_string_view&lt;T&gt;::const_reverse_iterator">const_reverse_iterator</a> <tt class="descname">rbegin</tt><big>(</big><big>)</big><tt class="descclassname"> const</tt><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#basic_string_view:T:::rbeginC" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">reverse iterator to the beginning of the <a class="reference internal" href="#basic_string_ref:T:" title="basic_string_ref&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">string_ref</span></tt></a></td>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">reverse iterator to the beginning of the <a class="reference internal" href="#basic_string_view:T:" title="basic_string_view&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">string_view</span></tt></a></td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
 <dl class="function">
-<dt id="basic_string_ref:T:::crendC">
-<a class="reference internal" href="#basic_string_ref:T:::const_reverse_iterator" title="basic_string_ref&lt;T&gt;::const_reverse_iterator">const_reverse_iterator</a> <tt class="descname">crend</tt><big>(</big><big>)</big><tt class="descclassname"> const</tt><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#basic_string_ref:T:::crendC" title="Permalink to this definition">¶</a></dt>
-<dt id="basic_string_ref:T:::rendC">
-<a class="reference internal" href="#basic_string_ref:T:::const_reverse_iterator" title="basic_string_ref&lt;T&gt;::const_reverse_iterator">const_reverse_iterator</a> <tt class="descname">rend</tt><big>(</big><big>)</big><tt class="descclassname"> const</tt><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#basic_string_ref:T:::rendC" title="Permalink to this definition">¶</a></dt>
+<dt id="basic_string_view:T:::crendC">
+<a class="reference internal" href="#basic_string_view:T:::const_reverse_iterator" title="basic_string_view&lt;T&gt;::const_reverse_iterator">const_reverse_iterator</a> <tt class="descname">crend</tt><big>(</big><big>)</big><tt class="descclassname"> const</tt><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#basic_string_view:T:::crendC" title="Permalink to this definition">¶</a></dt>
+<dt id="basic_string_view:T:::rendC">
+<a class="reference internal" href="#basic_string_view:T:::const_reverse_iterator" title="basic_string_view&lt;T&gt;::const_reverse_iterator">const_reverse_iterator</a> <tt class="descname">rend</tt><big>(</big><big>)</big><tt class="descclassname"> const</tt><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#basic_string_view:T:::rendC" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">reverse iterator to the beginning of the <a class="reference internal" href="#basic_string_ref:T:" title="basic_string_ref&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">string_ref</span></tt></a></td>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">reverse iterator to the beginning of the <a class="reference internal" href="#basic_string_view:T:" title="basic_string_view&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">string_view</span></tt></a></td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
 <dl class="function">
-<dt id="basic_string_ref:T:::max_sizeCCE">
-<em class="property">constexpr</em> <a class="reference internal" href="#basic_string_ref:T:::size_type" title="basic_string_ref&lt;T&gt;::size_type">size_type</a> <tt class="descname">max_size</tt><big>(</big><big>)</big><tt class="descclassname"> const</tt><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#basic_string_ref:T:::max_sizeCCE" title="Permalink to this definition">¶</a></dt>
+<dt id="basic_string_view:T:::max_sizeCCE">
+<em class="property">constexpr</em> <a class="reference internal" href="#basic_string_view:T:::size_type" title="basic_string_view&lt;T&gt;::size_type">size_type</a> <tt class="descname">max_size</tt><big>(</big><big>)</big><tt class="descclassname"> const</tt><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#basic_string_view:T:::max_sizeCCE" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><a class="reference internal" href="#basic_string_ref:T:::sizeCCE" title="basic_string_ref&lt;T&gt;::size"><tt class="xref cpp cpp-func docutils literal"><span class="pre">size()</span></tt></a></td>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><a class="reference internal" href="#basic_string_view:T:::sizeCCE" title="basic_string_view&lt;T&gt;::size"><tt class="xref cpp cpp-func docutils literal"><span class="pre">size()</span></tt></a></td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
 <dl class="function">
-<dt id="basic_string_ref:T:::lengthCCE">
-<em class="property">constexpr</em> <a class="reference internal" href="#basic_string_ref:T:::size_type" title="basic_string_ref&lt;T&gt;::size_type">size_type</a> <tt class="descname">length</tt><big>(</big><big>)</big><tt class="descclassname"> const</tt><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#basic_string_ref:T:::lengthCCE" title="Permalink to this definition">¶</a></dt>
-<dt id="basic_string_ref:T:::sizeCCE">
-<em class="property">constexpr</em> <a class="reference internal" href="#basic_string_ref:T:::size_type" title="basic_string_ref&lt;T&gt;::size_type">size_type</a> <tt class="descname">size</tt><big>(</big><big>)</big><tt class="descclassname"> const</tt><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#basic_string_ref:T:::sizeCCE" title="Permalink to this definition">¶</a></dt>
+<dt id="basic_string_view:T:::lengthCCE">
+<em class="property">constexpr</em> <a class="reference internal" href="#basic_string_view:T:::size_type" title="basic_string_view&lt;T&gt;::size_type">size_type</a> <tt class="descname">length</tt><big>(</big><big>)</big><tt class="descclassname"> const</tt><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#basic_string_view:T:::lengthCCE" title="Permalink to this definition">¶</a></dt>
+<dt id="basic_string_view:T:::sizeCCE">
+<em class="property">constexpr</em> <a class="reference internal" href="#basic_string_view:T:::size_type" title="basic_string_view&lt;T&gt;::size_type">size_type</a> <tt class="descname">size</tt><big>(</big><big>)</big><tt class="descclassname"> const</tt><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#basic_string_view:T:::sizeCCE" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -303,8 +303,8 @@ defined.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="basic_string_ref:T:::emptyCCE">
-<em class="property">constexpr</em> bool <tt class="descname">empty</tt><big>(</big><big>)</big><tt class="descclassname"> const</tt><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#basic_string_ref:T:::emptyCCE" title="Permalink to this definition">¶</a></dt>
+<dt id="basic_string_view:T:::emptyCCE">
+<em class="property">constexpr</em> bool <tt class="descname">empty</tt><big>(</big><big>)</big><tt class="descclassname"> const</tt><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#basic_string_view:T:::emptyCCE" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -316,53 +316,53 @@ defined.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="basic_string_ref:T:::subscript-operator__size_typeCCE">
-<em class="property">constexpr</em> <a class="reference internal" href="#basic_string_ref:T:::reference" title="basic_string_ref&lt;T&gt;::reference">reference</a> <tt class="descname">operator[]</tt><big>(</big><a class="reference internal" href="#basic_string_ref:T:::size_type" title="basic_string_ref&lt;T&gt;::size_type">size_type</a> <em>idx</em><big>)</big><tt class="descclassname"> const</tt><a class="headerlink" href="#basic_string_ref:T:::subscript-operator__size_typeCCE" title="Permalink to this definition">¶</a></dt>
+<dt id="basic_string_view:T:::subscript-operator__size_typeCCE">
+<em class="property">constexpr</em> <a class="reference internal" href="#basic_string_view:T:::reference" title="basic_string_view&lt;T&gt;::reference">reference</a> <tt class="descname">operator[]</tt><big>(</big><a class="reference internal" href="#basic_string_view:T:::size_type" title="basic_string_view&lt;T&gt;::size_type">size_type</a> <em>idx</em><big>)</big><tt class="descclassname"> const</tt><a class="headerlink" href="#basic_string_view:T:::subscript-operator__size_typeCCE" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">reference to the <a class="reference internal" href="#basic_string_ref:T:::value_type" title="basic_string_ref&lt;T&gt;::value_type"><tt class="xref cpp cpp-type docutils literal"><span class="pre">value_type</span></tt></a> located at <em>idx</em>.</td>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">reference to the <a class="reference internal" href="#basic_string_view:T:::value_type" title="basic_string_view&lt;T&gt;::value_type"><tt class="xref cpp cpp-type docutils literal"><span class="pre">value_type</span></tt></a> located at <em>idx</em>.</td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
 <dl class="function">
-<dt id="basic_string_ref:T:::frontCCE">
-<em class="property">constexpr</em> <a class="reference internal" href="#basic_string_ref:T:::reference" title="basic_string_ref&lt;T&gt;::reference">reference</a> <tt class="descname">front</tt><big>(</big><big>)</big><tt class="descclassname"> const</tt><a class="headerlink" href="#basic_string_ref:T:::frontCCE" title="Permalink to this definition">¶</a></dt>
+<dt id="basic_string_view:T:::frontCCE">
+<em class="property">constexpr</em> <a class="reference internal" href="#basic_string_view:T:::reference" title="basic_string_view&lt;T&gt;::reference">reference</a> <tt class="descname">front</tt><big>(</big><big>)</big><tt class="descclassname"> const</tt><a class="headerlink" href="#basic_string_view:T:::frontCCE" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">reference to the <a class="reference internal" href="#basic_string_ref:T:::value_type" title="basic_string_ref&lt;T&gt;::value_type"><tt class="xref cpp cpp-type docutils literal"><span class="pre">value_type</span></tt></a> located at the index 0.</td>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">reference to the <a class="reference internal" href="#basic_string_view:T:::value_type" title="basic_string_view&lt;T&gt;::value_type"><tt class="xref cpp cpp-type docutils literal"><span class="pre">value_type</span></tt></a> located at the index 0.</td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
 <dl class="function">
-<dt id="basic_string_ref:T:::backCCE">
-<em class="property">constexpr</em> <a class="reference internal" href="#basic_string_ref:T:::reference" title="basic_string_ref&lt;T&gt;::reference">reference</a> <tt class="descname">back</tt><big>(</big><big>)</big><tt class="descclassname"> const</tt><a class="headerlink" href="#basic_string_ref:T:::backCCE" title="Permalink to this definition">¶</a></dt>
+<dt id="basic_string_view:T:::backCCE">
+<em class="property">constexpr</em> <a class="reference internal" href="#basic_string_view:T:::reference" title="basic_string_view&lt;T&gt;::reference">reference</a> <tt class="descname">back</tt><big>(</big><big>)</big><tt class="descclassname"> const</tt><a class="headerlink" href="#basic_string_view:T:::backCCE" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">reference to the <a class="reference internal" href="#basic_string_ref:T:::value_type" title="basic_string_ref&lt;T&gt;::value_type"><tt class="xref cpp cpp-type docutils literal"><span class="pre">value_type</span></tt></a> located at the end of the
-<a class="reference internal" href="#basic_string_ref:T:" title="basic_string_ref&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">string_ref</span></tt></a>.</td>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">reference to the <a class="reference internal" href="#basic_string_view:T:::value_type" title="basic_string_view&lt;T&gt;::value_type"><tt class="xref cpp cpp-type docutils literal"><span class="pre">value_type</span></tt></a> located at the end of the
+<a class="reference internal" href="#basic_string_view:T:" title="basic_string_view&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">string_view</span></tt></a>.</td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
 <dl class="function">
-<dt id="basic_string_ref:T:::dataCCE">
-<em class="property">constexpr</em> <a class="reference internal" href="#basic_string_ref:T:::pointer" title="basic_string_ref&lt;T&gt;::pointer">pointer</a> <tt class="descname">data</tt><big>(</big><big>)</big><tt class="descclassname"> const</tt><a class="headerlink" href="#basic_string_ref:T:::dataCCE" title="Permalink to this definition">¶</a></dt>
+<dt id="basic_string_view:T:::dataCCE">
+<em class="property">constexpr</em> <a class="reference internal" href="#basic_string_view:T:::pointer" title="basic_string_view&lt;T&gt;::pointer">pointer</a> <tt class="descname">data</tt><big>(</big><big>)</big><tt class="descclassname"> const</tt><a class="headerlink" href="#basic_string_view:T:::dataCCE" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><a class="reference internal" href="#basic_string_ref:T:::pointer" title="basic_string_ref&lt;T&gt;::pointer"><tt class="xref cpp cpp-type docutils literal"><span class="pre">pointer</span></tt></a> to the data viewed by the <a class="reference internal" href="#basic_string_ref:T:" title="basic_string_ref&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">string_ref</span></tt></a>.
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><a class="reference internal" href="#basic_string_view:T:::pointer" title="basic_string_view&lt;T&gt;::pointer"><tt class="xref cpp cpp-type docutils literal"><span class="pre">pointer</span></tt></a> to the data viewed by the <a class="reference internal" href="#basic_string_view:T:" title="basic_string_view&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">string_view</span></tt></a>.
 This pointer is not guaranteed to be null terminated, and
 should be treated as such.</td>
 </tr>
@@ -371,87 +371,87 @@ should be treated as such.</td>
 </dd></dl>
 
 <dl class="function">
-<dt id="basic_string_ref:T:::remove_prefix__size_type">
-void <tt class="descname">remove_prefix</tt><big>(</big><a class="reference internal" href="#basic_string_ref:T:::size_type" title="basic_string_ref&lt;T&gt;::size_type">size_type</a> <em>n</em><big>)</big><a class="headerlink" href="#basic_string_ref:T:::remove_prefix__size_type" title="Permalink to this definition">¶</a></dt>
-<dd><p>Moves the front of the <a class="reference internal" href="#basic_string_ref:T:" title="basic_string_ref&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">string_ref</span></tt></a> forward <em>n</em> characters or
-<a class="reference internal" href="#basic_string_ref:T:::sizeCCE" title="basic_string_ref&lt;T&gt;::size"><tt class="xref cpp cpp-func docutils literal"><span class="pre">size()</span></tt></a> if <em>n</em> is greater than <a class="reference internal" href="#basic_string_ref:T:::sizeCCE" title="basic_string_ref&lt;T&gt;::size"><tt class="xref cpp cpp-func docutils literal"><span class="pre">size()</span></tt></a>.</p>
+<dt id="basic_string_view:T:::remove_prefix__size_type">
+void <tt class="descname">remove_prefix</tt><big>(</big><a class="reference internal" href="#basic_string_view:T:::size_type" title="basic_string_view&lt;T&gt;::size_type">size_type</a> <em>n</em><big>)</big><a class="headerlink" href="#basic_string_view:T:::remove_prefix__size_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Moves the front of the <a class="reference internal" href="#basic_string_view:T:" title="basic_string_view&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">string_view</span></tt></a> forward <em>n</em> characters or
+<a class="reference internal" href="#basic_string_view:T:::sizeCCE" title="basic_string_view&lt;T&gt;::size"><tt class="xref cpp cpp-func docutils literal"><span class="pre">size()</span></tt></a> if <em>n</em> is greater than <a class="reference internal" href="#basic_string_view:T:::sizeCCE" title="basic_string_view&lt;T&gt;::size"><tt class="xref cpp cpp-func docutils literal"><span class="pre">size()</span></tt></a>.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="basic_string_ref:T:::remove_suffix__size_type">
-void <tt class="descname">remove_suffix</tt><big>(</big><a class="reference internal" href="#basic_string_ref:T:::size_type" title="basic_string_ref&lt;T&gt;::size_type">size_type</a> <em>n</em><big>)</big><a class="headerlink" href="#basic_string_ref:T:::remove_suffix__size_type" title="Permalink to this definition">¶</a></dt>
-<dd><p>Moves the end of the <a class="reference internal" href="#basic_string_ref:T:" title="basic_string_ref&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">string_ref</span></tt></a> backwards <em>n</em> characters or
-<a class="reference internal" href="#basic_string_ref:T:::sizeCCE" title="basic_string_ref&lt;T&gt;::size"><tt class="xref cpp cpp-func docutils literal"><span class="pre">size()</span></tt></a> if <em>n</em> is greater than <a class="reference internal" href="#basic_string_ref:T:::sizeCCE" title="basic_string_ref&lt;T&gt;::size"><tt class="xref cpp cpp-func docutils literal"><span class="pre">size()</span></tt></a>.</p>
+<dt id="basic_string_view:T:::remove_suffix__size_type">
+void <tt class="descname">remove_suffix</tt><big>(</big><a class="reference internal" href="#basic_string_view:T:::size_type" title="basic_string_view&lt;T&gt;::size_type">size_type</a> <em>n</em><big>)</big><a class="headerlink" href="#basic_string_view:T:::remove_suffix__size_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Moves the end of the <a class="reference internal" href="#basic_string_view:T:" title="basic_string_view&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">string_view</span></tt></a> backwards <em>n</em> characters or
+<a class="reference internal" href="#basic_string_view:T:::sizeCCE" title="basic_string_view&lt;T&gt;::size"><tt class="xref cpp cpp-func docutils literal"><span class="pre">size()</span></tt></a> if <em>n</em> is greater than <a class="reference internal" href="#basic_string_view:T:::sizeCCE" title="basic_string_view&lt;T&gt;::size"><tt class="xref cpp cpp-func docutils literal"><span class="pre">size()</span></tt></a>.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="basic_string_ref:T:::clear">
-void <tt class="descname">clear</tt><big>(</big><big>)</big><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#basic_string_ref:T:::clear" title="Permalink to this definition">¶</a></dt>
-<dd><p>Sets the <a class="reference internal" href="#basic_string_ref:T:" title="basic_string_ref&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">string_ref</span></tt></a> to be empty.</p>
+<dt id="basic_string_view:T:::clear">
+void <tt class="descname">clear</tt><big>(</big><big>)</big><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#basic_string_view:T:::clear" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the <a class="reference internal" href="#basic_string_view:T:" title="basic_string_view&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">string_view</span></tt></a> to be empty.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name" colspan="2">Postconditions :</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><a class="reference internal" href="#basic_string_ref:T:::emptyCCE" title="basic_string_ref&lt;T&gt;::empty"><tt class="xref cpp cpp-func docutils literal"><span class="pre">empty()</span></tt></a> == true</td>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><a class="reference internal" href="#basic_string_view:T:::emptyCCE" title="basic_string_view&lt;T&gt;::empty"><tt class="xref cpp cpp-func docutils literal"><span class="pre">empty()</span></tt></a> == true</td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
 <dl class="function">
-<dt id="basic_string_ref:T:::substr__size_type.size_typeCCE">
-<em class="property">constexpr</em> basic_string_ref <tt class="descname">substr</tt><big>(</big><a class="reference internal" href="#basic_string_ref:T:::size_type" title="basic_string_ref&lt;T&gt;::size_type">size_type</a> <em>pos</em>, <a class="reference internal" href="#basic_string_ref:T:::size_type" title="basic_string_ref&lt;T&gt;::size_type">size_type</a> <em>n</em><em>=npos</em><big>)</big><tt class="descclassname"> const</tt><a class="headerlink" href="#basic_string_ref:T:::substr__size_type.size_typeCCE" title="Permalink to this definition">¶</a></dt>
+<dt id="basic_string_view:T:::substr__size_type.size_typeCCE">
+<em class="property">constexpr</em> basic_string_view <tt class="descname">substr</tt><big>(</big><a class="reference internal" href="#basic_string_view:T:::size_type" title="basic_string_view&lt;T&gt;::size_type">size_type</a> <em>pos</em>, <a class="reference internal" href="#basic_string_view:T:::size_type" title="basic_string_view&lt;T&gt;::size_type">size_type</a> <em>n</em><em>=npos</em><big>)</big><tt class="descclassname"> const</tt><a class="headerlink" href="#basic_string_view:T:::substr__size_type.size_typeCCE" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">a new <a class="reference internal" href="#basic_string_ref:T:" title="basic_string_ref&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">string_ref</span></tt></a> with starting point <em>pos</em> and a length of
-<em>n</em> characters. If <em>n</em> is equal to <a class="reference internal" href="#basic_string_ref:T:::npos__constexpr" title="basic_string_ref&lt;T&gt;::npos"><tt class="xref cpp cpp-member docutils literal"><span class="pre">npos</span></tt></a>, or
-<em>pos</em> + <em>n</em> is greater than <a class="reference internal" href="#basic_string_ref:T:::sizeCCE" title="basic_string_ref&lt;T&gt;::size"><tt class="xref cpp cpp-func docutils literal"><span class="pre">size()</span></tt></a>, the length will be
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">a new <a class="reference internal" href="#basic_string_view:T:" title="basic_string_view&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">string_view</span></tt></a> with starting point <em>pos</em> and a length of
+<em>n</em> characters. If <em>n</em> is equal to <a class="reference internal" href="#basic_string_view:T:::npos__constexpr" title="basic_string_view&lt;T&gt;::npos"><tt class="xref cpp cpp-member docutils literal"><span class="pre">npos</span></tt></a>, or
+<em>pos</em> + <em>n</em> is greater than <a class="reference internal" href="#basic_string_view:T:::sizeCCE" title="basic_string_view&lt;T&gt;::size"><tt class="xref cpp cpp-func docutils literal"><span class="pre">size()</span></tt></a>, the length will be
 the remainder of the string. Otherwise it will be <em>n</em>
 characters.</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Throws :</th><td class="field-body"><tt class="docutils literal"><span class="pre">std::out_of_range</span></tt> if <em>pos</em> is greater than <a class="reference internal" href="#basic_string_ref:T:::sizeCCE" title="basic_string_ref&lt;T&gt;::size"><tt class="xref cpp cpp-func docutils literal"><span class="pre">size()</span></tt></a></td>
+<tr class="field-even field"><th class="field-name">Throws :</th><td class="field-body"><tt class="docutils literal"><span class="pre">std::out_of_range</span></tt> if <em>pos</em> is greater than <a class="reference internal" href="#basic_string_view:T:::sizeCCE" title="basic_string_view&lt;T&gt;::size"><tt class="xref cpp cpp-func docutils literal"><span class="pre">size()</span></tt></a></td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
 <dl class="function">
-<dt id="basic_string_ref:T:::starts_with__basic_string_refC">
-bool <tt class="descname">starts_with</tt><big>(</big>basic_string_ref <em>value</em><big>)</big><tt class="descclassname"> const</tt><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#basic_string_ref:T:::starts_with__basic_string_refC" title="Permalink to this definition">¶</a></dt>
-<dt id="basic_string_ref:T:::starts_with__value_typeC">
-bool <tt class="descname">starts_with</tt><big>(</big><a class="reference internal" href="#basic_string_ref:T:::value_type" title="basic_string_ref&lt;T&gt;::value_type">value_type</a> <em>value</em><big>)</big><tt class="descclassname"> const</tt><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#basic_string_ref:T:::starts_with__value_typeC" title="Permalink to this definition">¶</a></dt>
+<dt id="basic_string_view:T:::starts_with__basic_string_viewC">
+bool <tt class="descname">starts_with</tt><big>(</big>basic_string_view <em>value</em><big>)</big><tt class="descclassname"> const</tt><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#basic_string_view:T:::starts_with__basic_string_viewC" title="Permalink to this definition">¶</a></dt>
+<dt id="basic_string_view:T:::starts_with__value_typeC">
+bool <tt class="descname">starts_with</tt><big>(</big><a class="reference internal" href="#basic_string_view:T:::value_type" title="basic_string_view&lt;T&gt;::value_type">value_type</a> <em>value</em><big>)</big><tt class="descclassname"> const</tt><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#basic_string_view:T:::starts_with__value_typeC" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Whether the <a class="reference internal" href="#basic_string_ref:T:" title="basic_string_ref&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">string_ref</span></tt></a> starts with the given <em>value</em>.</td>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Whether the <a class="reference internal" href="#basic_string_view:T:" title="basic_string_view&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">string_view</span></tt></a> starts with the given <em>value</em>.</td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
 <dl class="function">
-<dt id="basic_string_ref:T:::ends_with__basic_string_refC">
-bool <tt class="descname">ends_with</tt><big>(</big>basic_string_ref <em>value</em><big>)</big><tt class="descclassname"> const</tt><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#basic_string_ref:T:::ends_with__basic_string_refC" title="Permalink to this definition">¶</a></dt>
-<dt id="basic_string_ref:T:::ends_with__value_typeC">
-bool <tt class="descname">ends_with</tt><big>(</big><a class="reference internal" href="#basic_string_ref:T:::value_type" title="basic_string_ref&lt;T&gt;::value_type">value_type</a> <em>value</em><big>)</big><tt class="descclassname"> const</tt><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#basic_string_ref:T:::ends_with__value_typeC" title="Permalink to this definition">¶</a></dt>
+<dt id="basic_string_view:T:::ends_with__basic_string_viewC">
+bool <tt class="descname">ends_with</tt><big>(</big>basic_string_view <em>value</em><big>)</big><tt class="descclassname"> const</tt><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#basic_string_view:T:::ends_with__basic_string_viewC" title="Permalink to this definition">¶</a></dt>
+<dt id="basic_string_view:T:::ends_with__value_typeC">
+bool <tt class="descname">ends_with</tt><big>(</big><a class="reference internal" href="#basic_string_view:T:::value_type" title="basic_string_view&lt;T&gt;::value_type">value_type</a> <em>value</em><big>)</big><tt class="descclassname"> const</tt><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#basic_string_view:T:::ends_with__value_typeC" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Whether the <a class="reference internal" href="#basic_string_ref:T:" title="basic_string_ref&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">string_ref</span></tt></a> ends with the given <em>value</em>.</td>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Whether the <a class="reference internal" href="#basic_string_view:T:" title="basic_string_view&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">string_view</span></tt></a> ends with the given <em>value</em>.</td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
 <dl class="function">
-<dt id="basic_string_ref:T:::compare__basic_string_refC">
-<a class="reference internal" href="#basic_string_ref:T:::difference_type" title="basic_string_ref&lt;T&gt;::difference_type">difference_type</a> <tt class="descname">compare</tt><big>(</big>basic_string_ref <em>that</em><big>)</big><tt class="descclassname"> const</tt><a class="headerlink" href="#basic_string_ref:T:::compare__basic_string_refC" title="Permalink to this definition">¶</a></dt>
-<dd><p>Compares two <a class="reference internal" href="#basic_string_ref:T:" title="basic_string_ref&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">string_ref</span></tt></a>&#8216;s. First calculates the number of characters
+<dt id="basic_string_view:T:::compare__basic_string_viewC">
+<a class="reference internal" href="#basic_string_view:T:::difference_type" title="basic_string_view&lt;T&gt;::difference_type">difference_type</a> <tt class="descname">compare</tt><big>(</big>basic_string_view <em>that</em><big>)</big><tt class="descclassname"> const</tt><a class="headerlink" href="#basic_string_view:T:::compare__basic_string_viewC" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compares two <a class="reference internal" href="#basic_string_view:T:" title="basic_string_view&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">string_view</span></tt></a>&#8216;s. First calculates the number of characters
 to compare, then compares via a character by character lexicographical
 comparison. If the result is 0, then their sizes are compared and the
 return value is affected by their length.</p>
@@ -459,35 +459,35 @@ return value is affected by their length.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">negative value if this <a class="reference internal" href="#basic_string_ref:T:" title="basic_string_ref&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">string_ref</span></tt></a> is less than the other,
-zero if the both <a class="reference internal" href="#basic_string_ref:T:" title="basic_string_ref&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">string_ref</span></tt></a>&#8216;s are equal,
-positive value if this <a class="reference internal" href="#basic_string_ref:T:" title="basic_string_ref&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">string_ref</span></tt></a> is greater than the other.</td>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">negative value if this <a class="reference internal" href="#basic_string_view:T:" title="basic_string_view&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">string_view</span></tt></a> is less than the other,
+zero if the both <a class="reference internal" href="#basic_string_view:T:" title="basic_string_view&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">string_view</span></tt></a>&#8216;s are equal,
+positive value if this <a class="reference internal" href="#basic_string_view:T:" title="basic_string_view&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">string_view</span></tt></a> is greater than the other.</td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
 <dl class="function">
-<dt id="basic_string_ref:T:::at__size_typeC">
-<a class="reference internal" href="#basic_string_ref:T:::reference" title="basic_string_ref&lt;T&gt;::reference">reference</a> <tt class="descname">at</tt><big>(</big><a class="reference internal" href="#basic_string_ref:T:::size_type" title="basic_string_ref&lt;T&gt;::size_type">size_type</a> <em>idx</em><big>)</big><tt class="descclassname"> const</tt><a class="headerlink" href="#basic_string_ref:T:::at__size_typeC" title="Permalink to this definition">¶</a></dt>
+<dt id="basic_string_view:T:::at__size_typeC">
+<a class="reference internal" href="#basic_string_view:T:::reference" title="basic_string_view&lt;T&gt;::reference">reference</a> <tt class="descname">at</tt><big>(</big><a class="reference internal" href="#basic_string_view:T:::size_type" title="basic_string_view&lt;T&gt;::size_type">size_type</a> <em>idx</em><big>)</big><tt class="descclassname"> const</tt><a class="headerlink" href="#basic_string_view:T:::at__size_typeC" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><a class="reference internal" href="#basic_string_ref:T:::value_type" title="basic_string_ref&lt;T&gt;::value_type"><tt class="xref cpp cpp-type docutils literal"><span class="pre">value_type</span></tt></a> located at <em>idx</em>.</td>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><a class="reference internal" href="#basic_string_view:T:::value_type" title="basic_string_view&lt;T&gt;::value_type"><tt class="xref cpp cpp-type docutils literal"><span class="pre">value_type</span></tt></a> located at <em>idx</em>.</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Throws :</th><td class="field-body"><tt class="docutils literal"><span class="pre">std::out_of_range</span></tt> if <em>idx</em> is greater than or equal to
-<a class="reference internal" href="#basic_string_ref:T:::sizeCCE" title="basic_string_ref&lt;T&gt;::size"><tt class="xref cpp cpp-func docutils literal"><span class="pre">size()</span></tt></a>.</td>
+<a class="reference internal" href="#basic_string_view:T:::sizeCCE" title="basic_string_view&lt;T&gt;::size"><tt class="xref cpp cpp-func docutils literal"><span class="pre">size()</span></tt></a>.</td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
 <dl class="function">
-<dt id="basic_string_ref:T:::find_first_not_of__XC">
-<a class="reference internal" href="#basic_string_ref:T:::size_type" title="basic_string_ref&lt;T&gt;::size_type">size_type</a> <tt class="descname">find_first_not_of</tt><big>(</big><em>basic_string_ref</em><big>)</big><tt class="descclassname"> const</tt><a class="headerlink" href="#basic_string_ref:T:::find_first_not_of__XC" title="Permalink to this definition">¶</a></dt>
+<dt id="basic_string_view:T:::find_first_not_of__XC">
+<a class="reference internal" href="#basic_string_view:T:::size_type" title="basic_string_view&lt;T&gt;::size_type">size_type</a> <tt class="descname">find_first_not_of</tt><big>(</big><em>basic_string_view</em><big>)</big><tt class="descclassname"> const</tt><a class="headerlink" href="#basic_string_view:T:::find_first_not_of__XC" title="Permalink to this definition">¶</a></dt>
 <dt>
-<a class="reference internal" href="#basic_string_ref:T:::size_type" title="basic_string_ref&lt;T&gt;::size_type">size_type</a> <tt class="descname">find_first_not_of</tt><big>(</big><em>value_type</em><big>)</big><tt class="descclassname"> const</tt></dt>
+<a class="reference internal" href="#basic_string_view:T:::size_type" title="basic_string_view&lt;T&gt;::size_type">size_type</a> <tt class="descname">find_first_not_of</tt><big>(</big><em>value_type</em><big>)</big><tt class="descclassname"> const</tt></dt>
 <dd><p>Finds the first character equal to none of the characters in the given
 character sequence.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -495,17 +495,17 @@ character sequence.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">index of the first character not in the given sequence, or
-<a class="reference internal" href="#basic_string_ref:T:::npos__constexpr" title="basic_string_ref&lt;T&gt;::npos"><tt class="xref cpp cpp-member docutils literal"><span class="pre">npos</span></tt></a> if no such character is found.</td>
+<a class="reference internal" href="#basic_string_view:T:::npos__constexpr" title="basic_string_view&lt;T&gt;::npos"><tt class="xref cpp cpp-member docutils literal"><span class="pre">npos</span></tt></a> if no such character is found.</td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
 <dl class="function">
-<dt id="basic_string_ref:T:::find_last_not_of__XC">
-<a class="reference internal" href="#basic_string_ref:T:::size_type" title="basic_string_ref&lt;T&gt;::size_type">size_type</a> <tt class="descname">find_last_not_of</tt><big>(</big><em>basic_string_ref</em><big>)</big><tt class="descclassname"> const</tt><a class="headerlink" href="#basic_string_ref:T:::find_last_not_of__XC" title="Permalink to this definition">¶</a></dt>
+<dt id="basic_string_view:T:::find_last_not_of__XC">
+<a class="reference internal" href="#basic_string_view:T:::size_type" title="basic_string_view&lt;T&gt;::size_type">size_type</a> <tt class="descname">find_last_not_of</tt><big>(</big><em>basic_string_view</em><big>)</big><tt class="descclassname"> const</tt><a class="headerlink" href="#basic_string_view:T:::find_last_not_of__XC" title="Permalink to this definition">¶</a></dt>
 <dt>
-<a class="reference internal" href="#basic_string_ref:T:::size_type" title="basic_string_ref&lt;T&gt;::size_type">size_type</a> <tt class="descname">find_last_not_of</tt><big>(</big><em>value_type</em><big>)</big><tt class="descclassname"> const</tt></dt>
+<a class="reference internal" href="#basic_string_view:T:::size_type" title="basic_string_view&lt;T&gt;::size_type">size_type</a> <tt class="descname">find_last_not_of</tt><big>(</big><em>value_type</em><big>)</big><tt class="descclassname"> const</tt></dt>
 <dd><p>Finds the last character equal to none of the characters in the given
 character sequence.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -513,24 +513,24 @@ character sequence.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">index of the last character not in the given sequence, or
-<a class="reference internal" href="#basic_string_ref:T:::npos__constexpr" title="basic_string_ref&lt;T&gt;::npos"><tt class="xref cpp cpp-member docutils literal"><span class="pre">npos</span></tt></a> if no such character is found.</td>
+<a class="reference internal" href="#basic_string_view:T:::npos__constexpr" title="basic_string_view&lt;T&gt;::npos"><tt class="xref cpp cpp-member docutils literal"><span class="pre">npos</span></tt></a> if no such character is found.</td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
 <dl class="function">
-<dt id="basic_string_ref:T:::find_first_of__XC">
-<a class="reference internal" href="#basic_string_ref:T:::size_type" title="basic_string_ref&lt;T&gt;::size_type">size_type</a> <tt class="descname">find_first_of</tt><big>(</big><em>basic_string_ref</em><big>)</big><tt class="descclassname"> const</tt><a class="headerlink" href="#basic_string_ref:T:::find_first_of__XC" title="Permalink to this definition">¶</a></dt>
+<dt id="basic_string_view:T:::find_first_of__XC">
+<a class="reference internal" href="#basic_string_view:T:::size_type" title="basic_string_view&lt;T&gt;::size_type">size_type</a> <tt class="descname">find_first_of</tt><big>(</big><em>basic_string_view</em><big>)</big><tt class="descclassname"> const</tt><a class="headerlink" href="#basic_string_view:T:::find_first_of__XC" title="Permalink to this definition">¶</a></dt>
 <dt>
-<a class="reference internal" href="#basic_string_ref:T:::size_type" title="basic_string_ref&lt;T&gt;::size_type">size_type</a> <tt class="descname">find_first_of</tt><big>(</big><em>value_type</em><big>)</big><tt class="descclassname"> const</tt></dt>
+<a class="reference internal" href="#basic_string_view:T:::size_type" title="basic_string_view&lt;T&gt;::size_type">size_type</a> <tt class="descname">find_first_of</tt><big>(</big><em>value_type</em><big>)</big><tt class="descclassname"> const</tt></dt>
 <dd><p>Finds the first character equal to one of characters in the given
 character sequence.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Index of the first character found, or <a class="reference internal" href="#basic_string_ref:T:::npos__constexpr" title="basic_string_ref&lt;T&gt;::npos"><tt class="xref cpp cpp-member docutils literal"><span class="pre">npos</span></tt></a> if no such
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Index of the first character found, or <a class="reference internal" href="#basic_string_view:T:::npos__constexpr" title="basic_string_view&lt;T&gt;::npos"><tt class="xref cpp cpp-member docutils literal"><span class="pre">npos</span></tt></a> if no such
 character is found.</td>
 </tr>
 </tbody>
@@ -538,17 +538,17 @@ character is found.</td>
 </dd></dl>
 
 <dl class="function">
-<dt id="basic_string_ref:T:::find_last_of__XC">
-<a class="reference internal" href="#basic_string_ref:T:::size_type" title="basic_string_ref&lt;T&gt;::size_type">size_type</a> <tt class="descname">find_last_of</tt><big>(</big><em>basic_string_ref</em><big>)</big><tt class="descclassname"> const</tt><a class="headerlink" href="#basic_string_ref:T:::find_last_of__XC" title="Permalink to this definition">¶</a></dt>
+<dt id="basic_string_view:T:::find_last_of__XC">
+<a class="reference internal" href="#basic_string_view:T:::size_type" title="basic_string_view&lt;T&gt;::size_type">size_type</a> <tt class="descname">find_last_of</tt><big>(</big><em>basic_string_view</em><big>)</big><tt class="descclassname"> const</tt><a class="headerlink" href="#basic_string_view:T:::find_last_of__XC" title="Permalink to this definition">¶</a></dt>
 <dt>
-<a class="reference internal" href="#basic_string_ref:T:::size_type" title="basic_string_ref&lt;T&gt;::size_type">size_type</a> <tt class="descname">find_last_of</tt><big>(</big><em>value_type</em><big>)</big><tt class="descclassname"> const</tt></dt>
+<a class="reference internal" href="#basic_string_view:T:::size_type" title="basic_string_view&lt;T&gt;::size_type">size_type</a> <tt class="descname">find_last_of</tt><big>(</big><em>value_type</em><big>)</big><tt class="descclassname"> const</tt></dt>
 <dd><p>Finds the last character equal to one of characters in the given
 character sequence.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Index of the last character found, or <a class="reference internal" href="#basic_string_ref:T:::npos__constexpr" title="basic_string_ref&lt;T&gt;::npos"><tt class="xref cpp cpp-member docutils literal"><span class="pre">npos</span></tt></a> is no such
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Index of the last character found, or <a class="reference internal" href="#basic_string_view:T:::npos__constexpr" title="basic_string_view&lt;T&gt;::npos"><tt class="xref cpp cpp-member docutils literal"><span class="pre">npos</span></tt></a> is no such
 character is found.</td>
 </tr>
 </tbody>
@@ -556,16 +556,16 @@ character is found.</td>
 </dd></dl>
 
 <dl class="function">
-<dt id="basic_string_ref:T:::rfind__XC">
-<a class="reference internal" href="#basic_string_ref:T:::size_type" title="basic_string_ref&lt;T&gt;::size_type">size_type</a> <tt class="descname">rfind</tt><big>(</big><em>basic_string_ref</em><big>)</big><tt class="descclassname"> const</tt><a class="headerlink" href="#basic_string_ref:T:::rfind__XC" title="Permalink to this definition">¶</a></dt>
+<dt id="basic_string_view:T:::rfind__XC">
+<a class="reference internal" href="#basic_string_view:T:::size_type" title="basic_string_view&lt;T&gt;::size_type">size_type</a> <tt class="descname">rfind</tt><big>(</big><em>basic_string_view</em><big>)</big><tt class="descclassname"> const</tt><a class="headerlink" href="#basic_string_view:T:::rfind__XC" title="Permalink to this definition">¶</a></dt>
 <dt>
-<a class="reference internal" href="#basic_string_ref:T:::size_type" title="basic_string_ref&lt;T&gt;::size_type">size_type</a> <tt class="descname">rfind</tt><big>(</big><em>value_type</em><big>)</big><tt class="descclassname"> const</tt></dt>
+<a class="reference internal" href="#basic_string_view:T:::size_type" title="basic_string_view&lt;T&gt;::size_type">size_type</a> <tt class="descname">rfind</tt><big>(</big><em>value_type</em><big>)</big><tt class="descclassname"> const</tt></dt>
 <dd><p>Finds the last substring equal to the given character sequence.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">index of the desired substring, or <a class="reference internal" href="#basic_string_ref:T:::npos__constexpr" title="basic_string_ref&lt;T&gt;::npos"><tt class="xref cpp cpp-member docutils literal"><span class="pre">npos</span></tt></a> if no such substring
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">index of the desired substring, or <a class="reference internal" href="#basic_string_view:T:::npos__constexpr" title="basic_string_view&lt;T&gt;::npos"><tt class="xref cpp cpp-member docutils literal"><span class="pre">npos</span></tt></a> if no such substring
 was found.</td>
 </tr>
 </tbody>
@@ -573,16 +573,16 @@ was found.</td>
 </dd></dl>
 
 <dl class="function">
-<dt id="basic_string_ref:T:::find__XC">
-<a class="reference internal" href="#basic_string_ref:T:::size_type" title="basic_string_ref&lt;T&gt;::size_type">size_type</a> <tt class="descname">find</tt><big>(</big><em>basic_string_ref</em><big>)</big><tt class="descclassname"> const</tt><a class="headerlink" href="#basic_string_ref:T:::find__XC" title="Permalink to this definition">¶</a></dt>
+<dt id="basic_string_view:T:::find__XC">
+<a class="reference internal" href="#basic_string_view:T:::size_type" title="basic_string_view&lt;T&gt;::size_type">size_type</a> <tt class="descname">find</tt><big>(</big><em>basic_string_view</em><big>)</big><tt class="descclassname"> const</tt><a class="headerlink" href="#basic_string_view:T:::find__XC" title="Permalink to this definition">¶</a></dt>
 <dt>
-<a class="reference internal" href="#basic_string_ref:T:::size_type" title="basic_string_ref&lt;T&gt;::size_type">size_type</a> <tt class="descname">find</tt><big>(</big><em>value_type</em><big>)</big><tt class="descclassname"> const</tt></dt>
+<a class="reference internal" href="#basic_string_view:T:::size_type" title="basic_string_view&lt;T&gt;::size_type">size_type</a> <tt class="descname">find</tt><big>(</big><em>value_type</em><big>)</big><tt class="descclassname"> const</tt></dt>
 <dd><p>Finds the first substring equal to the given character sequence.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">index of the desired substring, or <a class="reference internal" href="#basic_string_ref:T:::npos__constexpr" title="basic_string_ref&lt;T&gt;::npos"><tt class="xref cpp cpp-member docutils literal"><span class="pre">npos</span></tt></a> if no such substring
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">index of the desired substring, or <a class="reference internal" href="#basic_string_view:T:::npos__constexpr" title="basic_string_view&lt;T&gt;::npos"><tt class="xref cpp cpp-member docutils literal"><span class="pre">npos</span></tt></a> if no such substring
 was found.</td>
 </tr>
 </tbody>
@@ -590,31 +590,31 @@ was found.</td>
 </dd></dl>
 
 <dl class="function">
-<dt id="basic_string_ref:T:::swap__basic_string_refR">
-void <tt class="descname">swap</tt><big>(</big>basic_string_ref&amp; <em>that</em><big>)</big><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#basic_string_ref:T:::swap__basic_string_refR" title="Permalink to this definition">¶</a></dt>
-<dd><p>Swaps the contents of the <a class="reference internal" href="#basic_string_ref:T:" title="basic_string_ref&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">string_ref</span></tt></a> with <em>that</em>.</p>
+<dt id="basic_string_view:T:::swap__basic_string_viewR">
+void <tt class="descname">swap</tt><big>(</big>basic_string_view&amp; <em>that</em><big>)</big><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#basic_string_view:T:::swap__basic_string_viewR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Swaps the contents of the <a class="reference internal" href="#basic_string_view:T:" title="basic_string_view&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">string_view</span></tt></a> with <em>that</em>.</p>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="function">
 <dt id="eq-operator__X.X">
-bool <tt class="descname">operator==</tt><big>(</big><em>basic_string_ref</em>, <em>basic_string_ref</em><big>)</big><a class="headerlink" href="#eq-operator__X.X" title="Permalink to this definition">¶</a></dt>
+bool <tt class="descname">operator==</tt><big>(</big><em>basic_string_view</em>, <em>basic_string_view</em><big>)</big><a class="headerlink" href="#eq-operator__X.X" title="Permalink to this definition">¶</a></dt>
 <dt id="neq-operator__X.X">
-bool <tt class="descname">operator!=</tt><big>(</big><em>basic_string_ref</em>, <em>basic_string_ref</em><big>)</big><a class="headerlink" href="#neq-operator__X.X" title="Permalink to this definition">¶</a></dt>
+bool <tt class="descname">operator!=</tt><big>(</big><em>basic_string_view</em>, <em>basic_string_view</em><big>)</big><a class="headerlink" href="#neq-operator__X.X" title="Permalink to this definition">¶</a></dt>
 <dt id="gte-operator__X.X">
-bool <tt class="descname">operator&gt;=</tt><big>(</big><em>basic_string_ref</em>, <em>basic_string_ref</em><big>)</big><a class="headerlink" href="#gte-operator__X.X" title="Permalink to this definition">¶</a></dt>
+bool <tt class="descname">operator&gt;=</tt><big>(</big><em>basic_string_view</em>, <em>basic_string_view</em><big>)</big><a class="headerlink" href="#gte-operator__X.X" title="Permalink to this definition">¶</a></dt>
 <dt id="lte-operator__X.X">
-bool <tt class="descname">operator&lt;=</tt><big>(</big><em>basic_string_ref</em>, <em>basic_string_ref</em><big>)</big><a class="headerlink" href="#lte-operator__X.X" title="Permalink to this definition">¶</a></dt>
+bool <tt class="descname">operator&lt;=</tt><big>(</big><em>basic_string_view</em>, <em>basic_string_view</em><big>)</big><a class="headerlink" href="#lte-operator__X.X" title="Permalink to this definition">¶</a></dt>
 <dt id="gt-operator__X.X">
-bool <tt class="descname">operator&gt;</tt><big>(</big><em>basic_string_ref</em>, <em>basic_string_ref</em><big>)</big><a class="headerlink" href="#gt-operator__X.X" title="Permalink to this definition">¶</a></dt>
+bool <tt class="descname">operator&gt;</tt><big>(</big><em>basic_string_view</em>, <em>basic_string_view</em><big>)</big><a class="headerlink" href="#gt-operator__X.X" title="Permalink to this definition">¶</a></dt>
 <dt id="lt-operator__X.X">
-bool <tt class="descname">operator&lt;</tt><big>(</big><em>basic_string_ref</em>, <em>basic_string_ref</em><big>)</big><a class="headerlink" href="#lt-operator__X.X" title="Permalink to this definition">¶</a></dt>
+bool <tt class="descname">operator&lt;</tt><big>(</big><em>basic_string_view</em>, <em>basic_string_view</em><big>)</big><a class="headerlink" href="#lt-operator__X.X" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Whether the given <a class="reference internal" href="#basic_string_ref:T:" title="basic_string_ref&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">string_ref</span></tt></a>&#8216;s meet the requirements for the
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Whether the given <a class="reference internal" href="#basic_string_view:T:" title="basic_string_view&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">string_view</span></tt></a>&#8216;s meet the requirements for the
 given operator. Follows the same semantics as the <tt class="docutils literal"><span class="pre">std::string</span></tt>
 comparison operators.</td>
 </tr>
@@ -623,33 +623,33 @@ comparison operators.</td>
 </dd></dl>
 
 <dl class="function">
-<dt id="lshift-operator__std::basic_ostream:T:R.basic_string_ref:T:CR">
-std::basic_ostream&lt;T&gt;&amp; <tt class="descname">operator&lt;&lt;</tt><big>(</big>std::basic_ostream&lt;T&gt;&amp; <em>os</em>, basic_string_ref&lt;T&gt; const&amp; <em>str</em><big>)</big><a class="headerlink" href="#lshift-operator__std::basic_ostream:T:R.basic_string_ref:T:CR" title="Permalink to this definition">¶</a></dt>
-<dd><p>Overload to print a <a class="reference internal" href="#basic_string_ref:T:" title="basic_string_ref&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">string_ref</span></tt></a> directly to the given stream <em>os</em>.</p>
+<dt id="lshift-operator__std::basic_ostream:T:R.basic_string_view:T:CR">
+std::basic_ostream&lt;T&gt;&amp; <tt class="descname">operator&lt;&lt;</tt><big>(</big>std::basic_ostream&lt;T&gt;&amp; <em>os</em>, basic_string_view&lt;T&gt; const&amp; <em>str</em><big>)</big><a class="headerlink" href="#lshift-operator__std::basic_ostream:T:R.basic_string_view:T:CR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Overload to print a <a class="reference internal" href="#basic_string_view:T:" title="basic_string_view&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">string_view</span></tt></a> directly to the given stream <em>os</em>.</p>
 </dd></dl>
 
 <dl class="type">
-<dt id="string_ref">
-<em class="property">type </em><tt class="descname">string_ref</tt><a class="headerlink" href="#string_ref" title="Permalink to this definition">¶</a></dt>
-<dd><p>A type alias for <a class="reference internal" href="#basic_string_ref:T:" title="basic_string_ref&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">string_ref</span></tt></a> where <tt class="docutils literal"><span class="pre">T</span></tt> is <tt class="docutils literal"><span class="pre">char</span></tt>.</p>
+<dt id="string_view">
+<em class="property">type </em><tt class="descname">string_view</tt><a class="headerlink" href="#string_view" title="Permalink to this definition">¶</a></dt>
+<dd><p>A type alias for <a class="reference internal" href="#basic_string_view:T:" title="basic_string_view&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">string_view</span></tt></a> where <tt class="docutils literal"><span class="pre">T</span></tt> is <tt class="docutils literal"><span class="pre">char</span></tt>.</p>
 </dd></dl>
 
 <dl class="type">
-<dt id="wstring_ref">
-<em class="property">type </em><tt class="descname">wstring_ref</tt><a class="headerlink" href="#wstring_ref" title="Permalink to this definition">¶</a></dt>
-<dd><p>A type alias for <a class="reference internal" href="#basic_string_ref:T:" title="basic_string_ref&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">string_ref</span></tt></a> where <tt class="docutils literal"><span class="pre">T</span></tt> is <tt class="docutils literal"><span class="pre">wchar_t</span></tt>.</p>
+<dt id="wstring_view">
+<em class="property">type </em><tt class="descname">wstring_view</tt><a class="headerlink" href="#wstring_view" title="Permalink to this definition">¶</a></dt>
+<dd><p>A type alias for <a class="reference internal" href="#basic_string_view:T:" title="basic_string_view&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">string_view</span></tt></a> where <tt class="docutils literal"><span class="pre">T</span></tt> is <tt class="docutils literal"><span class="pre">wchar_t</span></tt>.</p>
 </dd></dl>
 
 <dl class="type">
-<dt id="u16string_ref">
-<em class="property">type </em><tt class="descname">u16string_ref</tt><a class="headerlink" href="#u16string_ref" title="Permalink to this definition">¶</a></dt>
-<dd><p>A type alias for <a class="reference internal" href="#basic_string_ref:T:" title="basic_string_ref&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">string_ref</span></tt></a> where <tt class="docutils literal"><span class="pre">T</span></tt> is <tt class="docutils literal"><span class="pre">char16_t</span></tt>.</p>
+<dt id="u16string_view">
+<em class="property">type </em><tt class="descname">u16string_view</tt><a class="headerlink" href="#u16string_view" title="Permalink to this definition">¶</a></dt>
+<dd><p>A type alias for <a class="reference internal" href="#basic_string_view:T:" title="basic_string_view&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">string_view</span></tt></a> where <tt class="docutils literal"><span class="pre">T</span></tt> is <tt class="docutils literal"><span class="pre">char16_t</span></tt>.</p>
 </dd></dl>
 
 <dl class="type">
-<dt id="u32string_ref">
-<em class="property">type </em><tt class="descname">u32string_ref</tt><a class="headerlink" href="#u32string_ref" title="Permalink to this definition">¶</a></dt>
-<dd><p>A type alias for <a class="reference internal" href="#basic_string_ref:T:" title="basic_string_ref&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">string_ref</span></tt></a> where <tt class="docutils literal"><span class="pre">T</span></tt> is <tt class="docutils literal"><span class="pre">char32_t</span></tt>.</p>
+<dt id="u32string_view">
+<em class="property">type </em><tt class="descname">u32string_view</tt><a class="headerlink" href="#u32string_view" title="Permalink to this definition">¶</a></dt>
+<dd><p>A type alias for <a class="reference internal" href="#basic_string_view:T:" title="basic_string_view&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">string_view</span></tt></a> where <tt class="docutils literal"><span class="pre">T</span></tt> is <tt class="docutils literal"><span class="pre">char32_t</span></tt>.</p>
 </dd></dl>
 
 <div class="section" id="specializations">
@@ -657,14 +657,14 @@ std::basic_ostream&lt;T&gt;&amp; <tt class="descname">operator&lt;&lt;</tt><big>
 <p>Several specializations for standard code are provided</p>
 <dl class="function">
 <dt id="swap__X.X">
-void <tt class="descname">swap</tt><big>(</big><em>basic_string_ref&amp;</em>, <em>basic_string_ref&amp;</em><big>)</big><a class="headerlink" href="#swap__X.X" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calls <a class="reference internal" href="#basic_string_ref:T:::swap__basic_string_refR" title="basic_string_ref&lt;T&gt;::swap"><tt class="xref cpp cpp-func docutils literal"><span class="pre">basic_string_ref&lt;T&gt;::swap()</span></tt></a></p>
+void <tt class="descname">swap</tt><big>(</big><em>basic_string_view&amp;</em>, <em>basic_string_view&amp;</em><big>)</big><a class="headerlink" href="#swap__X.X" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calls <a class="reference internal" href="#basic_string_view:T:::swap__basic_string_viewR" title="basic_string_view&lt;T&gt;::swap"><tt class="xref cpp cpp-func docutils literal"><span class="pre">basic_string_view&lt;T&gt;::swap()</span></tt></a></p>
 </dd></dl>
 
 <dl class="class">
-<dt id="hash:basic_string_ref:T::">
-<em class="property">class </em><tt class="descname">hash&lt;basic_string_ref&lt;T&gt;&gt;</tt><a class="headerlink" href="#hash:basic_string_ref:T::" title="Permalink to this definition">¶</a></dt>
-<dd><p>Specialization hash for <a class="reference internal" href="#basic_string_ref:T:" title="basic_string_ref&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">string_ref</span></tt></a>.</p>
+<dt id="hash:basic_string_view:T::">
+<em class="property">class </em><tt class="descname">hash&lt;basic_string_view&lt;T&gt;&gt;</tt><a class="headerlink" href="#hash:basic_string_view:T::" title="Permalink to this definition">¶</a></dt>
+<dd><p>Specialization hash for <a class="reference internal" href="#basic_string_view:T:" title="basic_string_view&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">string_view</span></tt></a>.</p>
 </dd></dl>
 
 </div>
