@@ -342,13 +342,13 @@ private:
 
 template <class W>
 struct observer_ptr final {
-  using value_type = W;
+  using element_type = W;
 
-  using const_pointer = add_pointer_t<add_const_t<W>>;
-  using pointer = add_pointer_t<W>;
+  using const_pointer = add_pointer_t<add_const_t<element_type>>;
+  using pointer = add_pointer_t<element_type>;
 
-  using const_reference = add_lvalue_reference_t<add_const_t<W>>;
-  using reference = add_lvalue_reference_t<W>;
+  using const_reference = add_lvalue_reference_t<add_const_t<element_type>>;
+  using reference = add_lvalue_reference_t<element_type>;
 
   constexpr observer_ptr (std::nullptr_t) noexcept : ptr { nullptr } { }
   explicit observer_ptr (pointer ptr) noexcept : ptr { ptr } { }
