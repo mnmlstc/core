@@ -32,8 +32,7 @@ of |expected|.
    contains an optionally instantiated type ``T``. However, unlike
    :class:`optional\<T>`, it is never in a 'null' state. It will instead hold
    an exception that was thrown at some level within the function that returned
-   the |expected|. Additionally, it does not model an object, and
-   only provides :func:`optional\<T>::operator*`.
+   the |expected|. Additionally, it does not model an object.
 
    .. note:: While |expected| uses placement new internally, it
       is ok to use a class that overloads the address-of operator with it.

@@ -5,8 +5,8 @@ MNMLSTC Core is a small and easy to use C++11 library that adds a functionality
 set that will be available in C++14 and later, as well as some useful
 additions, or some proposals that have not been completely approved yet.
 
-Information on installing and using MNMLSTC Core (as well as modifying its
-internals) can be found in its `documentation <http://mnmlstc.github.io/core>`_
+Information on installing and using MNMLSTC Core can be found in its
+`documentation <http://mnmlstc.github.io/core/>`_.
 
 MNMLSTC Core is released under the Apache 2.0 License.
 

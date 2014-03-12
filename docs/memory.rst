@@ -6,7 +6,7 @@ Memory Component
 .. default-domain:: cpp
 
 This section discusses the memory component of MNMLSTC Core. Contained in this
-component are two new smart pointers (both with deep copy semantics) and a
+component are three new smart pointers (two with deep copy semantics) and a
 C++11 equivalent to C++14's :func:`make_unique\<T>`.
 
 .. |observer_ptr| replace:: :class:`observer_ptr <observer_ptr\<T>>`
@@ -14,6 +14,9 @@ C++11 equivalent to C++14's :func:`make_unique\<T>`.
 .. |deep_ptr| replace:: :class:`deep_ptr <deep_ptr\<T, Deleter, Copier>>`
 
 .. namespace:: core
+
+Polymorphic Smart Pointer
+-------------------------
 
 .. class:: poly_ptr<T, Deleter>
 
@@ -183,6 +186,9 @@ C++11 equivalent to C++14's :func:`make_unique\<T>`.
 
       Swaps the managed object and copier function
 
+Deep Copying Smart Pointer
+--------------------------
+
 .. class:: deep_ptr<T, Deleter, Copier>
 
    |deep_ptr| is a smart pointer for a type that retains sole ownership of the
@@ -321,6 +327,10 @@ C++11 equivalent to C++14's :func:`make_unique\<T>`.
 
       Swaps the managed object, copier object, and deleter object.
 
+
+Dumbest Smart Pointer
+---------------------
+
 .. class:: observer_ptr<T>
 
    |observer_ptr| is "the dumbest smart pointer", in that it is only ever used
@@ -404,6 +414,9 @@ C++11 equivalent to C++14's :func:`make_unique\<T>`.
 
       Resets the object watched by the |observer_ptr| with *ptr*.
 
+Utilities
+---------
+
 .. class:: bad_polymorphic_reset
 
    :inherits: std::logic_error
@@ -455,6 +468,9 @@ C++11 equivalent to C++14's :func:`make_unique\<T>`.
    object. Given any unique_ptr, it will return an empty unique_ptr.
 
    :returns: An empty ``std::unique_ptr<T, D>``
+
+Comparison Operators
+--------------------
 
 .. function:: bool operator == (poly_ptr const&, poly_ptr const&) noexcept
               bool operator != (poly_ptr const&, poly_ptr const&) noexcept
@@ -525,6 +541,9 @@ C++11 equivalent to C++14's :func:`make_unique\<T>`.
 
    :returns: The result of comparing the objects watched by |observer_ptr| with
              ``nullptr`` via the given operator
+
+Make Functions
+--------------
 
 .. function:: observer_ptr<T> make_observer(W* ptr)
               observer_ptr<T> make_observer(std::unique_ptr<W, D> const& ptr)
