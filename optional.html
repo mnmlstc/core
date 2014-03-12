@@ -386,10 +386,33 @@ bool <tt class="descname">operator==</tt><big>(</big><em>nullopt_t</em>, <em>opt
 bool <tt class="descname">operator==</tt><big>(</big><em>optional&lt;T&gt; const&amp;</em>, <em>T const&amp;</em><big>)</big><tt class="descclassname"> noexcept</tt></dt>
 <dt>
 bool <tt class="descname">operator==</tt><big>(</big><em>T const&amp;</em>, <em>optional&lt;T&gt; const&amp;</em><big>)</big><tt class="descclassname"> noexcept</tt></dt>
-<dd><div class="admonition-todo admonition" id="index-0">
-<p class="first admonition-title">Todo</p>
-<p class="last">add descriptions of behavior.</p>
-</div>
+<dd><p>For the first overload, if only one of the given <a class="reference internal" href="#optional:T:" title="optional&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">optional</span></tt></a> values is
+<em>engaged</em>, it will return false. If both <a class="reference internal" href="#optional:T:" title="optional&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">optional</span></tt></a> values are
+<em>disengaged</em>, it will return true. Otherwise the <a class="reference internal" href="#optional:T:" title="optional&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">optional</span></tt></a> values compare
+their managed objects with <tt class="docutils literal"><span class="pre">operator</span> <span class="pre">==</span></tt></p>
+<p>The second overload returns whether or not the <a class="reference internal" href="#optional:T:" title="optional&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">optional</span></tt></a> value is <em>engaged</em>.
+The third overload <em>always</em> returns false.
+The fourth and fifth overloads will check if the <a class="reference internal" href="#optional:T:" title="optional&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">optional</span></tt></a> value is
+<em>engaged</em>. If it is, the object managed by <a class="reference internal" href="#optional:T:" title="optional&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">optional</span></tt></a> will be compared
+with <tt class="docutils literal"><span class="pre">operator</span> <span class="pre">==</span></tt>. Otherwise it will return false.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="lt-operator__X.X">
+bool <tt class="descname">operator&lt;</tt><big>(</big><em>optional&lt;T&gt; const&amp;</em>, <em>optional&lt;T&gt; const&amp;</em><big>)</big><tt class="descclassname"> noexcept</tt><a class="headerlink" href="#lt-operator__X.X" title="Permalink to this definition">¶</a></dt>
+<dt>
+bool <tt class="descname">operator&lt;</tt><big>(</big><em>optional&lt;T&gt; const&amp;</em>, <em>nullopt_t</em><big>)</big><tt class="descclassname"> noexcept</tt></dt>
+<dt>
+bool <tt class="descname">operator&lt;</tt><big>(</big><em>nullopt_t</em>, <em>optional&lt;T&gt; const&amp;</em><big>)</big><tt class="descclassname"> noexcept</tt></dt>
+<dt>
+bool <tt class="descname">operator&lt;</tt><big>(</big><em>optional&lt;T&gt; const&amp;</em>, <em>T const&amp;</em><big>)</big><tt class="descclassname"> noexcept</tt></dt>
+<dd><p>For the first overload, if the right <a class="reference internal" href="#optional:T:" title="optional&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">optional</span></tt></a> is <em>disengaged</em>, it will
+return false. If the left <a class="reference internal" href="#optional:T:" title="optional&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">optional</span></tt></a> is <em>disengaged</em>, it will return true.
+Otherwise, the result of a comparison <tt class="docutils literal"><span class="pre">std::less&lt;T&gt;</span></tt> is returned.</p>
+<p>The second overload returns true if the <a class="reference internal" href="#optional:T:" title="optional&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">optional</span></tt></a> is <em>disengaged</em>.
+The third overload returns true if the <a class="reference internal" href="#optional:T:" title="optional&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">optional</span></tt></a> is <em>engaged</em>.
+The fourth optional returns true if the <a class="reference internal" href="#optional:T:" title="optional&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">optional</span></tt></a> is <em>disengaged</em>.
+Otherwise, the result of a comparison with <tt class="docutils literal"><span class="pre">std::less&lt;T&gt;</span></tt> is returned.</p>
 </dd></dl>
 
 <div class="section" id="specializations">

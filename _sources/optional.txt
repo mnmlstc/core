@@ -222,7 +222,30 @@ possible.
               bool operator == (optional<T> const&, T const&) noexcept
               bool operator == (T const&, optional<T> const&) noexcept
 
-   .. todo:: add descriptions of behavior.
+   For the first overload, if only one of the given |optional| values is
+   *engaged*, it will return false. If both |optional| values are 
+   *disengaged*, it will return true. Otherwise the |optional| values compare
+   their managed objects with ``operator ==``
+
+   The second overload returns whether or not the |optional| value is *engaged*.
+   The third overload *always* returns false.
+   The fourth and fifth overloads will check if the |optional| value is
+   *engaged*. If it is, the object managed by |optional| will be compared
+   with ``operator ==``. Otherwise it will return false.
+
+.. function:: bool operator < (optional<T> const&, optional<T> const&) noexcept
+              bool operator < (optional<T> const&, nullopt_t) noexcept
+              bool operator < (nullopt_t, optional<T> const&) noexcept
+              bool operator < (optional<T> const&, T const&) noexcept
+
+   For the first overload, if the right |optional| is *disengaged*, it will
+   return false. If the left |optional| is *disengaged*, it will return true.
+   Otherwise, the result of a comparison ``std::less<T>`` is returned.
+
+   The second overload returns true if the |optional| is *disengaged*.
+   The third overload returns true if the |optional| is *engaged*.
+   The fourth optional returns true if the |optional| is *disengaged*.
+   Otherwise, the result of a comparison with ``std::less<T>`` is returned.
 
 Specializations
 ---------------

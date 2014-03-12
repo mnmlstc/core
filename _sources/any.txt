@@ -4,6 +4,7 @@ Any Component
 =============
 
 .. default-domain:: cpp
+.. highlight:: cpp
 
 .. |any| replace:: :class:`any`
 
@@ -95,15 +96,36 @@ follow the proposal as closely as possible.
 
 
 
-.. function:: ValueType any_cast (any const&)
-              ValueType any_cast (any&&)
-              ValueType any_cast (any&)
+.. function:: ValueType any_cast (any const& operand)
+              ValueType any_cast (any&& operand)
+              ValueType any_cast (any& operand)
 
-   .. todo:: Discuss behavior and return value.
+   :returns: ``*any_cast<add_const_t<remove_reference_t<ValueType>>(&operand)``
+             for the first :func:`any_cast` signature. For the other overloads,
+             the return type is
+             ``*any_cast<remove_reference_t<ValueType>>(&operand)``.
 
    :raises: :class:`bad_any_cast`
 
-.. function:: ValueType const* any_cast (any const*)
-              ValueType* any_cast (any*)
+   Given a type *ValueType*, it will attempt to extract the value stored within
+   the given |any|. *ValueType* may be either concrete or a reference type.
+   If ``typeid(remove_reference_t<ValueType>)`` is not equal to the value
+   returned by :func:`any::type`, :class:`bad_any_cast` is thrown. Some
+   usage examples::
 
-   .. todo:: Discuss behavior and return value
+      any x(5) // x holds an int
+      auto y = any_cast<int>(x); // cast to a value
+      any_cast<int&>(x) = 10; // cast to a reference for mutation.
+
+      x = std::string { "Woof" }; // x now holds a string.
+      auto woof = std::move(any_cast<std::string&>(x)); // move value in x
+      assert(any_cast<std::string const&>(x) == "");
+
+
+.. function:: ValueType const* any_cast (any const* operand)
+              ValueType* any_cast (any* operand)
+
+   :returns: *ValueType* if operand is not equal to ``nullptr`` and
+             ``typeid(ValueType)`` is the same as the value returned by 
+             :func:`any::type`, a pointer to the object managed by *operand*
+             is returned. Otherwise, ``nullptr``.

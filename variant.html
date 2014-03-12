@@ -172,7 +172,7 @@ void <tt class="descname">swap</tt><big>(</big><em>variant&amp;</em><big>)</big>
 <dd><p>Visiting a <a class="reference internal" href="#variant:Ts:" title="variant&lt;Ts&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">variant</span></tt></a> follows the following semantics. These semantics
 require that, when given a callable type <tt class="docutils literal"><span class="pre">Visitor</span></tt>, and variadic
 arguments <tt class="docutils literal"><span class="pre">Args...</span></tt>, that the return type of the visit will be
-a  result of <tt class="docutils literal"><span class="pre">common_type_t&lt;invoke_of_t&lt;Visitor,</span> <span class="pre">Ts,</span> <span class="pre">Args...&gt;...&gt;</span></tt>.</p>
+a result of <tt class="docutils literal"><span class="pre">common_type_t&lt;invoke_of_t&lt;Visitor,</span> <span class="pre">Ts,</span> <span class="pre">Args...&gt;...&gt;</span></tt>.</p>
 <p>If a common type cannot be found, then the visitation function will
 fail to compile properly. This means that a visitor <em>must</em> be capable of
 being invoked with all types in the <a class="reference internal" href="#variant:Ts:" title="variant&lt;Ts&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">variant</span></tt></a>&#8216;s typelist and the arguments
@@ -193,7 +193,9 @@ given. The visitor is executed with the <em>INVOKE</em> psuedo expression.</p>
  <tt class="descname">match</tt><big>(</big><em>Visitors&amp;&amp;</em><big>)</big><tt class="descclassname"> const</tt><a class="headerlink" href="#variant:Ts:::match__XC" title="Permalink to this definition">¶</a></dt>
 <dt id="variant:Ts:::match__X">
  <tt class="descname">match</tt><big>(</big><em>Visitors&amp;&amp;</em><big>)</big><a class="headerlink" href="#variant:Ts:::match__X" title="Permalink to this definition">¶</a></dt>
-<dd><p>Takes a variadic number of arguments that are all callable objects.</p>
+<dd><p>Takes a variadic number of arguments that are all callable objects. These
+objects are combined into a single visitor and then executed on the
+<a class="reference internal" href="#variant:Ts:" title="variant&lt;Ts&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">variant</span></tt></a>.</p>
 </dd></dl>
 
 <dl class="function">
@@ -283,7 +285,8 @@ auto&amp;&amp; <tt class="descname">get&lt;N&gt;</tt><big>(</big><em>variant&amp
 auto&amp; <tt class="descname">get&lt;N&gt;</tt><big>(</big><em>variant&amp;</em><big>)</big></dt>
 <dd><p>Calls <tt class="xref cpp cpp-func docutils literal"><span class="pre">variant&lt;Ts&gt;::get()</span></tt>, and returns the value. This specialization
 is provided to interact with <tt class="docutils literal"><span class="pre">std::tuple</span></tt> and to provide <em>some</em> semblance
-of boost interoperability.</p>
+of boost interoperability. However it does not support using the type
+to get the value from the variant.</p>
 </dd></dl>
 
 </div>

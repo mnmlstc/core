@@ -88,7 +88,7 @@ switch statement*
      Visiting a |variant| follows the following semantics. These semantics
      require that, when given a callable type ``Visitor``, and variadic
      arguments ``Args...``, that the return type of the visit will be
-     a  result of ``common_type_t<invoke_of_t<Visitor, Ts, Args...>...>``.
+     a result of ``common_type_t<invoke_of_t<Visitor, Ts, Args...>...>``.
 
      If a common type cannot be found, then the visitation function will
      fail to compile properly. This means that a visitor *must* be capable of
@@ -102,7 +102,9 @@ switch statement*
    .. function:: match (Visitors&&) const
                  match (Visitors&&)
 
-      Takes a variadic number of arguments that are all callable objects.
+      Takes a variadic number of arguments that are all callable objects. These
+      objects are combined into a single visitor and then executed on the
+      |variant|.
 
    .. function:: auto get<N> () noexcept
 
@@ -148,4 +150,5 @@ Specializations
 
    Calls :func:`variant\<Ts>::get`, and returns the value. This specialization
    is provided to interact with ``std::tuple`` and to provide *some* semblance
-   of boost interoperability.
+   of boost interoperability. However it does not support using the type
+   to get the value from the variant.

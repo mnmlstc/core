@@ -95,7 +95,7 @@ additional allocator aware constructors.</p>
 </tr>
 </tbody>
 </table>
-<p>This is the exception thrown when <a class="reference internal" href="#any_cast__X" title="any_cast"><tt class="xref cpp cpp-func docutils literal"><span class="pre">any_cast()</span></tt></a> fails.
+<p>This is the exception thrown when <a class="reference internal" href="#any_cast__anyCR" title="any_cast"><tt class="xref cpp cpp-func docutils literal"><span class="pre">any_cast()</span></tt></a> fails.
 It inherits from <tt class="docutils literal"><span class="pre">std::bad_cast</span></tt>.</p>
 <dl class="function">
 <dt id="bad_any_cast::whatC">
@@ -189,35 +189,57 @@ void <tt class="descname">clear</tt><big>(</big><big>)</big><tt class="descclass
 </dd></dl>
 
 <dl class="function">
-<dt id="any_cast__X">
-ValueType <tt class="descname">any_cast</tt><big>(</big><em>any const&amp;</em><big>)</big><a class="headerlink" href="#any_cast__X" title="Permalink to this definition">¶</a></dt>
-<dt>
-ValueType <tt class="descname">any_cast</tt><big>(</big><em>any&amp;&amp;</em><big>)</big></dt>
-<dt>
-ValueType <tt class="descname">any_cast</tt><big>(</big><em>any&amp;</em><big>)</big></dt>
-<dd><div class="admonition-todo admonition" id="index-0">
-<p class="first admonition-title">Todo</p>
-<p class="last">Discuss behavior and return value.</p>
-</div>
-<table class="docutils field-list" frame="void" rules="none">
+<dt id="any_cast__anyCR">
+ValueType <tt class="descname">any_cast</tt><big>(</big>any const&amp; <em>operand</em><big>)</big><a class="headerlink" href="#any_cast__anyCR" title="Permalink to this definition">¶</a></dt>
+<dt id="any_cast__anyRR">
+ValueType <tt class="descname">any_cast</tt><big>(</big>any&amp;&amp; <em>operand</em><big>)</big><a class="headerlink" href="#any_cast__anyRR" title="Permalink to this definition">¶</a></dt>
+<dt id="any_cast__anyR">
+ValueType <tt class="descname">any_cast</tt><big>(</big>any&amp; <em>operand</em><big>)</big><a class="headerlink" href="#any_cast__anyR" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Raises :</th><td class="field-body"><a class="reference internal" href="#bad_any_cast" title="bad_any_cast"><tt class="xref cpp cpp-class docutils literal"><span class="pre">bad_any_cast</span></tt></a></td>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><tt class="docutils literal"><span class="pre">*any_cast&lt;add_const_t&lt;remove_reference_t&lt;ValueType&gt;&gt;(&amp;operand)</span></tt>
+for the first <a class="reference internal" href="#any_cast__anyCR" title="any_cast"><tt class="xref cpp cpp-func docutils literal"><span class="pre">any_cast()</span></tt></a> signature. For the other overloads,
+the return type is
+<tt class="docutils literal"><span class="pre">*any_cast&lt;remove_reference_t&lt;ValueType&gt;&gt;(&amp;operand)</span></tt>.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises :</th><td class="field-body"><a class="reference internal" href="#bad_any_cast" title="bad_any_cast"><tt class="xref cpp cpp-class docutils literal"><span class="pre">bad_any_cast</span></tt></a></td>
 </tr>
 </tbody>
 </table>
+<p>Given a type <em>ValueType</em>, it will attempt to extract the value stored within
+the given <a class="reference internal" href="#any" title="any"><tt class="xref cpp cpp-class docutils literal"><span class="pre">any</span></tt></a>. <em>ValueType</em> may be either concrete or a reference type.
+If <tt class="docutils literal"><span class="pre">typeid(remove_reference_t&lt;ValueType&gt;)</span></tt> is not equal to the value
+returned by <a class="reference internal" href="#any::typeC" title="any::type"><tt class="xref cpp cpp-func docutils literal"><span class="pre">any::type()</span></tt></a>, <a class="reference internal" href="#bad_any_cast" title="bad_any_cast"><tt class="xref cpp cpp-class docutils literal"><span class="pre">bad_any_cast</span></tt></a> is thrown. Some
+usage examples:</p>
+<div class="highlight-cpp"><div class="highlight"><pre><span class="n">any</span> <span class="n">x</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span> <span class="c1">// x holds an int</span>
+<span class="k">auto</span> <span class="n">y</span> <span class="o">=</span> <span class="n">any_cast</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">x</span><span class="p">);</span> <span class="c1">// cast to a value</span>
+<span class="n">any_cast</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&amp;&gt;</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">=</span> <span class="mi">10</span><span class="p">;</span> <span class="c1">// cast to a reference for mutation.</span>
+
+<span class="n">x</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="p">{</span> <span class="s">&quot;Woof&quot;</span> <span class="p">};</span> <span class="c1">// x now holds a string.</span>
+<span class="k">auto</span> <span class="n">woof</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="n">any_cast</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;&gt;</span><span class="p">(</span><span class="n">x</span><span class="p">));</span> <span class="c1">// move value in x</span>
+<span class="n">assert</span><span class="p">(</span><span class="n">any_cast</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="k">const</span><span class="o">&amp;&gt;</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">==</span> <span class="s">&quot;&quot;</span><span class="p">);</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="function">
-<dt>
-ValueType const* <tt class="descname">any_cast</tt><big>(</big><em>any const*</em><big>)</big></dt>
-<dt>
-ValueType* <tt class="descname">any_cast</tt><big>(</big><em>any*</em><big>)</big></dt>
-<dd><div class="admonition-todo admonition" id="index-1">
-<p class="first admonition-title">Todo</p>
-<p class="last">Discuss behavior and return value</p>
-</div>
+<dt id="any_cast__anyCP">
+ValueType const* <tt class="descname">any_cast</tt><big>(</big>any const* <em>operand</em><big>)</big><a class="headerlink" href="#any_cast__anyCP" title="Permalink to this definition">¶</a></dt>
+<dt id="any_cast__anyP">
+ValueType* <tt class="descname">any_cast</tt><big>(</big>any* <em>operand</em><big>)</big><a class="headerlink" href="#any_cast__anyP" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><em>ValueType</em> if operand is not equal to <tt class="docutils literal"><span class="pre">nullptr</span></tt> and
+<tt class="docutils literal"><span class="pre">typeid(ValueType)</span></tt> is the same as the value returned by
+<a class="reference internal" href="#any::typeC" title="any::type"><tt class="xref cpp cpp-func docutils literal"><span class="pre">any::type()</span></tt></a>, a pointer to the object managed by <em>operand</em>
+is returned. Otherwise, <tt class="docutils literal"><span class="pre">nullptr</span></tt>.</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </div>
