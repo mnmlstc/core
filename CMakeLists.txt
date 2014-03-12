@@ -5,6 +5,7 @@ project(core CXX)
 # Modules, Variables, and Options
 #------------------------------------------------------------------------------
 include(CMakePackageConfigHelpers)
+include(CMakeDependentOption)
 include(CheckCXXCompilerFlag)
 include(CheckIncludeFileCXX)
 include(CTest)
@@ -26,10 +27,25 @@ set(TEST_BINARY_DIR "${PROJECT_BINARY_DIR}/tests")
 set(DOCS_SOURCE_DIR "${PROJECT_SOURCE_DIR}/docs")
 set(DOCS_BINARY_DIR "${PROJECT_BINARY_DIR}/docs")
 
+set(PACK_SOURCE_DIR "${PROJECT_SOURCE_DIR}/package")
+set(PACK_BINARY_DIR "${PROJECT_BINARY_DIR}/package")
+
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/configure")
 
+# Used by cmake-dependent-option
+list(APPEND RPM_DEP "UNIX" "NOT APPLE" "BUILD_PACKAGE")
+list(APPEND DEB_DEP "UNIX" "NOT APPLE" "BUILD_PACKAGE")
+list(APPEND PKG_DEP "APPLE" "BUILD_PACKAGE")
+list(APPEND MSI_DEP "WIN32" "BUILD_PACKAGE")
+
 option(BUILD_WITH_LIBCXX "Use libc++ as stdlib" OFF)
+option(BUILD_PACKAGE "Build package with CPack" OFF)
 option(BUILD_DOCS "Build documentation with Sphinx Documentation Generator")
+
+cmake_dependent_option(BUILD_PACKAGE_MSI "Create an MSI" ON "${MSI_DEP}" OFF)
+cmake_dependent_option(BUILD_PACKAGE_RPM "Create an RPM" ON "${RPM_DEP}" OFF)
+cmake_dependent_option(BUILD_PACKAGE_DEB "Create a DEB" ON "${DEB_DEP}" OFF)
+cmake_dependent_option(BUILD_PACKAGE_PKG "Create a PKG" ON "${PKG_DEP}" OFF)
 
 if (APPLE AND ${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
   set(BUILD_WITH_LIBCXX ON CACHE BOOL "Use libc++ as stdlib" ON)
@@ -166,6 +182,10 @@ if (BUILD_DOCS)
   add_subdirectory("${DOCS_SOURCE_DIR}" "${DOCS_BINARY_DIR}" EXCLUDE_FROM_ALL)
 endif ()
 
+if (BUILD_PACKAGE)
+  add_subdirectory("${PACK_SOURCE_DIR}" "${PACK_BINARY_DIR}" EXCLUDE_FROM_ALL)
+endif ()
+
 #------------------------------------------------------------------------------
 # Install
 #------------------------------------------------------------------------------
@@ -180,36 +200,15 @@ install(DIRECTORY "${PROJECT_SOURCE_DIR}/include/core"
   FILES_MATCHING PATTERN "*.hpp"
 )
 
-install(DIRECTORY "${DOCS_BINARY_DIR}/"
-  DESTINATION ${DOCS_INSTALL_DIR}
-  FILES_MATCHING PATTERN "*"
-)
-
-#------------------------------------------------------------------------------
-# Package
-#------------------------------------------------------------------------------
-# TODO: Allow for different generators to be selected at configuration time.
-
-set(CPACK_GENERATOR "WIX")
-set(CPACK_PACKAGE_NAME ${PROJECT_NAME})
-set(CPACK_PACKAGE_VENDOR "MNMLSTC")
-set(CPACK_PACKAGE_DESCRIPTION_SUMMARY
-  "MNMLSTC Core - A C++11 library to extend the standard library"
-)
-set(CPACK_PACKAGE_DESCRIPTION_FILE "${PROJECT_SOURCE_DIR}/Readme.rst")
-set(CPACK_RESOURCE_FILE_LICENSE "${PROJECT_SOURCE_DIR}/License.rst")
-
-set(CPACK_PACKAGE_VERSION_MAJOR ${CORE_VERSION_MAJOR})
-set(CPACK_PACKAGE_VERSION_MINOR ${CORE_VERSION_MINOR})
-set(CPACK_PACKAGE_VERSION_PATCH ${CORE_VERSION_PATCH})
-
-set(CPACK_PACKAGE_INSTALL_DIRECTORY "mnmlstc/${PROJECT_NAME}")
-
-set(CPACK_WIX_UPGRADE_GUID "AE6C6986-200F-464C-83EF-C3A94C6C9995")
-set(CPACK_WIX_PRODUCT_GUID "*")
-set(CPACK_WIX_PRODUCT_ICON "${PROJECT_SOURCE_DIR}/package/mnmlstc.ico")
-set(CPACK_WIX_LICENSE_RTF "${PROJECT_SOURCE_DIR}/package/License.rtf")
-set(CPACK_WIX_UI_BANNER "${PROJECT_SOURCE_DIR}/package/banner.bmp")
-set(CPACK_WIX_UI_DIALOG "${PROJECT_SOURCE_DIR}/package/dialog.bmp")
-
-include(CPack)
+if (BUILD_DOCS)
+  install(DIRECTORY "${DOCS_BINARY_DIR}/"
+    DESTINATION ${DOCS_INSTALL_DIR}
+    FILES_MATCHING
+    PATTERN ".buildinfo" EXCLUDE
+    PATTERN "CMakeFiles" EXCLUDE
+    PATTERN ".doctrees" EXCLUDE
+    PATTERN "Makefile" EXCLUDE
+    PATTERN "*.cmake" EXCLUDE
+    PATTERN "*"
+  )
+endif ()
