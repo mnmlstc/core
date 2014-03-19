@@ -11,12 +11,14 @@ namespace core {
 inline namespace v1 {
 namespace impl {
 
+using data_type = add_pointer_t<void>;
+
 template <class Type>
 using is_small = std::integral_constant<bool, sizeof(Type) <= sizeof(void*)>;
 
 struct any_dispatch {
-  using destroy_function = void (*)(void**);
-  using clone_function = void(*)(void* const*, void**);
+  using destroy_function = void (*)(data_type&);
+  using clone_function = void(*)(data_type const&, data_type&);
   using type_function = std::type_info const& (*)();
 
   destroy_function const destroy;
@@ -30,38 +32,40 @@ struct any_dispatch_select;
 template <class Type>
 struct any_dispatch_select<Type, true> {
   using allocator_type = std::allocator<Type>;
+  using allocator_traits = std::allocator_traits<allocator_type>;
 
-  static void clone (void* const* source, void** data) {
+  static void clone (data_type const& source, data_type& data) {
     allocator_type alloc { };
-    auto const& value = *reinterpret_cast<Type const*>(source);
-    auto pointer = reinterpret_cast<Type*>(data);
-    std::allocator_traits<allocator_type>::construct(alloc, pointer, value);
+    auto const& value = reinterpret_cast<Type const&>(source);
+    auto& ref = reinterpret_cast<Type&>(data);
+    allocator_traits::construct(alloc, std::addressof(ref), value);
   }
 
-  static void destroy (void** data) {
+  static void destroy (data_type& data) {
     allocator_type alloc { };
-    auto pointer = reinterpret_cast<Type*>(data);
-    std::allocator_traits<allocator_type>::destroy(alloc, pointer);
+    auto& ref = reinterpret_cast<Type&>(data);
+    allocator_traits::destroy(alloc, std::addressof(ref));
   }
 };
 
 template <class Type>
 struct any_dispatch_select<Type, false> {
   using allocator_type = std::allocator<Type>;
+  using allocator_traits = std::allocator_traits<allocator_type>;
 
-  static void clone (void* const* source, void** data) {
+  static void clone (data_type const& source, data_type& data) {
     allocator_type alloc { };
-    auto const& value = **reinterpret_cast<Type* const*>(source);
-    auto pointer = std::allocator_traits<allocator_type>::allocate(alloc, 1);
-    std::allocator_traits<allocator_type>::construct(alloc, pointer, value);
-    *data = pointer;
+    auto const& value = *static_cast<Type* const&>(source);
+    auto pointer = allocator_traits::allocate(alloc, 1);
+    allocator_traits::construct(alloc, pointer, value);
+    data = pointer;
   }
 
-  static void destroy (void** data) {
+  static void destroy (data_type& data) {
     allocator_type alloc { };
-    auto& value = *reinterpret_cast<Type**>(data);
-    std::allocator_traits<allocator_type>::destroy(alloc, value);
-    std::allocator_traits<allocator_type>::deallocate(alloc, value, 1);
+    auto value = static_cast<Type*>(data);
+    allocator_traits::destroy(alloc, value);
+    allocator_traits::deallocate(alloc, value, 1);
   }
 };
 
@@ -78,8 +82,8 @@ any_dispatch const* get_any_dispatch () {
 template <>
 inline any_dispatch const* get_any_dispatch<void> () {
   static any_dispatch const instance = {
-    [] (void**) { },
-    [] (void* const*, void**) { },
+    [] (data_type&) { },
+    [] (data_type const&, data_type&) { },
     [] () -> std::type_info const& { return typeid(void); }
   };
   return std::addressof(instance);
@@ -100,7 +104,7 @@ class any final {
   template <class ValueType> friend ValueType* any_cast (any*) noexcept;
 
   impl::any_dispatch const* table;
-  void* data;
+  impl::data_type data;
 
   template <class ValueType>
   any (ValueType&& value, std::true_type&&) :
@@ -143,21 +147,19 @@ class any final {
 
   template <class ValueType>
   ValueType const* cast (std::false_type&&) const {
-    return reinterpret_cast<ValueType const*>(this->data);
+    return static_cast<ValueType const*>(this->data);
   }
 
   template <class ValueType>
   ValueType* cast (std::false_type&&) {
-    return reinterpret_cast<ValueType*>(this->data);
+    return static_cast<ValueType*>(this->data);
   }
 
 public:
   any (any const& that) :
     table { that.table },
     data { nullptr }
-  {
-    this->table->clone(std::addressof(that.data), std::addressof(this->data));
-  }
+  { this->table->clone(that.data, this->data); }
 
   any (any&& that) noexcept :
     table { that.table },
@@ -197,7 +199,7 @@ public:
   }
 
   void clear () noexcept {
-    this->table->destroy(std::addressof(this->data));
+    this->table->destroy(this->data);
     this->table = impl::get_any_dispatch<void>();
   }
 
