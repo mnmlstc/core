@@ -6,6 +6,7 @@
 #include <utility>
 
 #include <cstddef>
+#include <core/type_traits.hpp>
 
 namespace core {
 inline namespace v1 {
@@ -83,18 +84,34 @@ auto value_at(T&& value, Ts&&...) -> decltype(std::forward<T>(value)) {
   return std::forward<T>(value);
 }
 
-template <class Callable>
 struct scope_guard final {
-
-  static_assert(
-    std::is_nothrow_move_constructible<Callable>::value,
-    "Given type must be nothrow move constructible"
-  );
-
+  
+  
+  template <class Callable, class = enable_if_t<
+  std::is_constructible<std::function<void()>, Callable>::value>>
   explicit scope_guard (Callable callable) noexcept :
-    callable { std::move(callable) }
-  { }
-
+  callable { std::move(callable) }
+  {
+    static_assert(
+                  std::is_nothrow_move_constructible<Callable>::value,
+                  "Given type must be nothrow move constructible"
+                  );
+  }
+  
+  // wrap arbitary return types
+  template <class Callable, class = enable_if_t<!
+  std::is_constructible<std::function<void()>, Callable>::value>, class = void>
+  explicit scope_guard (Callable callable) noexcept :
+  callable {
+    std::bind([] (const Callable& callable) { callable(); },
+              std::move(callable))
+  } {
+    static_assert(
+                  std::is_nothrow_move_constructible<Callable>::value,
+                  "Given type must be nothrow move constructible"
+                  );
+  };
+  
   scope_guard (scope_guard const&) = delete;
   scope_guard (scope_guard&&) = default;
   scope_guard () = delete;
@@ -104,16 +121,12 @@ struct scope_guard final {
   scope_guard& operator = (scope_guard&&) = default;
 
 private:
-  Callable callable;
+  std::function<void()> callable;
 };
 
 template <class Callable>
-auto make_scope_guard(Callable&& callable) -> scope_guard<
-  typename std::decay<Callable>::type
-> {
-  return scope_guard<typename std::decay<Callable>::type> {
-    std::forward<Callable>(callable)
-  };
+scope_guard make_scope_guard(Callable&& callable) {
+  return scope_guard(callable);
 }
 
 }} /* namespace core::v1 */
