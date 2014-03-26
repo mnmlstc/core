@@ -10,6 +10,16 @@ int main () {
       bool value { false };
       { auto scope = core::make_scope_guard([&]{ value = true; }); }
       assert::is_true(value);
+    },
+    task("constructor") = [] {
+      bool value { false };
+      { core::scope_guard guard([&] { value = true;}); }
+      assert::is_true(value);
+    },
+    task("ignore-return") = [] {
+      bool value { false };
+      { core::scope_guard guard([&] { return value = true;}); }
+      assert::is_true(value);
     }
   };
 
