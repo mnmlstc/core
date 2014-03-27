@@ -55,7 +55,7 @@ struct any_dispatch_select<Type, false> {
 
   static void clone (data_type const& source, data_type& data) {
     allocator_type alloc { };
-    auto const& value = *static_cast<Type* const&>(source);
+    auto const& value = *static_cast<Type* const>(source);
     auto pointer = allocator_traits::allocate(alloc, 1);
     allocator_traits::construct(alloc, pointer, value);
     data = pointer;

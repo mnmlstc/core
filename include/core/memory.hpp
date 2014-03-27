@@ -54,7 +54,7 @@ struct default_copy {
   using pointer = T*;
 
   constexpr default_copy () = default;
-  template <class U> default_copy (default_copy<U> const& copier) noexcept { }
+  template <class U> default_copy (default_copy<U> const&) noexcept { }
 
   pointer operator ()(pointer const ptr) const { return new T { *ptr }; }
 };

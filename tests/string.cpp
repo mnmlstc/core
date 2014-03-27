@@ -12,8 +12,8 @@ int main () {
   test("basic-string-view") = {
     task("default-constructor") = [] {
       constexpr core::string_view ref { };
-      assert::equal(ref.length(), 0);
-      assert::equal(ref.size(), 0);
+      assert::equal(ref.length(), 0u);
+      assert::equal(ref.size(), 0u);
       assert::is_true(ref.empty());
       assert::is_null(ref.data());
     },
@@ -21,8 +21,8 @@ int main () {
     task("copy-constructor") = [] {
       constexpr core::string_view ref { "hello!", 6 };
 
-      assert::equal(ref.length(), 6);
-      assert::equal(ref.size(), 6);
+      assert::equal(ref.length(), 6u);
+      assert::equal(ref.size(), 6u);
       assert::is_false(ref.empty());
       assert::is_not_null(ref.data());
 
@@ -42,7 +42,7 @@ int main () {
 
       assert::is_not_null(ref.data());
       assert::is_false(ref.empty());
-      assert::equal(ref.size(), 11);
+      assert::equal(ref.size(), 11u);
       assert::is(ref.data(), str.data());
     },
 
@@ -62,7 +62,7 @@ int main () {
 
       assert::is_not_null(ref.data());
       assert::is_false(ref.empty());
-      assert::equal(ref.size(), 11);
+      assert::equal(ref.size(), 11u);
     },
 
     task("copy-assignment-operator") = [] {
@@ -89,13 +89,13 @@ int main () {
     task("max-size") = [] {
       constexpr core::string_view ref { };
 
-      assert::equal(ref.max_size(), 0);
+      assert::equal(ref.max_size(), 0u);
     },
 
     task("size") = [] {
       constexpr core::string_view ref { "size", 4 };
 
-      assert::equal(ref.size(), 4);
+      assert::equal(ref.size(), 4u);
     },
 
     task("empty") = [] {
@@ -140,21 +140,21 @@ int main () {
       core::string_view ref { "remove-prefix" };
       ref.remove_prefix(7);
       assert::equal(ref, core::string_view { "prefix" });
-      assert::equal(ref.size(), 6);
+      assert::equal(ref.size(), 6u);
     },
 
     task("remove-suffix") = [] {
       core::string_view ref { "remove-suffix" };
       ref.remove_suffix(7);
       assert::equal(ref, core::string_view { "remove" });
-      assert::equal(ref.size(), 6);
+      assert::equal(ref.size(), 6u);
     },
 
     task("clear") = [] {
       core::string_view ref { "hello", 5 };
 
       assert::is_false(ref.empty());
-      assert::equal(ref.size(), 5);
+      assert::equal(ref.size(), 5u);
 
       ref.clear();
 
@@ -222,11 +222,11 @@ int main () {
       auto npos = core::string_view::npos;
 
       /* char comparisons */
-      assert::equal(ref.find_first_not_of('x'), 0);
-      assert::equal(ref.find_first_not_of('f'), 1);
+      assert::equal(ref.find_first_not_of('x'), 0u);
+      assert::equal(ref.find_first_not_of('f'), 1u);
 
       /* string-view comparisons */
-      assert::equal(ref.find_first_not_of(search_pass), 4);
+      assert::equal(ref.find_first_not_of(search_pass), 4u);
       assert::equal(ref.find_first_not_of(search_fail), npos);
     },
 
@@ -241,7 +241,7 @@ int main () {
       assert::equal(ref.find_last_not_of('f'), ref.size() - 2);
 
       /* string-view comparisons */
-      assert::equal(ref.find_last_not_of(search_pass), 13);
+      assert::equal(ref.find_last_not_of(search_pass), 13u);
       assert::equal(ref.find_last_not_of(search_fail), npos);
     },
 
@@ -254,11 +254,11 @@ int main () {
 
       /* char comparisons */
       assert::equal(ref.find_first_of('x'), npos);
-      assert::equal(ref.find_first_of('f'), 0);
+      assert::equal(ref.find_first_of('f'), 0u);
 
       /* string-view comparisons */
       assert::equal(ref.find_first_of(search_fail), npos);
-      assert::equal(ref.find_first_of(search_pass), 8);
+      assert::equal(ref.find_first_of(search_pass), 8u);
     },
 
     task("find-last-of") = [] {
@@ -272,14 +272,14 @@ int main () {
       assert::equal(ref.find_last_of('x'), npos);
 
       assert::equal(ref.find_last_of(fail), npos);
-      assert::equal(ref.find_last_of(pass), 7);
+      assert::equal(ref.find_last_of(pass), 7u);
     },
 
     task("rfind") = [] {
       core::string_view ref { "rfind" };
       auto npos = core::string_view::npos;
 
-      assert::equal(ref.find("in"), 2);
+      assert::equal(ref.find("in"), 2u);
       assert::equal(ref.find('d'), ref.size() - 1);
 
       assert::equal(ref.find("string"), npos);
@@ -290,8 +290,8 @@ int main () {
       core::string_view ref { "find" };
       auto npos = core::string_view::npos;
 
-      assert::equal(ref.find("in"), 1);
-      assert::equal(ref.find('d'), 3);
+      assert::equal(ref.find("in"), 1u);
+      assert::equal(ref.find('d'), 3u);
 
       assert::equal(ref.find("string"), npos);
       assert::equal(ref.find('x'), npos);
