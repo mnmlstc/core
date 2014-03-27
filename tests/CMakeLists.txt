@@ -6,6 +6,7 @@ include_directories(${UNITTEST_INCLUDE_DIR})
 #------------------------------------------------------------------------------
 # Executable Section
 #------------------------------------------------------------------------------
+add_executable(test-type-traits "${TEST_SOURCE_DIR}/type-traits.cpp")
 add_executable(test-functional "${TEST_SOURCE_DIR}/functional.cpp")
 add_executable(test-iterator "${TEST_SOURCE_DIR}/iterator.cpp")
 add_executable(test-expected "${TEST_SOURCE_DIR}/expected.cpp")
@@ -20,6 +21,7 @@ add_executable(test-any "${TEST_SOURCE_DIR}/any.cpp")
 #------------------------------------------------------------------------------
 # Test Section
 #------------------------------------------------------------------------------
+add_test(type-traits test-type-traits)
 add_test(functional test-functional)
 add_test(iterator test-iterator)
 add_test(expected test-expected)
@@ -34,6 +36,7 @@ add_test(any test-any)
 #------------------------------------------------------------------------------
 # Dependency Section
 #------------------------------------------------------------------------------
+add_dependencies(check test-type-traits)
 add_dependencies(check test-functional)
 add_dependencies(check test-iterator)
 add_dependencies(check test-expected)

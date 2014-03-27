@@ -190,6 +190,15 @@ struct common_type<T, U, Ts...> {
 
 template <class... T> using common_type_t = typename common_type<T...>::type;
 
+template <class T> struct is_null_pointer : std::false_type { };
+
+template <>
+struct is_null_pointer<std::nullptr_t const volatile> : std::true_type { };
+template <>
+struct is_null_pointer<std::nullptr_t volatile> : std::true_type { };
+template <> struct is_null_pointer<std::nullptr_t const> : std::true_type { };
+template <> struct is_null_pointer<std::nullptr_t> : std::true_type { };
+
 }} /* namespace core::v1 */
 
 #endif /* CORE_TYPE_TRAITS_HPP */
