@@ -205,8 +205,9 @@ struct poly_ptr final {
   }
 
   void swap (poly_ptr& that) noexcept {
-    std::swap(this->get_copier(), that.get_copier());
-    std::swap(this->ptr, that.ptr);
+    using std::swap;
+    swap(this->get_copier(), that.get_copier());
+    swap(this->ptr, that.ptr);
   }
 
 private:
@@ -234,6 +235,8 @@ template <
     std::is_same<result_of_t<copier_type(pointer)>, pointer>::value,
     "deleter_type and copier_type have differing pointer types"
   );
+
+  using data_type = std::tuple<pointer, deleter_type, copier_type>;
 
   deep_ptr (
     pointer ptr,
@@ -328,15 +331,18 @@ template <
   }
 
   void reset (pointer ptr = pointer { }) noexcept {
-    std::swap(std::get<0>(this->data), ptr);
+    using std::swap;
+    swap(std::get<0>(this->data), ptr);
     if (not ptr) { return; }
     this->get_deleter()(ptr);
   }
 
-  void swap (deep_ptr& that) noexcept { std::swap(this->data, that.data); }
+  void swap (deep_ptr& that) noexcept(is_nothrow_swappable<data_type>::value) {
+    using std::swap;
+    swap(this->data, that.data);
+  }
 
 private:
-  using data_type = std::tuple<pointer, deleter_type, copier_type>;
   data_type data;
 };
 
@@ -391,7 +397,10 @@ struct observer_ptr final {
     return *this;
   }
 
-  void swap (observer_ptr& that) noexcept { std::swap(this->ptr, that.ptr); }
+  void swap (observer_ptr& that) noexcept {
+    using std::swap;
+    swap(this->ptr, that.ptr);
+  }
 
   explicit operator const_pointer () const noexcept { return this->get(); }
   explicit operator pointer () noexcept { return this->get(); }
@@ -761,27 +770,24 @@ template <
   class... Args
 > auto make_unique(Args&&...) -> void = delete;
 
+template <class T, class D>
+void swap (poly_ptr<T, D>& lhs, poly_ptr<T, D>& rhs) noexcept(
+  noexcept(lhs.swap(rhs))
+) { lhs.swap(rhs); }
+
+template <class T, class D, class C>
+void swap (deep_ptr<T, D, C>& lhs, deep_ptr<T, D, C>& rhs) noexcept(
+  noexcept(lhs.swap(rhs))
+) { lhs.swap(rhs); }
+
+template <class W>
+void swap (observer_ptr<W>& lhs, observer_ptr<W>& rhs) noexcept(
+  noexcept(lhs.swap(rhs))
+) { lhs.swap(rhs); }
+
 }} /* namespace core::v1 */
 
 namespace std {
-
-template <class T, class D>
-void swap (
-  core::v1::poly_ptr<T, D>& lhs,
-  core::v1::poly_ptr<T, D>& rhs
-) noexcept { lhs.swap(rhs); }
-
-template <class T, class Deleter, class Copier>
-void swap (
-  core::v1::deep_ptr<T, Deleter, Copier>& lhs,
-  core::v1::deep_ptr<T, Deleter, Copier>& rhs
-) noexcept { lhs.swap(rhs); }
-
-template <class W>
-void swap (
-  core::v1::observer_ptr<W>& lhs,
-  core::v1::observer_ptr<W>& rhs
-) noexcept { lhs.swap(rhs); }
 
 template <class T, class D>
 struct hash<core::v1::poly_ptr<T, D>> {

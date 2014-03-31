@@ -238,6 +238,27 @@ using is_swappable = std::integral_constant<
 template <class T, class U=T>
 using is_nothrow_swappable = impl::is_nothrow_swappable<T, U>;
 
+/* all-traits */
+template <class...> struct all_traits;
+template <class T, class... Args>
+struct all_traits<T, Args...> : std::integral_constant<bool,
+  T::value and all_traits<Args...>::value
+> { };
+template <> struct all_traits<> : std::true_type { };
+
+/* any-traits */
+template <class...> struct any_traits;
+template <class T, class... Args>
+struct any_traits<T, Args...> : std::integral_constant<bool,
+  T::value or any_traits<Args...>::value
+> { };
+template <> struct any_traits<> : std::false_type { };
+
+/* no-traits */
+template <class... Args> struct no_traits : std::integral_constant<bool,
+  not all_traits<Args...>::value
+> { };
+
 }} /* namespace core::v1 */
 
 #endif /* CORE_TYPE_TRAITS_HPP */

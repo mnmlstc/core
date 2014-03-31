@@ -88,10 +88,11 @@ int main () {
     },
 
     task("swap") = [] {
+      using std::swap;
       std::uint64_t integer = 42;
       core::any value { integer };
       core::any to_swap { };
-      std::swap(value, to_swap);
+      swap(value, to_swap);
       assert::is_true(value.empty());
       assert::is_false(to_swap.empty());
     },

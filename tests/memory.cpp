@@ -160,13 +160,14 @@ int main () {
     },
 
     task("swap") = [] {
+      using std::swap;
       core::poly_ptr<poly::base> lhs { new poly::derived { } };
       core::poly_ptr<poly::base> rhs { };
 
       assert::is_true(bool(lhs));
       assert::is_true(not rhs);
 
-      std::swap(lhs, rhs);
+      swap(lhs, rhs);
 
       assert::is_true(not lhs);
       assert::is_true(bool(rhs));
@@ -476,6 +477,7 @@ int main () {
     },
 
     task("swap") = [] {
+      using std::swap;
       int value_one { 42 };
       int value_two { 43 };
 
@@ -485,7 +487,7 @@ int main () {
       assert::equal(std::addressof(value_one), lhs.get());
       assert::equal(std::addressof(value_two), rhs.get());
 
-      std::swap(lhs, rhs);
+      swap(lhs, rhs);
 
       assert::equal(std::addressof(value_one), rhs.get());
       assert::equal(std::addressof(value_two), lhs.get());

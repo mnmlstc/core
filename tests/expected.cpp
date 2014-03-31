@@ -196,6 +196,7 @@ int main () {
     },
 
     task("swap") = [] {
+      using std::swap;
       auto ptr = std::make_exception_ptr(std::logic_error { "swap" });
       core::expected<int> error { ptr };
       core::expected<int> value { 5 };
@@ -203,7 +204,7 @@ int main () {
       assert::is_true(bool(value));
       assert::is_true(not error);
 
-      std::swap(value, error);
+      swap(value, error);
 
       assert::is_true(bool(error));
       assert::is_true(not value);
@@ -335,6 +336,7 @@ int main () {
     },
 
     task("swap") = [] {
+      using std::swap;
       auto lhs_ptr = std::make_exception_ptr(std::logic_error { "" });
       auto rhs_ptr = std::make_exception_ptr(core::bad_expected_type { "" });
 
@@ -346,8 +348,8 @@ int main () {
       assert::equal(lhs.get_ptr(), lhs_ptr);
       assert::equal(rhs.get_ptr(), rhs_ptr);
 
-      std::swap(lhs, rhs);
- 
+      swap(lhs, rhs);
+
       assert::is_true(not lhs);
       assert::is_true(not rhs);
       assert::equal(lhs.get_ptr(), rhs_ptr);

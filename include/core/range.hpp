@@ -257,9 +257,10 @@ struct range {
     );
   }
 
-  void swap (range& that) noexcept {
-    std::swap(this->begin_, that.begin_);
-    std::swap(this->end_, that.end_);
+  void swap (range& that) noexcept(is_nothrow_swappable<iterator>::value) {
+    using std::swap;
+    swap(this->begin_, that.begin_);
+    swap(this->end_, that.end_);
   }
 
 private:
@@ -302,16 +303,11 @@ auto make_range (std::basic_streambuf<CharT, Traits>* buffer) -> range<
   return make_range(iterator { buffer }, iterator { });
 }
 
-}} /* namespace core::v1 */
-
-namespace std {
-
 template <class Iterator>
-void swap (
-  core::v1::range<Iterator>& lhs,
-  core::v1::range<Iterator>& rhs
-) noexcept { lhs.swap(rhs); }
+void swap (range<Iterator>& lhs, range<Iterator>& rhs) noexcept(
+  noexcept(lhs.swap(rhs))
+) { lhs.swap(rhs); }
 
-} /* namespace std */
+}} /* namespace core::v1 */
 
 #endif /* CORE_RANGE_HPP */

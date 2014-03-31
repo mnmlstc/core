@@ -365,6 +365,7 @@ int main () {
     },
 
     task("swap") = [] {
+      using std::swap;
       std::string second { "second" };
       std::string first { "first" };
 
@@ -390,7 +391,7 @@ int main () {
       assert::equal(rhs[4], 'n');
       assert::equal(rhs[5], 'd');
 
-      std::swap(lhs, rhs);
+      swap(lhs, rhs);
 
       assert::is_false(lhs.empty());
       assert::is_false(rhs.empty());

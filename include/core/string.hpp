@@ -270,8 +270,9 @@ struct basic_string_view {
   }
 
   void swap (basic_string_view& that) noexcept {
-    std::swap(this->str, that.str);
-    std::swap(this->len, that.len);
+    using std::swap;
+    swap(this->str, that.str);
+    swap(this->len, that.len);
   }
 
 private:
@@ -326,15 +327,15 @@ std::basic_ostream<CharT, Traits>& operator << (
   basic_string_view<CharT, Traits> const& str
 ) { for (auto ch : str) { os << ch; } return os; }
 
+template <class CharT, class Traits>
+void swap (
+  basic_string_view<CharT, Traits>& lhs,
+  basic_string_view<CharT, Traits>& rhs
+) noexcept { return lhs.swap(rhs); }
+
 }} /* namespace core::v1 */
 
 namespace std {
-
-template <class CharT, class Traits>
-void swap (
-  core::v1::basic_string_view<CharT, Traits>& lhs,
-  core::v1::basic_string_view<CharT, Traits>& rhs
-) noexcept { return lhs.swap(rhs); }
 
 template <typename CharT, typename Traits>
 struct hash<core::v1::basic_string_view<CharT, Traits>> {

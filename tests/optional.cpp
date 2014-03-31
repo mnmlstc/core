@@ -188,18 +188,19 @@ int main () {
     },
 
     task("swap") = [] {
+      using std::swap;
       core::optional<int> lhs { 4 };
       core::optional<int> rhs { };
       core::optional<int> rhs2 { 4 };
 
-      std::swap(lhs, rhs);
+      swap(lhs, rhs);
 
       assert::is_true(not lhs);
       assert::is_true(bool(rhs));
       assert::equal(rhs, 4);
       assert::equal(rhs, rhs2);
 
-      std::swap(lhs, rhs);
+      swap(lhs, rhs);
 
       assert::is_true(not rhs);
       assert::is_true(bool(lhs));

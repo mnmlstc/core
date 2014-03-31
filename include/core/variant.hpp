@@ -135,9 +135,10 @@ class variant final {
     using data_type = std::reference_wrapper<storage_type>;
     data_type data;
     template <class T>
-    void operator ()(T&& value) noexcept(
-      noexcept(std::swap(std::declval<T&>(), std::declval<T&>()))
-    ) { std::swap(reinterpret_cast<decay_t<T>&>(this->data.get()), value); }
+    void operator ()(T&& value) noexcept(is_nothrow_swappable<T>::value) {
+      using std::swap;
+      swap(reinterpret_cast<decay_t<T>&>(this->data.get()), value);
+    }
   };
 
   struct equality final {
@@ -259,7 +260,9 @@ public:
     return that.visit(less_than { std::cref(this->data) });
   }
 
-  void swap (variant& that) noexcept {
+  void swap (variant& that) noexcept(
+    all_traits<is_nothrow_swappable<Ts>...>::value
+  ) {
     if (this->which() == that.which()) {
       that.visit(swapper { std::ref(this->data) });
       return;
@@ -361,14 +364,14 @@ private:
   std::uint8_t tag;
 };
 
+template <class... Ts>
+void swap (variant<Ts...>& lhs, variant<Ts...>& rhs) noexcept(
+  noexcept(lhs.swap(rhs))
+) { lhs.swap(rhs); }
+
 }} /* namespace core::v1 */
 
 namespace std {
-
-template <class... Ts>
-void swap (core::v1::variant<Ts...>& lhs, core::v1::variant<Ts...>& rhs) {
-  lhs.swap(rhs);
-}
 
 template <class... Ts>
 struct hash<core::v1::variant<Ts...>> {

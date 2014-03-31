@@ -128,18 +128,17 @@ struct expected final {
   }
 
   void swap (expected& that) noexcept(
-    std::is_nothrow_move_constructible<value_type>::value and
-    noexcept(
-      std::swap(std::declval<value_type&>(), std::declval<value_type&>())
-    )
+    is_nothrow_swappable<value_type>::value
   ) {
+    using std::swap;
+
     if (not this->valid and not that.valid) {
-      std::swap(this->ptr, that.ptr);
+      swap(this->ptr, that.ptr);
       return;
     }
 
     if (this->valid and that.valid) {
-      std::swap(this->val, that.val);
+      swap(this->val, that.val);
       return;
     }
 
@@ -206,7 +205,10 @@ struct expected<void> final {
   explicit operator bool () const noexcept { return not this->ptr; }
 
   std::exception_ptr get_ptr () const noexcept { return this->ptr; }
-  void swap (expected& that) noexcept { std::swap(this->ptr, that.ptr); }
+  void swap (expected& that) noexcept {
+    using std::swap;
+    swap(this->ptr, that.ptr);
+  }
 
   template <class E> E expect () const noexcept(false) {
     try { this->raise(); }
@@ -285,15 +287,11 @@ auto make_expected (std::exception_ptr error) noexcept -> expected<T> {
   return expected<T> { error };
 }
 
-}} /* namespace core::v1 */
-
-namespace std {
-
 template <class T>
-void swap (core::v1::expected<T>& lhs, core::v1::expected<T>& rhs) noexcept(
+void swap (expected<T>& lhs, expected<T>& rhs) noexcept(
   noexcept(lhs.swap(rhs))
 ) { lhs.swap(rhs); }
 
-} /* namespace std */
+}} /* namespace core::v1 */
 
 #endif /* CORE_EXPECTED_HPP */

@@ -240,16 +240,17 @@ int main () {
     },
 
     task("swap") = [] {
+      using std::swap;
       using variant_type = core::variant<std::string, double>;
       variant_type lhs_str { std::string { "lhs" } };
       variant_type rhs_str { std::string { "rhs" } };
       variant_type lhs { 0.8 };
 
-      std::swap(lhs_str, rhs_str);
+      swap(lhs_str, rhs_str);
       assert::equal(std::get<0>(lhs_str), std::string { "rhs" });
       assert::equal(std::get<0>(rhs_str), std::string { "lhs" });
 
-      std::swap(lhs, rhs_str);
+      swap(lhs, rhs_str);
       assert::equal(lhs.type(), typeid(std::string));
       assert::equal(rhs_str.type(), typeid(double));
       assert::equal(std::get<0>(lhs), std::string { "lhs" });

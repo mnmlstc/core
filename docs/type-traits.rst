@@ -80,3 +80,20 @@ also documented here.
    It will be ``std::true_type`` if a given swap call on a type is actually
    marked as *noexcept*, and ``std::false_type`` otherwise. This type
    is comparable to libc++'s internal ``__is_nothrow_swappable``.
+
+.. type:: all_traits<Args>
+
+   Given a typelist *Args*, where each type in *Args* is a type trait property
+   that contains a boolean member value, it will ether be equivalent to
+   ``std::true_type`` if *all* of the traits ``value`` members are true.
+   Otherwise, it will be equivalent to ``std::false_type``
+
+.. type:: any_traits<Args>
+
+   Works much like :type:`all_traits\<Args>`, however only *one* of the given
+   traits in *Args* must be true.
+
+.. type:: no_traits<Args>
+
+   The inverse of :type:`all_traits\<Args>`. Will only be true if every
+   trait in *Args* is false.

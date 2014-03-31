@@ -194,8 +194,9 @@ public:
   }
 
   void swap (any& that) noexcept {
-    std::swap(this->table, that.table);
-    std::swap(this->data, that.data);
+    using std::swap;
+    swap(this->table, that.table);
+    swap(this->data, that.data);
   }
 
   void clear () noexcept {
@@ -264,12 +265,8 @@ template <
   return *pointer;
 }
 
+inline void swap (any& lhs, any& rhs) noexcept { lhs.swap(rhs); }
+
 }} /* namespace core::v1 */
-
-namespace std {
-
-inline void swap (core::any& lhs, core::any& rhs) noexcept { lhs.swap(rhs); }
-
-} /* namespace std */
 
 #endif /* CORE_ANY_HPP */

@@ -298,13 +298,14 @@ int main () {
     },
 
     task("swap") = [] {
+      using std::swap;
       core::string_view lhs { "lhs" };
       core::string_view rhs { "rhs" };
 
       assert::equal(lhs, core::string_view { "lhs" });
       assert::equal(rhs, core::string_view { "rhs" });
 
-      std::swap(lhs, rhs);
+      swap(lhs, rhs);
 
       assert::equal(lhs, core::string_view { "rhs" });
       assert::equal(rhs, core::string_view { "lhs" });

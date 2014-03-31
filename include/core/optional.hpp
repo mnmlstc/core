@@ -218,14 +218,12 @@ struct optional final {
   }
 
   void swap (optional& that) noexcept (
-    std::is_nothrow_move_constructible<value_type>::value and
-    noexcept(
-      std::swap(std::declval<value_type&>(), std::declval<value_type&>())
-    )
+    is_nothrow_swappable<value_type>::value
   ) {
+    using std::swap;
     if (not this->engaged and not that.engaged) { return; }
     if (this->engaged and that.engaged) {
-      std::swap(**this, *that);
+      swap(**this, *that);
       return;
     }
 
@@ -326,14 +324,14 @@ bool operator < (optional<T> const& opt, T const& value) noexcept {
   return bool(opt) ? std::less<T>{ }(*opt, value) : true;
 }
 
+template <class T>
+void swap (optional<T>& lhs, optional<T>& rhs) noexcept(
+  noexcept(lhs.swap(rhs))
+) { lhs.swap(rhs); }
+
 }} /* namespace core::v1 */
 
 namespace std {
-
-template <class Type>
-void swap (core::optional<Type>& lhs, core::optional<Type>& rhs) noexcept(
-  noexcept(lhs.swap(rhs))
-) { lhs.swap(rhs); }
 
 template <class Type>
 struct hash<core::optional<Type>> {
