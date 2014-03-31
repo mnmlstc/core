@@ -14,6 +14,7 @@ rather than by feature.
    :maxdepth: 1
 
    Using MNMLSTC Core <usage>
+   type-traits
    functional
    expected
    iterator

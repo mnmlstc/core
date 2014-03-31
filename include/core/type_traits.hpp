@@ -98,7 +98,6 @@ namespace impl {
 struct undefined { undefined (...); };
 
 /* Get the result of an attempt at the INVOKE expression */
-
 /* fallback */
 template <class... Args> auto invoke_expr (undefined, Args&&...) -> undefined;
 
@@ -153,6 +152,34 @@ struct invoke_of<true, Args...> {
   using type = decltype(invoke_expr(std::declval<Args>()...));
 };
 
+/* swappable implementation details */
+using std::declval;
+using std::swap;
+
+template <class T, class U>
+class is_swappable {
+  struct not_found_type { };
+
+  template <class T1, class T2>
+  static auto test (T1& lhs, T2& rhs) -> decltype(swap(lhs, rhs));
+
+  template <class, class> static auto test (...) -> not_found_type;
+
+  using test_type_lr = decltype(test<T, U>(declval<T&>(), declval<U&>()));
+  using test_type_rl = decltype(test<U, T>(declval<U&>(), declval<T&>()));
+
+public:
+  static constexpr bool value =
+    not std::is_same<test_type_lr, not_found_type>::value and
+    not std::is_same<test_type_rl, not_found_type>::value;
+};
+
+template <class T, class U>
+struct is_nothrow_swappable : std::integral_constant<
+  bool,
+  is_swappable<T, U>::value and noexcept(swap(declval<T&>(), declval<U&>()))
+> { };
+
 } /* namespace impl */
 
 template <class... Args> struct invokable : std::integral_constant<
@@ -190,6 +217,7 @@ struct common_type<T, U, Ts...> {
 
 template <class... T> using common_type_t = typename common_type<T...>::type;
 
+/* is_null_pointer */
 template <class T> struct is_null_pointer : std::false_type { };
 
 template <>
@@ -198,6 +226,17 @@ template <>
 struct is_null_pointer<std::nullptr_t volatile> : std::true_type { };
 template <> struct is_null_pointer<std::nullptr_t const> : std::true_type { };
 template <> struct is_null_pointer<std::nullptr_t> : std::true_type { };
+
+/* is_swappable */
+template <class T, class U=T>
+using is_swappable = std::integral_constant<
+  bool,
+  impl::is_swappable<T, U>::value
+>;
+
+/* is_nothrow_swappable */
+template <class T, class U=T>
+using is_nothrow_swappable = impl::is_nothrow_swappable<T, U>;
 
 }} /* namespace core::v1 */
 
