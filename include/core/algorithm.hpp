@@ -591,6 +591,198 @@ auto remove_copy_if (Range&& rng, OutputIt&& it, UnaryPred&& up) -> enable_if_t<
   );
 }
 
+template <class Range, class T>
+auto replace (Range&& rng, T const& old, T const& value) -> enable_if_t<
+  is_range<Range>::value
+> {
+  auto range = make_range(::std::forward<Range>(rng));
+  constexpr auto is_forward = decltype(range)::is_input;
+  static_assert(is_forward, "replace requires ForwardIterators");
+  return ::std::replace(
+    ::std::begin(range),
+    ::std::end(range),
+    old,
+    value
+  );
+}
+
+template <class Range, class UnaryPred, class T>
+auto replace_if (Range&& rng, UnaryPred&& up, T const& value) -> enable_if_t<
+  is_range<Range>::value
+> {
+  auto range = make_range(::std::forward<Range>(rng));
+  constexpr auto is_forward = decltype(range)::is_forward;
+  static_assert(is_forward, "replace_if requires ForwardIterators");
+  return ::std::replace_if(
+    ::std::begin(range),
+    ::std::end(range),
+    ::std::forward<UnaryPred>(up),
+    value
+  );
+}
+
+template <class Range, class OutputIt, class T>
+auto replace_copy (Range&& rng, OutputIt&& it, T const& value) -> enable_if_t<
+  is_range<Range>::value,
+  decay_t<OutputIt>
+> {
+  auto range = make_range(::std::forward<Range>(rng));
+  constexpr auto is_input = decltype(range)::is_input;
+  static_assert(is_input, "replace_copy requires InputIterators");
+  return ::std::replace_copy(
+    ::std::begin(range),
+    ::std::end(range),
+    ::std::forward<OutputIt>(it),
+    value
+  );
+}
+
+template <class Range, class OutputIt, class UnaryPred, class T>
+auto replace_copy_if (
+  Range&& rng,
+  OutputIt&& it,
+  UnaryPred&& up,
+  T const& value
+) -> enable_if_t<
+  is_range<Range>::value,
+  decay_t<OutputIt>
+> {
+  auto range = make_range(::std::forward<Range>(rng));
+  constexpr auto is_input = decltype(range)::is_input;
+  static_assert(is_input, "replace_copy_if requires InputIterators");
+  return ::std::replace_copy_if(
+    ::std::begin(range),
+    ::std::end(range),
+    ::std::forward<OutputIt>(it),
+    ::std::forward<UnaryPred>(up),
+    value
+  );
+}
+
+template <class Range>
+auto reverse (Range&& rng) -> enable_if_t<is_range<Range>::value> {
+  auto range = make_range(::std::forward<Range>(rng));
+  constexpr auto is_bidir = decltype(range)::is_bidirectional;
+  static_assert(is_bidir, "reverse requires BidirectionalIterators");
+  return ::std::reverse(::std::begin(range), ::std::end(range));
+}
+
+template <class Range, class OutputIt>
+auto reverse_copy (Range&& rng, OutputIt&& it) -> enable_if_t<
+  is_range<Range>::value,
+  decay_t<OutputIt>
+> {
+  auto range = make_range(::std::forward<Range>(rng));
+  constexpr auto is_bidir = decltype(range)::is_bidirectional;
+  static_assert(is_bidir, "reverse_copy requires BidirectionalIterators");
+  return ::std::reverse_copy(
+    ::std::begin(range),
+    ::std::end(range),
+    ::std::forward<OutputIt>(it)
+  );
+}
+
+template <class Range, class ForwardIt>
+auto rotate (Range&& rng, ForwardIt&& it) -> enable_if_t<
+  is_range<Range>::value
+> {
+  auto range = make_range(::std::forward<Range>(rng));
+  constexpr auto is_forward = decltype(range)::is_forward;
+  static_assert(is_forward, "rotate requires ForwardIterators");
+  return ::std::rotate(
+    ::std::begin(range),
+    ::std::forward<ForwardIt>(it),
+    ::std::end(range)
+  );
+}
+
+template <class Range, class ForwardIt, class OutputIt>
+auto rotate_copy (Range&& rng, ForwardIt&& it, OutputIt&& ot) -> enable_if_t<
+  is_range<Range>::value
+> {
+  auto range = make_range(::std::forward<Range>(rng));
+  constexpr auto is_forward = decltype(range)::is_forward;
+  static_assert(is_forward, "rotate_copy requires ForwardIterators");
+  return ::std::rotate_copy(
+    ::std::begin(range),
+    ::std::forward<ForwardIt>(it),
+    ::std::end(range),
+    ::std::forward<OutputIt>(ot)
+  );
+}
+
+template <class Range, class URNG>
+auto shuffle (Range&& rng, URNG&& g) -> enable_if_t<
+  is_range<Range>::value
+> {
+  auto range = make_range(::std::forward<Range>(rng));
+  constexpr auto is_random = decltype(range)::is_random;
+  static_assert(is_random, "shuffle requires RandomIterators");
+  return ::std::shuffle(
+    ::std::begin(range),
+    ::std::end(range),
+    ::std::forward<URNG>(g)
+  );
+}
+
+template <class Range>
+auto unique (Range&& rng) -> enable_if_t<
+  is_range<Range>::value,
+  decltype(::std::begin(::std::forward<Range>(rng)))
+> {
+  auto range = make_range(::std::forward<Range>(rng));
+  constexpr auto is_forward = decltype(range)::is_forward;
+  static_assert(is_forward, "unique requires ForwardIterators");
+  return ::std::unique(::std::begin(range), ::std::end(range));
+}
+
+template <class Range, class BinaryPredicate>
+auto unique (Range&& rng, BinaryPredicate&& bp) -> enable_if_t<
+  is_range<Range>::value,
+  decltype(::std::begin(::std::forward<Range>(rng)))
+> {
+  auto range = make_range(::std::forward<Range>(rng));
+  constexpr auto is_forward = decltype(range)::is_forward;
+  static_assert(is_forward, "unique requires ForwardIterators");
+  return ::std::unique(
+    ::std::begin(range),
+    ::std::end(range),
+    ::std::forward<BinaryPredicate>(bp)
+  );
+}
+
+template <class Range, class OutputIt>
+auto unique_copy (Range&& rng, OutputIt&& it) -> enable_if_t<
+  is_range<Range>::value,
+  decay_t<OutputIt>
+> {
+  auto range = make_range(::std::forward<Range>(rng));
+  constexpr auto is_input = decltype(range)::is_input;
+  static_assert(is_input, "unique_copy requires InputIterators");
+  return ::std::unique_copy(
+    ::std::begin(range),
+    ::std::end(range),
+    ::std::forward<OutputIt>(it)
+  );
+}
+
+template <class Range, class OutputIt, class BinaryPred>
+auto unique_copy (Range&& rng, OutputIt&& it, BinaryPred&& bp) -> enable_if_t<
+  is_range<Range>::value,
+  decay_t<OutputIt>
+> {
+  auto range = make_range(::std::forward<Range>(rng));
+  constexpr auto is_input = decltype(range)::is_input;
+  static_assert(is_input, "unique_copy requires InputIterators");
+  return ::std::unique_copy(
+    ::std::begin(range),
+    ::std::end(range),
+    ::std::forward<OutputIt>(it)
+  );
+}
+
+
+
 }} /* namespace core::v1 */
 
 #endif /* CORE_ALGORITHM_HPP */
