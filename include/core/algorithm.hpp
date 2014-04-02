@@ -433,21 +433,6 @@ auto copy_if (Range&& rng, OutputIt&& it, UnaryPredicate&& up) -> enable_if_t<
   );
 }
 
-template <class Range, class Size, class OutputIt>
-auto copy_n (Range&& rng, Size&& count, OutputIt&& it) -> enable_if_t<
-  is_range<Range>::value,
-  decay_t<OutputIt>
-> {
-  auto range = make_range(::std::forward<Range>(rng));
-  constexpr auto is_input = decltype(range)::is_input;
-  static_assert(is_input, "copy_n requires InputIterators");
-  return ::std::copy_n(
-    ::std::begin(range),
-    ::std::forward<Size>(count),
-    ::std::forward<OutputIt>(it)
-  );
-}
-
 template <class Range, class BidirIt>
 auto copy_backward (Range&& rng, BidirIt&& it) -> enable_if_t<
   is_range<Range>::value,
@@ -503,16 +488,6 @@ auto fill (Range&& rng, T const& value) -> enable_if_t<
   return ::std::fill(::std::begin(range), ::std::end(range), value);
 }
 
-template <class Range, class Size, class T>
-auto fill_n (Range&& rng, Size&& count, T const& value) -> enable_if_t<
-  is_range<Range>::value
-> {
-  auto range = make_range(::std::forward<Range>(rng));
-  constexpr auto is_output = decltype(range)::is_output;
-  static_assert(is_output, "fill_n requires OutputIterators");
-  return ::std::fill_n(::std::begin(range), ::std::forward<Size>(count), value);
-}
-
 template <class Range, class OutputIt, class UnaryOperation>
 auto transform (
   Range&& rng,
@@ -557,6 +532,65 @@ auto transform (
     ::std::forward<BinaryOperation>(op)
   );
 }
+
+template <class Range, class T>
+auto remove (Range&& rng, T const& value) -> enable_if_t<
+  is_range<Range>::value,
+  decltype(::std::begin(::std::forward<Range>(rng)))
+> {
+  auto range = make_range(::std::forward<Range>(rng));
+  constexpr auto is_forward = decltype(range)::is_forward;
+  static_assert(is_forward, "remove requires ForwardIterators");
+  return ::std::remove(::std::begin(range), ::std::end(range), value);
+}
+
+template <class Range, class UnaryPredicate>
+auto remove_if (Range&& rng, UnaryPredicate&& up) -> enable_if_t<
+  is_range<Range>::value,
+  decltype(::std::begin(::std::forward<Range>(rng)))
+> {
+  auto range = make_range(::std::forward<Range>(rng));
+  constexpr auto is_forward = decltype(range)::is_forward;
+  static_assert(is_forward, "remove_if requires ForwardIterators");
+  return ::std::remove_if(
+    ::std::begin(range),
+    ::std::end(range),
+    ::std::forward<UnaryPredicate>(up)
+  );
+}
+
+template <class Range, class OutputIt, class T>
+auto remove_copy (Range&& rng, OutputIt&& it, T const& value) -> enable_if_t<
+  is_range<Range>::value,
+  decay_t<OutputIt>
+> {
+  auto range = make_range(::std::forward<Range>(rng));
+  constexpr auto is_input = decltype(range)::is_input;
+  static_assert(is_input, "remove_copy requires InputIterators");
+  return ::std::remove_copy(
+    ::std::begin(range),
+    ::std::end(range),
+    ::std::forward<OutputIt>(it),
+    value
+  );
+}
+
+template <class Range, class OutputIt, class UnaryPred>
+auto remove_copy_if (Range&& rng, OutputIt&& it, UnaryPred&& up) -> enable_if_t<
+  is_range<Range>::value,
+  decay_t<OutputIt>
+> {
+  auto range = make_range(::std::forward<Range>(rng));
+  constexpr auto is_input = decltype(range)::is_input;
+  static_assert(is_input, "remove_copy_if requires InputIterators");
+  return ::std::remove_copy_if(
+    ::std::begin(range),
+    ::std::end(range),
+    ::std::forward<OutputIt>(it),
+    ::std::forward<UnaryPred>(up)
+  );
+}
+
 }} /* namespace core::v1 */
 
 #endif /* CORE_ALGORITHM_HPP */
