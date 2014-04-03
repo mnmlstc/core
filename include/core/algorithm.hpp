@@ -1167,6 +1167,279 @@ auto equal_range (Range&& rng, T const& value, Compare&& cmp) -> enable_if_t<
   );
 }
 
+/* set operations (on sorted ranges) */
+template <class Range1, class Range2, class OutputIt>
+auto merge (Range1&& rng1, Range2&& rng2, OutputIt&& it) -> enable_if_t<
+  is_range<Range>::value,
+  decay_t<OutputIt>
+> {
+  auto range1 = make_range(::std::forward<Range1>(rng1));
+  auto range2 = make_range(::std::forward<Range2>(rng2));
+  constexpr auto is_input1 = decltype(range1)::is_input;
+  constexpr auto is_input2 = decltype(range2)::is_input;
+  static_assert(is_input1, "merge requires InputIterators");
+  static_assert(is_input2, "merge requires InputIterators");
+  return ::std::merge(
+    ::std::begin(range1),
+    ::std::end(range1),
+    ::std::begin(range2),
+    ::std::end(range2),
+    ::std::forward<OutputIt>(it)
+  );
+}
+
+template <class Range, class BidirIt>
+auto inplace_merge (Range&& rng, BidirIt&& it) -> enable_if_t<
+  is_range<Range>::value
+> {
+  auto range = make_range(::std::forward<Range>(rng));
+  constexpr auto is_bidir = decltype(range)::is_bidirectional;
+  static_assert(is_bidir, "inplace_merge requires BidirectionalIterators");
+  return ::std::inplace_merge(
+    ::std::begin(range),
+    ::std::end(range),
+    ::std::forward<BidirIt>(it)
+  );
+}
+
+template <class Range, class BidirIt, class Compare>
+auto inplace_merge (Range&& rng, BidirIt&& it, Compare&& cmp) -> enable_if_t<
+  is_range<Range>::value
+> {
+  auto range = make_range(::std::forward<Range>(rng));
+  constexpr auto is_bidir = decltype(range)::is_bidirectional;
+  static_assert(is_bidir, "inplace_merge requires BidirectionalIterators");
+  return ::std::inplace_merge(
+    ::std::begin(range),
+    ::std::end(range),
+    ::std::forward<BidirIt>(it),
+    ::std::forward<Compare>(cmp)
+  );
+}
+
+template <class Range1, class Range2>
+auto includes (Range1&& rng1, Range2& rng2) -> enable_if_t<
+  all_traits<is_range<Range1>, is_range<Range2>>,
+  bool
+> {
+  auto range1 = make_range(::std::forward<Range1>(rng1));
+  auto range2 = make_range(::std::forward<Range2>(rng2));
+  constexpr auto is_input1 = decltype(range1)::is_input;
+  constexpr auto is_input2 = decltype(range2)::is_input;
+  static_assert(is_input1, "includes requires InputIterators");
+  static_assert(is_input2, "includes requires InputIterators");
+  return ::std::includes(
+    ::std::begin(range1),
+    ::std::end(range1),
+    ::std::begin(range2),
+    ::std::end(range2)
+  );
+}
+
+template <class Range1, class Range2, class Compare>
+auto includes (Range1&& rng1, Range2& rng2, Compare&& cmp) -> enable_if_t<
+  all_traits<is_range<Range1>, is_range<Range2>>,
+  bool
+> {
+  auto range1 = make_range(::std::forward<Range1>(rng1));
+  auto range2 = make_range(::std::forward<Range2>(rng2));
+  constexpr auto is_input1 = decltype(range1)::is_input;
+  constexpr auto is_input2 = decltype(range2)::is_input;
+  static_assert(is_input1, "includes requires InputIterators");
+  static_assert(is_input2, "includes requires InputIterators");
+  return ::std::includes(
+    ::std::begin(range1),
+    ::std::end(range1),
+    ::std::begin(range2),
+    ::std::end(range2),
+    ::std::forward<Compare>(cmp)
+  );
+}
+
+template <class Range1, class Range2, class OutputIt>
+auto set_difference (Range1&& rng1, Range2&& rng2, OutputIt&& it) -> enable_if_t<
+  all_traits<is_range<Range1>, is_range<Range2>>,
+  decay_t<OutputIt>
+> {
+  auto range1 = make_range(::std::forward<Range1>(rng1));
+  auto range2 = make_range(::std::forward<Range2>(rng2));
+  constexpr auto is_input1 = decltype(range1)::is_input;
+  constexpr auto is_input2 = decltype(range2)::is_input;
+  static_assert(is_input1, "set_difference requires InputIterators");
+  static_assert(is_input2, "set_difference requires InputIterators");
+  return ::std::set_difference(
+    ::std::begin(range1),
+    ::std::end(range1),
+    ::std::begin(range2),
+    ::std::end(range2),
+    ::std::forward<OutputIt>(it)
+  );
+}
+
+template <class Range1, class Range2, class OutputIt, class Compare>
+auto set_difference (
+  Range1&& rng1,
+  Range2&& rng2,
+  OutputIt&& it,
+  Compare&& cmp
+) -> enable_if_t<
+  all_traits<is_range<Range1>, is_range<Range2>>,
+  decay_t<OutputIt>
+> {
+  auto range1 = make_range(::std::forward<Range1>(rng1));
+  auto range2 = make_range(::std::forward<Range2>(rng2));
+  constexpr auto is_input1 = decltype(range1)::is_input;
+  constexpr auto is_input2 = decltype(range2)::is_input;
+  static_assert(is_input1, "set_difference requires InputIterators");
+  static_assert(is_input2, "set_difference requires InputIterators");
+  return ::std::set_difference(
+    ::std::begin(range1),
+    ::std::end(range1),
+    ::std::begin(range2),
+    ::std::end(range2),
+    ::std::forward<OutputIt>(it),
+    ::std::forward<Compare>(cmp)
+  );
+}
+
+template <class Range1, class Range2, class OutputIt>
+auto set_intersection (Range1&& rng1, Range2&& rng2, OutputIt&& it) -> enable_if_t<
+  all_traits<is_range<Range1>, is_range<Range2>>,
+  decay_t<OutputIt>
+> {
+  auto range1 = make_range(::std::forward<Range1>(rng1));
+  auto range2 = make_range(::std::forward<Range2>(rng2));
+  constexpr auto is_input1 = decltype(range1)::is_input;
+  constexpr auto is_input2 = decltype(range2)::is_input;
+  static_assert(is_input1, "set_intersection requires InputIterators");
+  static_assert(is_input2, "set_intersection requires InputIterators");
+  return ::std::set_intersection(
+    ::std::begin(range1),
+    ::std::end(range1),
+    ::std::begin(range2),
+    ::std::end(range2),
+    ::std::forward<OutputIt>(it)
+  );
+}
+
+template <class Range1, class Range2, class OutputIt, class Compare>
+auto set_intersection (
+  Range1&& rng1,
+  Range2&& rng2,
+  OutputIt&& it,
+  Compare&& cmp
+) -> enable_if_t<
+  all_traits<is_range<Range1>, is_range<Range2>>,
+  decay_t<OutputIt>
+> {
+  auto range1 = make_range(::std::forward<Range1>(rng1));
+  auto range2 = make_range(::std::forward<Range2>(rng2));
+  constexpr auto is_input1 = decltype(range1)::is_input;
+  constexpr auto is_input2 = decltype(range2)::is_input;
+  static_assert(is_input1, "set_intersection requires InputIterators");
+  static_assert(is_input2, "set_intersection requires InputIterators");
+  return ::std::set_intersection(
+    ::std::begin(range1),
+    ::std::end(range1),
+    ::std::begin(range2),
+    ::std::end(range2),
+    ::std::forward<OutputIt>(it),
+    ::std::forward<Compare>(cmp)
+  );
+}
+
+template <class Range1, class Range2, class OutputIt>
+auto set_symmetric_difference (Range1&& rng1, Range2&& rng2, OutputIt&& it) -> enable_if_t<
+  all_traits<is_range<Range1>, is_range<Range2>>,
+  decay_t<OutputIt>
+> {
+  auto range1 = make_range(::std::forward<Range1>(rng1));
+  auto range2 = make_range(::std::forward<Range2>(rng2));
+  constexpr auto is_input1 = decltype(range1)::is_input;
+  constexpr auto is_input2 = decltype(range2)::is_input;
+  static_assert(is_input1, "set_symmetric_difference requires InputIterators");
+  static_assert(is_input2, "set_symmetric_difference requires InputIterators");
+  return ::std::set_symmetric_difference(
+    ::std::begin(range1),
+    ::std::end(range1),
+    ::std::begin(range2),
+    ::std::end(range2),
+    ::std::forward<OutputIt>(it)
+  );
+}
+
+template <class Range1, class Range2, class OutputIt, class Compare>
+auto set_symmetric_difference (
+  Range1&& rng1,
+  Range2&& rng2,
+  OutputIt&& it,
+  Compare&& cmp
+) -> enable_if_t<
+  all_traits<is_range<Range1>, is_range<Range2>>,
+  decay_t<OutputIt>
+> {
+  auto range1 = make_range(::std::forward<Range1>(rng1));
+  auto range2 = make_range(::std::forward<Range2>(rng2));
+  constexpr auto is_input1 = decltype(range1)::is_input;
+  constexpr auto is_input2 = decltype(range2)::is_input;
+  static_assert(is_input1, "set_symmetric_difference requires InputIterators");
+  static_assert(is_input2, "set_symmetric_difference requires InputIterators");
+  return ::std::set_symmetric_difference(
+    ::std::begin(range1),
+    ::std::end(range1),
+    ::std::begin(range2),
+    ::std::end(range2),
+    ::std::forward<OutputIt>(it),
+    ::std::forward<Compare>(cmp)
+  );
+}
+
+template <class Range1, class Range2, class OutputIt>
+auto set_union (Range1&& rng1, Range2&& rng2, OutputIt&& it) -> enable_if_t<
+  all_traits<is_range<Range1>, is_range<Range2>>,
+  decay_t<OutputIt>
+> {
+  auto range1 = make_range(::std::forward<Range1>(rng1));
+  auto range2 = make_range(::std::forward<Range2>(rng2));
+  constexpr auto is_input1 = decltype(range1)::is_input;
+  constexpr auto is_input2 = decltype(range2)::is_input;
+  static_assert(is_input1, "set_union requires InputIterators");
+  static_assert(is_input2, "set_union requires InputIterators");
+  return ::std::set_union(
+    ::std::begin(range1),
+    ::std::end(range1),
+    ::std::begin(range2),
+    ::std::end(range2),
+    ::std::forward<OutputIt>(it)
+  );
+}
+
+template <class Range1, class Range2, class OutputIt, class Compare>
+auto set_union (
+  Range1&& rng1,
+  Range2&& rng2,
+  OutputIt&& it,
+  Compare&& cmp
+) -> enable_if_t<
+  all_traits<is_range<Range1>, is_range<Range2>>,
+  decay_t<OutputIt>
+> {
+  auto range1 = make_range(::std::forward<Range1>(rng1));
+  auto range2 = make_range(::std::forward<Range2>(rng2));
+  constexpr auto is_input1 = decltype(range1)::is_input;
+  constexpr auto is_input2 = decltype(range2)::is_input;
+  static_assert(is_input1, "set_union requires InputIterators");
+  static_assert(is_input2, "set_union requires InputIterators");
+  return ::std::set_union(
+    ::std::begin(range1),
+    ::std::end(range1),
+    ::std::begin(range2),
+    ::std::end(range2),
+    ::std::forward<OutputIt>(it),
+    ::std::forward<Compare>(cmp)
+  );
+}
+
 }} /* namespace core::v1 */
 
 #endif /* CORE_ALGORITHM_HPP */
