@@ -1601,6 +1601,227 @@ auto sort_heap (Range&& rng, Compare&& cmp) -> enable_if_t<
   );
 }
 
+/* min/max operations */
+template <class Range>
+auto max_element (Range&& rng) -> enable_if_t<
+  is_range<Range>::value,
+  decltype(::std::begin(::std::forward<Range>(rng)))
+> {
+  auto range = make_range(::std::forward<Range>(rng));
+  constexpr auto is_forward = decltype(range)::is_forward;
+  static_assert(is_forward, "max_element requires ForwardIterators");
+  return ::std::max_element(::std::begin(range), ::std::end(range));
+}
+
+template <class Range, class Compare>
+auto max_element (Range&& rng, Compare&& cmp) -> enable_if_t<
+  is_range<Range>::value,
+  decltype(::std::begin(::std::forward<Range>(rng)))
+> {
+  auto range = make_range(::std::forward<Range>(rng));
+  constexpr auto is_forward = decltype(range)::is_forward;
+  static_assert(is_forward, "max_element requires ForwardIterators");
+  return ::std::max_element(
+    ::std::begin(range),
+    ::std::end(range),
+    ::std::forward<Compare>(cmp)
+  );
+}
+
+template <class Range>
+auto min_element (Range&& rng) -> enable_if_t<
+  is_range<Range>::value,
+  decltype(::std::begin(::std::forward<Range>(rng)))
+> {
+  auto range = make_range(::std::forward<Range>(rng));
+  constexpr auto is_forward = decltype(range)::is_forward;
+  static_assert(is_forward, "min_element requires ForwardIterators");
+  return ::std::min_element(::std::begin(range), ::std::end(range));
+}
+
+template <class Range, class Compare>
+auto min_element (Range&& rng, Compare&& cmp) -> enable_if_t<
+  is_range<Range>::value,
+  decltype(::std::begin(::std::forward<Range>(rng)))
+> {
+  auto range = make_range(::std::forward<Range>(rng));
+  constexpr auto is_forward = decltype(range)::is_forward;
+  static_assert(is_forward, "min_element requires ForwardIterators");
+  return ::std::min_element(
+    ::std::begin(range),
+    ::std::end(range),
+    ::std::forward<Compare>(cmp)
+  );
+}
+
+template <class Range>
+auto minmax_element (Range&& rng) -> enable_if_t<
+  is_range<Range>::value,
+  std::pair<
+    decltype(::std::begin(::std::forward<Range>(rng))),
+    decltype(::std::begin(::std::forward<Range>(rng)))
+  >
+> {
+  auto range = make_range(::std::forward<Range>(rng));
+  constexpr auto is_forward = decltype(range)::is_forward;
+  static_assert(is_forward, "minmax_element requires ForwardIterators");
+  return ::std::minmax_element(::std::begin(range), ::std::end(range));
+}
+
+template <class Range, class Compare>
+auto minmax_element (Range&& rng, Compare&& cmp) -> enable_if_t<
+  is_range<Range>::value,
+  std::pair<
+    range<decltype(::std::begin(::std::forward<Range>(rng)))>,
+    range<decltype(::std::begin(::std::forward<Range>(rng)))>
+  >
+> {
+  auto range = make_range(::std::forward<Range>(rng));
+  constexpr auto is_forward = decltype(range)::is_forward;
+  static_assert(is_forward, "minmax_element requires ForwardIterators");
+  return ::std::minmax_element(
+    ::std::begin(range),
+    ::std::end(range),
+    ::std::forward<Compare>(cmp)
+  );
+}
+
+template <class Range1, class Range2>
+auto lexicographical_compare (Range1&& rng1, Range2&& rng2) -> enable_if_t<
+  all_traits<is_range<Range1>, is_range<Range2>>::value,
+  bool
+> {
+  auto range1 = make_range(::std::forward<Range1>(rng1));
+  auto range2 = make_range(::std::forward<Range2>(rng2));
+  constexpr auto is_input1 = decltype(range1)::is_input;
+  constexpr auto is_input2 = decltype(range2)::is_input;
+  static_assert(is_input1, "lexicographical_compare requires InputIterators");
+  static_assert(is_input2, "lexicographical_compare requires InputIterators");
+  return ::std::lexicographical_compare(
+    ::std::begin(range1),
+    ::std::end(range1),
+    ::std::begin(range2),
+    ::std::end(range2)
+  );
+}
+
+template <class Range1, class Range2, class Compare>
+auto lexicographical_compare (
+  Range1&& rng1,
+  Range2&& rng2,
+  Compare&& cmp
+) -> enable_if_t<
+  all_traits<is_range<Range1>, is_range<Range2>>::value,
+  bool
+> {
+  auto range1 = make_range(::std::forward<Range1>(rng1));
+  auto range2 = make_range(::std::forward<Range2>(rng2));
+  constexpr auto is_input1 = decltype(range1)::is_input;
+  constexpr auto is_input2 = decltype(range2)::is_input;
+  static_assert(is_input1, "lexicographical_compare requires InputIterators");
+  static_assert(is_input2, "lexicographical_compare requires InputIterators");
+  return ::std::lexicographical_compare(
+    ::std::begin(range1),
+    ::std::end(range1),
+    ::std::begin(range2),
+    ::std::end(range2),
+    ::std::forward<Compare>(cmp)
+  );
+}
+
+template <class Range1, class Range2>
+auto is_permutation (Range1&& rng1, Range2&& rng2) -> enable_if_t<
+  all_traits<is_range<Range1>, is_range<Range2>>::value,
+  bool
+> {
+  auto range1 = make_range(::std::forward<Range1>(rng1));
+  auto range2 = make_range(::std::forward<Range2>(rng2));
+  constexpr auto is_forward1 = decltype(range1)::is_forward;
+  constexpr auto is_forward2 = decltype(range2)::is_forward;
+  static_assert(is_forward1, "is_permutation requires ForwardIterators");
+  static_assert(is_forward2, "is_permutation requires ForwardIterators");
+  return ::std::lexicographical_compare(
+    ::std::begin(range1),
+    ::std::end(range1),
+    ::std::begin(range2)
+  );
+}
+
+template <class Range1, class Range2, class BinaryPredicate>
+auto is_permutation (
+  Range1&& rng1,
+  Range2&& rng2,
+  BinaryPredicate&& bp
+) -> enable_if_t<
+  all_traits<is_range<Range1>, is_range<Range2>>::value,
+  bool
+> {
+  auto range1 = make_range(::std::forward<Range1>(rng1));
+  auto range2 = make_range(::std::forward<Range2>(rng2));
+  constexpr auto is_forward1 = decltype(range1)::is_forward;
+  constexpr auto is_forward2 = decltype(range2)::is_forward;
+  static_assert(is_forward1, "is_permutation requires ForwardIterators");
+  static_assert(is_forward2, "is_permutation requires ForwardIterators");
+  return ::std::lexicographical_compare(
+    ::std::begin(range1),
+    ::std::end(range1),
+    ::std::begin(range2),
+    ::std::forward<BinaryPredicate>(bp)
+  );
+}
+
+template <class Range>
+auto next_permutation (Range&& rng) -> enable_if_t<
+  is_range<Range>::value,
+  bool
+> {
+  auto range = make_range(::std::forward<Range>(rng));
+  constexpr auto is_bidir = decltype(range)::is_bidirectional;
+  static_assert(is_bidir, "next_permutation requires BidirectionalIterators");
+  return ::std::next_permutation(::std::begin(range), ::std::end(range));
+}
+
+template <class Range, class Compare>
+auto next_permutation (Range&& rng, Compare&& cmp) -> enable_if_t<
+  is_range<Range>::value,
+  bool
+> {
+  auto range = make_range(::std::forward<Range>(rng));
+  constexpr auto is_bidir = decltype(range)::is_bidirectional;
+  static_assert(is_bidir, "next_permutation requires BidirectionalIterators");
+  return ::std::next_permutation(
+    ::std::begin(range),
+    ::std::end(range),
+    ::std::forward<Compare>(cmp)
+  );
+}
+
+template <class Range>
+auto prev_permutation (Range&& rng) -> enable_if_t<
+  is_range<Range>::value,
+  bool
+> {
+  auto range = make_range(::std::forward<Range>(rng));
+  constexpr auto is_bidir = decltype(range)::is_bidirectional;
+  static_assert(is_bidir, "prev_permutation requires BidirectionalIterators");
+  return ::std::prev_permutation(::std::begin(range), ::std::end(range));
+}
+
+template <class Range, class Compare>
+auto prev_permutation (Range&& rng, Compare&& cmp) -> enable_if_t<
+  is_range<Range>::value,
+  bool
+> {
+  auto range = make_range(::std::forward<Range>(rng));
+  constexpr auto is_bidir = decltype(range)::is_bidirectional;
+  static_assert(is_bidir, "prev_permutation requires BidirectionalIterators");
+  return ::std::prev_permutation(
+    ::std::begin(range),
+    ::std::end(range),
+    ::std::forward<Compare>(cmp)
+  );
+}
+
 }} /* namespace core::v1 */
 
 #endif /* CORE_ALGORITHM_HPP */
