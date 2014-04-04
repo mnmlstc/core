@@ -1170,7 +1170,7 @@ auto equal_range (Range&& rng, T const& value, Compare&& cmp) -> enable_if_t<
 /* set operations (on sorted ranges) */
 template <class Range1, class Range2, class OutputIt>
 auto merge (Range1&& rng1, Range2&& rng2, OutputIt&& it) -> enable_if_t<
-  is_range<Range>::value,
+  all_traits<is_range<Range1>, is_range<Range2>>::value,
   decay_t<OutputIt>
 > {
   auto range1 = make_range(::std::forward<Range1>(rng1));
@@ -1185,6 +1185,32 @@ auto merge (Range1&& rng1, Range2&& rng2, OutputIt&& it) -> enable_if_t<
     ::std::begin(range2),
     ::std::end(range2),
     ::std::forward<OutputIt>(it)
+  );
+}
+
+template <class Range1, class Range2, class OutputIt, class Compare>
+auto merge (
+  Range1&& rng1,
+  Range2&& rng2,
+  OutputIt&& it,
+  Compare&& cmp
+) -> enable_if_t<
+  all_traits<is_range<Range1>, is_range<Range2>>::value,
+  decay_t<OutputIt>
+> {
+  auto range1 = make_range(::std::forward<Range1>(rng1));
+  auto range2 = make_range(::std::forward<Range2>(rng2));
+  constexpr auto is_input1 = decltype(range1)::is_input;
+  constexpr auto is_input2 = decltype(range2)::is_input;
+  static_assert(is_input1, "merge requires InputIterators");
+  static_assert(is_input2, "merge requires InputIterators");
+  return ::std::merge(
+    ::std::begin(range1),
+    ::std::end(range1),
+    ::std::begin(range2),
+    ::std::end(range2),
+    ::std::forward<OutputIt>(it),
+    ::std::forward<Compare>(cmp)
   );
 }
 
@@ -1219,7 +1245,7 @@ auto inplace_merge (Range&& rng, BidirIt&& it, Compare&& cmp) -> enable_if_t<
 
 template <class Range1, class Range2>
 auto includes (Range1&& rng1, Range2& rng2) -> enable_if_t<
-  all_traits<is_range<Range1>, is_range<Range2>>,
+  all_traits<is_range<Range1>, is_range<Range2>>::value,
   bool
 > {
   auto range1 = make_range(::std::forward<Range1>(rng1));
@@ -1238,7 +1264,7 @@ auto includes (Range1&& rng1, Range2& rng2) -> enable_if_t<
 
 template <class Range1, class Range2, class Compare>
 auto includes (Range1&& rng1, Range2& rng2, Compare&& cmp) -> enable_if_t<
-  all_traits<is_range<Range1>, is_range<Range2>>,
+  all_traits<is_range<Range1>, is_range<Range2>>::value,
   bool
 > {
   auto range1 = make_range(::std::forward<Range1>(rng1));
@@ -1258,7 +1284,7 @@ auto includes (Range1&& rng1, Range2& rng2, Compare&& cmp) -> enable_if_t<
 
 template <class Range1, class Range2, class OutputIt>
 auto set_difference (Range1&& rng1, Range2&& rng2, OutputIt&& it) -> enable_if_t<
-  all_traits<is_range<Range1>, is_range<Range2>>,
+  all_traits<is_range<Range1>, is_range<Range2>>::value,
   decay_t<OutputIt>
 > {
   auto range1 = make_range(::std::forward<Range1>(rng1));
@@ -1283,7 +1309,7 @@ auto set_difference (
   OutputIt&& it,
   Compare&& cmp
 ) -> enable_if_t<
-  all_traits<is_range<Range1>, is_range<Range2>>,
+  all_traits<is_range<Range1>, is_range<Range2>>::value,
   decay_t<OutputIt>
 > {
   auto range1 = make_range(::std::forward<Range1>(rng1));
@@ -1304,7 +1330,7 @@ auto set_difference (
 
 template <class Range1, class Range2, class OutputIt>
 auto set_intersection (Range1&& rng1, Range2&& rng2, OutputIt&& it) -> enable_if_t<
-  all_traits<is_range<Range1>, is_range<Range2>>,
+  all_traits<is_range<Range1>, is_range<Range2>>::value,
   decay_t<OutputIt>
 > {
   auto range1 = make_range(::std::forward<Range1>(rng1));
@@ -1329,7 +1355,7 @@ auto set_intersection (
   OutputIt&& it,
   Compare&& cmp
 ) -> enable_if_t<
-  all_traits<is_range<Range1>, is_range<Range2>>,
+  all_traits<is_range<Range1>, is_range<Range2>>::value,
   decay_t<OutputIt>
 > {
   auto range1 = make_range(::std::forward<Range1>(rng1));
@@ -1350,7 +1376,7 @@ auto set_intersection (
 
 template <class Range1, class Range2, class OutputIt>
 auto set_symmetric_difference (Range1&& rng1, Range2&& rng2, OutputIt&& it) -> enable_if_t<
-  all_traits<is_range<Range1>, is_range<Range2>>,
+  all_traits<is_range<Range1>, is_range<Range2>>::value,
   decay_t<OutputIt>
 > {
   auto range1 = make_range(::std::forward<Range1>(rng1));
@@ -1375,7 +1401,7 @@ auto set_symmetric_difference (
   OutputIt&& it,
   Compare&& cmp
 ) -> enable_if_t<
-  all_traits<is_range<Range1>, is_range<Range2>>,
+  all_traits<is_range<Range1>, is_range<Range2>>::value,
   decay_t<OutputIt>
 > {
   auto range1 = make_range(::std::forward<Range1>(rng1));
@@ -1396,7 +1422,7 @@ auto set_symmetric_difference (
 
 template <class Range1, class Range2, class OutputIt>
 auto set_union (Range1&& rng1, Range2&& rng2, OutputIt&& it) -> enable_if_t<
-  all_traits<is_range<Range1>, is_range<Range2>>,
+  all_traits<is_range<Range1>, is_range<Range2>>::value,
   decay_t<OutputIt>
 > {
   auto range1 = make_range(::std::forward<Range1>(rng1));
@@ -1421,7 +1447,7 @@ auto set_union (
   OutputIt&& it,
   Compare&& cmp
 ) -> enable_if_t<
-  all_traits<is_range<Range1>, is_range<Range2>>,
+  all_traits<is_range<Range1>, is_range<Range2>>::value,
   decay_t<OutputIt>
 > {
   auto range1 = make_range(::std::forward<Range1>(rng1));
@@ -1436,6 +1462,141 @@ auto set_union (
     ::std::begin(range2),
     ::std::end(range2),
     ::std::forward<OutputIt>(it),
+    ::std::forward<Compare>(cmp)
+  );
+}
+
+/* heap operations */
+template <class Range>
+auto is_heap (Range&& rng) -> enable_if_t<is_range<Range>::value, bool> {
+  auto range = make_range(::std::forward<Range>(rng));
+  constexpr auto is_random = decltype(range)::is_random;
+  static_assert(is_random, "is_heap requires RandomIterators");
+  return ::std::is_heap(::std::begin(range), ::std::end(range));
+}
+
+template <class Range, class Compare>
+auto is_heap (Range&& rng, Compare&& cmp) -> enable_if_t<
+  is_range<Range>::value,
+  bool
+> {
+  auto range = make_range(::std::forward<Range>(rng));
+  constexpr auto is_random = decltype(range)::is_random;
+  static_assert(is_random, "is_heap requires RandomIterators");
+  return ::std::is_heap(
+    ::std::begin(range),
+    ::std::end(range),
+    ::std::forward<Compare>(cmp)
+  );
+}
+
+template <class Range>
+auto is_heap_until (Range&& rng) -> enable_if_t<is_range<Range>::value, bool> {
+  auto range = make_range(::std::forward<Range>(rng));
+  constexpr auto is_random = decltype(range)::is_random;
+  static_assert(is_random, "is_heap_until requires RandomIterators");
+  return ::std::is_heap_until(::std::begin(range), ::std::end(range));
+}
+
+template <class Range, class Compare>
+auto is_heap_until (Range&& rng, Compare&& cmp) -> enable_if_t<
+  is_range<Range>::value,
+  bool
+> {
+  auto range = make_range(::std::forward<Range>(rng));
+  constexpr auto is_random = decltype(range)::is_random;
+  static_assert(is_random, "is_heap_until requires RandomIterators");
+  return ::std::is_heap_until(
+    ::std::begin(range),
+    ::std::end(range),
+    ::std::forward<Compare>(cmp)
+  );
+}
+
+template <class Range>
+auto make_heap (Range&& rng) -> enable_if_t<is_range<Range>::value> {
+  auto range = make_range(::std::forward<Range>(rng));
+  constexpr auto is_random = decltype(range)::is_random;
+  static_assert(is_random, "make_heap requires RandomIterators");
+  return ::std::make_heap(::std::begin(range), ::std::end(range));
+}
+
+template <class Range, class Compare>
+auto make_heap (Range&& rng, Compare&& cmp) -> enable_if_t<
+  is_range<Range>::value
+> {
+  auto range = make_range(::std::forward<Range>(rng));
+  constexpr auto is_random = decltype(range)::is_random;
+  static_assert(is_random, "make_heap requires RandomIterators");
+  return ::std::make_heap(
+    ::std::begin(range),
+    ::std::end(range),
+    ::std::forward<Compare>(cmp)
+  );
+}
+
+template <class Range>
+auto push_heap (Range&& rng) -> enable_if_t<is_range<Range>::value> {
+  auto range = make_range(::std::forward<Range>(rng));
+  constexpr auto is_random = decltype(range)::is_random;
+  static_assert(is_random, "push_heap requires RandomIterators");
+  return ::std::push_heap(::std::begin(range), ::std::end(range));
+}
+
+template <class Range, class Compare>
+auto push_heap (Range&& rng, Compare&& cmp) -> enable_if_t<
+  is_range<Range>::value
+> {
+  auto range = make_range(::std::forward<Range>(rng));
+  constexpr auto is_random = decltype(range)::is_random;
+  static_assert(is_random, "push_heap requires RandomIterators");
+  return ::std::push_heap(
+    ::std::begin(range),
+    ::std::end(range),
+    ::std::forward<Compare>(cmp)
+  );
+}
+
+template <class Range>
+auto pop_heap (Range&& rng) -> enable_if_t<is_range<Range>::value> {
+  auto range = make_range(::std::forward<Range>(rng));
+  constexpr auto is_random = decltype(range)::is_random;
+  static_assert(is_random, "pop_heap requires RandomIterators");
+  return ::std::pop_heap(::std::begin(range), ::std::end(range));
+}
+
+template <class Range, class Compare>
+auto pop_heap (Range&& rng, Compare&& cmp) -> enable_if_t<
+  is_range<Range>::value
+> {
+  auto range = make_range(::std::forward<Range>(rng));
+  constexpr auto is_random = decltype(range)::is_random;
+  static_assert(is_random, "pop_heap requires RandomIterators");
+  return ::std::pop_heap(
+    ::std::begin(range),
+    ::std::end(range),
+    ::std::forward<Compare>(cmp)
+  );
+}
+
+template <class Range>
+auto sort_heap (Range&& rng) -> enable_if_t<is_range<Range>::value> {
+  auto range = make_range(::std::forward<Range>(rng));
+  constexpr auto is_random = decltype(range)::is_random;
+  static_assert(is_random, "sort_heap requires RandomIterators");
+  return ::std::sort_heap(::std::begin(range), ::std::end(range));
+}
+
+template <class Range, class Compare>
+auto sort_heap (Range&& rng, Compare&& cmp) -> enable_if_t<
+  is_range<Range>::value
+> {
+  auto range = make_range(::std::forward<Range>(rng));
+  constexpr auto is_random = decltype(range)::is_random;
+  static_assert(is_random, "sort_heap requires RandomIterators");
+  return ::std::sort_heap(
+    ::std::begin(range),
+    ::std::end(range),
     ::std::forward<Compare>(cmp)
   );
 }
