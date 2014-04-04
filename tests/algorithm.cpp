@@ -1,4 +1,5 @@
 #include <core/algorithm.hpp>
+#include <initializer_list>
 #include <vector>
 
 #include <unittest/unittest.hpp>
@@ -7,11 +8,29 @@ int main () {
   using namespace unittest;
 
   test("algorithm") = {
-    task("all-of") = [] { assert::fail(); },
-    task("any-of") = [] { assert::fail(); },
-    task("none-of") = [] { assert::fail(); },
-    task("for-each") = [] { assert::fail(); },
-    task("count") = [] { assert::fail(); },
+    task("all-of") = [] {
+      auto result = core::all_of({ 1, 2, 3, 4, 5}, [](int v) { return v > 0; });
+      assert::is_true(result);
+    },
+
+    task("any-of") = [] {
+      auto result = core::any_of({ 1, 2, 3 }, [](int v) { return v % 2 == 0; });
+      assert::is_true(result);
+    },
+
+    task("none-of") = [] {
+      auto result = core::none_of({ 1, 2, 3 }, [](int v) { return v <= 0; });
+      assert::is_true(result);
+    },
+
+    task("for-each") = [] {
+      core::for_each({ 1, 2, 3 }, [](int v) { assert::greater(v, 0); });
+    },
+
+    task("count") = [] {
+      assert::fail();
+    },
+
     task("count-if") = [] { assert::fail(); },
     task("mismatch") = [] { assert::fail(); },
     task("equal") = [] { assert::fail(); },

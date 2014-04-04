@@ -1,6 +1,7 @@
 #ifndef CORE_ALGORITHM_HPP
 #define CORE_ALGORITHM_HPP
 
+#include <initializer_list>
 #include <algorithm>
 
 #include <core/range.hpp>
@@ -24,6 +25,11 @@ auto all_of (Range&& rng, UnaryPredicate&& p) -> enable_if_t<
   );
 }
 
+template <class T, class UnaryPredicate>
+bool all_of (std::initializer_list<T> ilist, UnaryPredicate&& p) {
+  return all_of(make_range(ilist), ::std::forward<UnaryPredicate>(p));
+}
+
 template <class Range, class UnaryPredicate>
 auto any_of (Range&& rng, UnaryPredicate&& p) -> enable_if_t<
   is_range<Range>::value,
@@ -37,6 +43,11 @@ auto any_of (Range&& rng, UnaryPredicate&& p) -> enable_if_t<
     ::std::end(range),
     ::std::forward<UnaryPredicate>(p)
   );
+}
+
+template <class T, class UnaryPredicate>
+bool any_of (std::initializer_list<T> ilist, UnaryPredicate&& p) {
+  return any_of(make_range(ilist), ::std::forward<UnaryPredicate>(p));
 }
 
 template <class Range, class UnaryPredicate>
@@ -54,6 +65,11 @@ auto none_of (Range&& rng, UnaryPredicate&& p) -> enable_if_t<
   );
 }
 
+template <class T, class UnaryPredicate>
+bool none_of (std::initializer_list<T> ilist, UnaryPredicate&& p) {
+  return none_of(make_range(ilist), ::std::forward<UnaryPredicate>(p));
+}
+
 template <class Range, class UnaryFunction>
 auto for_each (Range&& rng, UnaryFunction&& f) -> enable_if_t<
   is_range<Range>::value,
@@ -68,6 +84,11 @@ auto for_each (Range&& rng, UnaryFunction&& f) -> enable_if_t<
     ::std::forward<UnaryFunction>(f)
   );
 }
+
+template <class T, class UnaryFunction>
+auto for_each (std::initializer_list<T> ilist, UnaryFunction&& f) -> decay_t<
+  UnaryFunction
+> { return for_each(make_range(ilist), ::std::forward<UnaryFunction>(f)); }
 
 template <class Range, class T>
 auto count (Range&& rng, T const& value) -> enable_if_t<
