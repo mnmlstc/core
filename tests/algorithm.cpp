@@ -28,10 +28,14 @@ int main () {
     },
 
     task("count") = [] {
-      assert::fail();
+      assert::equal(core::count({ 1, 2, 1, 1 }, 1), 3);
     },
 
-    task("count-if") = [] { assert::fail(); },
+    task("count-if") = [] {
+      auto result = core::count_if({ 1, 2, 1 }, [](int v) { return v % 2; });
+      assert::equal(result, 2);
+    },
+
     task("mismatch") = [] { assert::fail(); },
     task("equal") = [] { assert::fail(); },
     task("find") = [] { assert::fail(); },

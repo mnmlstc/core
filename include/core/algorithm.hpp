@@ -107,6 +107,11 @@ auto count (Range&& rng, T const& value) -> enable_if_t<
   return ::std::count(::std::begin(range), ::std::end(range), value);
 }
 
+template <class T>
+auto count (std::initializer_list<T> ilist, T const& value) -> decltype(
+  count(make_range(ilist), value)
+) { return count(make_range(ilist), value); }
+
 template <class Range, class UnaryPredicate>
 auto count_if (Range&& rng, UnaryPredicate&& p) -> enable_if_t<
   is_range<Range>::value,
@@ -127,6 +132,11 @@ auto count_if (Range&& rng, UnaryPredicate&& p) -> enable_if_t<
     ::std::forward<UnaryPredicate>(p)
   );
 }
+
+template <class T, class UnaryPredicate>
+auto count_if (std::initializer_list<T> ilist, UnaryPredicate&& up) -> decltype(
+  count_if(make_range(ilist), ::std::forward<UnaryPredicate>(up))
+) { return count_if(make_range(ilist), ::std::forward<UnaryPredicate>(up)); }
 
 template <class Range, class InputIt>
 auto mismatch(Range&& rng, InputIt&& it) -> enable_if_t<
@@ -438,6 +448,11 @@ auto copy (Range&& rng, OutputIt&& it) -> enable_if_t<
   );
 }
 
+template <class T, class OutputIt>
+auto copy (std::initializer_list<T> ilist, OutputIt&& it) -> decay_t<OutputIt> {
+  return copy(make_range(ilist), ::std::forward<OutputIt>(it));
+}
+
 template <class Range, class OutputIt, class UnaryPredicate>
 auto copy_if (Range&& rng, OutputIt&& it, UnaryPredicate&& up) -> enable_if_t<
   is_range<Range>::value,
@@ -449,6 +464,19 @@ auto copy_if (Range&& rng, OutputIt&& it, UnaryPredicate&& up) -> enable_if_t<
   return ::std::copy_if(
     ::std::begin(range),
     ::std::end(range),
+    ::std::forward<OutputIt>(it),
+    ::std::forward<UnaryPredicate>(up)
+  );
+}
+
+template <class T, class OutputIt, class UnaryPredicate>
+auto copy_if (
+  std::initializer_list<T> ilist,
+  OutputIt&& it,
+  UnaryPredicate&& up
+) -> decay_t<OutputIt> {
+  return copy_if(
+    make_range(ilist),
     ::std::forward<OutputIt>(it),
     ::std::forward<UnaryPredicate>(up)
   );
