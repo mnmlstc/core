@@ -827,6 +827,21 @@ auto replace_copy_if (
   );
 }
 
+template <class Range, class ForwardIt>
+auto swap_ranges (Range&& rng, ForwardIt&& it) -> enable_if_t<
+  is_range<Range>::value,
+  decay_t<ForwardIt>
+> {
+  auto range = make_range(::std::forward<Range>(rng));
+  constexpr auto is_forward = decltype(range)::is_forward;
+  static_assert(is_forward, "swap_ranges requires ForwardIterators");
+  return ::std::swap_ranges(
+    ::std::begin(range),
+    ::std::end(range),
+    ::std::forward<ForwardIt>(it)
+  );
+}
+
 template <class Range>
 auto reverse (Range&& rng) -> enable_if_t<is_range<Range>::value> {
   auto range = make_range(::std::forward<Range>(rng));
