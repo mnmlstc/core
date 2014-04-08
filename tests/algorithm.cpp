@@ -219,7 +219,20 @@ int main () {
         [] (char ch) { return ::std::isalpha(ch); }
       );
       assert::equal(output, std::string { "--" });
-    }
+    },
+
+    task("replace") = [] { assert::fail(); },
+    task("replace-if") = [] { assert::fail(); },
+    task("replace-copy") = [] { assert::fail(); },
+    task("replace-copy-if") = [] { assert::fail(); },
+    task("swap-ranges") = [] { assert::fail(); },
+    task("reverse") = [] { assert::fail(); },
+    task("reverse-copy") = [] { assert::fail(); },
+    task("rotate") = [] { assert::fail(); },
+    task("rotate-copy") = [] { assert::fail(); },
+    task("shuffle") = [] { assert::fail(); },
+    task("unique") = [] { assert::fail(); },
+    task("unique-copy") = [] { assert::fail(); }
   };
 
   monitor::run();
