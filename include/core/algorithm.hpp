@@ -822,7 +822,7 @@ auto replace_copy_if (
   return replace_copy_if(
     make_range(ilist),
     ::std::forward<OutputIt>(it),
-    ::std::forward<UnaryPred>(up)
+    ::std::forward<UnaryPred>(up),
     value
   );
 }
@@ -851,14 +851,9 @@ auto reverse_copy (Range&& rng, OutputIt&& it) -> enable_if_t<
 }
 
 template <class T, class OutputIt>
-auto reverse_copy (
-  std::initializer_list<T> ilist,
-  OutputIt&& it,
-  T const& value
-) -> decay_t<OutputIt> {
-  return reverse_copy(make_range(ilist), ::std::forward<OutputIt>(it), value);
-}
-
+auto reverse_copy (std::initializer_list<T> ilist, OutputIt&& it) -> decay_t<
+  OutputIt
+> { return reverse_copy(make_range(ilist), ::std::forward<OutputIt>(it)); }
 
 template <class Range, class ForwardIt>
 auto rotate (Range&& rng, ForwardIt&& it) -> enable_if_t<
@@ -968,6 +963,19 @@ auto unique_copy (Range&& rng, OutputIt&& it, BinaryPred&& bp) -> enable_if_t<
   );
 }
 
+template <class T, class OutputIt, class BinaryPred>
+auto unique_copy (
+  std::initializer_list<T> ilist,
+  OutputIt&& it,
+  BinaryPred&& bp
+) -> decay_t<OutputIt> {
+  return unique_copy(
+    make_range(ilist),
+    ::std::forward<OutputIt>(it),
+    ::std::forward<BinaryPred>(bp)
+  );
+}
+
 /* partitioning operations */
 template <class Range, class UnaryPredicate>
 auto is_partitioned (Range&& rng, UnaryPredicate&& up) -> enable_if_t<
@@ -1020,6 +1028,22 @@ auto partition_copy (
     ::std::forward<UnaryPred>(up)
   );
 }
+
+template <class T, class OutputTrue, class OutputFalse, class UnaryPredicate>
+auto partition_copy (
+  std::initializer_list<T> ilist,
+  OutputTrue&& ot,
+  OutputFalse&& of,
+  UnaryPredicate&& up
+) -> std::pair<decay_t<OutputTrue>, decay_t<OutputFalse>> {
+  return partition_copy(
+    make_range(ilist),
+    ::std::forward<OutputTrue>(ot),
+    ::std::forward<OutputFalse>(of),
+    ::std::forward<UnaryPredicate>(up)
+  );
+}
+
 
 template <class Range, class UnaryPredicate>
 auto stable_partition (Range&& rng, UnaryPredicate&& up) -> enable_if_t<
@@ -1170,6 +1194,14 @@ auto partial_sort_copy (IRange&& irng, RRange&& rrng) -> enable_if_t<
   );
 }
 
+template <class T, class Range>
+auto partial_sort_copy (
+  std::initializer_list<T> ilist,
+  Range&& rng
+) -> decltype(::std::begin(::std::forward<Range>(rng))) {
+  return partial_sort_copy(make_range(ilist), ::std::forward<Range>(rng));
+}
+
 template <class IRange, class RRange, class Compare>
 auto partial_sort_copy (
   IRange&& irng,
@@ -1193,6 +1225,20 @@ auto partial_sort_copy (
     ::std::forward<Compare>(cmp)
   );
 }
+
+template <class T, class Range, class Compare>
+auto partial_sort_copy (
+  std::initializer_list<T> ilist,
+  Range&& rng,
+  Compare&& cmp
+) -> decltype(::std::begin(::std::forward<Range>(rng))) {
+  return partial_sort_copy(
+    make_range(ilist),
+    ::std::forward<Range>(rng),
+    ::std::forward<Compare>(cmp)
+  );
+}
+
 
 template <class Range>
 auto stable_sort (Range&& rng) -> enable_if_t<is_range<Range>::value> {
