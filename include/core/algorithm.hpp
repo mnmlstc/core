@@ -959,7 +959,8 @@ auto unique_copy (Range&& rng, OutputIt&& it, BinaryPred&& bp) -> enable_if_t<
   return ::std::unique_copy(
     ::std::begin(range),
     ::std::end(range),
-    ::std::forward<OutputIt>(it)
+    ::std::forward<OutputIt>(it),
+    ::std::forward<BinaryPred>(bp)
   );
 }
 
