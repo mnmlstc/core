@@ -1,5 +1,6 @@
 #include <core/algorithm.hpp>
 #include <initializer_list>
+#include <random>
 #include <vector>
 
 #include <unittest/unittest.hpp>
@@ -304,7 +305,12 @@ int main () {
       assert::equal(output[9], 4);
     },
 
-    task("shuffle") = [] { assert::fail(); },
+    task("shuffle") = [] {
+      std::vector<int> values { 1, 2, 3, 4, 5 };
+      std::random_device rd { };
+      core::shuffle(values, std::mt19937 { rd() });
+    },
+
     task("unique") = [] { assert::fail(); },
     task("unique-copy") = [] { assert::fail(); },
     task("is-partitioned") = [] { assert::fail(); },
