@@ -311,19 +311,110 @@ int main () {
       core::shuffle(values, std::mt19937 { rd() });
     },
 
-    task("unique") = [] { assert::fail(); },
-    task("unique-copy") = [] { assert::fail(); },
-    task("is-partitioned") = [] { assert::fail(); },
-    task("partition") = [] { assert::fail(); },
-    task("partition-copy") = [] { assert::fail(); },
-    task("stable-partition") = [] { assert::fail(); },
-    task("partition-point") = [] { assert::fail(); },
-    task("is-sorted") = [] { assert::fail(); },
-    task("is-sorted-until") = [] { assert::fail(); },
-    task("sort") = [] { assert::fail(); },
-    task("partial-sort") = [] { assert::fail(); },
-    task("partial-sort-copy") = [] { assert::fail(); },
+    task("unique") = [] {
+      std::vector<int> values { 1, 1, 2, 3, 4, 5 };
+      auto result = core::unique(values);
+      assert::not_equal(result, ::std::end(values));
+    },
+
+    task("unique-copy") = [] {
+      std::vector<int> values { 1, 1, 2, 3, 4, 5 };
+      std::vector<int> output { };
+      std::ignore = core::unique_copy(values, ::std::back_inserter(output));
+      assert::equal(output[0], 1);
+      assert::equal(output[1], 2);
+      assert::equal(output[2], 3);
+      assert::equal(output[3], 4);
+      assert::equal(output[4], 5);
+    },
+
+    task("is-partitioned") = [] {
+      auto is_even = [] (int v) { return v % 2 == 0; };
+      std::vector<int> values { 2, 4, 1, 3, 5 };
+      assert::is_true(core::is_partitioned(values, is_even));
+    },
+
+    task("partition") = [] {
+      auto is_odd = [] (int v) { return v % 2; };
+      std::vector<int> values { 1, 2, 3, 4, 5, 6 };
+      auto second_group = core::partition(values, is_odd);
+      assert::equal(std::distance(second_group, ::std::end(values)), 3);
+    },
+
+    task("partition-copy") = [] {
+      auto is_odd = [] (int v) { return v % 2; };
+      std::vector<int> values { 1, 2, 3, 4, 5, 6 };
+      std::vector<int> even { };
+      std::vector<int> odds { };
+      std::ignore = core::partition_copy(
+        values,
+        ::std::back_inserter(odds),
+        ::std::back_inserter(even),
+        is_odd
+      );
+      assert::is_true(core::none_of(even, is_odd));
+      assert::is_true(core::all_of(odds, is_odd));
+    },
+
+    task("stable-partition") = [] {
+      auto is_odd = [] (int v) { return v % 2; };
+      std::vector<int> values { 1, 2, 3, 4, 5, 6 };
+      std::ignore = core::stable_partition(values, is_odd);
+      assert::equal(values[0], 1);
+      assert::equal(values[1], 3);
+      assert::equal(values[2], 5);
+      assert::equal(values[3], 2);
+      assert::equal(values[4], 4);
+      assert::equal(values[5], 6);
+    },
+
+    task("partition-point") = [] {
+      auto is_odd = [] (int v) { return v % 2; };
+      std::vector<int> values { 1, 2, 3, 4, 5, 6 };
+      auto result = core::stable_partition(values, is_odd);
+      auto point = core::partition_point(values, is_odd);
+      assert::equal(point, result);
+    },
+
+    task("is-sorted") = [] {
+      std::vector<int> values { 1, 2, 3, 4, 5 };
+      assert::is_true(core::is_sorted(values));
+    },
+
+    task("is-sorted-until") = [] {
+      std::vector<int> values { 1, 2, 3, 4, 5, 4, 3 };
+      assert::not_equal(::std::end(values), core::is_sorted_until(values));
+    },
+
+    task("sort") = [] {
+      std::vector<int> values { 5, 4, 3, 2, 1 };
+      core::sort(values);
+      assert::equal(values[0], 1);
+      assert::equal(values[1], 2);
+      assert::equal(values[2], 3);
+      assert::equal(values[3], 4);
+      assert::equal(values[4], 5);
+    },
+
+    task("partial-sort") = [] {
+      std::vector<int> values { 1, 4, 5, 6, 3, 2 };
+      core::partial_sort(values, std::begin(values) + 3);
+      assert::equal(values[0], 1);
+      assert::equal(values[1], 2);
+      assert::equal(values[2], 3);
+    },
+
+    task("partial-sort-copy") = [] {
+      std::vector<int> values { 1, 4, 5, 6, 2, 3 };
+      std::vector<int> output(3);
+      core::partial_sort_copy(values, output);
+      assert::equal(output[0], 1);
+      assert::equal(output[1], 2);
+      assert::equal(output[2], 3);
+    },
+
     task("stable-sort") = [] { assert::fail(); },
+
     task("nth-element") = [] { assert::fail(); },
     task("lower-bound") = [] { assert::fail(); },
     task("upper-bound") = [] { assert::fail(); },
