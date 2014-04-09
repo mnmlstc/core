@@ -883,7 +883,7 @@ auto rotate (Range&& rng, ForwardIt&& it) -> enable_if_t<
   auto range = make_range(::std::forward<Range>(rng));
   constexpr auto is_forward = decltype(range)::is_forward;
   static_assert(is_forward, "rotate requires ForwardIterators");
-  return ::std::rotate(
+  ::std::rotate(
     ::std::begin(range),
     ::std::forward<ForwardIt>(it),
     ::std::end(range)
