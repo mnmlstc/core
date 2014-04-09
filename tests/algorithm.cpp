@@ -492,7 +492,15 @@ int main () {
       assert::is_true(core::includes(values, subgroup));
     },
 
-    task("set-difference") = [] { assert::fail(); },
+    task("set-difference") = [] {
+      std::vector<int> values { 1, 2, 3, 5, 6, 7 };
+      std::vector<int> diff { 1, 2, 3, 4, 5, 6, 7 };
+      std::vector<int> output { };
+      core::set_difference(diff, values, ::std::back_inserter(output));
+      assert::equal(output.size(), 1u);
+      assert::equal(output.front(), 4);
+    },
+
     task("set-intersection") = [] { assert::fail(); },
     task("set-symmetric-difference") = [] { assert::fail(); },
     task("set-union") = [] { assert::fail(); },
