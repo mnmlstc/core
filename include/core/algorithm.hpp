@@ -892,7 +892,8 @@ auto rotate (Range&& rng, ForwardIt&& it) -> enable_if_t<
 
 template <class Range, class ForwardIt, class OutputIt>
 auto rotate_copy (Range&& rng, ForwardIt&& it, OutputIt&& ot) -> enable_if_t<
-  is_range<Range>::value
+  is_range<Range>::value,
+  decay_t<OutputIt>
 > {
   auto range = make_range(::std::forward<Range>(rng));
   constexpr auto is_forward = decltype(range)::is_forward;

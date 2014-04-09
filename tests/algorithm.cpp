@@ -287,7 +287,23 @@ int main () {
       assert::equal(value[9], 5);
     },
 
-    task("rotate-copy") = [] { assert::fail(); },
+    task("rotate-copy") = [] {
+      std::vector<int> value { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+      std::vector<int> output { };
+      auto rotator = ::std::begin(value) + 5;
+      core::rotate_copy(value, rotator, ::std::back_inserter(output));
+      assert::equal(output[0], 5);
+      assert::equal(output[1], 6);
+      assert::equal(output[2], 7);
+      assert::equal(output[3], 8);
+      assert::equal(output[4], 9);
+      assert::equal(output[5], 0);
+      assert::equal(output[6], 1);
+      assert::equal(output[7], 2);
+      assert::equal(output[8], 3);
+      assert::equal(output[9], 4);
+    },
+
     task("shuffle") = [] { assert::fail(); },
     task("unique") = [] { assert::fail(); },
     task("unique-copy") = [] { assert::fail(); },
