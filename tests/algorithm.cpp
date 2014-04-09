@@ -627,8 +627,15 @@ int main () {
       assert::is_true(core::is_permutation(lhs, rhs));
     },
 
-    task("next_permutation") = [] { assert::fail(); },
-    task("prev-permutation") = [] { assert::fail(); }
+    task("next_permutation") = [] {
+      std::string text { "abc" };
+      assert::is_true(core::next_permutation(text));
+    },
+
+    task("prev-permutation") = [] {
+      std::string text { "cba" };
+      assert::is_true(core::prev_permutation(text));
+    }
   };
 
   monitor::run();
