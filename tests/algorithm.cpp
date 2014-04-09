@@ -225,7 +225,14 @@ int main () {
     task("replace-if") = [] { assert::fail(); },
     task("replace-copy") = [] { assert::fail(); },
     task("replace-copy-if") = [] { assert::fail(); },
-    task("swap-ranges") = [] { assert::fail(); },
+
+    task("swap-ranges") = [] {
+      std::string hello { "hello" };
+      std::vector<char> world { 'w', 'o', 'r', 'l', 'd' };
+      core::swap_ranges(hello, ::std::begin(world));
+      assert::equal(hello, std::string { "world" });
+    },
+
     task("reverse") = [] { assert::fail(); },
     task("reverse-copy") = [] { assert::fail(); },
     task("rotate") = [] { assert::fail(); },
