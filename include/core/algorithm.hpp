@@ -766,7 +766,12 @@ auto replace_if (Range&& rng, UnaryPred&& up, T const& value) -> enable_if_t<
 }
 
 template <class Range, class OutputIt, class T>
-auto replace_copy (Range&& rng, OutputIt&& it, T const& value) -> enable_if_t<
+auto replace_copy (
+  Range&& rng,
+  OutputIt&& it,
+  T const& old,
+  T const& value
+) -> enable_if_t<
   is_range<Range>::value,
   decay_t<OutputIt>
 > {
@@ -777,6 +782,7 @@ auto replace_copy (Range&& rng, OutputIt&& it, T const& value) -> enable_if_t<
     ::std::begin(range),
     ::std::end(range),
     ::std::forward<OutputIt>(it),
+    old,
     value
   );
 }

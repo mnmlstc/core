@@ -221,10 +221,36 @@ int main () {
       assert::equal(output, std::string { "--" });
     },
 
-    task("replace") = [] { assert::fail(); },
-    task("replace-if") = [] { assert::fail(); },
-    task("replace-copy") = [] { assert::fail(); },
-    task("replace-copy-if") = [] { assert::fail(); },
+    task("replace") = [] {
+      std::string text { "replace" };
+      core::replace(text, 'e', 'f');
+      assert::equal(text, std::string { "rfplacf" });
+    },
+
+    task("replace-if") = [] {
+      std::string text { "replace-if" };
+      core::replace_if(text, [] (char c) { return not std::isalpha(c); }, 'f');
+      assert::equal(text, std::string { "replacefif" });
+    },
+
+    task("replace-copy") = [] {
+      std::string text { "replace-copy" };
+      std::string output { };
+      core::replace_copy(text, ::std::back_inserter(output), '-', 'f');
+      assert::equal(text, std::string { "replacefcopy" });
+    },
+
+    task("replace-copy-if") = [] {
+      std::string text { "replace-copy-if" };
+      std::string output { };
+      core::replace_copy_if(
+        text,
+        ::std::back_inserter(output),
+        [] (char ch) { return not std::isalpha(ch); },
+        'f'
+      );
+      assert::equal(text, std::string { "replacefcopyfif" });
+    },
 
     task("swap-ranges") = [] {
       std::string hello { "hello" };
@@ -233,8 +259,19 @@ int main () {
       assert::equal(hello, std::string { "world" });
     },
 
-    task("reverse") = [] { assert::fail(); },
-    task("reverse-copy") = [] { assert::fail(); },
+    task("reverse") = [] {
+      std::string text { "reverse" };
+      core::reverse(text);
+      assert::equal(text, std::string { "esrever" });
+    },
+
+    task("reverse-copy") = [] {
+      std::string text { "reverse-copy" };
+      std::string output { };
+      core::reverse_copy(text, ::std::back_inserter(output));
+      assert::equal(output, std::string { "ypoc-esrever" });
+    },
+
     task("rotate") = [] { assert::fail(); },
     task("rotate-copy") = [] { assert::fail(); },
     task("shuffle") = [] { assert::fail(); },
