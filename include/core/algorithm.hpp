@@ -1747,7 +1747,10 @@ auto is_heap (Range&& rng, Compare&& cmp) -> enable_if_t<
 }
 
 template <class Range>
-auto is_heap_until (Range&& rng) -> enable_if_t<is_range<Range>::value, bool> {
+auto is_heap_until (Range&& rng) -> enable_if_t<
+  is_range<Range>::value,
+  decltype(::std::begin(::std::forward<Range>(rng)))
+> {
   auto range = make_range(::std::forward<Range>(rng));
   constexpr auto is_random = decltype(range)::is_random_access;
   static_assert(is_random, "is_heap_until requires RandomIterators");
@@ -1757,7 +1760,7 @@ auto is_heap_until (Range&& rng) -> enable_if_t<is_range<Range>::value, bool> {
 template <class Range, class Compare>
 auto is_heap_until (Range&& rng, Compare&& cmp) -> enable_if_t<
   is_range<Range>::value,
-  bool
+  decltype(::std::begin(::std::forward<Range>(rng)))
 > {
   auto range = make_range(::std::forward<Range>(rng));
   constexpr auto is_random = decltype(range)::is_random_access;
@@ -1996,7 +1999,7 @@ auto is_permutation (Range1&& rng1, Range2&& rng2) -> enable_if_t<
   constexpr auto is_forward2 = decltype(range2)::is_forward;
   static_assert(is_forward1, "is_permutation requires ForwardIterators");
   static_assert(is_forward2, "is_permutation requires ForwardIterators");
-  return ::std::lexicographical_compare(
+  return ::std::is_permutation(
     ::std::begin(range1),
     ::std::end(range1),
     ::std::begin(range2)
@@ -2018,7 +2021,7 @@ auto is_permutation (
   constexpr auto is_forward2 = decltype(range2)::is_forward;
   static_assert(is_forward1, "is_permutation requires ForwardIterators");
   static_assert(is_forward2, "is_permutation requires ForwardIterators");
-  return ::std::lexicographical_compare(
+  return ::std::is_permutation(
     ::std::begin(range1),
     ::std::end(range1),
     ::std::begin(range2),

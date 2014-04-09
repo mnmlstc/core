@@ -501,19 +501,132 @@ int main () {
       assert::equal(output.front(), 4);
     },
 
-    task("set-intersection") = [] { assert::fail(); },
-    task("set-symmetric-difference") = [] { assert::fail(); },
-    task("set-union") = [] { assert::fail(); },
-    task("is-heap") = [] { assert::fail(); },
-    task("is-heap-until") = [] { assert::fail(); },
-    task("make-heap") = [] { assert::fail(); },
-    task("push-heap") = [] { assert::fail(); },
-    task("pop-heap") = [] { assert::fail(); },
-    task("sort-heap") = [] { assert::fail(); },
-    task("max-element") = [] { assert::fail(); },
-    task("min-element") = [] { assert::fail(); },
-    task("minmax-element") = [] { assert::fail(); },
-    task("is-permutation") = [] { assert::fail(); },
+    task("set-intersection") = [] {
+      std::vector<int> first { 1, 2, 3, 4, 5 };
+      std::vector<int> second { 5, 6, 7, 8, 9 };
+      std::vector<int> output { };
+      core::set_intersection(first, second, ::std::back_inserter(output));
+      assert::equal(output.size(), 1u);
+      assert::equal(output.front(), 5);
+    },
+
+    task("set-symmetric-difference") = [] {
+      std::vector<int> first { 1, 2, 3, 4, 5, 6 };
+      std::vector<int> second { 1, 2, 3, 4, 5 };
+      std::vector<int> output { };
+      auto iter = ::std::back_inserter(output);
+      core::set_symmetric_difference(first, second, iter);
+      assert::equal(output.size(), 1u);
+      assert::equal(output.front(), 6);
+    },
+
+    task("set-union") = [] {
+      std::vector<int> first { 1, 2, 3, 4, 5 };
+      std::vector<int> second { 2, 3, 4, 5, 6 };
+      std::vector<int> output { };
+      auto iter = ::std::back_inserter(output);
+      core::set_union(first, second, iter);
+      assert::equal(output.size(), 6u);
+      assert::equal(output[0], 1);
+      assert::equal(output[1], 2);
+      assert::equal(output[2], 3);
+      assert::equal(output[3], 4);
+      assert::equal(output[4], 5);
+      assert::equal(output[5], 6);
+    },
+
+    task("is-heap") = [] {
+      std::vector<int> values { 9, 5, 4, 1, 1, 3 };
+      assert::is_true(core::is_heap(values));
+    },
+
+    task("is-heap-until") = [] {
+      std::vector<int> values { 9, 5, 4, 1, 1, 3, 2, 6 };
+      auto result = core::is_heap_until(values);
+      assert::not_equal(result, ::std::end(values));
+    },
+
+    task("make-heap") = [] {
+      std::vector<int> values { 3, 1, 4, 1, 5, 9 };
+      core::make_heap(values);
+      assert::equal(values[0], 9);
+      assert::equal(values[1], 5);
+      assert::equal(values[2], 4);
+      assert::equal(values[3], 1);
+      assert::equal(values[4], 1);
+      assert::equal(values[5], 3);
+    },
+
+    task("push-heap") = [] {
+      std::vector<int> values { 9, 5, 4, 1, 1, 3 };
+      values.push_back(6);
+      core::push_heap(values);
+      assert::equal(values[0], 9);
+      assert::equal(values[1], 5);
+      assert::equal(values[2], 6);
+      assert::equal(values[3], 1);
+      assert::equal(values[4], 1);
+      assert::equal(values[5], 3);
+      assert::equal(values[6], 4);
+    },
+
+    task("pop-heap") = [] {
+      std::vector<int> values { 9, 5, 4, 1, 1, 3 };
+      core::pop_heap(values);
+      values.pop_back();
+      assert::equal(values[0], 5);
+      assert::equal(values[1], 3);
+      assert::equal(values[2], 4);
+      assert::equal(values[3], 1);
+      assert::equal(values[4], 1);
+    },
+
+    task("sort-heap") = [] {
+      std::vector<int> values { 9, 5, 4, 1, 1, 3 };
+      core::sort_heap(values);
+      assert::equal(values[0], 1);
+      assert::equal(values[1], 1);
+      assert::equal(values[2], 3);
+      assert::equal(values[3], 4);
+      assert::equal(values[4], 5);
+      assert::equal(values[5], 9);
+    },
+
+    task("max-element") = [] {
+      std::vector<int> values { 9, 5, 4, 1, 1, 3 };
+      auto result = core::max_element(values);
+      assert::equal(result, ::std::begin(values));
+      assert::equal(*result, 9);
+    },
+
+    task("min-element") = [] {
+      std::vector<int> values { 1, 1, 3, 4, 5, 6 };
+      auto result = core::min_element(values);
+      assert::equal(result, ::std::begin(values));
+      assert::equal(*result, 1);
+    },
+
+    task("minmax-element") = [] {
+      std::vector<int> values { 9, 4, 5, 6, 1 };
+      auto result = core::minmax_element(values);
+      assert::equal(::std::get<0>(result), values.end() - 1);
+      assert::equal(::std::get<1>(result), values.begin());
+      assert::equal(*::std::get<0>(result), 1);
+      assert::equal(*::std::get<1>(result), 9);
+    },
+
+    task("lexicographical-compare") = [] {
+      std::string lhs { "abcd" };
+      std::vector<char> rhs { 'b', 'c', 'd', 'e' };
+      assert::is_true(core::lexicographical_compare(lhs, rhs));
+    },
+
+    task("is-permutation") = [] {
+      std::vector<int> lhs { 1, 2, 3, 4, 5 };
+      std::vector<int> rhs { 5, 4, 3, 2, 1 };
+      assert::is_true(core::is_permutation(lhs, rhs));
+    },
+
     task("next_permutation") = [] { assert::fail(); },
     task("prev-permutation") = [] { assert::fail(); }
   };
