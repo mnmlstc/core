@@ -2,6 +2,7 @@
 #include <initializer_list>
 #include <random>
 #include <vector>
+#include <set>
 
 #include <unittest/unittest.hpp>
 
@@ -413,15 +414,84 @@ int main () {
       assert::equal(output[2], 3);
     },
 
-    task("stable-sort") = [] { assert::fail(); },
+    task("stable-sort") = [] {
+      struct employee {
+        bool operator == (employee const& that) const noexcept {
+          return this->age == that.age and this->name == that.name;
+        }
 
-    task("nth-element") = [] { assert::fail(); },
-    task("lower-bound") = [] { assert::fail(); },
-    task("upper-bound") = [] { assert::fail(); },
-    task("binary-search") = [] { assert::fail(); },
-    task("equal_range") = [] { assert::fail(); },
-    task("merge") = [] { assert::fail(); },
-    task("inplace-merge") = [] { assert::fail(); },
+        bool operator < (employee const& that) const noexcept {
+          return this->age < that.age;
+        }
+
+        std::string name;
+        std::int32_t age;
+      };
+
+      std::vector<employee> values = {
+        { "jane smith", 32 },
+        { "joe shmoe", 55 },
+        { "jocoocoo puhwenis", 39 },
+        { "ira glass", 55 },
+        { "bubbles", 43 }
+      };
+      core::stable_sort(values);
+      assert::equal(values.back(), employee { "ira glass", 55 });
+    },
+
+    task("nth-element") = [] {
+      std::vector<int> values { 5, 6, 4, 3, 2, 6, 7, 9, 3 };
+      core::nth_element(values, ::std::begin(values) + values.size() / 2);
+      assert::equal(values[values.size() / 2], 5);
+    },
+
+    task("lower-bound") = [] {
+      std::vector<int> values { 1, 2, 3, 4, 5, 6, 7 };
+      auto result = core::lower_bound(values, 4);
+      assert::not_equal(result, ::std::end(values));
+      assert::equal(*result, 4);
+    },
+
+    task("upper-bound") = [] {
+      std::vector<int> values { 1, 2, 3, 4, 5, 6, 7 };
+      auto result = core::upper_bound(values, 4);
+      assert::not_equal(result, ::std::end(values));
+      assert::equal(*result, 5);
+    },
+
+    task("binary-search") = [] {
+      std::vector<int> values { 1, 2, 3, 4, 5, 6, 7 };
+      assert::is_true(core::binary_search(values, 3));
+    },
+
+    task("equal_range") = [] {
+      std::vector<int> values { 1, 2, 3, 3, 4, 4, 5, 5 };
+      using iterator = std::vector<int>::iterator;
+      core::range<iterator> range { core::equal_range(values, 3) };
+      assert::equal(::std::begin(values) + 2, ::std::begin(range));
+      assert::equal(::std::begin(values) + 4, ::std::end(range));
+    },
+
+    task("merge") = [] {
+      std::vector<int> even { 2, 4, 6, 8, 2, 4 };
+      std::vector<int> odds { 1, 3, 5, 7, 1, 3 };
+      std::set<int> integers { };
+      core::merge(even, odds, ::std::inserter(integers, integers.begin()));
+      assert::equal(integers.size(), 8);
+    },
+
+    task("inplace-merge") = [] {
+      std::vector<int> values { 1, 2, 3, 4, 5, 6, 7, 8 };
+      core::inplace_merge(values, values.begin() + 4);
+      assert::is_true(core::is_sorted(values));
+    },
+
+    task("includes") = [] {
+      std::vector<int> values { 1, 2, 3, 4, 5, 6, 7 };
+      std::vector<int> subgroup { 4, 5, 6 };
+      assert::is_true(core::includes(values, subgroup));
+    },
+
     task("set-difference") = [] { assert::fail(); },
     task("set-intersection") = [] { assert::fail(); },
     task("set-symmetric-difference") = [] { assert::fail(); },

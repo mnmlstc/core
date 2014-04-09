@@ -1479,8 +1479,8 @@ auto inplace_merge (Range&& rng, BidirIt&& it) -> enable_if_t<
   static_assert(is_bidir, "inplace_merge requires BidirectionalIterators");
   return ::std::inplace_merge(
     ::std::begin(range),
-    ::std::end(range),
-    ::std::forward<BidirIt>(it)
+    ::std::forward<BidirIt>(it),
+    ::std::end(range)
   );
 }
 
@@ -1493,14 +1493,14 @@ auto inplace_merge (Range&& rng, BidirIt&& it, Compare&& cmp) -> enable_if_t<
   static_assert(is_bidir, "inplace_merge requires BidirectionalIterators");
   return ::std::inplace_merge(
     ::std::begin(range),
-    ::std::end(range),
     ::std::forward<BidirIt>(it),
+    ::std::end(range),
     ::std::forward<Compare>(cmp)
   );
 }
 
 template <class Range1, class Range2>
-auto includes (Range1&& rng1, Range2& rng2) -> enable_if_t<
+auto includes (Range1&& rng1, Range2&& rng2) -> enable_if_t<
   all_traits<is_range<Range1>, is_range<Range2>>::value,
   bool
 > {
@@ -1519,7 +1519,7 @@ auto includes (Range1&& rng1, Range2& rng2) -> enable_if_t<
 }
 
 template <class Range1, class Range2, class Compare>
-auto includes (Range1&& rng1, Range2& rng2, Compare&& cmp) -> enable_if_t<
+auto includes (Range1&& rng1, Range2&& rng2, Compare&& cmp) -> enable_if_t<
   all_traits<is_range<Range1>, is_range<Range2>>::value,
   bool
 > {
