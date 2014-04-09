@@ -477,7 +477,7 @@ int main () {
       std::vector<int> odds { 1, 3, 5, 7, 1, 3 };
       std::set<int> integers { };
       core::merge(even, odds, ::std::inserter(integers, integers.begin()));
-      assert::equal(integers.size(), 8);
+      assert::equal(integers.size(), 8u);
     },
 
     task("inplace-merge") = [] {
