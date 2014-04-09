@@ -237,7 +237,7 @@ int main () {
       std::string text { "replace-copy" };
       std::string output { };
       core::replace_copy(text, ::std::back_inserter(output), '-', 'f');
-      assert::equal(text, std::string { "replacefcopy" });
+      assert::equal(output, std::string { "replacefcopy" });
     },
 
     task("replace-copy-if") = [] {
@@ -249,7 +249,7 @@ int main () {
         [] (char ch) { return not std::isalpha(ch); },
         'f'
       );
-      assert::equal(text, std::string { "replacefcopyfif" });
+      assert::equal(output, std::string { "replacefcopyfif" });
     },
 
     task("swap-ranges") = [] {
@@ -272,7 +272,21 @@ int main () {
       assert::equal(output, std::string { "ypoc-esrever" });
     },
 
-    task("rotate") = [] { assert::fail(); },
+    task("rotate") = [] {
+      std::vector<int> value { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+      core::rotate(value, ::std::begin(value) + 5);
+      assert::equal(value[0], 6);
+      assert::equal(value[1], 7);
+      assert::equal(value[2], 8);
+      assert::equal(value[3], 9);
+      assert::equal(value[4], 10);
+      assert::equal(value[5], 1);
+      assert::equal(value[6], 2);
+      assert::equal(value[7], 3);
+      assert::equal(value[8], 4);
+      assert::equal(value[9], 5);
+    },
+
     task("rotate-copy") = [] { assert::fail(); },
     task("shuffle") = [] { assert::fail(); },
     task("unique") = [] { assert::fail(); },
