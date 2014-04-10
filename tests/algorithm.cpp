@@ -223,6 +223,24 @@ int main () {
       assert::equal(output, std::string { "--" });
     },
 
+    task("remove-erase") = [] {
+      std::vector<int> values { 1, 2, 3, 4, 5 };
+      core::remove_erase(values, 3);
+      assert::equal(values.size(), 4u);
+      assert::equal(values[0], 1);
+      assert::equal(values[1], 2);
+      assert::equal(values[2], 4);
+      assert::equal(values[3], 5);
+    },
+
+    task("remove-erase-if") = [] {
+      std::vector<int> values { 1, 2, 3, 4, 5 };
+      core::remove_erase_if(values, [] (int v) { return v % 2; });
+      assert::equal(values.size(), 2u);
+      assert::equal(values[0], 2);
+      assert::equal(values[1], 4);
+    },
+
     task("replace") = [] {
       std::string text { "replace" };
       core::replace(text, 'e', 'f');

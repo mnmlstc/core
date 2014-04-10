@@ -736,6 +736,29 @@ auto remove_copy_if (
 }
 
 template <class Range, class T>
+auto remove_erase (Range&& rng, T const& val) -> enable_if_t<
+  is_range<Range>::value
+> {
+  ::std::forward<Range>(rng).erase(
+    remove(::std::forward<Range>(rng), val),
+    ::std::end(::std::forward<Range>(rng))
+  );
+}
+
+template <class Range, class UnaryPred>
+auto remove_erase_if (Range&& rng, UnaryPred&& up) -> enable_if_t<
+  is_range<Range>::value
+> {
+  ::std::forward<Range>(rng).erase(
+    remove_if(
+      ::std::forward<Range>(rng),
+      ::std::forward<UnaryPred>(up)
+    ),
+    ::std::end(::std::forward<Range>(rng))
+  );
+}
+
+template <class Range, class T>
 auto replace (Range&& rng, T const& old, T const& value) -> enable_if_t<
   is_range<Range>::value
 > {
