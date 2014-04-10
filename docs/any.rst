@@ -71,7 +71,16 @@ follow the proposal as closely as possible.
    .. function:: any& operator = (any const&)
                  any& operator = (any&&) noexcept
 
-      Assigns the contents of the incoming any to ``*this``.
+      Assigns the contents of the incoming |any| to ``*this``.
+
+   .. function:: any& operator = (ValueType&& value)
+
+      Assigns *value* to ``*this``. If ``*this`` already manages a contained
+      object, it will be destroyed after *value* is assigned.
+
+      .. versionadded:: 1.1
+
+         This function was unfortunately omitted from the 1.0 release.
 
    .. function:: void any::swap (any&) noexcept
 
