@@ -14,7 +14,10 @@ namespace impl {
 using data_type = add_pointer_t<void>;
 
 template <class Type>
-using is_small = std::integral_constant<bool, sizeof(Type) <= sizeof(void*)>;
+using is_small = std::integral_constant<
+  bool,
+  sizeof(decay_t<Type>) <= sizeof(void*)
+>;
 
 struct any_dispatch {
   using destroy_function = void (*)(data_type&);
@@ -190,6 +193,17 @@ public:
 
   any& operator = (any&& that) noexcept {
     any { std::move(that) }.swap(*this);
+    return *this;
+  }
+
+  template <
+    class ValueType,
+    class=enable_if_t<not std::is_same<any, decay_t<ValueType>>::value>
+  > any& operator = (ValueType&& value) {
+    any {
+      ::std::forward<ValueType>(value),
+      impl::is_small<ValueType> { }
+    }.swap(*this);
     return *this;
   }
 

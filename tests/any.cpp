@@ -87,6 +87,15 @@ int main () {
       assert::equal(typeid(integer), assigned.type());
     },
 
+    task("value-assign") = [] {
+      std::uint64_t integer { 42 };
+      core::any value { };
+      value = integer;
+      assert::is_false(value.empty());
+      assert::equal(typeid(integer), value.type());
+      assert::equal(core::any_cast<std::uint64_t>(value), 42u);
+    },
+
     task("swap") = [] {
       using std::swap;
       std::uint64_t integer = 42;
