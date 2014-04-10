@@ -16,9 +16,11 @@ rather than by feature.
    Using MNMLSTC Core <usage>
    type-traits
    functional
-   expected
+   algorithm
    iterator
+   expected
    optional
+   numeric
    variant
    utility
    memory
