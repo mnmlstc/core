@@ -105,3 +105,59 @@ Non-Modifying Sequence Operations
    :requires: *irange* must provide InputIterators, *frange* must provide
               ForwardIterators.
 
+.. function:: ForwardIt adjacent_find (Range&& range)
+              ForwardIt adjacent_find (Range&& range, BinaryPredicate&& bp)
+
+   Searches *range* for two consecutive identical elements. The first version
+   uses ``operator ==`` to compare the elements, the second version uses the
+   given binary predicate *bp*.
+
+   :returns: Forward iterator to the first of the identical elements. If no
+             such elements are found, the end of *range* is returned.
+   :requires: *range* must provide ForwardIterators.
+
+.. function:: ForwardIt search (Range1&& range1, Range2&& range2)
+              ForwardIt search (\
+                Range1&& range1,\
+                Range2&& range2,\
+                BinaryPredicate&& bp\
+              )
+
+   Searches for the first occurrence of the subsequence of elements in *range2*
+   in *range1*. ``operator ==`` is used for the first version, while *bp* is
+   utilized for the second.
+
+   :returns: Forward iterator to the subsequence, if found. Otherwise the end
+             of *range1*.
+   :requires: *range1* and *range2* must provide ForwardIterators
+
+.. function:: ForwardIt search_n (Range&& range, Size&& count, T const& value)
+              ForwardIt search_n (\
+                Range&& range,\
+                Size&& count,\
+                T const& value,\
+                BinaryPredicate&& bp\
+              )
+
+   Searches *range* for the first sequence of *count* identical elements equal
+   to *value*. The first version uses ``operator ==``. The second uses the
+   provided binary predicate *bp*.
+
+   :returns: Forward iterator to the start of the discovered sequence of the
+             end of *range* if no such sequence was found.
+   :requires: *range* must provide ForwardIterators
+
+Modifying Sequence Operations
+-----------------------------
+
+.. function:: decay_t<OutputIt> copy (Range&& range, OutputIt&& it)
+              decay_t<OutputIt> copy_if (\
+                Range&& range,\
+                OutputIt&& it,\
+                UnaryPredicate&& up\
+              )
+   Copies the elements in *range* to *it*.
+
+   :returns: Iterator pointing to the last element written.
+   :requires: *range* must provide InputIterators
+
