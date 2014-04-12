@@ -22,6 +22,8 @@ are discussed below.
    underlying functions by value is an unnecessary cost. The only cost that
    should be incurred is the one to :func:`make_range`.
 
+.. _core-algorithm-component-non-modifying-sequence-operations:
+
 Non-Modifying Sequence Operations
 ---------------------------------
 
@@ -147,6 +149,8 @@ Non-Modifying Sequence Operations
              end of *range* if no such sequence was found.
    :requires: *range* must provide ForwardIterators
 
+.. _core-alglorithm-component-modifying-sequence-operations:
+
 Modifying Sequence Operations
 -----------------------------
 
@@ -156,8 +160,40 @@ Modifying Sequence Operations
                 OutputIt&& it,\
                 UnaryPredicate&& up\
               )
+
    Copies the elements in *range* to *it*.
 
    :returns: Iterator pointing to the last element written.
    :requires: *range* must provide InputIterators
 
+.. _core-algorithm-component-partitioning-operations:
+
+Partitioning Operations
+-----------------------
+
+.. _core-algorithm-component-sorting-operations:
+
+Sorting Operations
+------------------
+
+.. _core-algorithm-component-binary-search-operations:
+
+Binary Search Operations
+------------------------
+
+.. note:: These operations are intended for sorted ranges *only*.
+
+.. _core-algorithm-component-set-operations:
+
+Set Operations
+--------------
+
+.. _core-algorithm-component-heap-operations:
+
+Heap Operations
+---------------
+
+.. _core-algorithm-component-min-max-operations:
+
+Min/Max Operations
+------------------
