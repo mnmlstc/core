@@ -11,30 +11,36 @@ int main () {
 
   test("algorithm") = {
     task("all-of") = [] {
-      auto result = core::all_of({ 1, 2, 3, 4, 5}, [](int v) { return v > 0; });
+      std::vector<int> values { 1, 2, 3, 4, 5 };
+      auto result = core::all_of(values, [](int v) { return v > 0; });
       assert::is_true(result);
     },
 
     task("any-of") = [] {
-      auto result = core::any_of({ 1, 2, 3 }, [](int v) { return v % 2 == 0; });
+      std::vector<int> values { 1, 2, 3, 4, 5 };
+      auto result = core::any_of(values, [](int v) { return v % 2 == 0; });
       assert::is_true(result);
     },
 
     task("none-of") = [] {
-      auto result = core::none_of({ 1, 2, 3 }, [](int v) { return v <= 0; });
+      std::vector<int> values { 1, 2, 3, 4, 5 };
+      auto result = core::none_of(values, [](int v) { return v <= 0; });
       assert::is_true(result);
     },
 
     task("for-each") = [] {
-      core::for_each({ 1, 2, 3 }, [](int v) { assert::greater(v, 0); });
+      std::vector<int> values { 1, 2, 3, 4, 5 };
+      core::for_each(values, [](int v) { assert::greater(v, 0); });
     },
 
     task("count") = [] {
-      assert::equal(core::count({ 1, 2, 1, 1 }, 1), 3);
+      std::vector<int> values { 1, 2, 1, 1 };
+      assert::equal(core::count(values, 1), 3);
     },
 
     task("count-if") = [] {
-      auto result = core::count_if({ 1, 2, 1 }, [](int v) { return v % 2; });
+      std::vector<int> values { 1, 2, 1 };
+      auto result = core::count_if(values, [](int v) { return v % 2; });
       assert::equal(result, 2);
     },
 

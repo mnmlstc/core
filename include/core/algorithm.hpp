@@ -1,7 +1,6 @@
 #ifndef CORE_ALGORITHM_HPP
 #define CORE_ALGORITHM_HPP
 
-#include <initializer_list>
 #include <algorithm>
 
 #include <core/range.hpp>
@@ -25,11 +24,6 @@ auto all_of (Range&& rng, UnaryPredicate&& p) -> enable_if_t<
   );
 }
 
-template <class T, class UnaryPredicate>
-bool all_of (std::initializer_list<T> ilist, UnaryPredicate&& p) {
-  return all_of(make_range(ilist), ::std::forward<UnaryPredicate>(p));
-}
-
 template <class Range, class UnaryPredicate>
 auto any_of (Range&& rng, UnaryPredicate&& p) -> enable_if_t<
   is_range<Range>::value,
@@ -43,11 +37,6 @@ auto any_of (Range&& rng, UnaryPredicate&& p) -> enable_if_t<
     ::std::end(range),
     ::std::forward<UnaryPredicate>(p)
   );
-}
-
-template <class T, class UnaryPredicate>
-bool any_of (std::initializer_list<T> ilist, UnaryPredicate&& p) {
-  return any_of(make_range(ilist), ::std::forward<UnaryPredicate>(p));
 }
 
 template <class Range, class UnaryPredicate>
@@ -65,11 +54,6 @@ auto none_of (Range&& rng, UnaryPredicate&& p) -> enable_if_t<
   );
 }
 
-template <class T, class UnaryPredicate>
-bool none_of (std::initializer_list<T> ilist, UnaryPredicate&& p) {
-  return none_of(make_range(ilist), ::std::forward<UnaryPredicate>(p));
-}
-
 template <class Range, class UnaryFunction>
 auto for_each (Range&& rng, UnaryFunction&& f) -> enable_if_t<
   is_range<Range>::value,
@@ -84,11 +68,6 @@ auto for_each (Range&& rng, UnaryFunction&& f) -> enable_if_t<
     ::std::forward<UnaryFunction>(f)
   );
 }
-
-template <class T, class UnaryFunction>
-auto for_each (std::initializer_list<T> ilist, UnaryFunction&& f) -> decay_t<
-  UnaryFunction
-> { return for_each(make_range(ilist), ::std::forward<UnaryFunction>(f)); }
 
 template <class Range, class T>
 auto count (Range&& rng, T const& value) -> enable_if_t<
@@ -106,11 +85,6 @@ auto count (Range&& rng, T const& value) -> enable_if_t<
   static_assert(is_input, "count requires InputIterators");
   return ::std::count(::std::begin(range), ::std::end(range), value);
 }
-
-template <class T>
-auto count (std::initializer_list<T> ilist, T const& value) -> decltype(
-  count(make_range(ilist), value)
-) { return count(make_range(ilist), value); }
 
 template <class Range, class UnaryPredicate>
 auto count_if (Range&& rng, UnaryPredicate&& p) -> enable_if_t<
@@ -132,11 +106,6 @@ auto count_if (Range&& rng, UnaryPredicate&& p) -> enable_if_t<
     ::std::forward<UnaryPredicate>(p)
   );
 }
-
-template <class T, class UnaryPredicate>
-auto count_if (std::initializer_list<T> ilist, UnaryPredicate&& up) -> decltype(
-  count_if(make_range(ilist), ::std::forward<UnaryPredicate>(up))
-) { return count_if(make_range(ilist), ::std::forward<UnaryPredicate>(up)); }
 
 template <class Range, class InputIt>
 auto mismatch(Range&& rng, InputIt&& it) -> enable_if_t<
@@ -448,11 +417,6 @@ auto copy (Range&& rng, OutputIt&& it) -> enable_if_t<
   );
 }
 
-template <class T, class OutputIt>
-auto copy (std::initializer_list<T> ilist, OutputIt&& it) -> decay_t<OutputIt> {
-  return copy(make_range(ilist), ::std::forward<OutputIt>(it));
-}
-
 template <class Range, class OutputIt, class UnaryPredicate>
 auto copy_if (Range&& rng, OutputIt&& it, UnaryPredicate&& up) -> enable_if_t<
   is_range<Range>::value,
@@ -464,19 +428,6 @@ auto copy_if (Range&& rng, OutputIt&& it, UnaryPredicate&& up) -> enable_if_t<
   return ::std::copy_if(
     ::std::begin(range),
     ::std::end(range),
-    ::std::forward<OutputIt>(it),
-    ::std::forward<UnaryPredicate>(up)
-  );
-}
-
-template <class T, class OutputIt, class UnaryPredicate>
-auto copy_if (
-  std::initializer_list<T> ilist,
-  OutputIt&& it,
-  UnaryPredicate&& up
-) -> decay_t<OutputIt> {
-  return copy_if(
-    make_range(ilist),
     ::std::forward<OutputIt>(it),
     ::std::forward<UnaryPredicate>(up)
   );
@@ -497,11 +448,6 @@ auto copy_backward (Range&& rng, BidirIt&& it) -> enable_if_t<
   );
 }
 
-template <class T, class BidirIt>
-auto copy_backward (std::initializer_list<T> ilist, BidirIt&& it) -> decay_t<
-  BidirIt
-> { return copy_backward(make_range(ilist), ::std::forward<BidirIt>(it)); }
-
 template <class Range, class OutputIt>
 auto move (Range&& rng, OutputIt&& it) -> enable_if_t<
   is_range<Range>::value,
@@ -517,11 +463,6 @@ auto move (Range&& rng, OutputIt&& it) -> enable_if_t<
   );
 }
 
-template <class T, class OutputIt>
-auto move (std::initializer_list<T> ilist, OutputIt&& it) -> decay_t<
-  OutputIt
-> { return move(make_range(ilist), ::std::forward<OutputIt>(it)); }
-
 template <class Range, class BidirIt>
 auto move_backward (Range&& rng, BidirIt&& it) -> enable_if_t<
   is_range<Range>::value,
@@ -536,11 +477,6 @@ auto move_backward (Range&& rng, BidirIt&& it) -> enable_if_t<
     ::std::forward<BidirIt>(it)
   );
 }
-
-template <class T, class BidirIt>
-auto move_backward (std::initializer_list<T> ilist, BidirIt&& it) -> decay_t<
-  BidirIt
-> { return move_backward(make_range(ilist), ::std::forward<BidirIt>(it)); }
 
 template <class Range, class T>
 auto fill (Range&& rng, T const& value) -> enable_if_t<
@@ -572,19 +508,6 @@ auto transform (
   );
 }
 
-template <class T, class OutputIt, class UnaryOperation>
-auto transform (
-  std::initializer_list<T> ilist,
-  OutputIt&& it,
-  UnaryOperation&& u
-) -> decay_t<OutputIt> {
-  return transform(
-    make_range(ilist),
-    ::std::forward<OutputIt>(it),
-    ::std::forward<UnaryOperation>(u)
-  );
-}
-
 template <class Range1, class Range2, class OutputIt, class BinaryOperation>
 auto transform (
   Range1&& rng1,
@@ -605,51 +528,6 @@ auto transform (
     ::std::begin(range2),
     ::std::end(range2),
     ::std::begin(range2),
-    ::std::forward<OutputIt>(it),
-    ::std::forward<BinaryOperation>(op)
-  );
-}
-
-template <class T, class OutputIt, class BinaryOperation>
-auto transform (
-  std::initializer_list<T> ilist1,
-  std::initializer_list<T> ilist2,
-  OutputIt&& it,
-  BinaryOperation&& op
-) -> decay_t<OutputIt> {
-  return transform(
-    make_range(ilist1),
-    make_range(ilist2),
-    ::std::forward<OutputIt>(it),
-    ::std::forward<BinaryOperation>(op)
-  );
-}
-
-template <class T, class Range, class OutputIt, class BinaryOperation>
-auto transform (
-  Range&& rng,
-  std::initializer_list<T> ilist,
-  OutputIt&& it,
-  BinaryOperation&& op
-) -> decay_t<OutputIt> {
-  return transform(
-    ::std::forward<Range>(rng),
-    make_range(ilist),
-    ::std::forward<OutputIt>(it),
-    ::std::forward<BinaryOperation>(op)
-  );
-}
-
-template <class T, class Range, class OutputIt, class BinaryOperation>
-auto transform (
-  std::initializer_list<T> ilist,
-  Range&& rng,
-  OutputIt&& it,
-  BinaryOperation&& op
-) -> decay_t<OutputIt> {
-  return transform(
-    make_range(ilist),
-    ::std::forward<Range>(rng),
     ::std::forward<OutputIt>(it),
     ::std::forward<BinaryOperation>(op)
   );
@@ -697,15 +575,6 @@ auto remove_copy (Range&& rng, OutputIt&& it, T const& value) -> enable_if_t<
   );
 }
 
-template <class T, class OutputIt>
-auto remove_copy (
-  std::initializer_list<T> ilist,
-  OutputIt&& it,
-  T const& value
-) -> decay_t<OutputIt> {
-  return remove_copy(make_range(ilist), ::std::forward<OutputIt>(it), value);
-}
-
 template <class Range, class OutputIt, class UnaryPred>
 auto remove_copy_if (Range&& rng, OutputIt&& it, UnaryPred&& up) -> enable_if_t<
   is_range<Range>::value,
@@ -717,19 +586,6 @@ auto remove_copy_if (Range&& rng, OutputIt&& it, UnaryPred&& up) -> enable_if_t<
   return ::std::remove_copy_if(
     ::std::begin(range),
     ::std::end(range),
-    ::std::forward<OutputIt>(it),
-    ::std::forward<UnaryPred>(up)
-  );
-}
-
-template <class T, class OutputIt, class UnaryPred>
-auto remove_copy_if (
-  std::initializer_list<T> ilist,
-  OutputIt&& it,
-  UnaryPred&& up
-) -> decay_t<OutputIt> {
-  return remove_copy_if(
-    make_range(ilist),
     ::std::forward<OutputIt>(it),
     ::std::forward<UnaryPred>(up)
   );
@@ -810,15 +666,6 @@ auto replace_copy (
   );
 }
 
-template <class T, class OutputIt>
-auto replace_copy (
-  std::initializer_list<T> ilist,
-  OutputIt&& it,
-  T const& value
-) -> decay_t<OutputIt> {
-  return replace_copy(make_range(ilist), ::std::forward<OutputIt>(it), value);
-}
-
 template <class Range, class OutputIt, class UnaryPred, class T>
 auto replace_copy_if (
   Range&& rng,
@@ -835,21 +682,6 @@ auto replace_copy_if (
   return ::std::replace_copy_if(
     ::std::begin(range),
     ::std::end(range),
-    ::std::forward<OutputIt>(it),
-    ::std::forward<UnaryPred>(up),
-    value
-  );
-}
-
-template <class T, class OutputIt, class UnaryPred>
-auto replace_copy_if (
-  std::initializer_list<T> ilist,
-  OutputIt&& it,
-  UnaryPred&& up,
-  T const& value
-) -> decay_t<OutputIt> {
-  return replace_copy_if(
-    make_range(ilist),
     ::std::forward<OutputIt>(it),
     ::std::forward<UnaryPred>(up),
     value
@@ -893,11 +725,6 @@ auto reverse_copy (Range&& rng, OutputIt&& it) -> enable_if_t<
     ::std::forward<OutputIt>(it)
   );
 }
-
-template <class T, class OutputIt>
-auto reverse_copy (std::initializer_list<T> ilist, OutputIt&& it) -> decay_t<
-  OutputIt
-> { return reverse_copy(make_range(ilist), ::std::forward<OutputIt>(it)); }
 
 template <class Range, class ForwardIt>
 auto rotate (Range&& rng, ForwardIt&& it) -> enable_if_t<
@@ -984,15 +811,6 @@ auto unique_copy (Range&& rng, OutputIt&& it) -> enable_if_t<
   );
 }
 
-template <class T, class OutputIt>
-auto unique_copy (
-  std::initializer_list<T> ilist,
-  OutputIt&& it,
-  T const& value
-) -> decay_t<OutputIt> {
-  return unique_copy(make_range(ilist), ::std::forward<OutputIt>(it), value);
-}
-
 template <class Range, class OutputIt, class BinaryPred>
 auto unique_copy (Range&& rng, OutputIt&& it, BinaryPred&& bp) -> enable_if_t<
   is_range<Range>::value,
@@ -1004,19 +822,6 @@ auto unique_copy (Range&& rng, OutputIt&& it, BinaryPred&& bp) -> enable_if_t<
   return ::std::unique_copy(
     ::std::begin(range),
     ::std::end(range),
-    ::std::forward<OutputIt>(it),
-    ::std::forward<BinaryPred>(bp)
-  );
-}
-
-template <class T, class OutputIt, class BinaryPred>
-auto unique_copy (
-  std::initializer_list<T> ilist,
-  OutputIt&& it,
-  BinaryPred&& bp
-) -> decay_t<OutputIt> {
-  return unique_copy(
-    make_range(ilist),
     ::std::forward<OutputIt>(it),
     ::std::forward<BinaryPred>(bp)
   );
@@ -1074,22 +879,6 @@ auto partition_copy (
     ::std::forward<UnaryPred>(up)
   );
 }
-
-template <class T, class OutputTrue, class OutputFalse, class UnaryPredicate>
-auto partition_copy (
-  std::initializer_list<T> ilist,
-  OutputTrue&& ot,
-  OutputFalse&& of,
-  UnaryPredicate&& up
-) -> std::pair<decay_t<OutputTrue>, decay_t<OutputFalse>> {
-  return partition_copy(
-    make_range(ilist),
-    ::std::forward<OutputTrue>(ot),
-    ::std::forward<OutputFalse>(of),
-    ::std::forward<UnaryPredicate>(up)
-  );
-}
-
 
 template <class Range, class UnaryPredicate>
 auto stable_partition (Range&& rng, UnaryPredicate&& up) -> enable_if_t<
@@ -1240,14 +1029,6 @@ auto partial_sort_copy (IRange&& irng, RRange&& rrng) -> enable_if_t<
   );
 }
 
-template <class T, class Range>
-auto partial_sort_copy (
-  std::initializer_list<T> ilist,
-  Range&& rng
-) -> decltype(::std::begin(::std::forward<Range>(rng))) {
-  return partial_sort_copy(make_range(ilist), ::std::forward<Range>(rng));
-}
-
 template <class IRange, class RRange, class Compare>
 auto partial_sort_copy (
   IRange&& irng,
@@ -1271,20 +1052,6 @@ auto partial_sort_copy (
     ::std::forward<Compare>(cmp)
   );
 }
-
-template <class T, class Range, class Compare>
-auto partial_sort_copy (
-  std::initializer_list<T> ilist,
-  Range&& rng,
-  Compare&& cmp
-) -> decltype(::std::begin(::std::forward<Range>(rng))) {
-  return partial_sort_copy(
-    make_range(ilist),
-    ::std::forward<Range>(rng),
-    ::std::forward<Compare>(cmp)
-  );
-}
-
 
 template <class Range>
 auto stable_sort (Range&& rng) -> enable_if_t<is_range<Range>::value> {
