@@ -762,7 +762,7 @@ auto shuffle (Range&& rng, URNG&& g) -> enable_if_t<
 > {
   auto range = make_range(::std::forward<Range>(rng));
   constexpr auto is_random = decltype(range)::is_random_access;
-  static_assert(is_random, "shuffle requires RandomIterators");
+  static_assert(is_random, "shuffle requires RandomAccessIterators");
   return ::std::shuffle(
     ::std::begin(range),
     ::std::end(range),
@@ -965,7 +965,7 @@ template <class Range>
 auto sort (Range&& rng) -> enable_if_t<is_range<Range>::value> {
   auto range = make_range(::std::forward<Range>(rng));
   constexpr auto is_random = decltype(range)::is_random_access;
-  static_assert(is_random, "sort requires RandomIterators");
+  static_assert(is_random, "sort requires RandomAccessIterators");
   return ::std::sort(::std::begin(range), ::std::end(range));
 }
 
@@ -973,7 +973,7 @@ template <class Range, class Compare>
 auto sort (Range&& rng, Compare&& cmp) -> enable_if_t<is_range<Range>::value> {
   auto range = make_range(::std::forward<Range>(rng));
   constexpr auto is_random = decltype(range)::is_random_access;
-  static_assert(is_random, "sort requires RandomIterators");
+  static_assert(is_random, "sort requires RandomAccessIterators");
   return ::std::sort(
     ::std::begin(range),
     ::std::end(range),
@@ -987,7 +987,7 @@ auto partial_sort (Range&& rng, RandomIt&& it) -> enable_if_t<
 > {
   auto range = make_range(::std::forward<Range>(rng));
   constexpr auto is_random = decltype(range)::is_random_access;
-  static_assert(is_random, "partial_sort requires RandomIterators");
+  static_assert(is_random, "partial_sort requires RandomAccessIterators");
   return ::std::partial_sort(
     ::std::begin(range),
     ::std::forward<RandomIt>(it),
@@ -1001,7 +1001,7 @@ auto partial_sort (Range&& rng, RandomIt&& it, Compare&& cmp) -> enable_if_t<
 > {
   auto range = make_range(::std::forward<Range>(rng));
   constexpr auto is_random = decltype(range)::is_random_access;
-  static_assert(is_random, "partial_sort requires RandomIterators");
+  static_assert(is_random, "partial_sort requires RandomAccessIterators");
   return ::std::partial_sort(
     ::std::begin(range),
     ::std::forward<RandomIt>(it),
@@ -1020,7 +1020,7 @@ auto partial_sort_copy (IRange&& irng, RRange&& rrng) -> enable_if_t<
   constexpr auto is_input = decltype(irange)::is_input;
   constexpr auto is_random = decltype(rrange)::is_random_access;
   static_assert(is_input, "partial_sort_copy requires InputIterators");
-  static_assert(is_random, "partial_sort_copy requires RandomIterators");
+  static_assert(is_random, "partial_sort_copy requires RandomAccessIterators");
   return ::std::partial_sort_copy(
     ::std::begin(irange),
     ::std::end(irange),
@@ -1043,7 +1043,7 @@ auto partial_sort_copy (
   constexpr auto is_input = decltype(irange)::is_input;
   constexpr auto is_random = decltype(rrange)::is_random_access;
   static_assert(is_input, "partial_sort_copy requires InputIterators");
-  static_assert(is_random, "partial_sort_copy requires RandomIterators");
+  static_assert(is_random, "partial_sort_copy requires RandomAccessIterators");
   return ::std::partial_sort_copy(
     ::std::begin(irange),
     ::std::end(irange),
@@ -1057,7 +1057,7 @@ template <class Range>
 auto stable_sort (Range&& rng) -> enable_if_t<is_range<Range>::value> {
   auto range = make_range(::std::forward<Range>(rng));
   constexpr auto is_random = decltype(range)::is_random_access;
-  static_assert(is_random, "stable_sort requires RandomIterators");
+  static_assert(is_random, "stable_sort requires RandomAccessIterators");
   return ::std::stable_sort(::std::begin(range), ::std::end(range));
 }
 
@@ -1067,7 +1067,7 @@ auto stable_sort (Range&& rng, Compare&& cmp) -> enable_if_t<
 > {
   auto range = make_range(::std::forward<Range>(rng));
   constexpr auto is_random = decltype(range)::is_random_access;
-  static_assert(is_random, "stable_sort requires RandomIterators");
+  static_assert(is_random, "stable_sort requires RandomAccessIterators");
   return ::std::stable_sort(
     ::std::begin(range),
     ::std::end(range),
@@ -1081,7 +1081,7 @@ auto nth_element (Range&& rng, RandomIt&& it) -> enable_if_t<
 > {
   auto range = make_range(::std::forward<Range>(rng));
   constexpr auto is_random = decltype(range)::is_random_access;
-  static_assert(is_random, "nth_element requires RandomIterators");
+  static_assert(is_random, "nth_element requires RandomAccessIterators");
   return ::std::nth_element(
     ::std::begin(range),
     ::std::forward<RandomIt>(it),
@@ -1095,7 +1095,7 @@ auto nth_element (Range&& rng, RandomIt&& it, Compare&& cmp) -> enable_if_t<
 > {
   auto range = make_range(::std::forward<Range>(rng));
   constexpr auto is_random = decltype(range)::is_random_access;
-  static_assert(is_random, "nth_element requires RandomIterators");
+  static_assert(is_random, "nth_element requires RandomAccessIterators");
   return ::std::nth_element(
     ::std::begin(range),
     ::std::forward<RandomIt>(it),
@@ -1517,7 +1517,7 @@ template <class Range>
 auto is_heap (Range&& rng) -> enable_if_t<is_range<Range>::value, bool> {
   auto range = make_range(::std::forward<Range>(rng));
   constexpr auto is_random = decltype(range)::is_random_access;
-  static_assert(is_random, "is_heap requires RandomIterators");
+  static_assert(is_random, "is_heap requires RandomAccessIterators");
   return ::std::is_heap(::std::begin(range), ::std::end(range));
 }
 
@@ -1528,7 +1528,7 @@ auto is_heap (Range&& rng, Compare&& cmp) -> enable_if_t<
 > {
   auto range = make_range(::std::forward<Range>(rng));
   constexpr auto is_random = decltype(range)::is_random_access;
-  static_assert(is_random, "is_heap requires RandomIterators");
+  static_assert(is_random, "is_heap requires RandomAccessIterators");
   return ::std::is_heap(
     ::std::begin(range),
     ::std::end(range),
@@ -1543,7 +1543,7 @@ auto is_heap_until (Range&& rng) -> enable_if_t<
 > {
   auto range = make_range(::std::forward<Range>(rng));
   constexpr auto is_random = decltype(range)::is_random_access;
-  static_assert(is_random, "is_heap_until requires RandomIterators");
+  static_assert(is_random, "is_heap_until requires RandomAccessIterators");
   return ::std::is_heap_until(::std::begin(range), ::std::end(range));
 }
 
@@ -1554,7 +1554,7 @@ auto is_heap_until (Range&& rng, Compare&& cmp) -> enable_if_t<
 > {
   auto range = make_range(::std::forward<Range>(rng));
   constexpr auto is_random = decltype(range)::is_random_access;
-  static_assert(is_random, "is_heap_until requires RandomIterators");
+  static_assert(is_random, "is_heap_until requires RandomAccessIterators");
   return ::std::is_heap_until(
     ::std::begin(range),
     ::std::end(range),
@@ -1566,7 +1566,7 @@ template <class Range>
 auto make_heap (Range&& rng) -> enable_if_t<is_range<Range>::value> {
   auto range = make_range(::std::forward<Range>(rng));
   constexpr auto is_random = decltype(range)::is_random_access;
-  static_assert(is_random, "make_heap requires RandomIterators");
+  static_assert(is_random, "make_heap requires RandomAccessIterators");
   return ::std::make_heap(::std::begin(range), ::std::end(range));
 }
 
@@ -1576,7 +1576,7 @@ auto make_heap (Range&& rng, Compare&& cmp) -> enable_if_t<
 > {
   auto range = make_range(::std::forward<Range>(rng));
   constexpr auto is_random = decltype(range)::is_random_access;
-  static_assert(is_random, "make_heap requires RandomIterators");
+  static_assert(is_random, "make_heap requires RandomAccessIterators");
   return ::std::make_heap(
     ::std::begin(range),
     ::std::end(range),
@@ -1588,7 +1588,7 @@ template <class Range>
 auto push_heap (Range&& rng) -> enable_if_t<is_range<Range>::value> {
   auto range = make_range(::std::forward<Range>(rng));
   constexpr auto is_random = decltype(range)::is_random_access;
-  static_assert(is_random, "push_heap requires RandomIterators");
+  static_assert(is_random, "push_heap requires RandomAccessIterators");
   return ::std::push_heap(::std::begin(range), ::std::end(range));
 }
 
@@ -1598,7 +1598,7 @@ auto push_heap (Range&& rng, Compare&& cmp) -> enable_if_t<
 > {
   auto range = make_range(::std::forward<Range>(rng));
   constexpr auto is_random = decltype(range)::is_random_access;
-  static_assert(is_random, "push_heap requires RandomIterators");
+  static_assert(is_random, "push_heap requires RandomAccessIterators");
   return ::std::push_heap(
     ::std::begin(range),
     ::std::end(range),
@@ -1610,7 +1610,7 @@ template <class Range>
 auto pop_heap (Range&& rng) -> enable_if_t<is_range<Range>::value> {
   auto range = make_range(::std::forward<Range>(rng));
   constexpr auto is_random = decltype(range)::is_random_access;
-  static_assert(is_random, "pop_heap requires RandomIterators");
+  static_assert(is_random, "pop_heap requires RandomAccessIterators");
   return ::std::pop_heap(::std::begin(range), ::std::end(range));
 }
 
@@ -1620,7 +1620,7 @@ auto pop_heap (Range&& rng, Compare&& cmp) -> enable_if_t<
 > {
   auto range = make_range(::std::forward<Range>(rng));
   constexpr auto is_random = decltype(range)::is_random_access;
-  static_assert(is_random, "pop_heap requires RandomIterators");
+  static_assert(is_random, "pop_heap requires RandomAccessIterators");
   return ::std::pop_heap(
     ::std::begin(range),
     ::std::end(range),
@@ -1632,7 +1632,7 @@ template <class Range>
 auto sort_heap (Range&& rng) -> enable_if_t<is_range<Range>::value> {
   auto range = make_range(::std::forward<Range>(rng));
   constexpr auto is_random = decltype(range)::is_random_access;
-  static_assert(is_random, "sort_heap requires RandomIterators");
+  static_assert(is_random, "sort_heap requires RandomAccessIterators");
   return ::std::sort_heap(::std::begin(range), ::std::end(range));
 }
 
@@ -1642,7 +1642,7 @@ auto sort_heap (Range&& rng, Compare&& cmp) -> enable_if_t<
 > {
   auto range = make_range(::std::forward<Range>(rng));
   constexpr auto is_random = decltype(range)::is_random_access;
-  static_assert(is_random, "sort_heap requires RandomIterators");
+  static_assert(is_random, "sort_heap requires RandomAccessIterators");
   return ::std::sort_heap(
     ::std::begin(range),
     ::std::end(range),

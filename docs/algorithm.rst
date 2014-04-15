@@ -11,8 +11,8 @@ algorithm headers. There are a few small differences (namely that this
 component relies on the :ref:`core-range-component`), however these differences
 are discussed below.
 
-.. note:: All of the functions in this component take universal references in
-   most cases. The reasons for this are:
+.. note:: All of the functions in this component that take a range take
+   universal references in most cases. The reasons for this are:
 
     * there should be a minimal amount of overhead
     * we shouldn't add to this overhead
@@ -114,7 +114,7 @@ Non-Modifying Sequence Operations
    uses ``operator ==`` to compare the elements, the second version uses the
    given binary predicate *bp*.
 
-   :returns: Forward iterator to the first of the identical elements. If no
+   :returns: ForwardIterator to the first of the identical elements. If no
              such elements are found, the end of *range* is returned.
    :requires: *range* must provide ForwardIterators.
 
@@ -145,7 +145,7 @@ Non-Modifying Sequence Operations
    to *value*. The first version uses ``operator ==``. The second uses the
    provided binary predicate *bp*.
 
-   :returns: Forward iterator to the start of the discovered sequence of the
+   :returns: ForwardIterator to the start of the discovered sequence of the
              end of *range* if no such sequence was found.
    :requires: *range* must provide ForwardIterators
 
@@ -163,18 +163,228 @@ Modifying Sequence Operations
 
    Copies the elements in *range* to *it*.
 
-   :returns: Iterator pointing to the last element written.
-   :requires: *range* must provide InputIterators
+   :returns: Iterator to one past the last element written.
+   :requires: *range* must provide InputIterators.
+
+.. function:: decay_t<BidirIt> copy_backward(Range&& range, BidirIt&& it)
+
+   Copies the elements from *range* to the range starting at *it*.
+   The elements are copied in reverse order (the last element is copied first),
+   but their relative order is preserved.
+
+   :returns: Iterator to the last element copied.
+   :requires: *range* must provide BidirectionalIterators.
+
+
+.. function:: decay_t<OutputIt> move (Range&& range, OutputIt&& it)
+
+   Moves the elements in *range* to another range starting at *it*. The
+   elements in *range* are in a valid but null state after moving.
+
+   :returns: Iterator to one past the last element written.
+   :requires: *range* must provide InputIterators.
+
+.. function:: decay_t<BidirIt> move_backward (Range&& range, BidirIt&& it)
+
+   Moves the elements from *range* to another range starting at *it*.
+   The elements are moved in reverse order (the last element is moved first),
+   but their relative order is preserved.
+
+   :returns: Iterator to the last element moved.
+   :requires: *range* must provide BidirectionalIterators.
+
+.. function:: void fill (Range&& range, T const& value)
+
+   Fills *range* with a copy of *value*.
+
+   :requires: *range* must provide ForwardIterators.
+
+.. function:: decay_t<OutputIt> transform (\
+                Range&& range,\
+                OutputIt&& it,\
+                UnaryOperation&& op\
+              )
+              decay_t<OutputIt> transform (\
+                Range1&& range1,\
+                Range2&& range2,\
+                OutputIt&& it,\
+                BinaryOperation&& op\
+              )
+
+   Applies the given function to *range* and stores the result in another
+   range, beginning at *it*. The first version applies the unary operation *op*
+   to the elements in *range*. The second version applies the binary operation
+   *op* to pairs of elements from *range1* and *range2*.
+
+   :returns: Iterator to one past the last element transformed.
+   :requires: *range* must provide InputIterators.
+
+.. function:: ForwardIt remove (Range&& range, T const& value)
+              ForwardIt remove_if (Range&& range, UnaryPredicate&& up)
+
+   :requires: *range* must provide ForwardIterators.
+
+.. function:: decay_t<OutputIt> remove_copy (\
+                Range&& range,\
+                OutputIt&& it,\
+                T const& value\
+              )
+              decay_t<OutputIt> remove_copy_if (\
+                Range&& range,\
+                OutputIt&& it,\
+                UnaryPredicate&& up\
+              )
+
+   :requires: *range* must provide InputIterators.
+
+.. function:: void remove_erase (Range&& range, T const& val)
+              void remove_erase_if (Range&& range, UnaryPredicate&& up)
+
+   Calls :func:`remove_erase` (or :func:`remove_erase_if`), and then calls
+   ``::std::forward<Range>(range).erase()`` on the result. These two functions
+   are provided because the remove -> erase idiom is extremely common when
+   working with containers.
+
+   :requires: The same requirements as :func:`remove` and :func:`remove_if`
+              respectively.
+
+.. function:: void replace (Range&& range, T const& old, T const& value)
+              void replace_if (Range&& range, UnaryPred&& up, T const& value)
+
+   :requires: *range* must provide ForwardIterators
+
+.. function:: decay_t<OutputIt> replace_copy (\
+                Range&& range,\
+                OutputIt&& it,\
+                T const& old,\
+                T const& value\
+              )
+              decay_t<OutputIt> replace_copy_if (\
+                Range&& range,\
+                OutputIt&& it,\
+                UnaryPred&& up,\
+                T const& value\
+              )
+
+   :requires: *range* must provide InputIterators.
+
+.. function:: decay_t<ForwardIt> swap_ranges (Range&& range, ForwardIt&& it)
+
+   :requires: *range* must provide ForwardIterators.
+
+.. function:: void reverse (Range&&)
+
+   :requires: *range* must provide BidirectionalIterators.
+
+.. function:: decay_t<OutputIt> reverse_copy (Range&& range, OutputIt&& it)
+
+   :requires: *range* must provide BidirectionalIterators.
+
+.. function:: void rotate (Range&& range, ForwardIt&& it)
+
+   :requires: *range* must provide ForwardIterators.
+
+.. function:: decay_t<OutputIt> rotate_copy (\
+                Range&& range,\
+                ForwardIt&& it,\
+                OutputIt&& ot\
+              )
+
+   :requires: *range* must provide ForwardIterators.
+
+.. function:: void shuffle (Range&& range, URNG&& g)
+
+   :requires: *range* must provide RandomAccessIterators.
+
+.. function:: ForwardIt unique (Range&& range)
+              ForwardIt unique (Range&& range, BinaryPredicate&& bp)
+
+   :requires: *range* must provide ForwardIterators.
+
+.. function:: decay_t<OutputIt> unique_copy (Range&& range, OutputIt&& it)
+              decay_t<OutputIt> unique_copy (\
+                Range&& range,\
+                OutputIt&& it,\
+                BinaryPred&& bp\
+              )
+
+   :requires: *range* must provide InputIterators.
 
 .. _core-algorithm-component-partitioning-operations:
 
 Partitioning Operations
 -----------------------
 
+.. function:: bool is_partitioned (Range&& range, UnaryPredicate&& up)
+
+   :requires: *range* must provide InputIterators.
+
+.. function:: ForwardIt partition (Range&& range, UnaryPredicate&& up)
+
+   :requires: *range* must provide ForwardIterators.
+
+.. function:: partition_copy (\
+                Range&& range,\
+                OutputTrue&& ot,\
+                OutputFalse&& of,\
+                UnaryPredicate&& up\
+              )
+
+   :returns: ``std::pair<decay_t<OutputTrue>, decay_t<OutputFalse>>``
+   :requires: *range* must provide InputIterators.
+
+.. function:: BidirIt stable_partition (Range&& range, UnaryPredicate&& up)
+
+   :requires: *range* must provide BidirectionalIterators.
+
+.. function:: ForwardIt partition_point (Range&& range, UnaryPredicate&& up)
+
+   :requires: *range* must provide ForwardIterators.
+
 .. _core-algorithm-component-sorting-operations:
 
 Sorting Operations
 ------------------
+
+.. function:: bool is_sorted (Range&& range)
+              bool is_sorted (Range&& range, Compare&& comp)
+
+   :requires: *range* must provide ForwardIterators.
+
+.. function:: ForwardIt is_sorted_until (Range&& range)
+              ForwardIt is_sorted_until (Range&& range, Compare&& comp)
+
+   :requires: *range* must provide ForwardIterators.
+
+.. function:: void sort (Range&& range)
+              void sort (Range&& range, Compare&& comp)
+
+   :requires: *range* must provide RandomAccessIterators.
+
+.. function:: void partial_sort (Range&& range, RandomIt&& it)
+              void partial_sort (Range&& range, RandomIt&& it, Compare&& cmp)
+
+   :requires: *range* must provide RandomAccessIterators.
+
+.. function:: RandomIt partial_sort_copy (IRange&& irange, RRange&& rrange)
+              RandomIt partial_sort_copy (\
+                IRange&& irange,\
+                RRange&& rrange,\
+                Compare&& cmp\
+              )
+
+   :requires: *irange* must provide InputIterators, *rrange* must provide
+              RandomAccessIterators.
+
+.. function:: void stable_sort (Range&& range)
+              void stable_sort (Range&& range, Compare&& cmp)
+
+   :requires: *range* must provide RandomAccessIterators.
+
+.. function:: void nth_element (Range&& range, RandomIt&& it)
+              void nth_element (Range&& range, RandomIt&& it, Compare&& cmp)
+
+   :requires: *range* must provide RandomAccessIterators.
 
 .. _core-algorithm-component-binary-search-operations:
 
