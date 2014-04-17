@@ -573,12 +573,7 @@ int main () {
     task("make-heap") = [] {
       std::vector<int> values { 3, 1, 4, 1, 5, 9 };
       core::make_heap(values);
-      assert::equal(values[0], 9);
-      assert::equal(values[1], 5);
-      assert::equal(values[2], 4);
-      assert::equal(values[3], 1);
-      assert::equal(values[4], 1);
-      assert::equal(values[5], 3);
+      assert::is_true(core::is_heap(values));
     },
 
     task("push-heap") = [] {

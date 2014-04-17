@@ -149,8 +149,8 @@ int main () {
         >::value,
         "function-traits-arity incorrect size"
       );
-      assert::equal(mem_fn_arity, 1);
-      assert::equal(empty_arity, 0);
+      assert::equal(mem_fn_arity, 1u);
+      assert::equal(empty_arity, 0u);
     },
   };
 

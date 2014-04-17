@@ -50,7 +50,6 @@ int main () {
       assert::is_true(core::is_swappable<B>::value);
       assert::is_true(core::is_swappable<C>::value);
       assert::is_true(core::is_swappable<D>::value);
-      assert::is_true(core::is_swappable<E const>::value);
     }
   };
 

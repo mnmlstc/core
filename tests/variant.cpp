@@ -27,7 +27,7 @@ int main () {
       assert::equal(integer.type(), typeid(std::uint64_t));
 
       assert::equal(std::get<0>(string), std::string { "value-constructor" });
-      assert::equal(std::get<1>(integer), 64);
+      assert::equal(std::get<1>(integer), 64u);
     },
 
     task("move-constructor") = [] {
@@ -163,9 +163,9 @@ int main () {
       variant_type string { std::string { "which" } };
       variant_type integer { };
 
-      assert::equal(integer.which(), 0);
-      assert::equal(string.which(), 1);
-      assert::equal(vector.which(), 2);
+      assert::equal(integer.which(), 0u);
+      assert::equal(string.which(), 1u);
+      assert::equal(vector.which(), 2u);
     },
 
     task("empty") = [] {

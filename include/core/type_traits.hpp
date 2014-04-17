@@ -158,20 +158,15 @@ using std::swap;
 
 template <class T, class U>
 class is_swappable {
-  struct not_found_type { };
-
-  template <class T1, class T2>
-  static auto test (T1& lhs, T2& rhs) -> decltype(swap(lhs, rhs));
-
-  template <class, class> static auto test (...) -> not_found_type;
-
-  using test_type_lr = decltype(test<T, U>(declval<T&>(), declval<U&>()));
-  using test_type_rl = decltype(test<U, T>(declval<U&>(), declval<T&>()));
-
+  template <class X, class Y>
+  static auto check (int) noexcept -> decltype(
+    swap(declval<X&>(), declval<Y&>()),
+    void()
+  );
+  template <class X, class Y> static void check (...) noexcept(false);
 public:
   static constexpr bool value =
-    not std::is_same<test_type_lr, not_found_type>::value and
-    not std::is_same<test_type_rl, not_found_type>::value;
+    noexcept(check<T, U>(0)) and noexcept(check<U, T>(0));
 };
 
 template <class T, class U>

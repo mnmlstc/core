@@ -97,7 +97,10 @@ int main () {
       core::range<std::string::iterator> range { value };
 
       assert::is_true(not range.empty());
-      assert::equal(range.size(), value.size());
+      assert::equal(
+        static_cast<std::string::size_type>(range.size()),
+        value.size()
+      );
 
       assert::equal(range[0], 's');
       assert::equal(range[1], 'u');
@@ -145,7 +148,10 @@ int main () {
     task("size") = [] {
       std::string value { "size" };
       core::range<std::string::iterator> range { value };
-      assert::equal(value.size(), range.size());
+      assert::equal(
+        value.size(),
+        static_cast<std::string::size_type>(range.size())
+      );
     },
 
     task("slice") = [] {
