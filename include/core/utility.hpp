@@ -109,12 +109,27 @@ private:
 
 template <class Callable>
 auto make_scope_guard(Callable&& callable) -> scope_guard<
-  typename std::decay<Callable>::type
+  typename ::std::decay<Callable>::type
 > {
-  return scope_guard<typename std::decay<Callable>::type> {
-    std::forward<Callable>(callable)
+  return scope_guard<typename ::std::decay<Callable>::type> {
+    ::std::forward<Callable>(callable)
   };
 }
+
+template <class T>
+constexpr T&& forward (typename ::std::remove_reference<T>::type& t) noexcept {
+  return static_cast<T&&>(t);
+}
+
+template <class T>
+constexpr T&& forward (typename ::std::remove_reference<T>::type&& t) noexcept {
+  return static_cast<T&&>(t);
+}
+
+template <class T>
+constexpr auto move (T&& t) noexcept -> decltype(
+  static_cast<typename ::std::remove_reference<T>::type&&>(t)
+) { return static_cast<typename ::std::remove_reference<T>::type&&>(t); }
 
 }} /* namespace core::v1 */
 
