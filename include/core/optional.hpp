@@ -4,16 +4,18 @@
 #include <initializer_list>
 #include <functional>
 #include <stdexcept>
-#include <utility>
 #include <memory>
 
+#include <cstdint>
+
 #include <core/type_traits.hpp>
+#include <core/utility.hpp>
 
 namespace core {
 inline namespace v1 {
 
-struct in_place_t final { };
-struct nullopt_t final { };
+struct in_place_t { };
+struct nullopt_t { };
 
 constexpr in_place_t in_place { };
 constexpr nullopt_t nullopt { };
@@ -22,125 +24,184 @@ struct bad_optional_access final : public std::logic_error {
   using std::logic_error::logic_error;
 };
 
-template <class Type>
-struct optional final {
-  static_assert(
-    not std::is_same<decay_t<Type>, nullopt_t>::value,
-    "Cannot have an optional<nullopt_t>"
-  );
+namespace impl {
 
-  static_assert(
-    not std::is_same<decay_t<Type>, in_place_t>::value,
-    "Cannot have an optional<in_place_t>"
-  );
+/* this is the default 'false' case */
+template <class T, bool = ::std::is_trivially_destructible<T>::value>
+struct storage {
 
-  static_assert(
-    not std::is_same<decay_t<Type>, std::nullptr_t>::value,
-    "Cannot have an optional<std::nullptr_t>"
-  );
+  using value_type = T;
 
-  static_assert(
-    not std::is_same<decay_t<Type>, void>::value,
-    "Cannot have an optional<void>"
-  );
+  static constexpr bool nothrow_mv_ctor = ::std::is_nothrow_move_constructible<
+    value_type
+  >::value;
 
-  static_assert(
-    not std::is_same<decay_t<Type>, bool>::value,
-    "Cannot have an optional<bool>"
-  );
+  union {
+    ::std::uint8_t dummy;
+    value_type val;
+  };
+  bool engaged { false };
 
-  using value_type = Type;
-  using allocator_type = std::allocator<value_type>;
-
-  optional (optional const& that) :
+  constexpr storage () noexcept : dummy { '\0' } { }
+  storage (storage const& that) :
     engaged { that.engaged }
   {
     if (not this->engaged) { return; }
-    allocator_type alloc { };
-    std::allocator_traits<allocator_type>::construct(
-      alloc,
-      reinterpret_cast<value_type*>(std::addressof(this->data)),
-      *that
-    );
+    ::new(::std::addressof(this->val)) value_type { that.val };
   }
 
-  optional (optional&& that)
-  noexcept(std::is_nothrow_move_constructible<value_type>::value) :
-    engaged { std::move(that.engaged) }
+  storage (storage&& that) noexcept(nothrow_mv_ctor) :
+    engaged { that.engaged }
   {
     if (not this->engaged) { return; }
-    allocator_type alloc { };
-    std::allocator_traits<allocator_type>::construct(
-      alloc,
-      reinterpret_cast<value_type*>(std::addressof(this->data)),
-      std::move(*that)
-    );
-    this->engaged = true;
-    that.engaged = false;
+    ::new(::std::addressof(this->val)) value_type { ::core::move(that.val) };
   }
 
-  constexpr optional () noexcept : data { }, engaged { false } { }
-  constexpr optional (nullopt_t) noexcept : optional { } { }
+  constexpr storage (value_type const& value) :
+    val { value },
+    engaged { true }
+  { }
 
-  optional (value_type const& value) : data { }, engaged { false } {
-    allocator_type alloc { };
-    std::allocator_traits<allocator_type>::construct(
-      alloc,
-      reinterpret_cast<value_type*>(std::addressof(this->data)),
-      value
-    );
-    this->engaged = true;
-  }
-
-  optional (value_type&& value) noexcept(
-    std::is_nothrow_move_constructible<value_type>::value
-  ) : data { }, engaged { false } {
-    allocator_type alloc { };
-    std::allocator_traits<allocator_type>::construct(
-      alloc,
-      reinterpret_cast<value_type*>(std::addressof(this->data)),
-      std::move(value)
-    );
-    this->engaged = true;
-  }
+  constexpr storage (value_type&& value) noexcept(nothrow_mv_ctor) :
+    val { ::core::move(value) },
+    engaged { true }
+  { }
 
   template <class... Args>
-  explicit optional (in_place_t, Args&&... args) :
-    data { },
-    engaged { false }
+  constexpr explicit storage (in_place_t, Args&&... args) :
+    val { ::core::forward<Args>(args)... },
+    engaged { true }
+  { }
+
+  ~storage () noexcept { if (this->engaged) { this->val.~value_type(); } }
+};
+
+template <class T>
+struct storage<T, true> {
+  using value_type = T;
+  static constexpr bool nothrow_mv_ctor = ::std::is_nothrow_move_constructible<
+    value_type
+  >::value;
+  union {
+    ::std::uint8_t dummy;
+    value_type val;
+  };
+  bool engaged { false };
+
+  constexpr storage () noexcept : dummy { '\0' } { }
+  storage (storage const& that) :
+    engaged { that.engaged }
   {
-    allocator_type alloc { };
-    std::allocator_traits<allocator_type>::construct(
-      alloc,
-      reinterpret_cast<value_type*>(std::addressof(this->data)),
-      std::forward<Args>(args)...
-    );
-    this->engaged = true;
-  }
-
-  template <class T, class... Args>
-  explicit optional (
-    in_place_t,
-    std::initializer_list<T> list,
-    Args&&... args
-  ) : data { }, engaged { false } {
-    allocator_type alloc { };
-    std::allocator_traits<allocator_type>::construct(
-      alloc,
-      reinterpret_cast<value_type*>(std::addressof(this->data)),
-      list,
-      std::forward<Args>(args)...
-    );
-    this->engaged = true;
-  }
-
-  ~optional () noexcept {
     if (not this->engaged) { return; }
-    allocator_type alloc { };
-    std::allocator_traits<allocator_type>::destroy(
-      alloc, reinterpret_cast<value_type*>(std::addressof(this->data))
-    );
+    ::new(::std::addressof(this->val)) value_type { that.val };
   }
+
+  storage (storage&& that) noexcept(nothrow_mv_ctor) :
+    engaged { that.engaged }
+  {
+    if (not this->engaged) { return; }
+    ::new(::std::addressof(this->val)) value_type {
+      ::core::move(that.val)
+    };
+  }
+
+  constexpr storage (value_type const& value) :
+    val { value },
+    engaged { true }
+  { }
+
+  constexpr storage (value_type&& value) noexcept(nothrow_mv_ctor) :
+    val { ::core::move(value) },
+    engaged { true }
+  { }
+
+  template <class... Args>
+  constexpr explicit storage (in_place_t, Args&&... args) :
+    val { ::core::forward<Args>(args)... },
+    engaged { true }
+  { }
+};
+
+} /* namespace impl */
+
+template <class Type>
+struct optional final : private impl::storage<Type> {
+  using base = impl::storage<Type>;
+  using value_type = typename impl::storage<Type>::value_type;
+
+  /* compiler enforcement */
+  static_assert(
+    not ::std::is_reference<value_type>::value,
+    "Cannot have optional reference (ill-formed)"
+  );
+
+  static_assert(
+    not ::std::is_same<decay_t<value_type>, nullopt_t>::value,
+    "Cannot have optional<nullopt_t> (ill-formed)"
+  );
+
+  static_assert(
+    not ::std::is_same<decay_t<value_type>, in_place_t>::value,
+    "Cannot have optional<in_place_t> (ill-formed)"
+  );
+
+  static_assert(
+    not ::std::is_same<decay_t<value_type>, ::std::nullptr_t>::value,
+    "Cannot have optional nullptr (tautological)"
+  );
+
+  static_assert(
+    not ::std::is_same<decay_t<value_type>, void>::value,
+    "Cannot have optional<void> (ill-formed)"
+  );
+
+  static_assert(
+    ::std::is_object<value_type>::value,
+    "Cannot have optional with a non-object type (undefined behavior)"
+  );
+
+  static_assert(
+    ::std::is_nothrow_destructible<value_type>::value,
+    "Cannot have optional with non-noexcept destructible (undefined behavior)"
+  );
+
+  constexpr optional () noexcept { }
+  optional (optional const&) = default;
+  optional (optional&&) = default;
+  ~optional () = default;
+
+  constexpr optional (nullopt_t) noexcept { }
+
+  constexpr optional (value_type const& value) :
+    base { value }
+  { }
+
+  constexpr optional (value_type&& value) noexcept(base::nothrow_mv_ctor) :
+    base { ::core::move(value) }
+  { }
+
+  template <
+    class... Args,
+    class=enable_if_t< ::std::is_constructible<value_type, Args...>::value>
+  > constexpr explicit optional (in_place_t, Args&&... args) :
+    base { in_place, ::core::forward<Args>(args)... }
+  { }
+
+  template <
+    class T,
+    class... Args,
+    class=enable_if_t<
+      ::std::is_constructible<
+        value_type,
+        ::std::initializer_list<T>&,
+        Args...
+      >::value
+    >
+  > constexpr explicit optional (
+    in_place_t,
+    ::std::initializer_list<T> il,
+    Args&&... args
+  ) : base { in_place, il, ::core::forward<Args>(args)... } { }
 
   optional& operator = (optional const& that) {
     optional { that }.swap(*this);
@@ -148,180 +209,186 @@ struct optional final {
   }
 
   optional& operator = (optional&& that) noexcept (
-    std::is_nothrow_move_assignable<value_type>::value and
-    std::is_nothrow_move_constructible<value_type>::value
+    all_traits<
+      ::std::is_nothrow_move_assignable<value_type>,
+      ::std::is_nothrow_move_constructible<value_type>
+    >::value
   ) {
-    optional { std::move(that) }.swap(*this);
+    optional { ::core::move(that) }.swap(*this);
     return *this;
   }
 
   template <
     class T,
     class=enable_if_t<
-      std::is_constructible<value_type, T>::value and
-      std::is_assignable<value_type, T>::value
+      not ::std::is_same<decay_t<T>, optional>::value and
+      ::std::is_constructible<value_type, T>::value and
+      ::std::is_assignable<value_type, T>::value
     >
   > optional& operator = (T&& value) {
-    if (not this->engaged) { this->emplace(std::forward<T>(value)); }
-    else { **this = std::forward<T>(value); }
+    if (not this->engaged) { this->emplace(::core::forward<T>(value)); }
+    else { **this = ::core::forward<T>(value); }
     return *this;
   }
 
   optional& operator = (nullopt_t) noexcept {
-    if (not this->engaged) { return *this; }
-    allocator_type alloc { };
-    std::allocator_traits<allocator_type>::destroy(
-      alloc, reinterpret_cast<value_type*>(std::addressof(this->data))
-    );
-    this->engaged = false;
+    if (this->engaged) {
+      this->val.~value_type();
+      this->engaged = false;
+    }
     return *this;
   }
 
-  value_type const* operator -> () const {
-    return reinterpret_cast<value_type const*>(std::addressof(this->data));
-  }
-
-  value_type* operator -> () {
-    return reinterpret_cast<value_type*>(std::addressof(this->data));
-  }
-
-  value_type const& operator * () const {
-    return reinterpret_cast<value_type const&>(this->data);
-  }
-
-  value_type& operator * () {
-    return reinterpret_cast<value_type&>(this->data);
-  }
-
-  explicit operator bool () const { return this->engaged; }
-
-  value_type const& value () const {
-    if (this->engaged) { return *(*this); }
-    throw bad_optional_access { "optional is disengaged" };
-  }
-
-  value_type& value () {
-    if (this->engaged) { return *(*this); }
-    throw bad_optional_access { "optional is disengaged" };
-  }
-
-  template <class T>
-  value_type value_or (T&& val) const& {
-    if (not this->engaged) { return value_type { std::forward<T>(val) }; }
-    return **this;
-  }
-
-  template <class T>
-  value_type value_or (T&& val) && {
-    if (not this->engaged) { return value_type { std::forward<T>(val) }; }
-    return value_type { std::move(**this) };
-  }
-
-  void swap (optional& that) noexcept (
-    is_nothrow_swappable<value_type>::value
-  ) {
+  void swap (optional& that) noexcept(is_nothrow_swappable<value_type>::value) {
     using std::swap;
-    if (not this->engaged and not that.engaged) { return; }
-    if (this->engaged and that.engaged) {
+    if (not *this and not that) { return; }
+    if (*this and that) {
       swap(**this, *that);
       return;
     }
 
-    auto& to_disengage = this->engaged ? *this : that;
-    auto& to_engage = this->engaged ? that : *this;
+    auto& to_disengage = *this ? *this : that;
+    auto& to_engage = *this ? that : *this;
 
-    to_engage.emplace(std::move(*to_disengage));
+    to_engage.emplace(::core::move(*to_disengage));
     to_disengage = nullopt;
   }
 
-  template <class U, class... Args>
-  void emplace (std::initializer_list<U> list, Args&&... args) {
-    if (this->engaged) { *this = nullopt; }
+  constexpr value_type const* operator -> () const noexcept {
+    return ::std::addressof(this->val);
+  }
 
-    allocator_type alloc { };
-    std::allocator_traits<allocator_type>::construct(
-      alloc,
-      reinterpret_cast<value_type*>(std::addressof(this->data)),
-      list,
-      std::forward<Args>(args)...
-    );
+  value_type* operator -> () noexcept { return ::std::addressof(this->val); }
+
+  constexpr value_type const& operator * () const noexcept {
+    return this->val;
+  }
+
+  value_type& operator * () noexcept { return this->val; }
+
+  constexpr explicit operator bool () const { return this->engaged; }
+
+  template <class T, class... Args>
+  void emplace (::std::initializer_list<T> il, Args&&... args) {
+    *this = nullopt;
+    ::new(::std::addressof(this->val)) value_type {
+      il,
+      ::core::forward<Args>(args)...
+    };
     this->engaged = true;
   }
 
   template <class... Args>
   void emplace (Args&&... args) {
-    if (this->engaged) { *this = nullopt; }
-
-    allocator_type alloc { };
-    std::allocator_traits<allocator_type>::construct(
-      alloc,
-      reinterpret_cast<value_type*>(std::addressof(this->data)),
-      std::forward<Args>(args)...
-    );
+    *this = nullopt;
+    ::new(::std::addressof(this->val)) value_type {
+      ::core::forward<Args>(args)...
+    };
     this->engaged = true;
   }
 
-private:
-  using data_type = aligned_storage_t<
-    sizeof(value_type),
-    std::alignment_of<value_type>::value
-  >;
+  constexpr value_type const& value () const noexcept(false) {
+    return *this
+      ? **this
+      : (throw bad_optional_access { "optional is disengaged" }, **this);
+  }
 
-  data_type data;
-  bool engaged;
+  value_type& value () noexcept(false) {
+    if (this->engaged) { return **this; }
+    throw bad_optional_access { "optional is disengaged" };
+  }
+
+  template <
+    class T,
+    class=enable_if_t<
+      all_traits<
+        ::std::is_copy_constructible<value_type>,
+        ::std::is_convertible<T, value_type>
+      >::value
+    >
+  > constexpr value_type value_or (T&& val) const& {
+    return *this ? **this : static_cast<value_type>(::core::forward<T>(val));
+  }
+
+  template <
+    class T,
+    class=enable_if_t<
+      all_traits<
+        ::std::is_move_constructible<value_type>,
+        ::std::is_convertible<T, value_type>
+      >::value
+    >
+  > value_type value_or (T&& val) && {
+    return *this
+      ? value_type { ::core::move(**this) }
+      : static_cast<value_type>(::core::forward<T>(val));
+  }
+
 };
 
-
 template <class Type>
-auto make_optional (Type&& value) -> optional<decay_t<Type>> {
-  return optional<decay_t<Type>>(std::forward<Type>(value));
+constexpr auto make_optional (Type&& value) -> optional<decay_t<Type>> {
+  return optional<decay_t<Type>> { ::core::forward<Type>(value) };
 }
 
 template <class T>
-bool operator == (optional<T> const& lhs, optional<T> const& rhs) noexcept {
-  if (bool(lhs) != bool(rhs)) { return false; }
-  if (not lhs and not rhs) { return true; }
-  return *lhs == *rhs;
+constexpr bool operator == (
+  optional<T> const& lhs,
+  optional<T> const& rhs
+) noexcept {
+  return static_cast<bool>(lhs) != static_cast<bool>(rhs)
+    ? false
+    : (not lhs and not rhs) ? true : *lhs == *rhs;
 }
 
 template <class T>
-bool operator < (optional<T> const& lhs, optional<T> const& rhs) noexcept {
-  if (bool(rhs) == false) { return false; }
-  if (bool(lhs) == false) { return true; }
-  return std::less<T> { }(*lhs, *rhs);
+constexpr bool operator < (
+  optional<T> const& lhs,
+  optional<T> const& rhs
+) noexcept {
+  return static_cast<bool>(rhs) == false
+    ? false
+    : static_cast<bool>(lhs) == false ? true : ::std::less<T> { }(*lhs, *rhs);
 }
 
 template <class T>
-bool operator == (optional<T> const& lhs, nullopt_t) noexcept {
+constexpr bool operator == (optional<T> const& lhs, nullopt_t) noexcept {
   return not lhs;
 }
 
 template <class T>
-bool operator == (nullopt_t, optional<T> const&) noexcept { return false; }
+constexpr bool operator == (nullopt_t, optional<T> const&) noexcept {
+  return false;
+}
 
 template <class T>
-bool operator < (optional<T> const& lhs, nullopt_t) noexcept {
+constexpr bool operator < (optional<T> const& lhs, nullopt_t) noexcept {
   return not lhs;
 }
 
 template <class T>
-bool operator < (nullopt_t, optional<T> const& rhs) noexcept {
-  return bool(rhs);
+constexpr bool operator < (nullopt_t, optional<T> const& rhs) noexcept {
+  return static_cast<bool>(rhs);
 }
 
 template <class T>
-bool operator == (optional<T> const& opt, T const& value) noexcept {
-  return bool(opt) ? *opt == value : false;
+constexpr bool operator == (optional<T> const& opt, T const& value) noexcept {
+  return opt ? *opt == value : false;
 }
 
 template <class T>
-bool operator == (T const& value, optional<T> const& opt) noexcept {
-  return bool(opt) ? value == *opt : false;
+constexpr bool operator == (T const& value, optional<T> const& opt) noexcept {
+  return opt ? value == *opt : false;
 }
 
 template <class T>
-bool operator < (optional<T> const& opt, T const& value) noexcept {
-  return bool(opt) ? std::less<T>{ }(*opt, value) : true;
+constexpr bool operator < (optional<T> const& opt, T const& value) noexcept {
+  return opt ? ::std::less<T>{ }(*opt, value) : true;
+}
+
+template <class T>
+constexpr bool operator < (T const& value, optional<T> const& opt) noexcept {
+  return opt ? ::std::less<T> { }(value, *opt) : false;
 }
 
 template <class T>
@@ -334,10 +401,11 @@ void swap (optional<T>& lhs, optional<T>& rhs) noexcept(
 namespace std {
 
 template <class Type>
-struct hash<core::optional<Type>> {
+struct hash< ::core::v1::optional<Type>> {
   using result_type = typename hash<Type>::result_type;
+  using argument_type = ::core::v1::optional<Type>;
 
-  result_type operator () (core::optional<Type> const& value) const {
+  result_type operator () (argument_type const& value) const noexcept {
     return value ? hash<Type> { }(*value) : result_type { };
   }
 };
