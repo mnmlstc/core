@@ -15,10 +15,10 @@ namespace core {
 inline namespace v1 {
 
 struct in_place_t { };
-struct nullopt_t { };
+struct nullopt_t { constexpr explicit nullopt_t (int) noexcept { } };
 
 constexpr in_place_t in_place { };
-constexpr nullopt_t nullopt { };
+constexpr nullopt_t nullopt { 0 };
 
 struct bad_optional_access final : public std::logic_error {
   using std::logic_error::logic_error;
