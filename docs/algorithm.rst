@@ -565,6 +565,7 @@ Min/Max Operations
                 Range&& range,\
                 Compare&& compare\
               )
+
    :requires: *range* must provide ForwardIterators.
 
 .. function:: bool lexicographical_compare (Range1&& range1, Range2&& range2)
