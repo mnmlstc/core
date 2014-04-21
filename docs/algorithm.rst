@@ -393,17 +393,204 @@ Binary Search Operations
 
 .. note:: These operations are intended for sorted ranges *only*.
 
+.. function:: ForwardIt lower_bound (Range&& range, T const& value)
+              ForwardIt lower_bound (\
+                Range&& range,\
+                T const& value,\
+                Compare&& cmp\
+              )
+
+   :requires: *range* must provide ForwardIterators.
+
+.. function:: ForwardIt upper_bound (Range&& range, T const& value)
+              ForwardIt upper_bound (\
+                Range&& range,\
+                T const& value,\
+                Compare&& cmp\
+              )
+
+   :requires: *range* must provide ForwardIterators.
+
+.. function:: bool binary_search (Range&& range, T const& value)
+              bool binary_search (Range&& range, T const& value, Compare&& cmp)
+
+   :requires: *range* must provide ForwardIterators.
+
+.. function:: range<ForwardIt> equal_range (Range&& range, T const& value)
+              range<ForwardIt> equal_range (\
+                Range&& range,\
+                T const& value,\
+                Compare&& cmp\
+              )
+
+   :requires: *range* must provide ForwardIterators.
+
 .. _core-algorithm-component-set-operations:
 
 Set Operations
 --------------
+
+.. function:: decay_t<OutputIt> merge (\
+                Range1&& range1,\
+                Range2&& range2,\
+                OutputIt&& it\
+              )
+              decay_t<OutputIt> merge (\
+                Range1&& range1,\
+                Range2&& range2,\
+                OutputIt&& it,\
+                Compare&& cmp\
+              )
+
+   :requires: *range1* and *range2* must provide InputIterators.
+
+.. function:: void inplace_merge (Range&& range, Bidir&& it)
+              void inplace_merge (Range&& range, Bidir&& it, Compare&& cmp)
+
+   :requires: *range* must provide BidirectionalIterators
+
+.. function:: bool includes (Range1&& range1, Range2&& range2)
+              bool includes (Range1&& range1, Range2&& range2, Compare&& cmp)
+
+   :requires: *range1* and *range2* must provide InputIterators.
+
+.. function:: decay_t<OutputIt> set_difference (\
+                Range1&& range1,\
+                Range2&& range2,\
+                OutputIt&& it\
+              )
+              decay_t<OutputIt> set_difference (\
+                Range1&& range1,\
+                Range2&& range2,\
+                OutputIt&& it,\
+                Compare&& cmp\
+              )
+
+   :requires: *range1* and *range2* must provide InputIterators.
+
+.. function:: decay_t<OutputIt> set_intersection (\
+                Range1&& range1,\
+                Range2&& range2,\
+                OutputIt&& it\
+              )
+              decay_t<OutputIt> set_intersection (\
+                Range1&& range1,\
+                Range2&& range2,\
+                OutputIt&& it,\
+                Compare&& cmp\
+              )
+
+   :requires: *range1* and *range2* must provide InputIterators.
+
+.. function:: decay_t<OutputIt> set_symmetric_difference (\
+                Range1&& range1,\
+                Range2&& range2,\
+                OutputIt&& it\
+              )
+              decay_t<OutputIt> set_symmetric_difference (\
+                Range1&& range1,\
+                Range2&& range2,\
+                OutputIt&& it,\
+                Compare&& cmp\
+              )
+
+   :requires: *range1* and *range2* must provide InputIterators.
+
+.. function:: decay_t<OutputIt> set_union (\
+                Range1&& range1,\
+                Range2&& range2,\
+                OutputIt&& it\
+              )
+              decay_t<OutputIt> set_union (\
+                Range1&& range1,\
+                Range2&& range2,\
+                OutputIt&& it,\
+                Compare&& cmp\
+              )
+
+   :requires: *range1* and *range2* must provide InputIterators.
 
 .. _core-algorithm-component-heap-operations:
 
 Heap Operations
 ---------------
 
+.. function:: bool is_heap (Range&& range)
+              bool is_heap (Range&& range, Compare&& compare)
+
+   :require: *range* must provide RandomAccessIterators.
+
+.. function:: RandomIt is_heap_until (Range&& range)
+              RandomIt is_heap_until (Range&& range, Compare&& compare)
+
+   :require: *range* must provide RandomAccessIterators.
+
+.. function:: void make_heap (Range&& range)
+              void make_heap (Range&& range, Compare&& compare)
+
+   :requires: *range* must provide RandomAccessIterators.
+
+.. function:: void push_heap (Range&& range)
+              void push_heap (Range&& range, Compare&& compare)
+
+   :requires: *range* must provide RandomAccessIterators.
+
+.. function:: void pop_heap (Range&& range)
+              void pop_heap (Range&& range, Compare&& compare)
+
+   :requires: *range* must provide RandomAccessIterators.
+
+.. function:: void sort_heap (Range&& range)
+              void sort_heap (Range&& range, Compare&& compare)
+
+   :requires: *range* must provide RandomAccessIterators.
+
 .. _core-algorithm-component-min-max-operations:
 
 Min/Max Operations
 ------------------
+
+.. function:: ForwardIt max_element (Range&& range)
+              ForwardIt max_element (Range&& range, Compare&& compare)
+
+   :requires: *range* must provide ForwardIterators.
+
+.. function:: ForwardIt min_element (Range&& range)
+              ForwardIt min_element (Range&& range, Compare&& compare)
+
+   :requires: *range* must provide ForwardIterators.
+
+.. function:: std::pair<ForwardIt, ForwardIt> minmax_element (Range&& range)
+              std::pair<ForwardIt, ForwardIt> minmax_element (\
+                Range&& range,\
+                Compare&& compare\
+              )
+   :requires: *range* must provide ForwardIterators.
+
+.. function:: bool lexicographical_compare (Range1&& range1, Range2&& range2)
+              bool lexicographical_compare (\
+                Range1&& range1,\
+                Range2&& range2,\
+                Compare&& compare\
+              )
+
+   :requires: *range1* and *range2* must provide InputIterators.
+
+.. function:: is_permutation (Range1&& range1, Range2&& range2)
+              is_permutation (\
+                Range1&& range1,\
+                Range2&& range2,\
+                BinaryPredicate&& bp\
+              )
+
+   :requires: *range1* and *range2* must provide ForwardIterators.
+
+.. function:: bool next_permutation (Range&& range)
+              bool next_permutation (Range&& range, Compare&& compare)
+
+   :requires: *range* must provide BidirectionalIterators.
+
+.. function:: bool prev_permutation (Range&& range)
+              bool prev_permutation (Range&& range, Compare&& compare)
+
+   :requires: *range* must provide BidirectionalIterators.
