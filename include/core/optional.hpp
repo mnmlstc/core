@@ -223,7 +223,7 @@ struct optional final : private impl::storage<Type> {
     class=enable_if_t<
       not ::std::is_same<decay_t<T>, optional>::value and
       ::std::is_constructible<value_type, T>::value and
-      ::std::is_assignable<value_type, T>::value
+      ::std::is_assignable<value_type&, T>::value
     >
   > optional& operator = (T&& value) {
     if (not this->engaged) { this->emplace(::core::forward<T>(value)); }
@@ -239,7 +239,12 @@ struct optional final : private impl::storage<Type> {
     return *this;
   }
 
-  void swap (optional& that) noexcept(is_nothrow_swappable<value_type>::value) {
+  void swap (optional& that) noexcept(
+    all_traits<
+      is_nothrow_swappable<value_type>,
+      ::std::is_nothrow_move_constructible<value_type>
+    >::value
+  ) {
     using std::swap;
     if (not *this and not that) { return; }
     if (*this and that) {
@@ -323,7 +328,6 @@ struct optional final : private impl::storage<Type> {
       ? value_type { ::core::move(**this) }
       : static_cast<value_type>(::core::forward<T>(val));
   }
-
 };
 
 template <class Type>
@@ -348,7 +352,7 @@ constexpr bool operator < (
 ) noexcept {
   return static_cast<bool>(rhs) == false
     ? false
-    : static_cast<bool>(lhs) == false ? true : ::std::less<T> { }(*lhs, *rhs);
+    : static_cast<bool>(lhs) == false ? true : *lhs < *rhs;
 }
 
 template <class T>
@@ -383,12 +387,12 @@ constexpr bool operator == (T const& value, optional<T> const& opt) noexcept {
 
 template <class T>
 constexpr bool operator < (optional<T> const& opt, T const& value) noexcept {
-  return opt ? ::std::less<T>{ }(*opt, value) : true;
+  return opt ? *opt < value : true;
 }
 
 template <class T>
 constexpr bool operator < (T const& value, optional<T> const& opt) noexcept {
-  return opt ? ::std::less<T> { }(value, *opt) : false;
+  return opt ? value < *opt : false;
 }
 
 template <class T>

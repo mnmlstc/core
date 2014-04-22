@@ -227,28 +227,39 @@ int main () {
       assert::equal(values[core::make_optional<std::string>("text1")], 0);
       assert::equal(values[core::make_optional<std::string>("text2")], 1);
       assert::equal(values[core::make_optional<std::string>("text3")], 2);
+    },
+
+    task("force-disengage") = [] {
+      core::optional<int> value { 5 };
+      assert::is_true(static_cast<bool>(value));
+      value = {};
+      assert::is_false(static_cast<bool>(value));
     }
   };
 
   test("constexpr-optional") = {
     task("default-constructor") = [] {
       constexpr core::optional<int> opt { };
-      assert::is_true(not opt);
+      constexpr bool value = static_cast<bool>(opt);
+      assert::is_false(value);
     },
 
     task("nullopt-constructor") = [] {
       constexpr core::optional<int> opt { core::nullopt };
-      assert::is_true(not opt);
+      constexpr bool value = static_cast<bool>(opt);
+      assert::is_false(value);
     },
 
     task("value-constructor") = [] {
       constexpr int value = 7;
       constexpr core::optional<int> copy { value };
       constexpr core::optional<int> move { 5 };
-      assert::is_false(not copy);
-      assert::is_false(not move);
-      assert::equal(*copy, 7);
-      assert::equal(*move, 5);
+      static_assert(copy, "could not initialize core::optional<int>");
+      static_assert(move, "could not initialize core::optional<int>");
+      constexpr bool copy_result = *copy == value;
+      constexpr bool move_result = *move == 5;
+      assert::is_true(copy_result);
+      assert::is_true(move_result);
     },
 
     task("variadic-value-constructor") = [] {
