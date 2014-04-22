@@ -11,15 +11,15 @@
 namespace core {
 inline namespace v1 {
 
-struct bad_expected_type : public std::logic_error {
-  using std::logic_error::logic_error;
+struct bad_expected_type : public ::std::logic_error {
+  using ::std::logic_error::logic_error;
 };
 
 template <class T>
 struct expected final {
   using value_type = T;
 
-  explicit expected (std::exception_ptr ptr) noexcept :
+  explicit expected (::std::exception_ptr ptr) noexcept :
     ptr { },
     valid { false }
   { this->ptr = ptr; }
@@ -31,22 +31,26 @@ struct expected final {
   explicit expected (value_type&& val) noexcept :
     val { },
     valid { true }
-  { this->val = std::move(val); }
+  { this->val = ::std::move(val); }
 
   expected (expected const& that) :
     valid { that.valid }
   {
     if (this->valid) {
-      new (std::addressof(this->val)) value_type { that.val };
-    } else { new (std::addressof(this->ptr)) std::exception_ptr { that.ptr }; }
+      new (::std::addressof(this->val)) value_type { that.val };
+    } else {
+      new (::std::addressof(this->ptr)) ::std::exception_ptr { that.ptr };
+    }
   }
 
   expected (expected&& that) noexcept :
     valid { that.valid }
   {
     if (this->valid) {
-      new (std::addressof(this->val)) value_type { std::move(that.val) };
-    } else { new (std::addressof(this->ptr)) std::exception_ptr { that.ptr }; }
+      new (::std::addressof(this->val)) value_type { ::std::move(that.val) };
+    } else {
+      new (::std::addressof(this->ptr)) ::std::exception_ptr { that.ptr };
+    }
   }
 
   expected () noexcept :
@@ -64,15 +68,15 @@ struct expected final {
   }
 
   expected& operator = (expected&& that) {
-    expected { std::move(that) }.swap(*this);
+    expected { ::std::move(that) }.swap(*this);
     return *this;
   }
 
-  expected& operator = (std::exception_ptr ptr) {
+  expected& operator = (::std::exception_ptr ptr) {
     if (not this->valid) { this->ptr = ptr; }
     else {
       this->val.~value_type();
-      new (std::addressof(this->ptr)) std::exception_ptr { ptr };
+      new (::std::addressof(this->ptr)) ::std::exception_ptr { ptr };
       this->valid = false;
     }
     return *this;
@@ -83,10 +87,10 @@ struct expected final {
   }
 
   expected& operator = (value_type&& val) {
-    if (this->valid) { this->val = std::move(val); }
+    if (this->valid) { this->val = ::std::move(val); }
     else {
       this->ptr.~exception_ptr();
-      new (std::addressof(this->val)) value_type { std::move(val) };
+      new (::std::addressof(this->val)) value_type { ::std::move(val) };
       this->valid = true;
     }
     return *this;
@@ -101,36 +105,36 @@ struct expected final {
   value_type& operator * () noexcept(false) { return this->value(); }
 
   value_type const& value () const noexcept(false) {
-    if (not this->valid) { std::rethrow_exception(this->ptr); }
+    if (not this->valid) { ::std::rethrow_exception(this->ptr); }
     return this->val;
   }
 
   value_type& value () noexcept(false) {
-    if (not this->valid) { std::rethrow_exception(this->ptr); }
+    if (not this->valid) { ::std::rethrow_exception(this->ptr); }
     return this->val;
   }
 
-  std::exception_ptr get_ptr () const noexcept(false) {
+  ::std::exception_ptr get_ptr () const noexcept(false) {
     if (this->valid) { throw bad_expected_type { "expected<T> is valid" }; }
     return this->ptr;
   }
 
   template <class U>
   value_type value_or (U&& val) const& {
-    if (not this->valid) { return value_type { std::forward<U>(val) }; }
+    if (not this->valid) { return value_type { ::std::forward<U>(val) }; }
     return this->val;
   }
 
   template <class U>
   value_type value_or (U&& val) && {
-    if (not this->valid) { return value_type { std::forward<U>(val) }; }
-    return value_type { std::move(this->val) };
+    if (not this->valid) { return value_type { ::std::forward<U>(val) }; }
+    return value_type { ::std::move(this->val) };
   }
 
   void swap (expected& that) noexcept(
     is_nothrow_swappable<value_type>::value
   ) {
-    using std::swap;
+    using ::std::swap;
 
     if (not this->valid and not that.valid) {
       swap(this->ptr, that.ptr);
@@ -145,7 +149,7 @@ struct expected final {
     auto& to_invalidate = this->valid ? *this : that;
     auto& to_validate = this->valid ? that : *this;
     auto ptr = to_validate.ptr;
-    to_validate = std::move(to_invalidate.value());
+    to_validate = ::std::move(to_invalidate.value());
     to_invalidate = ptr;
   }
 
@@ -154,19 +158,19 @@ struct expected final {
     try { this->raise(); }
     catch (E const& e) { return e; }
     catch (...) {
-      std::throw_with_nested(bad_expected_type { "unexpected exception" });
+      ::std::throw_with_nested(bad_expected_type { "unexpected exception" });
     }
   }
 
   [[noreturn]] void raise () const noexcept(false) {
     if (this->valid) { throw bad_expected_type { "expected<T> is valid" }; }
-    std::rethrow_exception(this->ptr);
+    ::std::rethrow_exception(this->ptr);
   }
 
 private:
 
   union {
-    std::exception_ptr ptr;
+    ::std::exception_ptr ptr;
     value_type val;
   };
 
@@ -177,17 +181,17 @@ template <>
 struct expected<void> final {
   using value_type = void;
 
-  explicit expected (std::exception_ptr ptr) noexcept : ptr { ptr } { }
+  explicit expected (::std::exception_ptr ptr) noexcept : ptr { ptr } { }
   expected (expected const& that) noexcept : ptr { that.ptr } { }
 
   expected (expected&& that) noexcept :
-    ptr { std::move(that.ptr) }
+    ptr { ::std::move(that.ptr) }
   { that.ptr = nullptr; }
 
   expected () noexcept : ptr { nullptr } { }
   ~expected () noexcept { }
 
-  expected& operator = (std::exception_ptr ptr) noexcept {
+  expected& operator = (::std::exception_ptr ptr) noexcept {
     expected { ptr }.swap(*this);
     return *this;
   }
@@ -198,15 +202,15 @@ struct expected<void> final {
   }
 
   expected& operator = (expected&& that) noexcept {
-    expected { std::move(that) }.swap(*this);
+    expected { ::std::move(that) }.swap(*this);
     return *this;
   }
 
   explicit operator bool () const noexcept { return not this->ptr; }
 
-  std::exception_ptr get_ptr () const noexcept { return this->ptr; }
+  ::std::exception_ptr get_ptr () const noexcept { return this->ptr; }
   void swap (expected& that) noexcept {
-    using std::swap;
+    using ::std::swap;
     swap(this->ptr, that.ptr);
   }
 
@@ -214,17 +218,17 @@ struct expected<void> final {
     try { this->raise(); }
     catch (E const& e) { return e; }
     catch (...) {
-      std::throw_with_nested(bad_expected_type { "unexpected exception" });
+      ::std::throw_with_nested(bad_expected_type { "unexpected exception" });
     }
   }
 
   [[noreturn]] void raise () const noexcept(false) {
     if (not this->ptr) { throw bad_expected_type { "valid expected<void>" }; }
-    std::rethrow_exception(this->ptr);
+    ::std::rethrow_exception(this->ptr);
   }
 
 private:
-  std::exception_ptr ptr;
+  ::std::exception_ptr ptr;
 };
 
 template <class T>
@@ -234,13 +238,13 @@ bool operator == (expected<T> const& lhs, expected<T> const& rhs) noexcept {
 }
 
 template <class T>
-bool operator == (expected<T> const& lhs, std::exception_ptr rhs) {
+bool operator == (expected<T> const& lhs, ::std::exception_ptr rhs) {
   if (bool(lhs)) { return false; }
   return lhs.get_ptr() == rhs;
 }
 
 template <class T>
-bool operator == (std::exception_ptr lhs, expected<T> const& rhs) {
+bool operator == (::std::exception_ptr lhs, expected<T> const& rhs) {
   if (bool(rhs)) { return false; }
   return lhs == rhs.get_ptr();
 }
@@ -261,13 +265,13 @@ template <class T>
 bool operator < (expected<T> const& lhs, expected<T> const& rhs) noexcept {
   if (not lhs) { return false; }
   if (not rhs) { return true; }
-  return std::less<T> { }(lhs.value(), rhs.value());
+  return ::std::less<T> { }(lhs.value(), rhs.value());
 }
 
 template <class T>
 bool operator < (expected<T> const& lhs, T const& rhs) noexcept {
   if (not lhs) { return true; }
-  return std::less<T>{ }(lhs.value(), rhs);
+  return ::std::less<T>{ }(lhs.value(), rhs);
 }
 
 /* expected<void> specialization */
@@ -279,11 +283,11 @@ bool operator == <void>(
 
 template <class T>
 auto make_expected (T&& value) noexcept -> expected<decay_t<T>> {
-  return expected<decay_t<T>> { std::forward<T>(value) };
+  return expected<decay_t<T>> { ::std::forward<T>(value) };
 }
 
 template <class T>
-auto make_expected (std::exception_ptr error) noexcept -> expected<T> {
+auto make_expected (::std::exception_ptr error) noexcept -> expected<T> {
   return expected<T> { error };
 }
 
