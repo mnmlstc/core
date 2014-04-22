@@ -12,11 +12,11 @@
 namespace core {
 inline namespace v1 {
 
-template <class CharT, class Traits=std::char_traits<CharT>>
+template <class CharT, class Traits=::std::char_traits<CharT>>
 struct basic_string_view {
-  using difference_type = std::ptrdiff_t;
+  using difference_type = ::std::ptrdiff_t;
   using value_type = CharT;
-  using size_type = std::size_t;
+  using size_type = ::std::size_t;
 
   using reference = value_type const&;
   using pointer = value_type const*;
@@ -27,18 +27,17 @@ struct basic_string_view {
   using const_iterator = pointer;
   using iterator = const_iterator;
 
-  using const_reverse_iterator = std::reverse_iterator<const_iterator>;
+  using const_reverse_iterator = ::std::reverse_iterator<const_iterator>;
   using reverse_iterator = const_reverse_iterator;
 
   using traits = Traits;
 
-  static constexpr size_type npos = std::numeric_limits<size_type>::max();
+  static constexpr size_type npos = ::std::numeric_limits<size_type>::max();
 
   template <class Allocator>
-  basic_string_view (std::basic_string<CharT, Traits, Allocator> const& that) :
-    str { that.data() },
-    len { that.size() }
-  { }
+  basic_string_view (
+    ::std::basic_string<CharT, Traits, Allocator> const& that
+  ) : str { that.data() }, len { that.size() } { }
 
   constexpr basic_string_view (pointer str, size_type len) noexcept :
     str { str },
@@ -65,8 +64,8 @@ struct basic_string_view {
   }
 
   template <class Allocator>
-  explicit operator std::basic_string<CharT, Traits, Allocator> () const {
-    return std::basic_string<CharT, Traits, Allocator> {
+  explicit operator ::std::basic_string<CharT, Traits, Allocator> () const {
+    return ::std::basic_string<CharT, Traits, Allocator> {
       this->data(),
       this->size()
     };
@@ -123,7 +122,7 @@ struct basic_string_view {
 
   constexpr basic_string_view substr (size_type pos, size_type n=npos) const {
     return pos > this->size()
-      ? throw std::out_of_range { "start position out of range" }
+      ? throw ::std::out_of_range { "start position out of range" }
       : basic_string_view {
         this->data() + pos,
         n == npos or pos + n > this->size()
@@ -158,7 +157,7 @@ struct basic_string_view {
     auto cmp = traits::compare(
       this->data(),
       that.data(),
-      std::min(this->size(), that.size())
+      ::std::min(this->size(), that.size())
     );
 
     if (cmp != 0) { return cmp; }
@@ -169,7 +168,7 @@ struct basic_string_view {
 
   reference at (size_type idx) const {
     if (idx >= this->size()) {
-      throw std::out_of_range { "requested index out of range" };
+      throw ::std::out_of_range { "requested index out of range" };
     }
     return this->str[idx];
   }
@@ -178,7 +177,7 @@ struct basic_string_view {
   size_type find_first_not_of (basic_string_view that) const {
     for (auto iter = this->begin(); iter != this->end(); ++iter) {
       if (traits::find(that.data(), that.size(), *iter)) { continue; }
-      return std::distance(this->begin(), iter);
+      return ::std::distance(this->begin(), iter);
     }
     return npos;
   }
@@ -186,91 +185,98 @@ struct basic_string_view {
   size_type find_last_not_of (basic_string_view that) const {
     for (auto iter = this->rbegin(); iter != this->rend(); ++iter) {
       if (traits::find(that.data(), that.size(), *iter)) { continue; }
-      return this->size() - std::distance(this->rbegin(), iter) - 1;
+      return this->size() - ::std::distance(this->rbegin(), iter) - 1;
     }
     return npos;
   }
 
   size_type find_first_of (basic_string_view that) const {
-    auto iter = std::find_first_of(
+    auto iter = ::std::find_first_of(
       this->begin(), this->end(),
       that.begin(), that.end(),
       traits::eq
     );
     if (iter == this->end()) { return npos; }
-    return std::distance(this->begin(), iter);
+    return ::std::distance(this->begin(), iter);
   }
 
   size_type find_last_of (basic_string_view that) const {
-    auto iter = std::find_first_of(
+    auto iter = ::std::find_first_of(
       this->rbegin(), this->rend(),
       that.rbegin(), that.rend(),
       traits::eq
     );
     if (iter == this->rend()) { return npos; }
-    return this->size() - std::distance(this->rbegin(), iter) - 1;
+    return this->size() - ::std::distance(this->rbegin(), iter) - 1;
   }
 
   size_type rfind (basic_string_view that) const {
-    auto iter = std::search(
+    auto iter = ::std::search(
       this->rbegin(), this->rend(),
       that.rbegin(), that.rend(),
       traits::eq
     );
     if (iter == this->rend()) { return npos; }
-    return this->size() - std::distance(this->rbegin(), iter) - 1;
+    return this->size() - ::std::distance(this->rbegin(), iter) - 1;
   }
 
   size_type find (basic_string_view that) const {
-    auto iter = std::search(
+    auto iter = ::std::search(
       this->begin(), this->end(),
       that.begin(), that.end(),
       traits::eq
     );
     if (iter == this->end()) { return npos; }
-    return std::distance(this->begin(), iter);
+    return ::std::distance(this->begin(), iter);
   }
 
   /* functions that take a single CharT */
   size_type find_first_not_of (value_type value) const {
     auto end = this->end();
-    auto iter = std::find_if_not(
+    auto iter = ::std::find_if_not(
       this->begin(),
       end,
       [value](value_type val) { return traits::eq(val, value); }
     );
     if (iter == end) { return npos; }
-    return std::distance(this->begin(), iter);
+    return ::std::distance(this->begin(), iter);
   }
 
   size_type find_last_not_of (value_type value) const {
     auto end = this->rend();
-    auto iter = std::find_if_not(this->rbegin(), end, [value](value_type val) {
-      return traits::eq(val, value);
-    });
+    auto iter = ::std::find_if_not(
+      this->rbegin(),
+      end,
+      [value](value_type val) { return traits::eq(val, value); }
+    );
     if (iter == end) { return npos; }
-    return this->size() - std::distance(this->rbegin(), iter) - 1;
+    return this->size() - ::std::distance(this->rbegin(), iter) - 1;
   }
 
-  size_type find_first_of (value_type value) const { return this->find(value); }
-  size_type find_last_of (value_type value) const { return this->rfind(value); }
+  size_type find_first_of (value_type value) const {
+    return this->find(value);
+  }
+
+  size_type find_last_of (value_type value) const {
+    return this->rfind(value);
+  }
 
   size_type rfind (value_type value) const {
     auto end = this->rend();
-    auto iter = std::find(this->rbegin(), end, value);
+    auto iter = ::std::find(this->rbegin(), end, value);
     if (iter == end) { return npos; }
-    return this->size() - std::distance(this->rbegin(), iter) -1;
+    return this->size() - ::std::distance(this->rbegin(), iter) -1;
   }
 
   size_type find (value_type value) const {
     auto end = this->end();
-    auto iter = std::find(this->begin(), end, value);
+    auto iter = ::std::find(this->begin(), end, value);
     if (iter == end) { return npos; }
-    return std::distance(this->begin(), iter);
+    return ::std::distance(this->begin(), iter);
   }
 
   void swap (basic_string_view& that) noexcept {
-    using std::swap;
+    using ::std::swap;
     swap(this->str, that.str);
     swap(this->len, that.len);
   }
@@ -322,8 +328,8 @@ bool operator < (
 ) noexcept { return lhs.compare(rhs) < 0; }
 
 template <class CharT, class Traits>
-std::basic_ostream<CharT, Traits>& operator << (
-  std::basic_ostream<CharT, Traits>& os,
+::std::basic_ostream<CharT, Traits>& operator << (
+  ::std::basic_ostream<CharT, Traits>& os,
   basic_string_view<CharT, Traits> const& str
 ) { for (auto ch : str) { os << ch; } return os; }
 
@@ -340,7 +346,7 @@ namespace std {
 template <typename CharT, typename Traits>
 struct hash<core::v1::basic_string_view<CharT, Traits>> {
   using argument_type = core::v1::basic_string_view<CharT, Traits>;
-  using result_type = std::size_t;
+  using result_type = size_t;
 
   result_type operator ()(argument_type const& ref) const noexcept {
     return hash<typename argument_type::pointer> { }(ref.data());
