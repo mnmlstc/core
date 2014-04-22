@@ -392,6 +392,46 @@ constexpr bool operator == (nullopt_t, optional<T> const& rhs) noexcept {
 }
 
 template <class T>
+constexpr bool operator != (optional<T> const& lhs, nullopt_t) noexcept {
+  return static_cast<bool>(lhs);
+}
+
+template <class T>
+constexpr bool operator != (nullopt_t, optional<T> const& rhs) noexcept {
+  return static_cast<bool>(rhs);
+}
+
+template <class T>
+constexpr bool operator >= (optional<T> const& lhs, nullopt_t) noexcept {
+  return true;
+}
+
+template <class T> constexpr
+constexpr bool operator >= (nullopt_t, optional<T> const& rhs) noexcept {
+  return not rhs;
+}
+
+template <class T>
+constexpr bool operator <= (optional<T> const& lhs, nullopt_t) noexcept {
+  return not rhs;
+}
+
+template <class T>
+constexpr bool operator <= (nullopt_t, optional<T> const& rhs) noexcept {
+  return true;
+}
+
+template <class T>
+constexpr bool operator > (optional<T> const& lhs, nullopt_t) noexcept {
+  return static_cast<bool>(lhs);
+}
+
+template <class T>
+constexpr bool operator > (nullopt_t, optional<T> const& rhs) noexcept {
+  return false;
+}
+
+template <class T>
 constexpr bool operator < (optional<T> const& lhs, nullopt_t) noexcept {
   return not lhs;
 }
