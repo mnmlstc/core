@@ -58,3 +58,12 @@ type lists.
 .. function:: make_scope_guard(Callable callable) noexcept
 
    Constructs a :class:`scope_guard\<Callable>` from the given *callable*.
+
+.. function:: constexpr T&& forward (remove_reference_t<T>&&) noexcept
+              constexpr T&& forward (remove_reference_t<T>&) noexcept
+
+   ``constexpr`` versions of ``std::forward``.
+
+.. function:: constexpr remove_reference_t<T>&& move (T&&) noexcept
+
+   ``constexpr`` version of ``std::move``.
