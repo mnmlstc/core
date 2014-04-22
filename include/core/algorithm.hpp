@@ -110,8 +110,8 @@ auto count_if (Range&& rng, UnaryPredicate&& p) -> enable_if_t<
 template <class Range, class InputIt>
 auto mismatch(Range&& rng, InputIt&& it) -> enable_if_t<
   is_range<Range>::value,
-  std::pair<
-    decltype(::std::begin(std::forward<Range>(rng))),
+  ::std::pair<
+    decltype(::std::begin(::std::forward<Range>(rng))),
     decay_t<InputIt>
   >
 > {
@@ -128,8 +128,8 @@ auto mismatch(Range&& rng, InputIt&& it) -> enable_if_t<
 template <class Range, class InputIt, class BinaryPredicate>
 auto mismatch(Range&& rng, InputIt&& it, BinaryPredicate&& bp) -> enable_if_t<
   is_range<Range>::value,
-  std::pair<
-    decltype(::std::begin(std::forward<Range>(rng))),
+  ::std::pair<
+    decltype(::std::begin(::std::forward<Range>(rng))),
     decay_t<InputIt>
   >
 > {
@@ -866,7 +866,7 @@ auto partition_copy (
   UnaryPred&& up
 ) -> enable_if_t<
   is_range<Range>::value,
-  std::pair<decay_t<OutputTrue>, decay_t<OutputFalse>>
+  ::std::pair<decay_t<OutputTrue>, decay_t<OutputFalse>>
 > {
   auto range = make_range(::std::forward<Range>(rng));
   constexpr auto is_input = decltype(range)::is_input;
@@ -1706,7 +1706,7 @@ auto min_element (Range&& rng, Compare&& cmp) -> enable_if_t<
 template <class Range>
 auto minmax_element (Range&& rng) -> enable_if_t<
   is_range<Range>::value,
-  std::pair<
+  ::std::pair<
     decltype(::std::begin(::std::forward<Range>(rng))),
     decltype(::std::begin(::std::forward<Range>(rng)))
   >
@@ -1720,7 +1720,7 @@ auto minmax_element (Range&& rng) -> enable_if_t<
 template <class Range, class Compare>
 auto minmax_element (Range&& rng, Compare&& cmp) -> enable_if_t<
   is_range<Range>::value,
-  std::pair<
+  ::std::pair<
     range<decltype(::std::begin(::std::forward<Range>(rng)))>,
     range<decltype(::std::begin(::std::forward<Range>(rng)))>
   >
