@@ -11,8 +11,6 @@
 
 #include <cstdint>
 
-#include <iostream>
-
 namespace core {
 inline namespace v1 {
 namespace impl {
@@ -44,8 +42,8 @@ struct overload<Lambda, Lambdas...> :
   using call_type = overload;
 
   overload (Lambda&& lambda, Lambdas&&... lambdas) :
-    lambda_type(std::forward<Lambda>(lambda)),
-    base_type(std::forward<Lambdas>(lambdas)...)
+    lambda_type(::std::forward<Lambda>(lambda)),
+    base_type(::std::forward<Lambdas>(lambdas)...)
   { }
 
   using lambda_type::operator ();
@@ -54,16 +52,16 @@ struct overload<Lambda, Lambdas...> :
 
 template <class... Lambdas>
 auto make_overload(Lambdas&&... lambdas) -> overload<Lambdas...> {
-  return overload<Lambdas...> { std::forward<Lambdas>(lambdas)... };
+  return overload<Lambdas...> { ::std::forward<Lambdas>(lambdas)... };
 }
 
 template <class Visitor, class Type, class Data, class Result, class... Args>
 auto visitor_gen () -> Result {
   return [](Visitor&& visitor, Data& data, Args&&... args) {
     return invoke(
-      std::forward<Visitor>(visitor),
+      ::std::forward<Visitor>(visitor),
       reinterpret_cast<Type&>(data),
-      std::forward<Args>(args)...
+      ::std::forward<Args>(args)...
     );
   };
 }
@@ -71,8 +69,8 @@ auto visitor_gen () -> Result {
 } /* namespace impl */
 
 
-struct bad_variant_get final : std::logic_error {
-  using std::logic_error::logic_error;
+struct bad_variant_get final : ::std::logic_error {
+  using ::std::logic_error::logic_error;
 };
 
   /* visitation semantics require that, given a callable type C, and variadic
@@ -91,39 +89,39 @@ struct bad_variant_get final : std::logic_error {
 template <class... Ts>
 class variant final {
   static_assert(
-    sizeof...(Ts) < std::numeric_limits<uint8_t>::max(),
+    sizeof...(Ts) < ::std::numeric_limits<uint8_t>::max(),
     "Cannot have more elements than variant can contain"
   );
 
-  using tuple_type = std::tuple<Ts...>;
+  using tuple_type = ::std::tuple<Ts...>;
   using storage_type = aligned_storage_t<
     sizeof(impl::discriminate<Ts...>),
-    std::alignment_of<impl::discriminate<Ts...>>::value
+    ::std::alignment_of<impl::discriminate<Ts...>>::value
   >;
 
-  template <std::size_t N>
-  using element = typename std::tuple_element<N, tuple_type>::type;
+  template < ::std::size_t N>
+  using element = typename ::std::tuple_element<N, tuple_type>::type;
 
-  template <std::size_t N>
-  using index = std::integral_constant<std::size_t, N>;
+  template < ::std::size_t N>
+  using index = ::std::integral_constant< ::std::size_t, N>;
 
   struct copier final {
-    using data_type = std::reference_wrapper<storage_type>;
+    using data_type = ::std::reference_wrapper<storage_type>;
     data_type data;
 
     template <class T>
     void operator ()(T const& value) const {
-      new (std::addressof(this->data.get())) T { value };
+      new (::std::addressof(this->data.get())) T { value };
     }
   };
 
   struct mover final {
-    using data_type = std::reference_wrapper<storage_type>;
+    using data_type = ::std::reference_wrapper<storage_type>;
     data_type data;
 
     template <class T>
     void operator () (T&& value) {
-      new (std::addressof(this->data.get())) decay_t<T> { std::move(value) };
+      new (::std::addressof(this->data.get())) decay_t<T> { ::std::move(value) };
     }
   };
 
@@ -132,22 +130,22 @@ class variant final {
   };
 
   struct swapper final {
-    using data_type = std::reference_wrapper<storage_type>;
+    using data_type = ::std::reference_wrapper<storage_type>;
     data_type data;
     template <class T>
     void operator ()(T&& value) noexcept(is_nothrow_swappable<T>::value) {
-      using std::swap;
+      using ::std::swap;
       swap(reinterpret_cast<decay_t<T>&>(this->data.get()), value);
     }
   };
 
   struct equality final {
-    using data_type = std::reference_wrapper<storage_type const>;
+    using data_type = ::std::reference_wrapper<storage_type const>;
     data_type data;
 
     template <class T>
     bool operator ()(T const& value) {
-      return std::equal_to<T> { }(
+      return ::std::equal_to<T> { }(
         reinterpret_cast<T const&>(this->data.get()),
         value
       );
@@ -155,12 +153,12 @@ class variant final {
   };
 
   struct less_than final {
-    using data_type = std::reference_wrapper<storage_type const>;
+    using data_type = ::std::reference_wrapper<storage_type const>;
     data_type data;
 
     template <class T>
     bool operator ()(T const& value) noexcept {
-      return std::less<T> { }(
+      return ::std::less<T> { }(
         reinterpret_cast<T const&>(this->data.get()),
         value
       );
@@ -169,32 +167,32 @@ class variant final {
 
   struct type_info final {
     template <class T>
-    std::type_info const* operator ()(T&&) const noexcept {
-      return std::addressof(typeid(decay_t<T>));
+    ::std::type_info const* operator ()(T&&) const noexcept {
+      return ::std::addressof(typeid(decay_t<T>));
     }
   };
 
   template <
-    std::size_t N,
+    ::std::size_t N,
     class=enable_if_t<N < sizeof...(Ts)>,
     class T
-  > explicit variant (index<N>&&, std::false_type&&, T&& value) :
+  > explicit variant (index<N>&&, ::std::false_type&&, T&& value) :
     variant {
       index<N + 1> { },
-      std::is_constructible<type_at_t<N + 1, Ts...>, T> { },
-      std::forward<T>(value)
+      ::std::is_constructible<type_at_t<N + 1, Ts...>, T> { },
+      ::std::forward<T>(value)
     }
   { }
 
   template <
-    std::size_t N,
+    ::std::size_t N,
     class=enable_if_t<N < sizeof...(Ts)>,
     class T
-  > explicit variant (index<N>&&, std::true_type&&, T&& value) :
+  > explicit variant (index<N>&&, ::std::true_type&&, T&& value) :
     data { }, tag { N }
   {
-    new (std::addressof(this->data)) type_at_t<N, Ts...> (
-      std::forward<T>(value)
+    new (::std::addressof(this->data)) type_at_t<N, Ts...> (
+      ::std::forward<T>(value)
     );
   }
 
@@ -202,26 +200,26 @@ public:
 
   template <
     class T,
-    class=enable_if_t<not std::is_same<decay_t<T>, variant>::value>
+    class=enable_if_t<not ::std::is_same<decay_t<T>, variant>::value>
   > explicit variant (T&& value) :
     variant {
       index<0> { },
-      std::is_constructible<type_at_t<0, Ts...>, T> { },
-      std::forward<T>(value)
+      ::std::is_constructible<type_at_t<0, Ts...>, T> { },
+      ::std::forward<T>(value)
     }
   { }
 
   variant (variant const& that) :
     data { }, tag { that.tag }
-  { that.visit(copier { std::ref(this->data) }); }
+  { that.visit(copier { ::std::ref(this->data) }); }
 
   variant (variant&& that) noexcept :
     data { }, tag { that.tag }
-  { that.visit(mover { std::ref(this->data) }); }
+  { that.visit(mover { ::std::ref(this->data) }); }
 
   template <
     class=enable_if_t<
-      std::is_default_constructible<type_at_t<0, Ts...>>::value
+      ::std::is_default_constructible<type_at_t<0, Ts...>>::value
     >
   > variant () : variant { type_at_t<0, Ts...> { } } { }
 
@@ -229,9 +227,9 @@ public:
 
   template <
     class T,
-    class=enable_if_t<not std::is_same<decay_t<T>, variant>::value>
+    class=enable_if_t<not ::std::is_same<decay_t<T>, variant>::value>
   > variant& operator = (T&& value) {
-    variant { std::forward<T>(value) }.swap(*this);
+    variant { ::std::forward<T>(value) }.swap(*this);
     return *this;
   }
 
@@ -243,7 +241,7 @@ public:
   variant& operator = (variant&& that) noexcept {
     this->visit(destroyer { });
     this->tag = that.tag;
-    that.visit(mover { std::ref(this->data) });
+    that.visit(mover { ::std::ref(this->data) });
     return *this;
   }
 
@@ -252,24 +250,24 @@ public:
    */
   bool operator == (variant const& that) const noexcept {
     if (this->tag != that.tag) { return false; }
-    return that.visit(equality { std::cref(this->data) });
+    return that.visit(equality { ::std::cref(this->data) });
   }
 
   bool operator < (variant const& that) const noexcept {
     if (this->tag != that.tag) { return this->tag < that.tag; }
-    return that.visit(less_than { std::cref(this->data) });
+    return that.visit(less_than { ::std::cref(this->data) });
   }
 
   void swap (variant& that) noexcept(
     all_traits<is_nothrow_swappable<Ts>...>::value
   ) {
     if (this->which() == that.which()) {
-      that.visit(swapper { std::ref(this->data) });
+      that.visit(swapper { ::std::ref(this->data) });
       return;
     }
-    variant temp { std::move(*this) };
-    *this = std::move(that);
-    that = std::move(temp);
+    variant temp { ::std::move(*this) };
+    *this = ::std::move(that);
+    that = ::std::move(temp);
   }
 
   template <class Visitor, class... Args>
@@ -278,16 +276,16 @@ public:
   > {
     using return_type = common_type_t<invoke_of_t<Visitor, Ts, Args...>...>;
     using function = return_type(*)(Visitor&&, storage_type&, Args&&...);
-    constexpr std::size_t size = std::tuple_size<tuple_type>::value;
+    constexpr ::std::size_t size = ::std::tuple_size<tuple_type>::value;
 
     static function const callers[size] = {
       impl::visitor_gen<Visitor, Ts, storage_type, function, Args...>()...
     };
 
     return callers[this->tag](
-      std::forward<Visitor>(visitor),
+      ::std::forward<Visitor>(visitor),
       this->data,
-      std::forward<Args>(args)...
+      ::std::forward<Args>(args)...
     );
   }
 
@@ -297,7 +295,7 @@ public:
   > {
     using return_type = common_type_t<invoke_of_t<Visitor, Ts, Args...>...>;
     using function = return_type(*)(Visitor&&, storage_type const&, Args&&...);
-    constexpr std::size_t size = std::tuple_size<tuple_type>::value;
+    constexpr ::std::size_t size = ::std::tuple_size<tuple_type>::value;
 
     static function const callers[size] = {
       impl::visitor_gen<
@@ -310,58 +308,58 @@ public:
     };
 
     return callers[this->tag](
-      std::forward<Visitor>(visitor),
+      ::std::forward<Visitor>(visitor),
       this->data,
-      std::forward<Args>(args)...
+      ::std::forward<Args>(args)...
     );
   }
 
   template <class... Visitors>
   auto match (Visitors&&... visitors) -> decltype(
-    this->visit(impl::make_overload(std::forward<Visitors>(visitors)...))
+    this->visit(impl::make_overload(::std::forward<Visitors>(visitors)...))
   ) {
     return this->visit(
-      impl::make_overload(std::forward<Visitors>(visitors)...)
+      impl::make_overload(::std::forward<Visitors>(visitors)...)
     );
   }
 
   template <class... Visitors>
   auto match (Visitors&&... visitors) const -> decltype(
-    this->visit(impl::make_overload(std::forward<Visitors>(visitors)...))
+    this->visit(impl::make_overload(::std::forward<Visitors>(visitors)...))
   ) {
     return this->visit(
-      impl::make_overload(std::forward<Visitors>(visitors)...)
+      impl::make_overload(::std::forward<Visitors>(visitors)...)
     );
   }
 
-  template <std::size_t N>
+  template < ::std::size_t N>
   auto get () const& noexcept(false) -> element<N> const& {
     if (this->tag != N) { throw bad_variant_get { "incorrect type" }; }
     return reinterpret_cast<element<N> const&>(this->data);
   }
 
-  template <std::size_t N>
+  template < ::std::size_t N>
   auto get () && noexcept(false) -> element<N>&& {
     if (this->tag != N) { throw bad_variant_get { "incorrect type" }; }
-    return std::move(reinterpret_cast<element<N>&>(this->data));
+    return ::std::move(reinterpret_cast<element<N>&>(this->data));
   }
 
-  template <std::size_t N>
+  template < ::std::size_t N>
   auto get () & noexcept(false) -> element<N>& {
     if (this->tag != N) { throw bad_variant_get { "incorrect type" }; }
     return reinterpret_cast<element<N>&>(this->data);
   }
 
-  std::type_info const& type () const noexcept {
+  ::std::type_info const& type () const noexcept {
     return *this->visit(type_info { });
   }
 
-  std::uint32_t which () const noexcept { return this->tag; }
+  ::std::uint32_t which () const noexcept { return this->tag; }
   bool empty () const noexcept { return false; }
 
 private:
   storage_type data;
-  std::uint8_t tag;
+  ::std::uint8_t tag;
 };
 
 template <class... Ts>
@@ -376,7 +374,7 @@ namespace std {
 template <class... Ts>
 struct hash<core::v1::variant<Ts...>> {
   using argument_type = core::v1::variant<Ts...>;
-  using result_type = std::size_t;
+  using result_type = size_t;
   result_type operator () (argument_type const& value) const {
     return value.match(hash<Ts> { }...);
   };
