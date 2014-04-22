@@ -20,11 +20,23 @@ struct nullopt_t { constexpr explicit nullopt_t (int) noexcept { } };
 constexpr in_place_t in_place { };
 constexpr nullopt_t nullopt { 0 };
 
-struct bad_optional_access final : public std::logic_error {
-  using std::logic_error::logic_error;
+struct bad_optional_access final : ::std::logic_error {
+  using ::std::logic_error::logic_error;
 };
 
 namespace impl {
+
+template <class T>
+class has_addressof {
+  template <class U>
+  static auto test (U* ptr) noexcept -> decltype(ptr->operator&(), void());
+  template <class> static void test (...) noexcept(false);
+public:
+  static constexpr bool value = noexcept(test<T>(nullptr));
+};
+
+template <class T>
+struct addressof : ::std::integral_constant<bool, has_addressof<T>::value> { };
 
 /* this is the default 'false' case */
 template <class T, bool = ::std::is_trivially_destructible<T>::value>
@@ -260,7 +272,7 @@ struct optional final : private impl::storage<Type> {
   }
 
   constexpr value_type const* operator -> () const noexcept {
-    return ::std::addressof(this->val);
+    return this->ptr(impl::addressof<value_type> { });
   }
 
   value_type* operator -> () noexcept { return ::std::addressof(this->val); }
@@ -328,10 +340,19 @@ struct optional final : private impl::storage<Type> {
       ? value_type { ::core::move(**this) }
       : static_cast<value_type>(::core::forward<T>(val));
   }
+
+private:
+  constexpr value_type const* ptr (::std::false_type) const noexcept {
+    return &this->val;
+  }
+
+  value_type const* ptr (::std::true_type) const noexcept {
+    return ::std::addressof(this->val);
+  }
 };
 
 template <class Type>
-constexpr auto make_optional (Type&& value) -> optional<decay_t<Type>> {
+auto make_optional (Type&& value) -> optional<decay_t<Type>> {
   return optional<decay_t<Type>> { ::core::forward<Type>(value) };
 }
 
@@ -368,7 +389,7 @@ template <class T>
 constexpr bool operator > (
   optional<T> const& lhs,
   optional<T> const& rhs
-) noexcept { return lhs < rhs; }
+) noexcept { return rhs < lhs; }
 
 template <class T>
 constexpr bool operator < (
@@ -402,22 +423,22 @@ constexpr bool operator != (nullopt_t, optional<T> const& rhs) noexcept {
 }
 
 template <class T>
-constexpr bool operator >= (optional<T> const& lhs, nullopt_t) noexcept {
+constexpr bool operator >= (optional<T> const&, nullopt_t) noexcept {
   return true;
 }
 
-template <class T> constexpr
+template <class T>
 constexpr bool operator >= (nullopt_t, optional<T> const& rhs) noexcept {
   return not rhs;
 }
 
 template <class T>
 constexpr bool operator <= (optional<T> const& lhs, nullopt_t) noexcept {
-  return not rhs;
+  return not lhs;
 }
 
 template <class T>
-constexpr bool operator <= (nullopt_t, optional<T> const& rhs) noexcept {
+constexpr bool operator <= (nullopt_t, optional<T> const&) noexcept {
   return true;
 }
 
@@ -427,7 +448,7 @@ constexpr bool operator > (optional<T> const& lhs, nullopt_t) noexcept {
 }
 
 template <class T>
-constexpr bool operator > (nullopt_t, optional<T> const& rhs) noexcept {
+constexpr bool operator > (nullopt_t, optional<T> const&) noexcept {
   return false;
 }
 
@@ -450,6 +471,46 @@ constexpr bool operator == (optional<T> const& opt, T const& value) noexcept {
 template <class T>
 constexpr bool operator == (T const& value, optional<T> const& opt) noexcept {
   return opt ? value == *opt : false;
+}
+
+template <class T>
+constexpr bool operator != (optional<T> const& opt, T const& value) noexcept {
+  return opt ? not (*opt == value) : true;
+}
+
+template <class T>
+constexpr bool operator != (T const& value, optional<T> const& opt) noexcept {
+  return opt ? not (value == *opt) : true;
+}
+
+template <class T>
+constexpr bool operator >= (optional<T> const& opt, T const& value) noexcept {
+  return not (opt < value);
+}
+
+template <class T>
+constexpr bool operator >= (T const& value, optional<T> const& opt) noexcept {
+  return not (value < opt);
+}
+
+template <class T>
+constexpr bool operator <= (optional<T> const& opt, T const& value) noexcept {
+  return not (opt > value);
+}
+
+template <class T>
+constexpr bool operator <= (T const& value, optional<T> const& opt) noexcept {
+  return not (value > opt);
+}
+
+template <class T>
+constexpr bool operator > (optional<T> const& opt, T const& value) noexcept {
+  return opt ? value < *opt : false;
+}
+
+template <class T>
+constexpr bool operator > (T const& value, optional<T> const& opt) noexcept {
+  return opt ? *opt < value : true;
 }
 
 template <class T>

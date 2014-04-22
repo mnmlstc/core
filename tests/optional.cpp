@@ -11,8 +11,8 @@
 
 struct variadic {
   template <class... Args> constexpr variadic (Args&&...) { }
-  template <class... Args>
-  constexpr variadic (std::initializer_list<int>, Args&&...) { }
+  template <class T, class... Args>
+  constexpr variadic (std::initializer_list<T>, Args&&...) { }
 };
 
 
@@ -241,13 +241,13 @@ int main () {
     task("default-constructor") = [] {
       constexpr core::optional<int> opt { };
       constexpr bool value = static_cast<bool>(opt);
-      assert::is_false(value);
+      static_assert(not value, "");
     },
 
     task("nullopt-constructor") = [] {
       constexpr core::optional<int> opt { core::nullopt };
       constexpr bool value = static_cast<bool>(opt);
-      assert::is_false(value);
+      static_assert(not value, "");
     },
 
     task("value-constructor") = [] {
@@ -258,36 +258,38 @@ int main () {
       static_assert(move, "could not initialize core::optional<int>");
       constexpr bool copy_result = *copy == value;
       constexpr bool move_result = *move == 5;
-      assert::is_true(copy_result);
-      assert::is_true(move_result);
+      static_assert(copy_result, "");
+      static_assert(move_result, "");
     },
 
     task("variadic-value-constructor") = [] {
       constexpr core::optional<variadic> list { core::in_place, { 1, 2, 3, 4 } };
-      constexpr core::optional<variadic> nolist { core::in_place, 1, 2.0f, "words" };
-      assert::is_false(not list);
-      assert::is_false(not nolist);
+      constexpr core::optional<variadic> nolist { core::in_place, 1, "words" };
+      constexpr bool list_initd = static_cast<bool>(list);
+      constexpr bool nolist_initd = static_cast<bool>(nolist);
+      static_assert(list_initd, "");
+      static_assert(nolist_initd, "");
     },
 
     task("value") = [] {
       constexpr core::optional<int> opt { 5 };
-      assert::is_false(not opt);
-      assert::equal(opt.value(), 5);
+      constexpr int value { opt.value() };
+      static_assert(value == 5, "");
     },
 
     task("value-or") = [] {
       constexpr core::optional<int> engaged { 5 };
       constexpr core::optional<int> disengaged { };
-      assert::is_false(not engaged);
-      assert::is_true(not disengaged);
-      assert::equal(engaged.value_or(7), 5);
-      assert::equal(disengaged.value_or(7), 7);
+      constexpr int value_or_e = engaged.value_or(7);
+      constexpr int value_or_d = disengaged.value_or(7);
+      static_assert(value_or_e == 5, "");
+      static_assert(value_or_d == 7, "");
     },
 
-    task("make-optional") = [] {
-      constexpr auto opt = core::make_optional(5);
-      assert::is_false(not opt);
-      assert::equal(opt.value(), 5);
+    task("operator-star") = [] {
+      constexpr core::optional<int> lhs { 5 };
+      constexpr int value { *lhs };
+      static_assert(value == 5, "");
     },
 
     task("operator-equal") = [] {
@@ -301,33 +303,104 @@ int main () {
       constexpr bool fourth_result = core::optional<int> { } == core::nullopt;
       constexpr bool fifth_result = core::nullopt == core::optional<int> { };
 
-      assert::is_true(first_result);
-      assert::is_true(second_result);
-      assert::is_true(third_result);
-      assert::is_true(fourth_result);
-      assert::is_true(fifth_result);
+      static_assert(first_result, "");
+      static_assert(second_result, "");
+      static_assert(third_result, "");
+      static_assert(fourth_result, "");
+      static_assert(fifth_result, "");
     },
 
-    task("operator-not-equal") = [] { assert::fail(); },
-    task("operator-greater-equal") = [] { assert::fail(); },
-    task("operator-less-equal") = [] { assert::fail(); },
-    task("operator-greater") = [] { assert::fail(); },
+    task("operator-not-equal") = [] {
+      constexpr core::optional<int> lhs { 4 };
+      constexpr core::optional<int> rhs { 3 };
+      constexpr int value { 2 };
+
+      constexpr bool first_result = lhs != rhs;
+      constexpr bool second_result = lhs != value;
+      constexpr bool third_result = value != rhs;
+      constexpr bool fourth_result = lhs != core::nullopt;
+      constexpr bool fifth_result = core::nullopt != rhs;
+
+      static_assert(first_result, "");
+      static_assert(second_result, "");
+      static_assert(third_result, "");
+      static_assert(fourth_result, "");
+      static_assert(fifth_result, "");
+    },
+
+    task("operator-greater-equal") = [] {
+      constexpr core::optional<int> lhs { 4 };
+      constexpr core::optional<int> rhs { 3 };
+      constexpr int value { 3 };
+
+      constexpr bool first_result = lhs >= rhs;
+      constexpr bool second_result = lhs >= value;
+      constexpr bool third_result = value >= rhs;
+      constexpr bool fourth_result = lhs >= core::nullopt;
+      constexpr bool fifth_result = core::nullopt >= core::optional<int> { };
+
+      static_assert(first_result, "");
+      static_assert(second_result, "");
+      static_assert(third_result, "");
+      static_assert(fourth_result, "");
+      static_assert(fifth_result, "");
+    },
+
+    task("operator-less-equal") = [] {
+      constexpr core::optional<int> lhs { 3 };
+      constexpr core::optional<int> rhs { 3 };
+      constexpr int rhs_value { 4 };
+      constexpr int lhs_value { 2 };
+
+      constexpr bool first_result = lhs <= rhs;
+      constexpr bool second_result = lhs <= rhs_value;
+      constexpr bool third_result = lhs_value <= rhs;
+      constexpr bool fourth_result = core::optional<int> { } <= core::nullopt;
+      constexpr bool fifth_result = core::nullopt <= rhs;
+
+      static_assert(first_result, "");
+      static_assert(second_result, "");
+      static_assert(third_result, "");
+      static_assert(fourth_result, "");
+      static_assert(fifth_result, "");
+    },
+
+    task("operator-greater") = [] {
+      constexpr core::optional<int> lhs { 3 };
+      constexpr core::optional<int> rhs { 2 };
+      constexpr int rhs_value { 2 };
+      constexpr int lhs_value { 3 };
+
+      constexpr bool first_result = lhs > rhs;
+      constexpr bool second_result = lhs > rhs_value;
+      constexpr bool third_result = lhs_value > rhs;
+      constexpr bool fourth_result = lhs > core::nullopt;
+      constexpr bool fifth_result = core::nullopt > core::optional<int> { };
+
+      static_assert(first_result, "");
+      static_assert(second_result, "");
+      static_assert(third_result, "");
+      static_assert(fourth_result, "");
+      static_assert(not fifth_result, "");
+    },
 
     task("operator-less") = [] {
       constexpr core::optional<int> lhs { 3 };
       constexpr core::optional<int> rhs { 4 };
       constexpr int rhs_value { 4 };
       constexpr int lhs_value { 3 };
+
       constexpr bool first_result = lhs < rhs;
       constexpr bool second_result = lhs < rhs_value;
       constexpr bool third_result = lhs_value < rhs;
       constexpr bool fourth_result = core::optional<int> { } < core::nullopt;
       constexpr bool fifth_result = core::nullopt < rhs;
-      assert::is_true(first_result);
-      assert::is_true(second_result);
-      assert::is_true(third_result);
-      assert::is_true(fourth_result);
-      assert::is_true(fifth_result);
+
+      static_assert(first_result, "");
+      static_assert(second_result, "");
+      static_assert(third_result, "");
+      static_assert(fourth_result, "");
+      static_assert(fifth_result, "");
     }
   };
 
