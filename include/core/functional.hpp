@@ -41,18 +41,21 @@ struct function_traits<R(Args...)> {
   using return_type = R;
 
   using pointer = return_type(*)(Args...);
-  static constexpr std::size_t arity = sizeof...(Args);
+  static constexpr ::std::size_t arity = sizeof...(Args);
 
-  template <std::size_t N>
-  using argument = typename std::tuple_element<N, std::tuple<Args...>>::type;
+  template < ::std::size_t N>
+  using argument = typename ::std::tuple_element<
+    N,
+    ::std::tuple<Args...>
+  >::type;
 };
 
 template <class F> struct function_traits {
   using functor_type = function_traits<decltype(&decay_t<F>::operator())>;
   using return_type = typename functor_type::return_type;
   using pointer = typename functor_type::pointer;
-  static constexpr std::size_t arity = functor_type::arity - 1;
-  template <std::size_t N>
+  static constexpr ::std::size_t arity = functor_type::arity - 1;
+  template < ::std::size_t N>
   using argument = typename functor_type::template argument<N>;
 };
 
@@ -60,19 +63,19 @@ template <class F> struct function_traits {
 template <class Functor, class Object, class... Args>
 auto invoke (Functor&& functor, Object&& object, Args&&... args) -> enable_if_t<
   invokable<Functor, Object, Args...>::value,
-  decltype((object.*functor)(std::forward<Args>(args)...))
-> { return (object.*functor)(std::forward<Args>(args)...); }
+  decltype((object.*functor)(::std::forward<Args>(args)...))
+> { return (object.*functor)(::std::forward<Args>(args)...); }
 
 template <class Functor, class Object, class... Args>
 auto invoke (Functor&& functor, Object&& object, Args&&... args) -> enable_if_t<
   invokable<Functor, Object, Args...>::value,
   decltype(
-    ((*std::forward<Object>(object)).*functor)(std::forward<Args>(args)...)
+    ((*::std::forward<Object>(object)).*functor)(::std::forward<Args>(args)...)
   )
 > {
   return (
-    (*std::forward<Object>(object)).*functor
-  )(std::forward<Args>(args)...);
+    (*::std::forward<Object>(object)).*functor
+  )(::std::forward<Args>(args)...);
 }
 
 template <class Functor, class Object>
@@ -84,39 +87,47 @@ auto invoke (Functor&& functor, Object&& object) -> enable_if_t<
 template <class Functor, class Object>
 auto invoke (Functor&& functor, Object&& object) -> enable_if_t<
   invokable<Functor, Object>::value,
-  decltype((*std::forward<Object>(object)).*functor)
-> { return (*std::forward<Object>(object)).*functor; }
+  decltype((*::std::forward<Object>(object)).*functor)
+> { return (*::std::forward<Object>(object)).*functor; }
 
 template <class Functor, class... Args>
 auto invoke (Functor&& functor, Args&&... args) -> enable_if_t<
   invokable<Functor, Args...>::value,
-  decltype(std::forward<Functor>(functor)(std::forward<Args>(args)...))
-> { return std::forward<Functor>(functor)(std::forward<Args>(args)...); }
+  decltype(::std::forward<Functor>(functor)(::std::forward<Args>(args)...))
+> { return ::std::forward<Functor>(functor)(::std::forward<Args>(args)...); }
 
 namespace impl {
 
-template <class Functor, class U, std::size_t... I>
-auto unpack (Functor&& functor, U&& unpackable, index_sequence<I...>&&) ->
-invoke_of_t<Functor, decltype(std::get<I>(std::forward<U>(unpackable)))...> {
-  return ::core::v1::invoke(std::forward<Functor>(functor),
-    std::get<I>(std::forward<U>(unpackable))...
+template <class Functor, class U, ::std::size_t... I>
+auto unpack (
+  Functor&& functor,
+  U&& unpackable,
+  index_sequence<I...>&&
+) -> invoke_of_t<
+  Functor,
+  decltype(::std::get<I>(::std::forward<U>(unpackable)))...
+> {
+  return ::core::v1::invoke(::std::forward<Functor>(functor),
+    ::std::get<I>(::std::forward<U>(unpackable))...
   );
 }
 
-template <class U, std::size_t... I>
+template <class U, ::std::size_t... I>
 auto unpack (U&& unpackable, index_sequence<I...>&&) -> invoke_of_t<
-  decltype(std::get<I>(std::forward<U>(unpackable)))...
-> { return ::core::v1::invoke(std::get<I>(std::forward<U>(unpackable))...); }
+  decltype(::std::get<I>(::std::forward<U>(unpackable)))...
+> {
+  return ::core::v1::invoke(::std::get<I>(::std::forward<U>(unpackable))...);
+}
 
-template <class Functor, class U, std::size_t... I>
+template <class Functor, class U, ::std::size_t... I>
 auto runpack (
   Functor&& functor,
   U&& runpackable,
   index_sequence<I...>&&
-) -> invoke_of_t<Functor, decltype(std::forward<U>(runpackable).at(I))...> {
+) -> invoke_of_t<Functor, decltype(::std::forward<U>(runpackable).at(I))...> {
   return ::core::v1::invoke(
-    std::forward<Functor>(functor),
-    std::forward<U>(runpackable).at(I)...);
+    ::std::forward<Functor>(functor),
+    ::std::forward<U>(runpackable).at(I)...);
 }
 
 } /* namespace impl */
@@ -133,16 +144,16 @@ enable_if_t<
   is_unpackable<decay_t<Unpackable>>::value,
   decltype(
     impl::unpack(
-      std::forward<Functor>(functor),
-      std::forward<Unpackable>(unpackable),
-      make_index_sequence<std::tuple_size<decay_t<Unpackable>>::value> { }
+      ::std::forward<Functor>(functor),
+      ::std::forward<Unpackable>(unpackable),
+      make_index_sequence<::std::tuple_size<decay_t<Unpackable>>::value> { }
     )
   )
 > {
   return impl::unpack(
-    std::forward<Functor>(functor),
-    std::forward<Unpackable>(unpackable),
-    make_index_sequence<std::tuple_size<decay_t<Unpackable>>::value> { }
+    ::std::forward<Functor>(functor),
+    ::std::forward<Unpackable>(unpackable),
+    make_index_sequence<::std::tuple_size<decay_t<Unpackable>>::value> { }
   );
 }
 
@@ -152,14 +163,14 @@ enable_if_t<
   is_unpackable<decay_t<Unpackable>>::value,
   decltype(
     impl::unpack(
-      std::forward<Unpackable>(unpackable),
-      make_index_sequence<std::tuple_size<decay_t<Unpackable>>::value> { }
+      ::std::forward<Unpackable>(unpackable),
+      make_index_sequence<::std::tuple_size<decay_t<Unpackable>>::value> { }
     )
   )
 > {
   return impl::unpack(
-    std::forward<Unpackable>(unpackable),
-    make_index_sequence<std::tuple_size<decay_t<Unpackable>>::value> { }
+    ::std::forward<Unpackable>(unpackable),
+    make_index_sequence<::std::tuple_size<decay_t<Unpackable>>::value> { }
   );
 }
 
@@ -172,15 +183,15 @@ auto invoke (
   is_runpackable<decay_t<Runpackable>>::value,
   decltype(
     impl::runpack(
-      std::forward<Functor>(functor),
-      std::forward<Runpackable>(unpackable),
+      ::std::forward<Functor>(functor),
+      ::std::forward<Runpackable>(unpackable),
       make_index_sequence<function_traits<Functor>::arity> { }
     )
   )
 > {
   return impl::runpack(
-    std::forward<Functor>(functor),
-    std::forward<Runpackable>(unpackable),
+    ::std::forward<Functor>(functor),
+    ::std::forward<Runpackable>(unpackable),
     make_index_sequence<function_traits<Functor>::arity> { }
   );
 }
