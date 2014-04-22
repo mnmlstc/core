@@ -17,33 +17,33 @@ namespace impl {
 template <class T>
 class begin {
   template <class U>
-  static auto check (U&& u) noexcept -> decltype(std::begin(u));
+  static auto check (U&& u) noexcept -> decltype(::std::begin(u));
   static void check (...) noexcept(false);
 public:
-  using type = decltype(check(std::declval<T>()));
-  static constexpr bool value = noexcept(check(std::declval<T>()));
+  using type = decltype(check(::std::declval<T>()));
+  static constexpr bool value = noexcept(check(::std::declval<T>()));
 };
 
 template <class T>
 class end {
   template <class U>
-  static auto check (U&& u) noexcept -> decltype(std::end(u));
+  static auto check (U&& u) noexcept -> decltype(::std::end(u));
   static void check (...) noexcept(false);
 public:
-  using type = decltype(check(std::declval<T>()));
-  static constexpr bool value = noexcept(check(std::declval<T>()));
+  using type = decltype(check(::std::declval<T>()));
+  static constexpr bool value = noexcept(check(::std::declval<T>()));
 };
 
 } /* namespace impl */
 
 template <class R>
-struct is_range : std::integral_constant<bool,
+struct is_range : ::std::integral_constant<bool,
   impl::begin<R>::value and impl::end<R>::value
 > { };
 
 template <class Iterator>
 struct range {
-  using traits = std::iterator_traits<Iterator>;
+  using traits = ::std::iterator_traits<Iterator>;
 
   using iterator_category = typename traits::iterator_category;
 
@@ -55,44 +55,44 @@ struct range {
 
   using iterator = Iterator;
 
-  static constexpr bool is_input = std::is_convertible<
+  static constexpr bool is_input = ::std::is_convertible<
     iterator_category,
-    std::input_iterator_tag
+    ::std::input_iterator_tag
   >::value;
 
-  static constexpr bool is_output = std::is_convertible<
+  static constexpr bool is_output = ::std::is_convertible<
     iterator_category,
-    std::output_iterator_tag
+    ::std::output_iterator_tag
   >::value;
 
-  static constexpr bool is_forward = std::is_convertible<
+  static constexpr bool is_forward = ::std::is_convertible<
     iterator_category,
-    std::forward_iterator_tag
+    ::std::forward_iterator_tag
   >::value;
 
-  static constexpr bool is_bidirectional = std::is_convertible<
+  static constexpr bool is_bidirectional = ::std::is_convertible<
     iterator_category,
-    std::bidirectional_iterator_tag
+    ::std::bidirectional_iterator_tag
   >::value;
 
-  static constexpr bool is_random_access = std::is_convertible<
+  static constexpr bool is_random_access = ::std::is_convertible<
     iterator_category,
-    std::random_access_iterator_tag
+    ::std::random_access_iterator_tag
   >::value;
 
   template <
     typename Range,
     typename=enable_if_t<
-      not std::is_pointer<iterator>::value and
+      not ::std::is_pointer<iterator>::value and
       is_range<Range>::value and
-      std::is_convertible<typename impl::begin<Range>::type, iterator>::value
+      ::std::is_convertible<typename impl::begin<Range>::type, iterator>::value
     >
   > explicit range (Range&& r) noexcept :
-    range { std::begin(r), std::end(r) }
+    range { ::std::begin(r), ::std::end(r) }
   { }
 
-  range (std::pair<iterator, iterator> pair) noexcept :
-    range { std::get<0>(pair), std::get<1>(pair) }
+  range (::std::pair<iterator, iterator> pair) noexcept :
+    range { ::std::get<0>(pair), ::std::get<1>(pair) }
   { }
 
   range (iterator begin_, iterator end_) noexcept :
@@ -105,7 +105,7 @@ struct range {
   { }
 
   range (range&& that) noexcept :
-    range { std::move(that.begin_), std::move(that.end_) }
+    range { ::std::move(that.begin_), ::std::move(that.end_) }
   { that.begin_ = that.end_; }
 
   range () = default;
@@ -116,7 +116,7 @@ struct range {
   }
 
   range& operator = (range&& that) {
-    range { std::move(that) }.swap(*this);
+    range { ::std::move(that) }.swap(*this);
     return *this;
   }
 
@@ -131,14 +131,14 @@ struct range {
   reference front () const { return *this->begin(); }
   reference back () const {
     static_assert(is_bidirectional, "can only get back of bidirectional");
-    return *std::prev(this->end());
+    return *::std::prev(this->end());
   }
 
   bool empty () const { return this->begin() == this->end(); }
 
   difference_type size () const {
     static_assert(is_forward, "can only get size of forward-range");
-    return std::distance(this->begin(), this->end());
+    return ::std::distance(this->begin(), this->end());
   }
 
   /* Creates an open-ended range of [start, stop) */
@@ -183,7 +183,7 @@ struct range {
 
     /* now safe to compute size */
     auto const size = this->size();
-    auto third_empty = std::abs(stop) + start;
+    auto third_empty = ::std::abs(stop) + start;
 
     bool const second_return_empty =
       (start_positive and not stop_positive and third_empty >= size) or
@@ -199,10 +199,10 @@ struct range {
     if (not stop_positive) { stop = size + stop; }
 
     auto begin = this->begin();
-    std::advance(begin, start);
+    ::std::advance(begin, start);
 
     auto end = begin;
-    std::advance(end, stop - start);
+    ::std::advance(end, stop - start);
 
     return range { begin, end };
   }
@@ -213,26 +213,26 @@ struct range {
     return range { split(start).second };
   }
 
-  std::pair<range, range> split (difference_type idx) const {
+  ::std::pair<range, range> split (difference_type idx) const {
     static_assert(is_forward,"can only split a forward-range");
     if (idx >= 0) {
       range second { *this };
       second.pop_front_upto(idx);
-      return std::make_pair(range { this->begin(), second.begin() }, second);
+      return ::std::make_pair(range { this->begin(), second.begin() }, second);
     }
 
     range first { *this };
     first.pop_back_upto(-idx);
-    return std::make_pair(first, range { first.end(), this->end() });
+    return ::std::make_pair(first, range { first.end(), this->end() });
   }
 
   /* mutates range */
-  void pop_front (difference_type n) { std::advance(this->begin_, n); }
+  void pop_front (difference_type n) { ::std::advance(this->begin_, n); }
   void pop_front () { ++this->begin_; }
 
   void pop_back (difference_type n) {
     static_assert(is_bidirectional, "can only pop-back bidirectional-range");
-    std::advance(this->end_, -n);
+    ::std::advance(this->end_, -n);
   }
 
   void pop_back () {
@@ -242,23 +242,23 @@ struct range {
 
   /* Negative argument causes no change */
   void pop_front_upto (difference_type n) {
-    std::advance(
+    ::std::advance(
       this->begin_,
-      std::min(std::max<difference_type>(0, n), this->size())
+      ::std::min(::std::max<difference_type>(0, n), this->size())
     );
   }
 
   /* Negative argument causes no change */
   void pop_back_upto (difference_type n) {
     static_assert(is_bidirectional, "can only pop-back-upto bidirectional");
-    std::advance(
+    ::std::advance(
       this->end_,
-      -std::min(std::max<difference_type>(0, n), this->size())
+      -::std::min(::std::max<difference_type>(0, n), this->size())
     );
   }
 
   void swap (range& that) noexcept(is_nothrow_swappable<iterator>::value) {
-    using std::swap;
+    using ::std::swap;
     swap(this->begin_, that.begin_);
     swap(this->end_, that.end_);
   }
@@ -274,32 +274,32 @@ auto make_range (Iterator begin, Iterator end) -> range<Iterator> {
 }
 
 template <class Range>
-auto make_range (Range&& value) -> range<decltype(std::begin(value))> {
-  return make_range(std::begin(value), std::end(value));
+auto make_range (Range&& value) -> range<decltype(::std::begin(value))> {
+  return make_range(::std::begin(value), ::std::end(value));
 }
 
 template <class Range>
 auto make_ptr_range (Range&& value) -> range<
-  decltype(std::addressof(*std::begin(value)))
+  decltype(::std::addressof(*::std::begin(value)))
 >;
 
-/* Used like: core::make_range<char>(std::cin) */
+/* Used like: core::make_range<char>(::std::cin) */
 template <
   class T,
   class CharT,
-  class Traits=std::char_traits<CharT>
-> auto make_range (std::basic_istream<CharT, Traits>& stream) -> range<
-  std::istream_iterator<T, CharT, Traits>
+  class Traits=::std::char_traits<CharT>
+> auto make_range (::std::basic_istream<CharT, Traits>& stream) -> range<
+  ::std::istream_iterator<T, CharT, Traits>
 > {
-  using iterator = std::istream_iterator<T, CharT, Traits>;
+  using iterator = ::std::istream_iterator<T, CharT, Traits>;
   return make_range(iterator { stream }, iterator { });
 }
 
-template <class CharT, class Traits=std::char_traits<CharT>>
-auto make_range (std::basic_streambuf<CharT, Traits>* buffer) -> range<
-  std::istreambuf_iterator<CharT, Traits>
+template <class CharT, class Traits=::std::char_traits<CharT>>
+auto make_range (::std::basic_streambuf<CharT, Traits>* buffer) -> range<
+  ::std::istreambuf_iterator<CharT, Traits>
 > {
-  using iterator = std::istreambuf_iterator<CharT, Traits>;
+  using iterator = ::std::istreambuf_iterator<CharT, Traits>;
   return make_range(iterator { buffer }, iterator { });
 }
 
