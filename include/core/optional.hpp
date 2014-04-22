@@ -335,6 +335,7 @@ constexpr auto make_optional (Type&& value) -> optional<decay_t<Type>> {
   return optional<decay_t<Type>> { ::core::forward<Type>(value) };
 }
 
+/* comparison with optional<T> */
 template <class T>
 constexpr bool operator == (
   optional<T> const& lhs,
@@ -346,6 +347,30 @@ constexpr bool operator == (
 }
 
 template <class T>
+constexpr bool operator != (
+  optional<T> const& lhs,
+  optional<T> const& rhs
+) noexcept { return not (lhs == rhs); }
+
+template <class T>
+constexpr bool operator >= (
+  optional<T> const& lhs,
+  optional<T> const& rhs
+) noexcept { return not (lhs < rhs); }
+
+template <class T>
+constexpr bool operator <= (
+  optional<T> const& lhs,
+  optional<T> const& rhs
+) noexcept { return not (rhs < lhs); }
+
+template <class T>
+constexpr bool operator > (
+  optional<T> const& lhs,
+  optional<T> const& rhs
+) noexcept { return lhs < rhs; }
+
+template <class T>
 constexpr bool operator < (
   optional<T> const& lhs,
   optional<T> const& rhs
@@ -355,14 +380,15 @@ constexpr bool operator < (
     : static_cast<bool>(lhs) == false ? true : *lhs < *rhs;
 }
 
+/* comparison with nullopt */
 template <class T>
 constexpr bool operator == (optional<T> const& lhs, nullopt_t) noexcept {
   return not lhs;
 }
 
 template <class T>
-constexpr bool operator == (nullopt_t, optional<T> const&) noexcept {
-  return false;
+constexpr bool operator == (nullopt_t, optional<T> const& rhs) noexcept {
+  return not rhs;
 }
 
 template <class T>
@@ -375,6 +401,7 @@ constexpr bool operator < (nullopt_t, optional<T> const& rhs) noexcept {
   return static_cast<bool>(rhs);
 }
 
+/* comparison with T */
 template <class T>
 constexpr bool operator == (optional<T> const& opt, T const& value) noexcept {
   return opt ? *opt == value : false;

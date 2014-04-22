@@ -295,23 +295,39 @@ int main () {
       constexpr core::optional<int> rhs { 4 };
       constexpr int value { 4 };
 
-      assert::equal(lhs, rhs);
-      assert::equal(lhs, value);
-      assert::equal(rhs, value);
-      assert::equal(core::optional<int> { }, core::nullopt);
-      assert::is_false(core::nullopt == core::optional<int> { });
+      constexpr bool first_result = lhs == rhs;
+      constexpr bool second_result = lhs == value;
+      constexpr bool third_result = value == rhs;
+      constexpr bool fourth_result = core::optional<int> { } == core::nullopt;
+      constexpr bool fifth_result = core::nullopt == core::optional<int> { };
+
+      assert::is_true(first_result);
+      assert::is_true(second_result);
+      assert::is_true(third_result);
+      assert::is_true(fourth_result);
+      assert::is_true(fifth_result);
     },
+
+    task("operator-not-equal") = [] { assert::fail(); },
+    task("operator-greater-equal") = [] { assert::fail(); },
+    task("operator-less-equal") = [] { assert::fail(); },
+    task("operator-greater") = [] { assert::fail(); },
 
     task("operator-less") = [] {
       constexpr core::optional<int> lhs { 3 };
       constexpr core::optional<int> rhs { 4 };
       constexpr int rhs_value { 4 };
       constexpr int lhs_value { 3 };
-      assert::less(lhs, rhs);
-      assert::less(lhs, rhs_value);
-      assert::less(lhs_value, rhs);
-      assert::less(core::optional<int> { }, core::nullopt);
-      assert::less(core::nullopt, rhs);
+      constexpr bool first_result = lhs < rhs;
+      constexpr bool second_result = lhs < rhs_value;
+      constexpr bool third_result = lhs_value < rhs;
+      constexpr bool fourth_result = core::optional<int> { } < core::nullopt;
+      constexpr bool fifth_result = core::nullopt < rhs;
+      assert::is_true(first_result);
+      assert::is_true(second_result);
+      assert::is_true(third_result);
+      assert::is_true(fourth_result);
+      assert::is_true(fifth_result);
     }
   };
 
