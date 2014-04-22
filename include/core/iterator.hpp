@@ -9,13 +9,13 @@ namespace core {
 inline namespace v1 {
 
 template <class Container>
-auto cbegin (Container const& container) -> decltype(std::begin(container)) {
-  return std::begin(container);
+auto cbegin (Container const& container) -> decltype(::std::begin(container)) {
+  return ::std::begin(container);
 }
 
 template <class Container>
-auto cend (Container const& container) -> decltype(std::end(container)) {
-  return std::end(container);
+auto cend (Container const& container) -> decltype(::std::end(container)) {
+  return ::std::end(container);
 }
 
 template <class Container>
@@ -51,15 +51,15 @@ auto crend (Container const& container) -> decltype(rend(container)) {
 template <
   class T,
   class CharT=char,
-  class Traits=std::char_traits<CharT>
-> struct infix_ostream_iterator final : std::iterator<
-  std::output_iterator_tag,
+  class Traits=::std::char_traits<CharT>
+> struct infix_ostream_iterator final : ::std::iterator<
+  ::std::output_iterator_tag,
   void,
   void,
   void,
   void
 > {
-  using ostream_type = std::basic_ostream<CharT, Traits>;
+  using ostream_type = ::std::basic_ostream<CharT, Traits>;
   using traits_type = Traits;
   using char_type = CharT;
 
@@ -85,7 +85,7 @@ template <
   infix_ostream_iterator& operator * () { return *this; }
 
 private:
-  std::reference_wrapper<ostream_type> os;
+  ::std::reference_wrapper<ostream_type> os;
   char_type const* delimiter;
   bool first;
 
