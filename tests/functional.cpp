@@ -133,6 +133,15 @@ int main () {
       );
 
       assert::equal(result, std::string { "7unpack" });
+
+      struct type {
+        constexpr type () noexcept { }
+        constexpr int operator ()() const noexcept { return 5; }
+        constexpr int operator ()(int value) const noexcept { return value + 5; }
+      };
+      constexpr type value { };
+      static_assert(core::invoke(value) == 5, "");
+      static_assert(core::invoke(value, 6) == 11, "");
     },
 
     task("function-traits") = [] {

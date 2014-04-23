@@ -63,19 +63,19 @@ template <class F> struct function_traits {
 template <class Functor, class Object, class... Args>
 auto invoke (Functor&& functor, Object&& object, Args&&... args) -> enable_if_t<
   invokable<Functor, Object, Args...>::value,
-  decltype((object.*functor)(::std::forward<Args>(args)...))
-> { return (object.*functor)(::std::forward<Args>(args)...); }
+  decltype((object.*functor)(::core::forward<Args>(args)...))
+> { return (object.*functor)(::core::forward<Args>(args)...); }
 
 template <class Functor, class Object, class... Args>
 auto invoke (Functor&& functor, Object&& object, Args&&... args) -> enable_if_t<
   invokable<Functor, Object, Args...>::value,
   decltype(
-    ((*::std::forward<Object>(object)).*functor)(::std::forward<Args>(args)...)
+    ((*::core::forward<Object>(object)).*functor)(::core::forward<Args>(args)...)
   )
 > {
   return (
-    (*::std::forward<Object>(object)).*functor
-  )(::std::forward<Args>(args)...);
+    (*::core::forward<Object>(object)).*functor
+  )(::core::forward<Args>(args)...);
 }
 
 template <class Functor, class Object>
@@ -87,14 +87,14 @@ auto invoke (Functor&& functor, Object&& object) -> enable_if_t<
 template <class Functor, class Object>
 auto invoke (Functor&& functor, Object&& object) -> enable_if_t<
   invokable<Functor, Object>::value,
-  decltype((*::std::forward<Object>(object)).*functor)
-> { return (*::std::forward<Object>(object)).*functor; }
+  decltype((*::core::forward<Object>(object)).*functor)
+> { return (*::core::forward<Object>(object)).*functor; }
 
 template <class Functor, class... Args>
-auto invoke (Functor&& functor, Args&&... args) -> enable_if_t<
+constexpr auto invoke (Functor&& functor, Args&&... args) -> enable_if_t<
   invokable<Functor, Args...>::value,
-  decltype(::std::forward<Functor>(functor)(::std::forward<Args>(args)...))
-> { return ::std::forward<Functor>(functor)(::std::forward<Args>(args)...); }
+  decltype(::core::forward<Functor>(functor)(::core::forward<Args>(args)...))
+> { return ::core::forward<Functor>(functor)(::core::forward<Args>(args)...); }
 
 namespace impl {
 
