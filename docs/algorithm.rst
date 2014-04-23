@@ -210,14 +210,31 @@ Modifying Sequence Operations
                 OutputIt&& it,\
                 BinaryOperation&& op\
               )
+              OutputIt transform_if (\
+                Range&& range,\
+                OutputIt it,\
+                UnaryOperation op,\
+                UnaryPredicate up\
+              )
+              OutputIt transform_if (\
+                Range1&& range1,\
+                Range2&& range2,\
+                OutputIt it,\
+                BinaryOperation op,\
+                BinaryPredicate bp\
+              )
 
    Applies the given function to *range* and stores the result in another
    range, beginning at *it*. The first version applies the unary operation *op*
    to the elements in *range*. The second version applies the binary operation
-   *op* to pairs of elements from *range1* and *range2*.
+   *op* to pairs of elements from *range1* and *range2*. The conditional
+   versions do not perfectly forward their arguments as the algorithm is
+   performed in situ. :func:`transform_if` can be considered a merging of
+   :func:`copy_if` and :func:`transform`.
 
    :returns: Iterator to one past the last element transformed.
-   :requires: *range* must provide InputIterators.
+   :requires: :func:`transform` uses InputIterators. :func:`transform_if` uses
+              ForwardIterators.
 
 .. function:: ForwardIt remove (Range&& range, T const& value)
               ForwardIt remove_if (Range&& range, UnaryPredicate&& up)

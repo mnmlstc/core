@@ -3,6 +3,7 @@
 
 #include <algorithm>
 
+#include <core/utility.hpp>
 #include <core/range.hpp>
 
 namespace core {
@@ -508,6 +509,29 @@ auto transform (
   );
 }
 
+template <class Range, class OutputIt, class UnaryOperation, class UnaryPred>
+auto transform_if (
+  Range&& rng,
+  OutputIt it,
+  UnaryOperation op,
+  UnaryPred up
+) -> enable_if_t<
+  is_range<Range>::value,
+  OutputIt
+> {
+  auto range = make_range(::core::forward<Range>(rng));
+  constexpr auto is_forward = decltype(range)::is_forward;
+  static_assert(is_forward, "transform_if requires ForwardIterators");
+  while (range.begin() != range.end()) {
+    if (up(range.front())) {
+      *it = op(range.front());
+      ++it;
+    }
+    range.pop_front();
+  }
+  return it;
+}
+
 template <class Range1, class Range2, class OutputIt, class BinaryOperation>
 auto transform (
   Range1&& rng1,
@@ -531,6 +555,39 @@ auto transform (
     ::std::forward<OutputIt>(it),
     ::std::forward<BinaryOperation>(op)
   );
+}
+
+template <
+  class Range1,
+  class Range2,
+  class OutputIt,
+  class BinaryOperation,
+  class BinaryPredicate
+> auto transform_if (
+  Range1&& rng1,
+  Range2&& rng2,
+  OutputIt it,
+  BinaryOperation op,
+  BinaryPredicate bp
+) -> enable_if_t<
+  all_traits<is_range<Range1>, is_range<Range2>>::value,
+  OutputIt
+> {
+  auto range1 = make_range(::core::forward<Range1>(rng1));
+  auto range2 = make_range(::core::forward<Range2>(rng2));
+  constexpr auto is_forward1 = decltype(range1)::is_forward;
+  constexpr auto is_forward2 = decltype(range2)::is_forward;
+  static_assert(is_forward1, "transform_if requires ForwardIterators");
+  static_assert(is_forward2, "transform_if requires ForwardIterators");
+  while (range1.begin() != range1.end()) {
+    if (bp(range1.front(), range2.front())) {
+      *it = op(range1.front(), range2.front());
+      ++it;
+    }
+    range1.pop_front();
+    range2.pop_front();
+  }
+  return it;
 }
 
 template <class Range, class T>

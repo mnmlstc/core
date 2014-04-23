@@ -196,6 +196,34 @@ int main () {
       assert::equal(output[2], std::string { "3" });
     },
 
+    task("transform-if") = [] {
+      std::vector<int> value { 1, 2, 3 };
+      std::vector<std::string> output { };
+      std::vector<std::string> output2 { };
+
+      core::transform_if(
+        value,
+        ::std::back_inserter(output),
+        [] (int v) { return std::to_string(v); },
+        [] (int v) { return v % 2 != 0; }
+      );
+
+      assert::equal(output.size(), 2u);
+      assert::equal(output[0], "1");
+      assert::equal(output[1], "3");
+
+      core::transform_if(
+        value,
+        output,
+        ::std::back_inserter(output2),
+        [] (int v, std::string const& str) { return std::to_string(v) + str; },
+        [] (int v, std::string const&) { return v % 2 != 0 and v > 1; }
+      );
+
+      assert::equal(output2.size(), 1u);
+      assert::equal(output2[0], "31");
+    },
+
     task("remove") = [] {
       std::string text { "words words words" };
       text.erase(core::remove(text, ' '), ::std::end(text));
