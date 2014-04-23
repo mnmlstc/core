@@ -37,9 +37,10 @@ type lists.
 
       When accessed, provides the type at the index *N* in the type list *Ts*
 
-.. function:: auto value_at<N, Ts>(Ts&&)
+.. function:: constexpr auto value_at<N>(Ts&&) noexcept
 
    :returns: The value located at the index *N* in the type list *Ts*.
+   :requires: *N* may not be >= ``sizeof...(Ts)``
 
 .. class:: scope_guard<Callable>
 

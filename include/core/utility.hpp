@@ -45,6 +45,23 @@ struct typelist_index<Index, T, T, Types...> {
 };
 
 } /* namespace impl */
+
+template <class T>
+constexpr T&& forward (remove_reference_t<T>& t) noexcept {
+  return static_cast<T&&>(t);
+}
+
+template <class T>
+constexpr T&& forward (remove_reference_t<T>&& t) noexcept {
+  return static_cast<T&&>(t);
+}
+
+template <class T>
+constexpr auto move (T&& t) noexcept -> decltype(
+  static_cast<remove_reference_t<T>&&>(t)
+) { return static_cast<remove_reference_t<T>&&>(t); }
+
+
 template <class T, T... I>
 using integer_sequence = impl::integer_sequence<T, I...>;
 
@@ -63,7 +80,7 @@ using typelist_index = ::std::integral_constant<
   impl::typelist_index<0ul, T, Ts...>::type::value
 >;
 
-/* N3761 */
+/* N3761 (with some additions) */
 template < ::std::size_t N, class T, class... Ts>
 struct type_at { using type = typename type_at<N - 1, Ts...>::type; };
 
@@ -74,14 +91,16 @@ template < ::std::size_t N, class... Ts>
 using type_at_t = typename type_at<N, Ts...>::type;
 
 template < ::std::size_t N, class T, class... Ts>
-auto value_at(T&&, Ts&&... values) ->  typename type_at<N - 1, T, Ts...>::type {
-  return value_at<N - 1, Ts...>(::std::forward<Ts>(values)...);
-}
+constexpr auto value_at (T&& value, Ts&&...) -> enable_if_t<
+  N == 0 and N < (sizeof...(Ts) + 1),
+  decltype(::core::forward<T>(value))
+> { return ::core::forward<T>(value); }
 
-template <class T, class... Ts>
-auto value_at(T&& value, Ts&&...) -> decltype(::std::forward<T>(value)) {
-  return ::std::forward<T>(value);
-}
+template < ::std::size_t N, class T, class... Ts>
+constexpr auto value_at (T&&, Ts&&... values) -> enable_if_t<
+  N != 0 and N < (sizeof...(Ts) + 1),
+  type_at_t<N, T, Ts...>
+> { return value_at<N - 1, Ts...>(::core::forward<Ts>(values)...); }
 
 template <class Callable>
 struct scope_guard final {
@@ -92,7 +111,7 @@ struct scope_guard final {
   );
 
   explicit scope_guard (Callable callable) noexcept :
-    callable { ::std::move(callable) }
+    callable { ::core::move(callable) }
   { }
 
   scope_guard (scope_guard const&) = delete;
@@ -109,23 +128,10 @@ private:
 
 template <class Callable>
 auto make_scope_guard(Callable&& callable) -> scope_guard<decay_t<Callable>> {
-  return scope_guard<decay_t<Callable>> { ::std::forward<Callable>(callable) };
+  return scope_guard<decay_t<Callable>> {
+    ::core::forward<Callable>(callable)
+  };
 }
-
-template <class T>
-constexpr T&& forward (remove_reference_t<T>& t) noexcept {
-  return static_cast<T&&>(t);
-}
-
-template <class T>
-constexpr T&& forward (remove_reference_t<T>&& t) noexcept {
-  return static_cast<T&&>(t);
-}
-
-template <class T>
-constexpr auto move (T&& t) noexcept -> decltype(
-  static_cast<remove_reference_t<T>&&>(t)
-) { return static_cast<remove_reference_t<T>&&>(t); }
 
 }} /* namespace core::v1 */
 

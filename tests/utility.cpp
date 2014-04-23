@@ -13,5 +13,19 @@ int main () {
     }
   };
 
+  test("value-at") = {
+    task("runtime") = [] {
+      auto value = core::value_at<3>(1, 2, 3, 4);
+      assert::equal(value, 4);
+    },
+
+    task("compile-time") = [] {
+      constexpr auto value = core::value_at<3>(1, 2, 3, 4);
+      constexpr auto second = core::value_at<2>(1, 2, 4.0f, "");
+      static_assert(value == 4, "");
+      static_assert(second > 3.9f, "");
+    }
+  };
+
   monitor::run();
 }
