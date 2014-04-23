@@ -42,8 +42,8 @@ struct overload<Lambda, Lambdas...> :
   using call_type = overload;
 
   overload (Lambda&& lambda, Lambdas&&... lambdas) :
-    lambda_type(::std::forward<Lambda>(lambda)),
-    base_type(::std::forward<Lambdas>(lambdas)...)
+    lambda_type(::core::forward<Lambda>(lambda)),
+    base_type(::core::forward<Lambdas>(lambdas)...)
   { }
 
   using lambda_type::operator ();
@@ -52,16 +52,16 @@ struct overload<Lambda, Lambdas...> :
 
 template <class... Lambdas>
 auto make_overload(Lambdas&&... lambdas) -> overload<Lambdas...> {
-  return overload<Lambdas...> { ::std::forward<Lambdas>(lambdas)... };
+  return overload<Lambdas...> { ::core::forward<Lambdas>(lambdas)... };
 }
 
 template <class Visitor, class Type, class Data, class Result, class... Args>
 auto visitor_gen () -> Result {
   return [](Visitor&& visitor, Data& data, Args&&... args) {
     return invoke(
-      ::std::forward<Visitor>(visitor),
+      ::core::forward<Visitor>(visitor),
       reinterpret_cast<Type&>(data),
-      ::std::forward<Args>(args)...
+      ::core::forward<Args>(args)...
     );
   };
 }
@@ -73,19 +73,19 @@ struct bad_variant_get final : ::std::logic_error {
   using ::std::logic_error::logic_error;
 };
 
-  /* visitation semantics require that, given a callable type C, and variadic
-   * arguments Args... that the return type of the visit will be SFINAE-ified
-   * as common_type_t<invoke_of_t<C, Args>...> (this assumes a variadic
-   * approach can be taken with common_type, which it cannot at this time)
-   *
-   * Obviously if a common type cannot be found, then the visitation function
-   * cannot be generated.
-   *
-   * These same semantics are required for variant<Ts...>::match which simply
-   * calls visit with a generate overload<Lambdas...> type.
-   */
-
-
+/* visitation semantics require that, given a callable type C, and variadic
+ * arguments Args... that the return type of the visit will be SFINAE-ified
+ * as common_type_t<invoke_of_t<C, Args>...> (this assumes a variadic
+ * approach can be taken with common_type, which it cannot at this time. A
+ * custom SFINAE-capable version has been written within the type traits
+ * component.
+ *
+ * Obviously if a common type cannot be found, then the visitation function
+ * cannot be generated.
+ *
+ * These same semantics are required for variant<Ts...>::match which simply
+ * calls visit with a generate overload<Lambdas...> type.
+ */
 template <class... Ts>
 class variant final {
   static_assert(
@@ -180,7 +180,7 @@ class variant final {
     variant {
       index<N + 1> { },
       ::std::is_constructible<type_at_t<N + 1, Ts...>, T> { },
-      ::std::forward<T>(value)
+      ::core::forward<T>(value)
     }
   { }
 
@@ -192,7 +192,7 @@ class variant final {
     data { }, tag { N }
   {
     new (::std::addressof(this->data)) type_at_t<N, Ts...> (
-      ::std::forward<T>(value)
+      ::core::forward<T>(value)
     );
   }
 
@@ -201,11 +201,11 @@ public:
   template <
     class T,
     class=enable_if_t<not ::std::is_same<decay_t<T>, variant>::value>
-  > explicit variant (T&& value) :
+  > variant (T&& value) :
     variant {
       index<0> { },
       ::std::is_constructible<type_at_t<0, Ts...>, T> { },
-      ::std::forward<T>(value)
+      ::core::forward<T>(value)
     }
   { }
 
@@ -229,7 +229,7 @@ public:
     class T,
     class=enable_if_t<not ::std::is_same<decay_t<T>, variant>::value>
   > variant& operator = (T&& value) {
-    variant { ::std::forward<T>(value) }.swap(*this);
+    variant { ::core::forward<T>(value) }.swap(*this);
     return *this;
   }
 
@@ -265,9 +265,9 @@ public:
       that.visit(swapper { ::std::ref(this->data) });
       return;
     }
-    variant temp { ::std::move(*this) };
-    *this = ::std::move(that);
-    that = ::std::move(temp);
+    variant temp { ::core::move(*this) };
+    *this = ::core::move(that);
+    that = ::core::move(temp);
   }
 
   template <class Visitor, class... Args>
@@ -278,7 +278,7 @@ public:
     using function = return_type(*)(Visitor&&, storage_type&, Args&&...);
     constexpr ::std::size_t size = ::std::tuple_size<tuple_type>::value;
 
-    static function const callers[size] = {
+    static function const callers[size] {
       impl::visitor_gen<Visitor, Ts, storage_type, function, Args...>()...
     };
 
@@ -308,27 +308,27 @@ public:
     };
 
     return callers[this->tag](
-      ::std::forward<Visitor>(visitor),
+      ::core::forward<Visitor>(visitor),
       this->data,
-      ::std::forward<Args>(args)...
+      ::core::forward<Args>(args)...
     );
   }
 
   template <class... Visitors>
   auto match (Visitors&&... visitors) -> decltype(
-    this->visit(impl::make_overload(::std::forward<Visitors>(visitors)...))
+    this->visit(impl::make_overload(::core::forward<Visitors>(visitors)...))
   ) {
     return this->visit(
-      impl::make_overload(::std::forward<Visitors>(visitors)...)
+      impl::make_overload(::core::forward<Visitors>(visitors)...)
     );
   }
 
   template <class... Visitors>
   auto match (Visitors&&... visitors) const -> decltype(
-    this->visit(impl::make_overload(::std::forward<Visitors>(visitors)...))
+    this->visit(impl::make_overload(::core::forward<Visitors>(visitors)...))
   ) {
     return this->visit(
-      impl::make_overload(::std::forward<Visitors>(visitors)...)
+      impl::make_overload(::core::forward<Visitors>(visitors)...)
     );
   }
 
