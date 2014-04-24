@@ -527,7 +527,7 @@ Sorting Operations
 Binary Search Operations
 ------------------------
 
-.. note:: These operations are intended for sorted ranges *only*.
+.. note:: These operations are intended for sorted/partitioned ranges *only*.
 
 .. function:: ForwardIt lower_bound (Range&& range, T const& value)
               ForwardIt lower_bound (\
@@ -535,6 +535,12 @@ Binary Search Operations
                 T const& value,\
                 Compare&& cmp\
               )
+
+   Returns an iterator pointing to the first element in *range* that is **not
+   less than** *value*. The range must be partially ordered. A fully sorted
+   range or a range resulting from :func:`partition` meets this criteria. The
+   first version uses ``operator <`` to compare elements, while the second uses
+   the given function *cmp*.
 
    :requires: *range* must provide ForwardIterators.
 
@@ -545,10 +551,19 @@ Binary Search Operations
                 Compare&& cmp\
               )
 
+   Returns an iterator pointing to the first element in *range* that is
+   *greater* than value. The same ordering restructions in :func:`lower_bound`
+   apply. The first version uses ``operator <``. The second uses the
+   comparison function *cmp*.
+
    :requires: *range* must provide ForwardIterators.
 
 .. function:: bool binary_search (Range&& range, T const& value)
               bool binary_search (Range&& range, T const& value, Compare&& cmp)
+
+   Checks if an element equal to *value* resides within *range*. Requires that
+   *range* be partitioned. The first version uses ``operator <``. The second
+   uses the given function *cmp*.
 
    :requires: *range* must provide ForwardIterators.
 
@@ -559,7 +574,12 @@ Binary Search Operations
                 Compare&& cmp\
               )
 
-   :requires: *range* must provide ForwardIterators.
+   Returns a range containing all elements equivalent to *value* in *range*.
+   The first version uses ``operator <``. The second uses the given comparison
+   function *cmp*.
+
+   :requires: *range* must provide ForwardIterators and must be correctly
+              partitioned.
 
 .. _core-algorithm-component-set-operations:
 
