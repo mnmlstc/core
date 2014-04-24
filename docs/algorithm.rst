@@ -396,9 +396,16 @@ Partitioning Operations
 
 .. function:: bool is_partitioned (Range&& range, UnaryPredicate&& up)
 
+   :returns: ``true`` if all the elements in *range* that satisfy predicate
+             *up* appear before all the elements that don't or if *range* is
+             empty.
    :requires: *range* must provide InputIterators.
 
 .. function:: ForwardIt partition (Range&& range, UnaryPredicate&& up)
+
+   Reorders elements in *range* such that all elements for which *up* return
+   ``true`` come before the elements where *up* returns ``false``. Relative
+   order is *not* preserved.
 
    :requires: *range* must provide ForwardIterators.
 
@@ -409,14 +416,28 @@ Partitioning Operations
                 UnaryPredicate&& up\
               )
 
+   Copies the elements from *range* to different ranges depending on the result
+   of *up*. The elements that cause *up* to return ``true`` are copied to the
+   range starting at *ot*, and those that return ``false`` are copied to the
+   range starting at *of*.
+
+   It is undefined behavior to have the input range overlap *ot* or *of*.
+
    :returns: ``std::pair<decay_t<OutputTrue>, decay_t<OutputFalse>>``
    :requires: *range* must provide InputIterators.
 
 .. function:: BidirIt stable_partition (Range&& range, UnaryPredicate&& up)
 
+   Reorders the elements in *range* in the same way as :func:`partition`.
+   Unlike :func:`partition`, the order of elements is preserved.
+
    :requires: *range* must provide BidirectionalIterators.
 
 .. function:: ForwardIt partition_point (Range&& range, UnaryPredicate&& up)
+
+   Examines *range* and locates the end of the first partition (i.e., the first
+   element in *range* that does not satisfy *up*. If all elements satisfy
+   *up*, the end of *range* is returned.
 
    :requires: *range* must provide ForwardIterators.
 
