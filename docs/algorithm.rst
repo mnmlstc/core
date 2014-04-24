@@ -449,20 +449,41 @@ Sorting Operations
 .. function:: bool is_sorted (Range&& range)
               bool is_sorted (Range&& range, Compare&& comp)
 
+   Checks if the elements in *range* are sorted in ascending order. The first
+   version uses ``operator <`` to compare elements. The second uses the
+   comparison function *comp*.
+
    :requires: *range* must provide ForwardIterators.
 
 .. function:: ForwardIt is_sorted_until (Range&& range)
               ForwardIt is_sorted_until (Range&& range, Compare&& comp)
+
+   Inspects *range* and finds the largest sub range in which elements
+   are sorted in ascending order. The first version uses ``operator <``. The
+   second version uses the given comparison function *comp*.
 
    :requires: *range* must provide ForwardIterators.
 
 .. function:: void sort (Range&& range)
               void sort (Range&& range, Compare&& comp)
 
+   Sorts the elements in *range* in ascending order. The order of elements
+   equal to each other is no guaranteed to be preserved. The first version
+   uses ``operator <``. The second version uses the given comparison function
+   *comp*.
+
    :requires: *range* must provide RandomAccessIterators.
 
 .. function:: void partial_sort (Range&& range, RandomIt&& it)
               void partial_sort (Range&& range, RandomIt&& it, Compare&& cmp)
+
+   Rearranges elements in *range* so that the range contains the sorted
+   ``it - range.begin()`` smallest elements.
+
+   The order of elements equal to each other is not guaranteed to be preserved.
+   The order of the remaining elements in *range* is unspecified. The first
+   version uses ``operator <``. The second version uses the provided comparison
+   function *comp*.
 
    :requires: *range* must provide RandomAccessIterators.
 
@@ -473,16 +494,31 @@ Sorting Operations
                 Compare&& cmp\
               )
 
+   Sorts the elements in *irange* in ascending order, storing the result in
+   *rrange*. The order of elements which are equal is not guaranteed to be
+   preserved. The first version uses ``operator <``. The second uses the
+   comparison function *comp*.
+
    :requires: *irange* must provide InputIterators, *rrange* must provide
               RandomAccessIterators.
 
 .. function:: void stable_sort (Range&& range)
               void stable_sort (Range&& range, Compare&& cmp)
 
+   Sorts elements in *range* in the same way as :func:`sort`, with the exception
+   that the order of equal elements is guaranteed to be preserved.
+
    :requires: *range* must provide RandomAccessIterators.
 
 .. function:: void nth_element (Range&& range, RandomIt&& it)
               void nth_element (Range&& range, RandomIt&& it, Compare&& cmp)
+
+   Partial sorting algorithm that rearranges elements in *range* such that
+   the element pointed at by *it* is changed to whatever element would occur in
+   that position if *range* was sorted and al of the elements before this new
+   element at *it* are less than or equal to the elements after *it*.
+
+   If *it* is the end iterator of *range*, this function has no effect.
 
    :requires: *range* must provide RandomAccessIterators.
 
