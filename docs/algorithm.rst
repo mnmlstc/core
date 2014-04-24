@@ -239,6 +239,11 @@ Modifying Sequence Operations
 .. function:: ForwardIt remove (Range&& range, T const& value)
               ForwardIt remove_if (Range&& range, UnaryPredicate&& up)
 
+   Removes all elements satisfying specific criteris from *range* and returns
+   a past-the-end iterator for the new end of the range. The first version
+   removes all elements that are equal to *value*, while the second version
+   removes all eleents for which *up* returns ``true``.
+
    :requires: *range* must provide ForwardIterators.
 
 .. function:: decay_t<OutputIt> remove_copy (\
@@ -252,6 +257,12 @@ Modifying Sequence Operations
                 UnaryPredicate&& up\
               )
 
+   Copies elements from *range* to another range beignning at *it*, omitting
+   the elements which satisfy specific criteria. The first version ignores the
+   elements equal to *value*. The second version ignores the elements for which
+   *up* returns ``true``.
+
+   :returns: Iterator to the element past the last element copied.
    :requires: *range* must provide InputIterators.
 
 .. function:: void remove_erase (Range&& range, T const& val)
@@ -267,6 +278,10 @@ Modifying Sequence Operations
 
 .. function:: void replace (Range&& range, T const& old, T const& value)
               void replace_if (Range&& range, UnaryPred&& up, T const& value)
+ 
+   Replaces all elements satisfying specific criteria with *value* in *range*.
+   The first version replaces elements equal to *old*. The second version
+   replaces elements for which *up* returns ``true``.
 
    :requires: *range* must provide ForwardIterators
 
@@ -283,21 +298,46 @@ Modifying Sequence Operations
                 T const& value\
               )
 
+   Copies the elements from *range* to another range beginning at *it*.
+   Elements satisfying specific criteria are replaced with *value*. The first
+   version replaces elements equal to *old*. The second version replaces
+   elements for which *up* returns ``true``. The source and destination
+   ranges *cannot* overlap.
+
    :requires: *range* must provide InputIterators.
 
 .. function:: decay_t<ForwardIt> swap_ranges (Range&& range, ForwardIt&& it)
 
+   Exchanges elements between *range* and another range starting at *it*.
+
+   :returns: Iterator to the element past the last element exchanged with range
+             starting at *it*.
    :requires: *range* must provide ForwardIterators.
 
-.. function:: void reverse (Range&&)
+.. function:: void reverse (Range&& range)
+
+   Reverses the order of the elements in *range*.
 
    :requires: *range* must provide BidirectionalIterators.
 
 .. function:: decay_t<OutputIt> reverse_copy (Range&& range, OutputIt&& it)
 
+   Copies the elements from *range* to another range starting at *it* where the
+   elements in the new range are in reverse order.
+
+   :returns: Output iterator to the element past the last element copied.
    :requires: *range* must provide BidirectionalIterators.
 
 .. function:: void rotate (Range&& range, ForwardIt&& it)
+
+   Performs a left rotation on a range of elements. Specifically, it swaps
+   the elements in *range* in such a way that the element at *it* becomes the
+   first element of the range.
+
+   .. note:: Due to an incorrect interface in libstdc++, this form of rotate
+             returns ``void``. Technically it is required to return a
+             ForwardIterator, however this is ignored to take the path of least
+             resistance.
 
    :requires: *range* must provide ForwardIterators.
 
@@ -307,14 +347,31 @@ Modifying Sequence Operations
                 OutputIt&& ot\
               )
 
+   Copies the elements from *range* to another range starting at *ot* where
+   *it* will be the first element of the new range, and *it* - 1 becomes the
+   last.
+
+   :returns: Output iterator to the element past the last element copied.
    :requires: *range* must provide ForwardIterators.
 
 .. function:: void shuffle (Range&& range, URNG&& g)
+
+   Reorders elements in *range* so that each possible permutation of those
+   elements has equal probablity of appearance. The random number generator 
+   is the function object *g*.
+
+   .. note:: As you may have noticed, ``random_shuffle`` does not make an
+             appearance. This is due to the C++14 standard deprecating
+             ``random_shuffle``.
 
    :requires: *range* must provide RandomAccessIterators.
 
 .. function:: ForwardIt unique (Range&& range)
               ForwardIt unique (Range&& range, BinaryPredicate&& bp)
+
+   Removes all consecutive duplicate elements from *range* and returns a
+   past-the-end iterator for the new logical end of the range. The first
+   version uses ``operator ==``. The second version uses the predicate *bp*.
 
    :requires: *range* must provide ForwardIterators.
 
@@ -324,6 +381,11 @@ Modifying Sequence Operations
                 OutputIt&& it,\
                 BinaryPred&& bp\
               )
+
+   Copies the elements from *range* to another range beginning at *it* so
+   that no consecutive equal elements exist. The first version uses
+   ``operator ==`` to compare elements. The second version uses the predicate
+   *bp*.
 
    :requires: *range* must provide InputIterators.
 
