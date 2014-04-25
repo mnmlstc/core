@@ -767,10 +767,16 @@ Min/Max Operations
 .. function:: ForwardIt max_element (Range&& range)
               ForwardIt max_element (Range&& range, Compare&& compare)
 
+   Finds the greatest element in *range*. Uses ``operator <`` or *compare* as
+   the comparison function.
+
    :requires: *range* must provide ForwardIterators.
 
 .. function:: ForwardIt min_element (Range&& range)
               ForwardIt min_element (Range&& range, Compare&& compare)
+
+   Finds the smallest element in *range*. Uses ``operator <`` or *compare* as
+   the comparison function.
 
    :requires: *range* must provide ForwardIterators.
 
@@ -779,6 +785,9 @@ Min/Max Operations
                 Range&& range,\
                 Compare&& compare\
               )
+
+   Finds the greatest and smallest element in *range*. Uses ``operator <`` or
+   *compare* as the comparison function.
 
    :requires: *range* must provide ForwardIterators.
 
@@ -789,6 +798,9 @@ Min/Max Operations
                 Compare&& compare\
               )
 
+   Checks if *range1* is lexicographically less than *range2*. Uses
+   ``operator <`` or *compare* as the comparison function.
+
    :requires: *range1* and *range2* must provide InputIterators.
 
 .. function:: is_permutation (Range1&& range1, Range2&& range2)
@@ -798,14 +810,32 @@ Min/Max Operations
                 BinaryPredicate&& bp\
               )
 
+   Returns ``true`` if there exists a permutation of the elements in *range*
+   that makes it equal to *range2*. The first version uses ``operator ==``.
+   The second version uses the given binary predicate *bp*.
+
+
    :requires: *range1* and *range2* must provide ForwardIterators.
 
 .. function:: bool next_permutation (Range&& range)
               bool next_permutation (Range&& range, Compare&& compare)
 
+   Transforms *range* into the next permutation from the set of all
+   permutations that are lexicographically ordered. The first version
+   uses ``operator <``. The second version uses *compare*.
+
+   :returns: ``true`` if such permutation exists otherwise transforms *range*
+             into the first permutation and returns ``false`.
    :requires: *range* must provide BidirectionalIterators.
 
 .. function:: bool prev_permutation (Range&& range)
               bool prev_permutation (Range&& range, Compare&& compare)
+
+   Transforms *range* into the previous permutation from the set of all
+   permutations that are lexicographically ordered. The first version
+   uses ``operator <``. The second version uses *compare*.
+
+   :returns: ``true`` if such permutation exists otherwise transforms *range*
+             into the first permutation and returns ``false`.
 
    :requires: *range* must provide BidirectionalIterators.
