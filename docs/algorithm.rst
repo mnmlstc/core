@@ -711,30 +711,51 @@ Heap Operations
 .. function:: bool is_heap (Range&& range)
               bool is_heap (Range&& range, Compare&& compare)
 
+   Checks if the elements in *range* are a max heap. Uses ``operator <`` or
+   *cmp* as a comparison function.
+
    :require: *range* must provide RandomAccessIterators.
 
 .. function:: RandomIt is_heap_until (Range&& range)
               RandomIt is_heap_until (Range&& range, Compare&& compare)
+
+   Find the largest subrange within *range* which is a max heap. Uses
+   ``operator <`` or *compare* as the comparison function.
 
    :require: *range* must provide RandomAccessIterators.
 
 .. function:: void make_heap (Range&& range)
               void make_heap (Range&& range, Compare&& compare)
 
+   Constructs a max heap in *range*. Uses ``operator <`` or *compare*
+   as the comparison function.
+
    :requires: *range* must provide RandomAccessIterators.
 
 .. function:: void push_heap (Range&& range)
               void push_heap (Range&& range, Compare&& compare)
+
+   Inserts the element at ``range.end() - 1`` into the max heap defined by
+   ``[range.begin(), range.end() - 1)``. Uses ``operator <`` or *compare*
+   as the comparison function.
 
    :requires: *range* must provide RandomAccessIterators.
 
 .. function:: void pop_heap (Range&& range)
               void pop_heap (Range&& range, Compare&& compare)
 
+   Swaps the value at ``range.begin()`` and the value in ``range.end() - 1``
+   and turns this subrange into a max heap. Uses ``operator <`` or *compare*
+   as the comparison function.
+
    :requires: *range* must provide RandomAccessIterators.
 
 .. function:: void sort_heap (Range&& range)
               void sort_heap (Range&& range, Compare&& compare)
+
+   Converts a max heap (*range*) into a sorted range in ascending order.
+   The resulting range is no longer a heap. Uses ``operator <`` or *compare*
+   as the comparison function.
 
    :requires: *range* must provide RandomAccessIterators.
 
