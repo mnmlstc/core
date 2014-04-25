@@ -598,15 +598,31 @@ Set Operations
                 Compare&& cmp\
               )
 
+   Merges sorted *range1* and sorted *range2* into one sorted range beginning
+   at *it*. The first version uses ``operator <`` to compare elements. The
+   second uses the comparison function *cmp*. The relative order of elements
+   is preserved. If the destination range overlaps either *range1* or *range2*,
+   the resulting behavior is undefined. (It is ok if *range1* and *range2*
+   are overlapping)
+
    :requires: *range1* and *range2* must provide InputIterators.
 
 .. function:: void inplace_merge (Range&& range, Bidir&& it)
               void inplace_merge (Range&& range, Bidir&& it, Compare&& cmp)
 
+   Merges two consecutive sorted ranges (``[range.begin(), it)`` and
+   ``[it, range.end())``) into one sorted range. The order of equal elements
+   is preserved. The first version uses ``operator <``. The second version uses
+   the comparison function *cmp*.
+
    :requires: *range* must provide BidirectionalIterators
 
 .. function:: bool includes (Range1&& range1, Range2&& range2)
               bool includes (Range1&& range1, Range2&& range2, Compare&& cmp)
+
+   Returns ``true`` if every element from *range2* is found within the bounds
+   of *range1* or if *range2* is empty. The first version uses ``operator <``.
+   The second uses *cmp* as a comparison function.
 
    :requires: *range1* and *range2* must provide InputIterators.
 
@@ -622,6 +638,10 @@ Set Operations
                 Compare&& cmp\
               )
 
+   Copies the elements from *range1* which are not found in *range2* to the
+   range beginning at *it*. The first version uses ``operator <``. The second
+   uses *cmp* as a comparison function.
+
    :requires: *range1* and *range2* must provide InputIterators.
 
 .. function:: decay_t<OutputIt> set_intersection (\
@@ -635,6 +655,11 @@ Set Operations
                 OutputIt&& it,\
                 Compare&& cmp\
               )
+
+   Constructs a sorted range beginning at *it* consisting of elements that are
+   found in both *range1* and *range2*. The first version expects *range1*
+   and *range2* to be sorted with ``operator <``. The second version expects
+   them to be sorted by *cmp*.
 
    :requires: *range1* and *range2* must provide InputIterators.
 
@@ -650,6 +675,12 @@ Set Operations
                 Compare&& cmp\
               )
 
+   Copies the symmetric difference of *range1* and *range2* (i.e., the elements
+   found in either of the ranges but not both) to a range starting at *it*. The
+   result is also sorted. The first version expects *range1* and *range2* to be
+   sorted with ``operator <``. The second version expects them to be sorted
+   with *cmp*.
+
    :requires: *range1* and *range2* must provide InputIterators.
 
 .. function:: decay_t<OutputIt> set_union (\
@@ -663,6 +694,12 @@ Set Operations
                 OutputIt&& it,\
                 Compare&& cmp\
               )
+
+   Constructs a sorted range starting at *it* consisting of all elements
+   present in one or both *range1* and *range2*. The resulting range cannot
+   overlap with either *range1* or *range2*. The first version expects both
+   ranges to be sorted with ``operator <``. The second version expects them
+   to be sorted via *cmp*.
 
    :requires: *range1* and *range2* must provide InputIterators.
 
