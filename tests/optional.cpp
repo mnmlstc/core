@@ -512,18 +512,10 @@ int main () {
 
     task("dereference-operator") = [] {
       core::expected<int> nothrow { 51 };
-      core::expected<int> throws {
-        std::make_exception_ptr(std::logic_error { "" })
-      };
 
       assert::is_true(bool(nothrow));
-      assert::is_true(not throws);
 
       assert::equal(*nothrow, 51);
-      assert::throws<std::logic_error>([&throws] {
-        int value = *throws;
-        std::ignore = value;
-      });
     },
 
     task("equality-comparable") = [] {
@@ -634,9 +626,9 @@ int main () {
       assert::is_true(not value);
       assert::is_true(not copy);
 
-      assert::equal(value.get_ptr(), copy.get_ptr());
-      assert::equal(value.get_ptr(), ptr);
-      assert::equal(copy.get_ptr(), ptr);
+      assert::equal(value.pointer(), copy.pointer());
+      assert::equal(value.pointer(), ptr);
+      assert::equal(copy.pointer(), ptr);
     },
 
     task("move-constructor") = [] {
@@ -647,7 +639,7 @@ int main () {
       assert::is_true(bool(value));
       assert::is_true(not move);
 
-      assert::equal(move.get_ptr(), ptr);
+      assert::equal(move.pointer(), ptr);
     },
 
     task("ptr-constructor") = [] {
@@ -655,7 +647,7 @@ int main () {
       core::expected<void> value { ptr };
 
       assert::is_true(not value);
-      assert::equal(ptr, value.get_ptr());
+      assert::equal(ptr, value.pointer());
     },
 
     task("copy-assign-operator") = [] {
@@ -670,9 +662,9 @@ int main () {
       assert::is_true(not value);
       assert::is_true(not copy);
 
-      assert::equal(value.get_ptr(), copy.get_ptr());
-      assert::equal(value.get_ptr(), ptr);
-      assert::equal(copy.get_ptr(), ptr);
+      assert::equal(value.pointer(), copy.pointer());
+      assert::equal(value.pointer(), ptr);
+      assert::equal(copy.pointer(), ptr);
     },
 
     task("move-assign-operator") = [] {
@@ -687,7 +679,7 @@ int main () {
       assert::is_true(bool(value));
       assert::is_true(not move);
 
-      assert::equal(move.get_ptr(), ptr);
+      assert::equal(move.pointer(), ptr);
     },
 
     task("equality-comparable") = [] {
@@ -702,9 +694,9 @@ int main () {
       assert::is_true(bool(empty_rhs));
 
       assert::equal(empty_lhs, empty_rhs);
-      assert::equal(lhs.get_ptr(), rhs.get_ptr());
-      assert::equal(lhs.get_ptr(), ptr);
-      assert::equal(rhs.get_ptr(), ptr);
+      assert::equal(lhs.pointer(), rhs.pointer());
+      assert::equal(lhs.pointer(), ptr);
+      assert::equal(rhs.pointer(), ptr);
       assert::equal(lhs, ptr);
       assert::equal(ptr, rhs);
     },
@@ -742,15 +734,15 @@ int main () {
 
       assert::is_true(not lhs);
       assert::is_true(not rhs);
-      assert::equal(lhs.get_ptr(), lhs_ptr);
-      assert::equal(rhs.get_ptr(), rhs_ptr);
+      assert::equal(lhs.pointer(), lhs_ptr);
+      assert::equal(rhs.pointer(), rhs_ptr);
 
       swap(lhs, rhs);
 
       assert::is_true(not lhs);
       assert::is_true(not rhs);
-      assert::equal(lhs.get_ptr(), rhs_ptr);
-      assert::equal(rhs.get_ptr(), lhs_ptr);
+      assert::equal(lhs.pointer(), rhs_ptr);
+      assert::equal(rhs.pointer(), lhs_ptr);
 
     }
   };
