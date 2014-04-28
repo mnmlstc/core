@@ -6,10 +6,40 @@ Optional Component
 .. default-domain:: cpp
 
 .. |optional| replace:: :class:`optional <optional\<T>>`
+.. |expected| replace:: :class:`expected <expected\<T>>`
+.. |result| replace:: :class:`result <result\<T>>`
 
-The |optional| component is currently available in Boost. However,
-this implementation of |optional| follows the C++14 proposal as closely as
-possible.
+.. |expected-v| replace:: :class:`expected\<void>`
+.. |result-v| replace:: :class`result\<void>`
+
+The optional component contains several types that store an optional value.
+Arguably the most well known is the |optional| type (for which this component
+is named). |optional| is available in Boost. However, this implementation of
+|optional| follows the revision 5 proposal (N3793_) as closely as possible.
+
+In addition to |optional|, an |expected| type is provided. This type is based
+off of a type mentioned by Andrei Alexandrescu in his 2012 talk *Systematic
+Error Handling in C++*. Instead of an optional null-state, the |expected| type
+contains either a type *T*, or an exception. It differes significantly from
+Alexandrescu's talk in that it's interface closely resembles |optional|. It
+also has the ability to *extract* the contained exception without the need
+of a try-catch block placed by the user, as well as the ability to rethrow
+the contained exception (if any such exception exists). Additionally, a
+specialization for |expected-v| exists, allowing a function that normally
+returns ``void``, (but one that may throw an exception) to return the error
+by way of |expected|.
+
+Lastly, there is a third optional type provided, named |result|. This type
+is closely related to |expected|. However, it does not contain an exception,
+but rather a ``std::error_condition``. This type was partially inspired by
+the Rust language's ``Result<T, E>``. However, the |result| type is intended
+to model non-exception, portable error conditions to check against, hence
+it holding either a instance of type *T* or a non-zero ``std::error_condition``.
+Much like |expected-v|, a |result-v| is also provided to easily allow checking
+for a non-zero ``std::error_condition`` in a function that ideally would return
+void. This type was provided to allow generic use of |result|. *Technically*,
+this type can be replaced with a ``std::error_condition``. However it removes
+the ability to mark a function as returning ``void``.
 
 .. namespace:: core
 
@@ -39,6 +69,27 @@ possible.
       accessing the underlying object. Specifically it means calling |optional|
       member functions, and not member functions of the underlying object it
       may or may not currently manage.
+
+.. class:: bad_expected_type
+
+   :inherits: std::logic_error
+
+   Thrown when calling :func:`expected\<T>::expect`, if the expected type
+   is incorrect. Also thrown when attempting to expect or raise an exception
+   when an |expected| is in a *valid* state (that is, it does not currently
+   manage an exception)
+
+.. class:: bad_result_condition
+
+   :inherits: std::logic_error
+
+   Thrown when attempting to access the ``std::error_condition`` of a |result|
+   in a *valid* state. A |result| will **never** contain a
+   ``std::error_condition`` with a value of 0, and will only be *invalid* if
+   it actively manages a ``std::error_condition``.
+
+Optional Type
+-------------
 
 .. class:: optional<T>
 
@@ -198,6 +249,51 @@ possible.
       Constructs the object managed by the |optional|. If the |optional| is
       already engaged, it will first destruct the object it is currently
       managing.
+
+Expected Type
+-------------
+
+.. class:: expected<T>
+
+   |expected| works much like |optional| in that it contains an optionally
+   instantiated type *T*. However, unlike |optional| it is never in a
+   *disengaged* state. Instead its managed object is either *valid* or
+   *invalid*. Like |optional| it does not model a pointer, but rather an object
+   and provides the pointer access operator overloads for convenience.
+
+   .. note:: It is ok to use a type that overloads the address operator with
+      |expected|. This will not negatively affect the use of placement new
+      internally.
+
+Result Type
+-----------
+
+.. class:: result<T>
+
+   |result| works much like |expected|. However, it does not manage an
+   exception, but rather a ``std::error_condition``. This is done to provide a
+   nice rounding out for functions which may want to signal an error, but not
+   require the 'output' value to be passed by reference or by pointer.
+
+.. class:: expected<void>
+
+   |expected-v| is provided as a way to have the same semantics as |expected|,
+   but for functions that do not (or cannot) return a value. Its interface
+   is close to that of |expected|, however as it cannot store a value, it is
+   smaller and only has member functions related to handling the exception
+   stored within the |expected-v|.
+
+.. class:: result<void>
+
+   |result-v| is provided as a way to have the same semantics as |result|,
+   but for functions that do not (or cannot) return a value. Its interface
+   is close to that of |result|, however as it cannot store an object, it is
+   smaller and only has member functions related to handling error conditions.
+
+   Technically speaking, this type is unnecessary as an error_condition can be
+   supplied instead. However, it's sometimes nice to allow for more generic
+   code to be written, and worrying about whether or not you might accidentally
+   instantiate a |result-v| isn't something one should have to worry about.
 
 .. function:: optional<T> make_optional<T>(T&& value)
 
