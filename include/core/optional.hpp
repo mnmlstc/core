@@ -1012,7 +1012,7 @@ struct result<void> final {
     swap(this->cnd, that.cnd);
   }
 
-  explicit operator bool () const noexcept { return this->cnd; }
+  explicit operator bool () const noexcept { return bool(this->cnd); }
 
   ::std::error_condition const& condition () const noexcept(false) {
     if (*this) { throw bad_result_condition { "result<void> is valid" }; }
