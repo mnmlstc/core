@@ -675,8 +675,13 @@ struct result final {
   );
 
   result (int val, ::std::error_category const& cat) noexcept :
-    cnd { val, cat }
-  { }
+    valid { val == 0 }
+  {
+    if (*this) { ::new (::std::addressof(this->val)) value_type { }; }
+    else {
+      ::new (::std::addressof(this->cnd)) ::std::error_condition { val, cat };
+    }
+  }
 
   template <
     class ErrorConditionEnum,
@@ -684,8 +689,18 @@ struct result final {
       ::std::is_error_condition_enum<ErrorConditionEnum>::value
     >
   > explicit result (ErrorConditionEnum e) noexcept :
-    cnd { e }
-  { }
+    valid { static_cast<core::underlying_type_t<ErrorConditionEnum>>(e) == 0 }
+  {
+    if (*this) { ::new (::std::addressof(this->val)) value_type { }; }
+    else { ::new (::std::addressof(this->cnd)) ::std::error_condition { e }; }
+  }
+
+  explicit result (::std::error_condition const& ec) :
+    valid { ec }
+  {
+    if (*this) { ::new (::std::addressof(this->val)) value_type { }; }
+    else { ::new (::std::addressof(this->cnd)) ::std::error_condition { ec }; }
+  }
 
   explicit result (value_type const& val) :
     val { val },
@@ -893,7 +908,7 @@ struct result final {
       : static_cast<value_type>(::core::forward<T>(val));
   }
 
-  ::std::error_condition condition () const noexcept(false) {
+  ::std::error_condition const& condition () const noexcept(false) {
     if (*this) { throw bad_result_condition { "result<T> is valid" }; }
     return this->cnd;
   }
@@ -1311,7 +1326,17 @@ struct hash< ::core::v1::optional<Type>> {
 template <class Type>
 struct hash< ::core::v1::expected<Type>> {
   using result_type = typename hash<Type>::result_type;
-  using argument_type = core::v1::expected<Type>;
+  using argument_type = ::core::v1::expected<Type>;
+
+  result_type operator () (argument_type const& value) const noexcept {
+    return value ? hash<Type> { }(*value) : result_type { };
+  }
+};
+
+template <class Type>
+struct hash< ::core::v1::result<Type>> {
+  using result_type = typename hash<Type>::result_type;
+  using argument_type = ::core::v1::result<Type>;
 
   result_type operator () (argument_type const& value) const noexcept {
     return value ? hash<Type> { }(*value) : result_type { };
