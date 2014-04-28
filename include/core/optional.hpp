@@ -11,6 +11,7 @@
 #include <cstdint>
 
 #include <core/type_traits.hpp>
+#include <core/functional.hpp>
 #include <core/utility.hpp>
 
 namespace core {
@@ -1014,7 +1015,7 @@ struct result<void> final {
   explicit operator bool () const noexcept { return this->cnd; }
 
   ::std::error_condition const& condition () const noexcept(false) {
-    if (*this) { throw bad_result_condition { "result<void> is valid" };
+    if (*this) { throw bad_result_condition { "result<void> is valid" }; }
     return this->cnd;
   }
 
