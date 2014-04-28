@@ -973,6 +973,55 @@ private:
   ::std::exception_ptr ptr;
 };
 
+template <>
+struct result<void> final {
+  using value_type = void;
+
+  result (int val, ::std::error_category const& cat) :
+    cnd { val, cat }
+  { }
+
+  explicit result (::std::error_condition const& ec) :
+    cnd { ec }
+  { }
+
+  template <
+    class ErrorConditionEnum,
+    class=enable_if_t<
+      ::std::is_error_condition_enum<ErrorConditionEnum>::value
+    >
+  > explicit result (ErrorConditionEnum e) noexcept :
+    cnd { e }
+  { }
+
+  result (result const&) = default;
+  result (result&&) = default;
+  result () = default;
+
+  result& operator = (::std::error_condition const& ec) {
+    result { ec }.swap(*this);
+    return *this;
+  }
+
+  result& operator = (result const&) = default;
+  result& operator = (result&&) = default;
+
+  void swap (result& that) noexcept {
+    using ::std::swap;
+    swap(this->cnd, that.cnd);
+  }
+
+  explicit operator bool () const noexcept { return this->cnd; }
+
+  ::std::error_condition const& condition () const noexcept(false) {
+    if (*this) { throw bad_result_condition { "result<void> is valid" };
+    return this->cnd;
+  }
+
+private:
+  ::std::error_condition cnd;
+};
+
 /* comparison with optional<T> */
 template <class T>
 constexpr bool operator == (
