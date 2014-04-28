@@ -265,6 +265,110 @@ Expected Type
       |expected|. This will not negatively affect the use of placement new
       internally.
 
+   .. type:: value_type
+
+      Represents the given type *T*.
+
+   .. function:: explicit expected (std::exception_ptr) noexcept
+
+      Initializes the |expected| with the given exception_ptr. The |expected|
+      is then placed into an *invalid* state.
+
+   .. function:: explicit expected (value_type const&)
+                 explicit expected (value_type&&)
+
+      Initializes the |expected| with the given value. Afterwards, the
+      |expected| is in a *valid* state.
+
+   .. function:: expected (expected const&)
+                 expected (expected&&)
+
+      Initializes the |expected| base on the incoming |expected|'s valid state.
+      The state of the incoming |expected| does not change.
+
+   .. function:: expected ()
+
+      Default initializes the |expected| to be in a *valid* state. This
+      default constructs a :type:`expected\<T>::value_type` inside the
+      |expected|.
+
+   .. function:: expected& operator = (expected const&)
+                 expected& operator = (expected&&)
+
+      Assigns the content of the incoming |expected| to ``*this``.
+
+   .. function:: expected& operator = (value_type const&)
+                 expected& operator = (value_type&&)
+
+      Initializes the |expected| with the assigned value. If the |expected|
+      holds an exception_ptr, it is destructed, and the
+      :type:`expected\<T>::value_type` is initialized (*not assigned*) the
+      incoming value.
+
+   .. function:: void swap (expected& that)
+
+      :noexcept: ``std::is_nothrow_move_constructible<value_type`` and 
+                 ``core::is_nothrow_swappable<value_type>``.
+
+      If both |expected| are *valid*, then their values are swapped.
+      If both |expected| are *invalid*, then their exception_ptrs are swapped.
+
+      Otherwise, the *valid* and *invalid* state between both |expected| is
+      swapped and the *valid* object is moved into the *invalid* object, and
+      vice versa.
+
+   .. function:: operator bool () const noexcept
+
+      :returns: Whether the |expected| is *valid* or *invalid*.
+
+   .. function:: value_type const& operator * () const noexcept
+                 value_type& operator * () noexcept
+
+      :returns: The object managed by the |expected|. Accessing this object
+                when the |expected| is *invalid* will result in undefined
+                behavior.
+
+   .. function:: value_type const& value () const
+                 value_type& value ()
+
+      :returns: The object managed by |expected|
+      :throws: The exception managed by |expected| if the |expected|
+      :noexcept: ``false``
+
+   .. function:: value_type value_or (U&& value) const &
+                 value_type value_or (U&& value) &&
+
+      :returns: The object managed by |expected| if *valid*, otherwise, *value*
+      is returned. This function will not compile if *U* is not convertible
+      to :type:`expected\<T>::value_type`.
+
+   .. function:: E expect () const
+
+      :noexcept: ``false``
+
+      This function attempts to extract the given exception type *E*. If
+      |expected| is *valid*, :class:`bad_expected_type` is thrown. If
+      |expected| is *invalid*, but *E* is not the correct exception type,
+      ``std::nested_exception` with :class:`bad_expected_type` and the actual
+      exception are thrown. Otherwise, the exception is returned by value.
+
+   .. function:: void raise () const
+
+      :noexcept: ``false``
+      :attributes: ``[[noreturn]]``.
+
+      Throws the |expected|'s managed exception if *invalid*. Otherwise, throws
+      :class:`bad_expected_type`. This function *always* throws, and will never
+      return.
+
+   .. function:: std::exception_ptr pointer () const
+
+      This function will throw if |expected| is *invalid*.
+
+      :returns: The exception pointer managed by |expected|
+      :throws: :class:`bad_expected_type`
+      :noexcept: ``false``
+
 Result Type
 -----------
 
