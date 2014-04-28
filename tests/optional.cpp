@@ -636,7 +636,6 @@ int main () {
       core::expected<void> value { ptr };
       core::expected<void> move { std::move(value) };
 
-      assert::is_true(bool(value));
       assert::is_true(not move);
 
       assert::equal(move.pointer(), ptr);
@@ -676,7 +675,6 @@ int main () {
 
       move = std::move(value);
 
-      assert::is_true(bool(value));
       assert::is_true(not move);
 
       assert::equal(move.pointer(), ptr);
