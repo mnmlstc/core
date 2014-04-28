@@ -142,6 +142,10 @@ struct bad_expected_type : ::std::logic_error {
   using ::std::logic_error::logic_error;
 };
 
+struct bad_result_condition : ::std::logic_error {
+  using ::std::logic_error::logic_error;
+};
+
 template <class Type>
 struct optional final : private impl::storage<Type> {
   using base = impl::storage<Type>;
@@ -494,20 +498,14 @@ struct expected final {
   }
 
   expected& operator = (value_type const& value) {
-    if (not *this) {
-      this->ptr.~exception_ptr();
-      ::new (::std::addressof(this->val)) value_type { value };
-      this->valid = true;
-    } else { **this = value; }
+    if (not *this) { this->emplace(value); }
+    else { **this = value; }
     return *this;
   }
 
   expected& operator = (value_type&& value) {
-    if (not *this) {
-      this->ptr.~exception_ptr();
-      ::new (::std::addressof(this->val)) value_type { ::core::move(value) };
-      this->valid = true;
-    } else { **this = ::core::move(value); }
+    if (not *this) { this->emplace(::core::move(value)); }
+    else { **this = ::core::move(value); }
     return *this;
   }
 
@@ -529,12 +527,12 @@ struct expected final {
   ) {
     using ::std::swap;
 
-    if (not this->valid and not that.valid) {
+    if (not *this and not that) {
       swap(this->ptr, that.ptr);
       return;
     }
 
-    if (this->valid and that.valid) {
+    if (*this and that) {
       swap(this->val, that.val);
       return;
     }
@@ -559,7 +557,7 @@ struct expected final {
   template <class T, class... Args>
   void emplace (::std::initializer_list<T> il, Args&&... args) {
     this->reset();
-    ::new(::std::addressof(this->val)) value_type {
+    ::new (::std::addressof(this->val)) value_type {
       il,
       ::core::forward<Args>(args)...
     };
@@ -569,7 +567,7 @@ struct expected final {
   template <class... Args>
   void emplace (Args&&... args) {
     this->reset();
-    ::new(::std::addressof(this->val)) value_type {
+    ::new (::std::addressof(this->val)) value_type {
       ::core::forward<Args>(args)...
     };
     this->valid = true;
@@ -643,33 +641,292 @@ private:
   bool valid { false };
 };
 
+template <class Type>
+struct result final {
+  using value_type = Type;
+
+  static constexpr bool nothrow = ::std::is_nothrow_move_constructible<
+    value_type
+  >::value;
+
+  static_assert(
+    not ::std::is_error_condition_enum<value_type>::value,
+    "Cannot have result with an error condition enum as the value (ill-formed)"
+  );
+
+  static_assert(
+    not ::std::is_same<decay_t<value_type>, nullopt_t>::value,
+    "Cannot have result<nullopt_t> (ill-formed)"
+  );
+
+  static_assert(
+    not ::std::is_same<decay_t<value_type>, in_place_t>::value,
+    "Cannot have result<in_place_t> (ill-formed)"
+  );
+
+  static_assert(
+    ::std::is_object<value_type>::value,
+    "Cannot have result with non-object type (undefined behavior)"
+  );
+
+  static_assert(
+    ::std::is_nothrow_destructible<value_type>::value,
+    "Cannot have result with throwable destructor (undefined behavior)"
+  );
+
+  result (int val, ::std::error_category const& cat) noexcept :
+    cnd { val, cat }
+  { }
+
+  template <
+    class ErrorConditionEnum,
+    class=enable_if_t<
+      ::std::is_error_condition_enum<ErrorConditionEnum>::value
+    >
+  > explicit result (ErrorConditionEnum e) noexcept :
+    cnd { e }
+  { }
+
+  explicit result (value_type const& val) :
+    val { val },
+    valid { true }
+  { }
+
+  explicit result (value_type&& val) noexcept(nothrow) :
+    val { ::core::move(val) },
+    valid { true }
+  { }
+
+  template <
+    class... Args,
+    class=enable_if_t< ::std::is_constructible<value_type, Args...>::value>
+  > explicit result (in_place_t, Args&&... args) :
+    val { ::core::forward<Args>(args)... },
+    valid { true }
+  { }
+
+  template <
+    class T,
+    class... Args,
+    class=enable_if_t<
+      ::std::is_constructible<
+        value_type,
+        ::std::initializer_list<T>&,
+        Args...
+      >::value
+    >
+  > explicit result (
+    in_place_t,
+    ::std::initializer_list<T> il,
+    Args&&... args
+  ) : val { il, ::core::forward<Args>(args)... }, valid { true } { }
+
+  result (result const& that) :
+    valid { that.valid }
+  {
+    if (*this) { ::new (::std::addressof(this->val)) value_type { that.val }; }
+    else {
+      ::new (::std::addressof(this->cnd)) ::std::error_condition { that.cnd };
+    }
+  }
+
+  result (result&& that) :
+    valid { that.valid }
+  {
+    if (*this) {
+      ::new (::std::addressof(this->val)) value_type { ::core::move(that.val) };
+    } else {
+      ::new (::std::addressof(this->cnd)) ::std::error_condition { that.cnd };
+    }
+  }
+
+  result () :
+    val { },
+    valid { true }
+  { }
+
+  ~result () noexcept { this->reset(); }
+
+  result& operator = (result const& that) {
+    result { that }.swap(*this);
+    return *this;
+  }
+
+  result& operator = (result&& that) noexcept(
+    all_traits<
+      ::std::is_nothrow_move_assignable<value_type>,
+      ::std::is_nothrow_move_constructible<value_type>
+    >::value
+  ) {
+    result { ::core::move(that) }.swap(*this);
+    return *this;
+  }
+
+  template <
+    class T,
+    class=enable_if_t<
+      all_traits<
+        no_traits<
+          ::std::is_same<decay_t<T>, result>,
+          ::std::is_same<decay_t<T>, ::std::error_condition>
+        >,
+        ::std::is_constructible<value_type, T>,
+        ::std::is_assignable<value_type&, T>
+      >::value
+    >
+  > result& operator = (T&& value) {
+    if (not *this) { this->emplace(::core::forward<T>(value)); }
+    else { **this = ::core::forward<T>(value); }
+    return *this;
+  }
+
+  result& operator = (value_type const& value) {
+    if (not *this) { this->emplace(value); }
+    else { **this = value; }
+    return *this;
+  }
+
+  result& operator = (value_type&& value) {
+    if (not *this) { this->emplace(::core::move(value)); }
+    else { **this = ::core::move(value); }
+    return *this;
+  }
+
+  result& operator = (::std::error_condition const& cnd) {
+    if (not cnd) { return *this; }
+    if (not *this) { this->cnd = cnd; }
+    else {
+      this->reset();
+      ::new (::std::addressof(this->cnd)) ::std::error_condition { cnd };
+      this->valid = false;
+    }
+    return *this;
+  }
+
+  void swap (result& that) noexcept(
+    all_traits<
+      is_nothrow_swappable<value_type>,
+      ::std::is_nothrow_move_constructible<value_type>
+    >::value
+  ) {
+    using ::std::swap;
+    if (not *this and not that) {
+      swap(this->cnd, that.cnd);
+      return;
+    }
+
+    if (*this and that) {
+      swap(this->val, that.val);
+      return;
+    }
+
+    auto& to_invalidate = *this ? *this : that;
+    auto to_validate = *this ? that : *this;
+    auto cnd = to_validate.cnd;
+    to_validate.emplace(::core::move(*to_invalidate));
+    to_invalidate = cnd;
+  }
+
+  explicit operator bool () const noexcept { return this->valid; }
+
+  value_type const& operator * () const noexcept { return this->val; }
+  value_type& operator * () noexcept { return this->val; }
+
+  value_type const* operator -> () const noexcept {
+    return ::std::addressof(this->val);
+  }
+
+  value_type* operator -> () noexcept { return ::std::addressof(this->val); }
+
+  template <class T, class... Args>
+  void emplace (::std::initializer_list<T> il, Args&&... args) {
+    this->reset();
+    ::new (::std::addressof(this->val)) value_type {
+      il,
+      ::core::forward<Args>(args)...
+    };
+    this->valid = true;
+  }
+
+  template <class... Args>
+  void emplace (Args&&... args) {
+    this->reset();
+    ::new (::std::addressof(this->val)) value_type {
+      ::core::forward<Args>(args)...
+    };
+    this->valid = true;
+  }
+
+  value_type const& value () const noexcept(false) {
+    if (*this) { return **this; }
+    throw ::std::system_error { this->cnd.value(), this->cnd.category() };
+  }
+
+  value_type& value () noexcept(false) {
+    if (*this) { return **this; }
+   throw ::std::system_error { this->cnd.value(), this->cnd.category() };
+  }
+
+  template <
+    class T,
+    class=enable_if_t<
+      all_traits<
+        ::std::is_copy_constructible<value_type>,
+        ::std::is_convertible<T, value_type>
+      >::value
+    >
+  > value_type value_or (T&& val) const& {
+    return *this ? **this : static_cast<value_type>(::core::forward<T>(val));
+  }
+
+  template <
+    class T,
+    class=enable_if_t<
+      all_traits<
+        ::std::is_move_constructible<value_type>,
+        ::std::is_convertible<T, value_type>
+      >::value
+    >
+  > value_type value_or (T&& val) && {
+    return *this
+      ? value_type { ::core::move(**this) }
+      : static_cast<value_type>(::core::forward<T>(val));
+  }
+
+  ::std::error_condition condition () const noexcept(false) {
+    if (*this) { throw bad_result_condition { "result<T> is valid" }; }
+    return this->cnd;
+  }
+
+private:
+  void reset () {
+    *this ? this->val.~value_type() : this->cnd.~error_condition();
+  }
+
+  union {
+    value_type val;
+    ::std::error_condition cnd;
+  };
+  bool valid { false };
+};
+
 template <>
 struct expected<void> final {
   using value_type = void;
 
   explicit expected (::std::exception_ptr ptr) noexcept : ptr { ptr } { }
-  expected (expected const& that) noexcept : ptr { that.ptr } { }
-  expected (expected&& that) noexcept :
-    ptr { ::core::move(that.ptr) }
-  { }
-
-  expected () noexcept : ptr { nullptr } { }
-  ~expected () noexcept { }
+  expected (expected const&) = default;
+  expected (expected&&) = default;
+  expected () = default;
+  ~expected () = default;
 
   expected& operator = (::std::exception_ptr ptr) noexcept {
     expected { ptr }.swap(*this);
     return *this;
   }
 
-  expected& operator = (expected const& that) noexcept {
-    expected { that }.swap(*this);
-    return *this;
-  }
-
-  expected& operator = (expected&& that) noexcept {
-    expected { ::core::move(that) }.swap(*this);
-    return *this;
-  }
+  expected& operator = (expected const&) = default;
+  expected& operator = (expected&&) = default;
 
   void swap (expected& that) noexcept {
     using ::std::swap;
@@ -1032,6 +1289,11 @@ void swap (expected<T>& lhs, expected<T>& rhs) noexcept(
   noexcept(lhs.swap(rhs))
 ) { lhs.swap(rhs); }
 
+template <class T>
+void swap (result<T>& lhs, result<T>& rhs) noexcept (
+  noexcept(lhs.swap(rhs))
+) { lhs.swap(rhs); }
+
 }} /* namespace core::v1 */
 
 namespace std {
@@ -1040,6 +1302,16 @@ template <class Type>
 struct hash< ::core::v1::optional<Type>> {
   using result_type = typename hash<Type>::result_type;
   using argument_type = ::core::v1::optional<Type>;
+
+  result_type operator () (argument_type const& value) const noexcept {
+    return value ? hash<Type> { }(*value) : result_type { };
+  }
+};
+
+template <class Type>
+struct hash< ::core::v1::expected<Type>> {
+  using result_type = typename hash<Type>::result_type;
+  using argument_type = core::v1::expected<Type>;
 
   result_type operator () (argument_type const& value) const noexcept {
     return value ? hash<Type> { }(*value) : result_type { };
