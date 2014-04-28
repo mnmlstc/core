@@ -212,6 +212,8 @@ int main () {
       assert::equal(output[0], "1");
       assert::equal(output[1], "3");
 
+      value = { 2, 3 };
+
       core::transform_if(
         value,
         output,
@@ -221,7 +223,7 @@ int main () {
       );
 
       assert::equal(output2.size(), 1u);
-      assert::equal(output2[0], "31");
+      assert::equal(output2[0], "33");
     },
 
     task("remove") = [] {
