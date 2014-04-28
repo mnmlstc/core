@@ -582,7 +582,7 @@ struct expected final {
   }
 
   value_type& value () noexcept(false) {
-    if (*this) { ::std::rethrow_exception(this->ptr); }
+    if (not *this) { ::std::rethrow_exception(this->ptr); }
     return **this;
   }
 
