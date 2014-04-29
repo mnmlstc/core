@@ -1023,7 +1023,7 @@ private:
   ::std::error_condition cnd;
 };
 
-/* comparison with optional<T> */
+/* operator == */
 template <class T>
 constexpr bool operator == (
   optional<T> const& lhs,
@@ -1031,9 +1031,217 @@ constexpr bool operator == (
 ) noexcept {
   return static_cast<bool>(lhs) != static_cast<bool>(rhs)
     ? false
-    : (not lhs and not rhs) ? true : *lhs == *rhs;
+    : (not lhs and not rhs) or *lhs == *rhs;
 }
 
+template <class T>
+constexpr bool operator == (optional<T> const& lhs, nullopt_t) noexcept {
+  return not lhs;
+}
+
+template <class T>
+constexpr bool operator == (nullopt_t, optional<T> const& rhs) noexcept {
+  return not rhs;
+}
+
+template <class T>
+constexpr bool operator == (optional<T> const& opt, T const& value) noexcept {
+  return opt and *opt == value;
+}
+
+template <class T>
+constexpr bool operator == (T const& value, optional<T> const& opt) noexcept {
+  return opt and value == *opt;
+}
+
+template <class T>
+bool operator == (expected<T> const& lhs, expected<T> const& rhs) noexcept {
+  if (lhs and rhs) { return *lhs == *rhs; }
+  return not lhs and not rhs;
+}
+
+template <class T>
+bool operator == (expected<T> const& lhs, ::std::exception_ptr) noexcept {
+  return not lhs;
+}
+
+template <class T>
+bool operator == (::std::exception_ptr, expected<T> const& rhs) noexcept {
+  return not rhs;
+}
+
+template <class T>
+bool operator == (expected<T> const& lhs, T const& rhs) noexcept {
+  return lhs and *lhs == rhs;
+}
+
+template <class T>
+bool operator == (T const& lhs, expected<T> const& rhs) noexcept {
+  return rhs and lhs == *rhs;
+}
+
+template <class T>
+bool operator == (result<T> const& lhs, result<T> const& rhs) noexcept {
+  if (lhs and rhs) { return *lhs == *rhs; }
+  if (not lhs and not rhs) { return lhs.condition() == rhs.condition(); }
+  return false;
+}
+
+template <class T>
+bool operator == (
+  result<T> const& lhs,
+  ::std::error_condition const& rhs
+) noexcept {
+  if (not lhs and rhs) { return lhs.condition() == rhs; }
+  return bool(lhs);
+}
+
+template <class T>
+bool operator == (
+  ::std::error_condition const& lhs,
+  result<T> const& rhs
+) noexcept {
+  if (lhs and not rhs) { return lhs == rhs.condition(); }
+  return bool(rhs);
+}
+
+template <class T>
+bool operator == (result<T> const& lhs, ::std::error_code const& rhs) noexcept {
+  if (not lhs and rhs) { return lhs.condition() == rhs; }
+  return bool(lhs);
+}
+
+template <class T>
+bool operator == (
+  ::std::error_code const& lhs,
+  result<T> const& rhs
+) noexcept {
+  if (lhs and not rhs) { return lhs == rhs.condition(); }
+  return bool(rhs);
+}
+
+template <class T>
+bool operator == (result<T> const& res, T const& value) noexcept {
+  return res and *res == value;
+}
+
+template <class T>
+bool operator == (T const& value, result<T> const& res) noexcept {
+  return res and value == *res;
+}
+
+/* void specializations */
+template <>
+inline bool operator == <void> (
+  expected<void> const& lhs,
+  expected<void> const& rhs
+) noexcept {
+  if (not lhs and not rhs) { return lhs.pointer() == rhs.pointer(); }
+  return lhs and rhs;
+}
+
+template <>
+inline bool operator == <void> (
+  result<void> const& lhs,
+  result<void> const& rhs
+) noexcept {
+  if (not lhs and not rhs) { return lhs.condition() == rhs.condition(); }
+  return lhs and rhs;
+}
+
+/* operator < */
+template <class T>
+constexpr bool operator < (
+  optional<T> const& lhs,
+  optional<T> const& rhs
+) noexcept {
+  return static_cast<bool>(rhs) == false ? false : not lhs or *lhs < *rhs;
+}
+
+template <class T>
+constexpr bool operator < (optional<T> const& lhs, nullopt_t) noexcept {
+  return not lhs;
+}
+
+template <class T>
+constexpr bool operator < (nullopt_t, optional<T> const& rhs) noexcept {
+  return static_cast<bool>(rhs);
+}
+
+template <class T>
+constexpr bool operator < (optional<T> const& opt, T const& value) noexcept {
+  return not opt or *opt < value;
+}
+
+template <class T>
+constexpr bool operator < (T const& value, optional<T> const& opt) noexcept {
+  return opt and value < *opt;
+}
+
+template <class T>
+bool operator < (expected<T> const& lhs, expected<T> const& rhs) noexcept {
+  if (not rhs) { return false; }
+  return not lhs or *lhs < *rhs;
+}
+
+template <class T>
+bool operator < (expected<T> const& lhs, ::std::exception_ptr) noexcept {
+  return not lhs;
+}
+
+template <class T>
+bool operator < (::std::exception_ptr, expected<T> const& rhs) noexcept {
+  return static_cast<bool>(rhs);
+}
+
+template <class T>
+bool operator < (expected<T> const& exp, T const& value) noexcept {
+  return not exp or *exp < value;
+}
+
+template <class T>
+bool operator < (T const& value, expected<T> const& exp) noexcept {
+  return exp and value < *exp;
+}
+
+template <class T>
+bool operator < (result<T> const& lhs, result<T> const& rhs) noexcept {
+  if (not rhs and not lhs) { return lhs.condition() < rhs.condition(); }
+  if (lhs and rhs) { return *lhs < *rhs; }
+  return static_cast<bool>(rhs);
+}
+
+template <class T>
+bool operator < (
+  result<T> const& lhs,
+  ::std::error_condition const& rhs
+) noexcept { return not lhs and lhs.condition() < rhs; }
+
+template <class T>
+bool operator < (
+  ::std::error_condition const& lhs,
+  result<T> const& rhs
+) noexcept { return rhs or lhs < rhs.condition(); }
+template <>
+inline bool operator < <void> (
+  result<void> const& lhs,
+  result<void> const& rhs
+) noexcept {
+  if (not lhs and not rhs) { return lhs.condition() < rhs.condition(); }
+  return static_cast<bool>(rhs);
+}
+
+template <class T>
+bool operator < (result<T> const& res, T const& value) noexcept {
+  return not res or *res < value;
+}
+
+template <class T>
+bool operator < (T const& value, result<T> const& res) noexcept {
+  return res and value < *res;
+}
+
+/* operator != */
 template <class T>
 constexpr bool operator != (
   optional<T> const& lhs,
@@ -1041,39 +1249,23 @@ constexpr bool operator != (
 ) noexcept { return not (lhs == rhs); }
 
 template <class T>
-constexpr bool operator >= (
-  optional<T> const& lhs,
-  optional<T> const& rhs
-) noexcept { return not (lhs < rhs); }
-
-template <class T>
-constexpr bool operator <= (
-  optional<T> const& lhs,
-  optional<T> const& rhs
-) noexcept { return not (rhs < lhs); }
-
-template <class T>
-constexpr bool operator > (
-  optional<T> const& lhs,
-  optional<T> const& rhs
-) noexcept { return rhs < lhs; }
-
-template <class T>
-constexpr bool operator < (
-  optional<T> const& lhs,
-  optional<T> const& rhs
-) noexcept {
-  return static_cast<bool>(rhs) == false
-    ? false
-    : static_cast<bool>(lhs) == false ? true : *lhs < *rhs;
+constexpr bool operator != (optional<T> const& lhs, nullopt_t) noexcept {
+  return not (lhs == nullopt);
 }
 
-/* comparison with expected<T> */
 template <class T>
-bool operator == (expected<T> const& lhs, expected<T> const& rhs) noexcept {
-  if (lhs and rhs) { return *lhs == *rhs; }
-  if (not lhs and not rhs) { return lhs.pointer() == rhs.pointer(); }
-  return false;
+constexpr bool operator != (nullopt_t, optional<T> const& rhs) noexcept {
+  return not (nullopt == rhs);
+}
+
+template <class T>
+constexpr bool operator != (optional<T> const& opt, T const& value) noexcept {
+  return not (opt == value);
+}
+
+template <class T>
+constexpr bool operator != (T const& value, optional<T> const& opt) noexcept {
+  return not (value == opt);
 }
 
 template <class T>
@@ -1082,110 +1274,8 @@ bool operator != (expected<T> const& lhs, expected<T> const& rhs) noexcept {
 }
 
 template <class T>
-bool operator >= (expected<T> const& lhs, expected<T> const& rhs) noexcept {
-  return not (lhs < rhs);
-}
-
-template <class T>
-bool operator <= (expected<T> const& lhs, expected<T> const& rhs) noexcept {
-  return not (rhs < lhs);
-}
-
-template <class T>
-bool operator > (expected<T> const& lhs, expected<T> const& rhs) noexcept {
-  return rhs < lhs;
-}
-
-template <class T>
-bool operator < (expected<T> const& lhs, expected<T> const& rhs) noexcept {
-  if (not rhs) { return false; }
-  if (not lhs) { return true; }
-  return *lhs < *rhs;
-}
-
-template <>
-inline bool operator == <void>(
-  expected<void> const& lhs,
-  expected<void> const& rhs
-) noexcept { return bool(lhs) == bool(rhs); }
-
-/* comparison of optional<T> with nullopt */
-template <class T>
-constexpr bool operator == (optional<T> const& lhs, nullopt_t) noexcept {
-  return not lhs;
-}
-
-template <class T>
-constexpr bool operator != (optional<T> const& lhs, nullopt_t) noexcept {
-  return static_cast<bool>(lhs);
-}
-
-template <class T>
-constexpr bool operator >= (optional<T> const&, nullopt_t) noexcept {
-  return true;
-}
-
-template <class T>
-constexpr bool operator <= (optional<T> const& lhs, nullopt_t) noexcept {
-  return not lhs;
-}
-
-template <class T>
-constexpr bool operator > (optional<T> const& lhs, nullopt_t) noexcept {
-  return static_cast<bool>(lhs);
-}
-
-template <class T>
-constexpr bool operator < (optional<T> const& lhs, nullopt_t) noexcept {
-  return not lhs;
-}
-
-/* comparison of nullopt with optional<T> */
-template <class T>
-constexpr bool operator == (nullopt_t, optional<T> const& rhs) noexcept {
-  return not rhs;
-}
-
-template <class T>
-constexpr bool operator != (nullopt_t, optional<T> const& rhs) noexcept {
-  return static_cast<bool>(rhs);
-}
-
-template <class T>
-constexpr bool operator >= (nullopt_t, optional<T> const& rhs) noexcept {
-  return not rhs;
-}
-
-template <class T>
-constexpr bool operator <= (nullopt_t, optional<T> const&) noexcept {
-  return true;
-}
-
-template <class T>
-constexpr bool operator > (nullopt_t, optional<T> const&) noexcept {
-  return false;
-}
-
-template <class T>
-constexpr bool operator < (nullopt_t, optional<T> const& rhs) noexcept {
-  return static_cast<bool>(rhs);
-}
-
-/* comparison of expected<T> with std::exception_ptr */
-template <class T>
-bool operator == (expected<T> const& lhs, ::std::exception_ptr rhs) noexcept {
-  return not lhs and lhs.pointer() == rhs;
-}
-
-template <class T>
 bool operator != (expected<T> const& lhs, ::std::exception_ptr rhs) noexcept {
   return not (lhs == rhs);
-}
-
-/* comparison of std::exception_ptr with expected<T> */
-template <class T>
-bool operator == (::std::exception_ptr lhs, expected<T> const& rhs) noexcept {
-  return not rhs and lhs == rhs.pointer();
 }
 
 template <class T>
@@ -1193,103 +1283,9 @@ bool operator != (::std::exception_ptr lhs, expected<T> const& rhs) noexcept {
   return not (lhs == rhs);
 }
 
-/* comparison of optional<T> with T */
-template <class T>
-constexpr bool operator == (optional<T> const& opt, T const& value) noexcept {
-  return opt ? *opt == value : false;
-}
-
-template <class T>
-constexpr bool operator != (optional<T> const& opt, T const& value) noexcept {
-  return opt ? not (*opt == value) : true;
-}
-
-template <class T>
-constexpr bool operator >= (optional<T> const& opt, T const& value) noexcept {
-  return not (opt < value);
-}
-
-template <class T>
-constexpr bool operator <= (optional<T> const& opt, T const& value) noexcept {
-  return not (opt > value);
-}
-
-template <class T>
-constexpr bool operator > (optional<T> const& opt, T const& value) noexcept {
-  return opt ? value < *opt : false;
-}
-
-template <class T>
-constexpr bool operator < (optional<T> const& opt, T const& value) noexcept {
-  return opt ? *opt < value : true;
-}
-
-/* comparison of expected<T> with T */
-template <class T>
-bool operator == (expected<T> const& exp, T const& value) noexcept {
-  return exp ? *exp == value : false;
-}
-
 template <class T>
 bool operator != (expected<T> const& exp, T const& value) noexcept {
-  return not (*exp == value);
-}
-
-template <class T>
-bool operator >= (expected<T> const& exp, T const& value) noexcept {
-  return not (exp < value);
-}
-
-template <class T>
-bool operator <= (expected<T> const& exp, T const& value) noexcept {
-  return not (exp > value);
-}
-
-template <class T>
-bool operator > (expected<T> const& exp, T const& value) noexcept {
-  return exp ? value < *exp : true;
-}
-
-template <class T>
-bool operator < (expected<T> const& exp, T const& value) noexcept {
-  return exp ? *exp < value : false;
-}
-
-/* comparison of T with optional<T> */
-template <class T>
-constexpr bool operator == (T const& value, optional<T> const& opt) noexcept {
-  return opt ? value == *opt : false;
-}
-
-template <class T>
-constexpr bool operator != (T const& value, optional<T> const& opt) noexcept {
-  return opt ? not (value == *opt) : true;
-}
-
-template <class T>
-constexpr bool operator >= (T const& value, optional<T> const& opt) noexcept {
-  return not (value < opt);
-}
-
-template <class T>
-constexpr bool operator <= (T const& value, optional<T> const& opt) noexcept {
-  return not (value > opt);
-}
-
-template <class T>
-constexpr bool operator > (T const& value, optional<T> const& opt) noexcept {
-  return opt ? *opt < value : true;
-}
-
-template <class T>
-constexpr bool operator < (T const& value, optional<T> const& opt) noexcept {
-  return opt ? value < *opt : false;
-}
-
-/* comparison of T with expected<T> */
-template <class T>
-bool operator == (T const& value, expected<T> const& exp) noexcept {
-  return exp ? value == *exp : false;
+  return not (exp == value);
 }
 
 template <class T>
@@ -1298,23 +1294,287 @@ bool operator != (T const& value, expected<T> const& exp) noexcept {
 }
 
 template <class T>
+bool operator != (result<T> const& lhs, result<T> const& rhs) noexcept {
+  return not (lhs == rhs);
+}
+
+template <class T>
+bool operator != (
+  result<T> const& lhs,
+  ::std::error_condition const& rhs
+) noexcept { return not (lhs == rhs); }
+
+template <class T>
+bool operator != (
+  ::std::error_condition const& lhs,
+  result<T> const& rhs
+) noexcept { return not (lhs == rhs); }
+
+template <class T>
+bool operator != (
+  result<T> const& lhs,
+  ::std::error_code const& rhs
+) noexcept { return not (lhs == rhs); }
+
+template <class T>
+bool operator != (
+  ::std::error_code const& lhs,
+  result<T> const& rhs
+) noexcept { return not (lhs == rhs); }
+
+template <class T>
+bool operator != (result<T> const& res, T const& value) noexcept {
+  return not (res == value);
+}
+
+template <class T>
+bool operator != (T const& value, result<T> const& res) noexcept {
+  return not (value == res);
+}
+
+template <>
+inline bool operator != <void> (
+  expected<void> const& lhs,
+  expected<void> const& rhs
+) noexcept { return not (lhs == rhs); }
+
+template <>
+inline bool operator != <void> (
+  result<void> const& lhs,
+  result<void> const& rhs
+) noexcept { return not (lhs == rhs); }
+
+/* optional<T> operator >= */
+template <class T>
+constexpr bool operator >= (
+  optional<T> const& lhs,
+  optional<T> const& rhs
+) noexcept { return not (lhs < rhs); }
+
+template <class T>
+constexpr bool operator >= (optional<T> const&, nullopt_t) noexcept {
+  return true;
+}
+
+template <class T>
+constexpr bool operator >= (nullopt_t, optional<T> const& opt) noexcept {
+  return opt < nullopt;
+}
+
+template <class T>
+constexpr bool operator >= (optional<T> const& opt, T const& value) noexcept {
+  return not (opt < value);
+}
+
+template <class T>
+constexpr bool operator >= (T const& value, optional<T> const& opt) noexcept {
+  return not (value < opt);
+}
+
+template <class T>
+bool operator >= (expected<T> const& lhs, expected<T> const& rhs) noexcept {
+  return not (lhs < rhs);
+}
+
+template <class T>
+bool operator >= (expected<T> const&, ::std::exception_ptr) noexcept {
+  return true;
+}
+
+template <class T>
+bool operator >= (::std::exception_ptr ptr, expected<T> const& exp) noexcept {
+  return exp < ptr;
+}
+
+template <class T>
+bool operator >= (expected<T> const& exp, T const& value) noexcept {
+  return not (exp < value);
+}
+
+template <class T>
 bool operator >= (T const& value, expected<T> const& exp) noexcept {
   return not (value < exp);
 }
 
 template <class T>
+bool operator >= (result<T> const& lhs, result<T> const& rhs) noexcept {
+  return not (lhs < rhs);
+}
+
+template <class T>
+bool operator >= (
+  result<T> const& lhs,
+  ::std::error_condition const& rhs
+) noexcept { return not (lhs < rhs); }
+
+template <class T>
+bool operator >= (
+  ::std::error_condition const& lhs,
+  result<T> const& rhs
+) noexcept { return not (lhs < rhs); }
+
+template <class T>
+bool operator >= (result<T> const& res, T const& value) noexcept {
+  return not (res < value);
+}
+
+template <class T>
+bool operator >= (T const& value, result<T> const& res) noexcept {
+  return not (value < res);
+}
+
+template <>
+inline bool operator >= <void> (
+  result<void> const& lhs,
+  result<void> const& rhs
+) noexcept { return not (lhs < rhs); }
+
+/* operator <= */
+template <class T>
+constexpr bool operator <= (
+  optional<T> const& lhs,
+  optional<T> const& rhs
+) noexcept { return not (rhs < lhs); }
+
+template <class T>
+constexpr bool operator <= (optional<T> const& lhs, nullopt_t) noexcept {
+  return not lhs;
+}
+
+template <class T>
+constexpr bool operator <= (nullopt_t, optional<T> const& opt) noexcept {
+  return true;
+}
+
+template <class T>
+constexpr bool operator <= (optional<T> const& opt, T const& value) noexcept {
+  return not (opt > value);
+}
+
+template <class T>
+constexpr bool operator <= (T const& value, optional<T> const& opt) noexcept {
+  return not (value > opt);
+}
+
+template <class T>
+bool operator <= (expected<T> const& lhs, expected<T> const& rhs) noexcept {
+  return not (rhs < lhs);
+}
+
+template <class T>
+bool operator <= (expected<T> const& lhs, ::std::exception_ptr) noexcept {
+  return not lhs;
+}
+
+template <class T>
+bool operator <= (::std::exception_ptr, expected<T> const&) noexcept {
+  return true;
+}
+
+template <class T>
+bool operator <= (expected<T> const& exp, T const& value) noexcept {
+  return not (value < exp);
+}
+
+template <class T>
 bool operator <= (T const& value, expected<T> const& exp) noexcept {
-  return not (value > exp);
+  return not (exp < value);
+}
+
+template <class T>
+bool operator <= (result<T> const& lhs, result<T> const& rhs) noexcept {
+  return not (rhs < lhs);
+}
+
+template <class T>
+bool operator <= (
+  result<T> const& lhs,
+  ::std::error_condition const& rhs
+) noexcept { return not (rhs < lhs); }
+
+template <class T>
+bool operator <= (
+  ::std::error_condition const& lhs,
+  result<T> const& rhs
+) noexcept { return not (rhs < lhs); }
+
+template <class T>
+bool operator <= (result<T> const& res, T const& value) noexcept {
+  return not (value < res);
+}
+
+template <class T>
+bool operator <= (T const& value, result<T> const& res) noexcept {
+  return not (res < value);
+}
+
+/* operator > */
+template <class T>
+constexpr bool operator > (
+  optional<T> const& lhs,
+  optional<T> const& rhs
+) noexcept { return rhs < lhs; }
+
+template <class T>
+constexpr bool operator > (optional<T> const& lhs, nullopt_t) noexcept {
+  return static_cast<bool>(lhs);
+}
+
+template <class T>
+constexpr bool operator > (nullopt_t, optional<T> const&) noexcept {
+  return false;
+}
+
+template <class T>
+constexpr bool operator > (optional<T> const& opt, T const& value) noexcept {
+  return value < opt;
+}
+
+template <class T>
+constexpr bool operator > (T const& value, optional<T> const& opt) noexcept {
+  return opt < value;
+}
+
+template <class T>
+bool operator > (expected<T> const& lhs, expected<T> const& rhs) noexcept {
+  return rhs < lhs;
+}
+
+template <class T>
+bool operator > (expected<T> const& exp, T const& value) noexcept {
+  return value < exp;
 }
 
 template <class T>
 bool operator > (T const& value, expected<T> const& exp) noexcept {
-  return exp ? *exp < value : true;
+  return exp < value;
 }
 
 template <class T>
-bool operator < (T const& value, expected<T> const& exp) noexcept {
-  return exp ? value < *exp : false;
+bool operator > (result<T> const& lhs, result<T> const& rhs) noexcept {
+  return rhs < lhs;
+}
+
+template <class T>
+bool operator > (
+  result<T> const& lhs,
+  ::std::error_condition const& rhs
+) noexcept { return rhs < lhs; }
+
+template <class T>
+bool operator > (
+  ::std::error_condition const& lhs,
+  result<T> const& rhs
+) noexcept { return rhs < lhs; }
+
+template <class T>
+bool operator > (result<T> const& res, T const& value) noexcept {
+  return value < res;
+}
+
+template <class T>
+bool operator > (T const& value, result<T> const& res) noexcept {
+  return res < value;
 }
 
 /* make_ functions */
@@ -1342,6 +1602,16 @@ auto make_expected (U&& value) -> enable_if_t<
 template <class T>
 auto make_expected (::std::exception_ptr error) -> expected<T> {
   return expected<T> { error };
+}
+
+template <class T>
+auto make_result (::std::error_condition const& e) -> result<T> {
+  return result<T> { e };
+}
+
+template <class T>
+auto make_result (T&& value) -> result<decay_t<T>> {
+  return result<T> { ::core::forward<T>(value) };
 }
 
 template <class T>

@@ -428,6 +428,7 @@ Operators
               bool operator < (optional<T> const&, nullopt_t) noexcept
               bool operator < (nullopt_t, optional<T> const&) noexcept
               bool operator < (optional<T> const&, T const&) noexcept
+              bool operator < (T const&, optional<T> const&) noexcept
 
    For the first overload, if the right |optional| is *disengaged*, it will
    return false. If the left |optional| is *disengaged*, it will return true.
@@ -436,10 +437,11 @@ Operators
    The second overload returns true if the |optional| is *disengaged*.
    The third overload returns true if the |optional| is *engaged*.
    The fourth optional returns true if the |optional| is *disengaged*.
+   The fifth optional returns false if the |optional| is *disengaged*.
    Otherwise the result ``*opt < value`` or ``value < *opt`` is returned.
 
-.. note:: The rest of the relational operators for |optional| are implemented
-   in terms of ``operator ==`` and ``operator <``.
+.. note:: The rest of the relational operators for |optional| are (mostly)
+   implemented in terms of ``operator ==`` and ``operator <``.
 
 .. function:: bool operator == (expected const&, expected const&) noexcept
               bool operator == (expected const&, exception_ptr) noexcept
@@ -449,16 +451,11 @@ Operators
 
    For the first overload if only one of the |expected| values is *valid*,
    it will return ``false``. If both |expected| values are *invalid*, it will
-   return the comparison of their managed ``std::exception_ptr``. Otherwise,
-   the |expected| values compare their managed objects with ``operator ==``.
+   return ``true`` Otherwise, the |expected| values compare their managed
+   objects with ``operator ==``.
 
-   The second overload returns ``true`` only if the |expected| value is
-   *invalid* and its ``std::exception_ptr`` compares equal with the
-   ``std::exception_ptr`` on the right.
-
-   The third overload returns ``true`` only if the |expected| value is
-   *invalid* and its ``std::exception_ptr`` compares equal with the
-   ``std::exception_ptr`` on the left.
+   The second and third overload return ``true`` if the |expected| value is
+   *invalid*.
 
    The fourth and fifth overload returns ``true`` only if the |expected| value
    is *valid* and its managed object compares equal wth the *T* via *T*'s
@@ -472,21 +469,14 @@ Operators
 
    For the first overload, if the right |expected| is *invalid*, it will
    return ``false``. If the left |expected| is *invalid* it will return
-   ``true``.
+   ``true``. If both |expected| objects are *valid*, then their managed values
+   are compared via ``operator <``.
 
-   The second overload returns ``true`` if the |expected| is *invalid*,
-   **unless** the ``std::exception_ptr`` on the right is equal to ``nullptr``.
-
-   The third overload returns ``true`` if the |expected| is *valid*, or if
-   the ``std::exception_ptr`` on the left is equal to ``nullptr``.
-
-   The fourth overload will return ``true`` if the |expected| is *invalid*.
-   If the |expected| is *valid*, the result of comparing its managed object with
-   *T* via ``operator <`` is returned.
-
-   The fifth overload will return ``false`` if the |expected| is *invalid*.
-   If the |expected| is *valid*, the result of comparing its managed object
-   with *T* via ``operator <`` is returned.
+   The second overload returns ``true`` if the |expected| is *invalid*.
+   The third overload returns ``true`` if the |expected| is *valid*.
+   The fourth overload returns ``true`` if the |expected| is *invalid*.
+   The fifth overload returns ``false`` if the |expected| is *invalid*.
+   Otherwise the result of ``*exp < value`` or ``value < *exp`` is returned.
 
 .. note:: The rest of the relational operators for |expected| are implemented
    in terms of ``operator ==`` and ``operator <``.
