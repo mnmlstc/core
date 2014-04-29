@@ -518,7 +518,7 @@ int main () {
       assert::equal(*nothrow, 51);
     },
 
-    task("equality-comparable") = [] {
+    task("operator-equal") = [] {
       core::expected<int> lhs { 5 };
       core::expected<int> rhs { 6 };
 
@@ -530,7 +530,24 @@ int main () {
       assert::equal(core::expected<int> { 6 }, rhs);
     },
 
-    task("less-than-comparable") = [] {
+    task("operator-not-equal") = [] {
+      core::expected<int> lhs { 5 };
+      core::expected<int> rhs { 6 };
+
+      core::expected<int> invalid { ::std::exception_ptr { } };
+
+      assert::is_true(bool(lhs));
+      assert::is_true(bool(rhs));
+      assert::not_equal(lhs, rhs);
+      assert::not_equal(lhs, invalid);
+      assert::not_equal(invalid, rhs);
+    },
+
+    task("operator-greater-equal") = [] { assert::fail(); },
+    task("operator-less-equal") = [] { assert::fail(); },
+    task("operator-greater") = [] { assert::fail(); },
+
+    task("operator-less") = [] {
       core::expected<int> lhs { 5 };
       core::expected<int> rhs { 6 };
 

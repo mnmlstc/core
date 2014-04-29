@@ -1442,7 +1442,7 @@ constexpr bool operator <= (optional<T> const& lhs, nullopt_t) noexcept {
 }
 
 template <class T>
-constexpr bool operator <= (nullopt_t, optional<T> const& opt) noexcept {
+constexpr bool operator <= (nullopt_t, optional<T> const&) noexcept {
   return true;
 }
 
