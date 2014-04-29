@@ -339,8 +339,8 @@ Expected Type
                  value_type value_or (U&& value) &&
 
       :returns: The object managed by |expected| if *valid*, otherwise, *value*
-      is returned. This function will not compile if *U* is not convertible
-      to :type:`expected\<T>::value_type`.
+                is returned. This function will not compile if *U* is not
+                convertible to :type:`expected\<T>::value_type`.
 
    .. function:: E expect () const
 
@@ -349,7 +349,7 @@ Expected Type
       This function attempts to extract the given exception type *E*. If
       |expected| is *valid*, :class:`bad_expected_type` is thrown. If
       |expected| is *invalid*, but *E* is not the correct exception type,
-      ``std::nested_exception` with :class:`bad_expected_type` and the actual
+      ``std::nested_exception`` with :class:`bad_expected_type` and the actual
       exception are thrown. Otherwise, the exception is returned by value.
 
    .. function:: void raise () const
@@ -379,26 +379,6 @@ Result Type
    nice rounding out for functions which may want to signal an error, but not
    require the 'output' value to be passed by reference or by pointer.
 
-.. class:: expected<void>
-
-   |expected-v| is provided as a way to have the same semantics as |expected|,
-   but for functions that do not (or cannot) return a value. Its interface
-   is close to that of |expected|, however as it cannot store a value, it is
-   smaller and only has member functions related to handling the exception
-   stored within the |expected-v|.
-
-.. class:: result<void>
-
-   |result-v| is provided as a way to have the same semantics as |result|,
-   but for functions that do not (or cannot) return a value. Its interface
-   is close to that of |result|, however as it cannot store an object, it is
-   smaller and only has member functions related to handling error conditions.
-
-   Technically speaking, this type is unnecessary as an error_condition can be
-   supplied instead. However, it's sometimes nice to allow for more generic
-   code to be written, and worrying about whether or not you might accidentally
-   instantiate a |result-v| isn't something one should have to worry about.
-
 .. function:: optional<T> make_optional<T>(T&& value)
 
    :raises: Any exceptions thrown by the constructor of T
@@ -409,6 +389,17 @@ Result Type
 
    Due to a bug in Apple Clang-503.0.40, this function is *not* marked
    constexpr, and this causes an incompatibility with N3793_.
+
+.. function:: expected<T> make_expected (T&& value)
+              expected<T> make_expected (E&& exception)
+              expected<T> make_expected (std::exception_ptr)
+
+   The first overload returns a *valid* |expected| containing a T constructed
+   with *value*. The second overload returns an *invalid* |expected| with
+   an exception_ptr to *exception*. For this version to be usable, *E* must
+   inherit from ``std::exception``. The third overload takes an exception
+   pointer and returns an *invalid* |expected| from it.
+
 
 .. function:: bool operator == (optional const&, optional const&) noexcept
               bool operator == (optional const&, nullopt_t) noexcept
@@ -447,11 +438,99 @@ Result Type
 Specializations
 ---------------
 
+.. class:: expected<void>
+
+   |expected-v| is provided as a way to have the same semantics as |expected|,
+   but for functions that do not (or cannot) return a value. Its interface
+   is close to that of |expected|, however as it cannot store a value, it is
+   smaller and only has member functions related to handling the exception
+   stored within the |expected-v|.
+
+   .. type:: value_type
+
+      Always ``void``.
+
+   .. function:: explicit expected (std::exception_ptr) noexcept
+
+      Initializes (and invalidates) the |expected-v|.
+
+   .. function:: expected (expected const&) = default
+                 expected (expected&&) = default
+
+      Copies the exception_ptr stored within the |expected-v|. Invalidates
+      ``*this``.
+
+   .. function:: expected& operator = (expected const&) = default
+                 expected& operator = (expected&&) = default
+
+      Copies the exception_ptr stored within the |expected-v|. Invalidates
+      ``*this``.
+
+   .. function:: void swap (expected&) noexcept
+
+      Swaps the |expected-v|'s exception_ptrs.
+
+   .. function:: explicit operator bool () const noexcept
+
+      :returns: Whether the |expected-v| is *valid* or *invalid*.
+
+   .. function:: E expect<E> () const
+
+      See :func:`expected\<T>::expect\<E>`
+
+   .. function:: void raise () const
+
+      See :func:`expected\<T>::raise`
+
+   .. function:: std::exception_ptr pointer () const
+
+      :returns: The managed exception_ptr if the |expected-v| is *invalid*.
+      :throws: :class:`bad_expected_type` if the |expected-v| is *valid*.
+      :noexcept: ``false``.
+
+      Returns the 
+
+
+.. class:: result<void>
+
+   |result-v| is provided as a way to have the same semantics as |result|,
+   but for functions that do not (or cannot) return a value. Its interface
+   is close to that of |result|, however as it cannot store an object, it is
+   smaller and only has member functions related to handling error conditions.
+
+   Technically speaking, this type is unnecessary as an error_condition can be
+   supplied instead. However, it's sometimes nice to allow for more generic
+   code to be written, and worrying about whether or not you might accidentally
+   instantiate a |result-v| isn't something one should have to worry about.
+
+std::hash
+^^^^^^^^^
+
 .. class:: hash<optional<T>>
+
+   Specialization of ``std::hash``.
 
    Requires that the :type:`optional\<T>::value_type` be specialized for
    ``std::hash``. If the |optional| is engaged it will return the hash
    value for ``hash<value_type>``. Otherwise, it will return a default
    constructed ``std::hash<value_type>::result_type``.
+
+.. class:: hash<expected<T>>
+
+   Specialization of ``std::hash``.
+
+   Requests that the :type:`expected\<T>::value_type` be specialized for
+   ``std::hash``. If the |expected| is *valid*, it will return the hash value
+   for ``hash<value_type>``. Otherwise, it will return a default constructed
+   ``std::hash<value_type>::result_type``.
+
+.. class:: hash<result<T>>
+
+   Specialization of ``std::hash``.
+
+   Requests that the :type:`result\<T>::value_type` be specialized for
+   ``std::hash``. If the |result| is *valid*, it will return the hash value for
+   ``hash<value_type>``. Otherwise, it will return a default constructed
+   ``std::hash<value_type>::result_type``.
 
 .. _N3793: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2013/n3793.html

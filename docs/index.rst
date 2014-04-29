@@ -18,7 +18,6 @@ rather than by feature.
    functional
    algorithm
    iterator
-   expected
    optional
    numeric
    variant
