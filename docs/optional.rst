@@ -379,6 +379,9 @@ Result Type
    nice rounding out for functions which may want to signal an error, but not
    require the 'output' value to be passed by reference or by pointer.
 
+Functions
+---------
+
 .. function:: optional<T> make_optional<T>(T&& value)
 
    :raises: Any exceptions thrown by the constructor of T
@@ -400,6 +403,9 @@ Result Type
    inherit from ``std::exception``. The third overload takes an exception
    pointer and returns an *invalid* |expected| from it.
 
+
+Operators
+^^^^^^^^^
 
 .. function:: bool operator == (optional const&, optional const&) noexcept
               bool operator == (optional const&, nullopt_t) noexcept
@@ -433,6 +439,114 @@ Result Type
    Otherwise the result ``*opt < value`` or ``value < *opt`` is returned.
 
 .. note:: The rest of the relational operators for |optional| are implemented
+   in terms of ``operator ==`` and ``operator <``.
+
+.. function:: bool operator == (expected const&, expected const&) noexcept
+              bool operator == (expected const&, exception_ptr) noexcept
+              bool operator == (exception_ptr, expected const&) noexcept
+              bool operator == (expected const&, T const&) noexcept
+              bool operator == (T const&, expected const&) noexcept
+
+   For the first overload if only one of the |expected| values is *valid*,
+   it will return ``false``. If both |expected| values are *invalid*, it will
+   return the comparison of their managed ``std::exception_ptr``. Otherwise,
+   the |expected| values compare their managed objects with ``operator ==``.
+
+   The second overload returns ``true`` only if the |expected| value is
+   *invalid* and its ``std::exception_ptr`` compares equal with the
+   ``std::exception_ptr`` on the right.
+
+   The third overload returns ``true`` only if the |expected| value is
+   *invalid* and its ``std::exception_ptr`` compares equal with the
+   ``std::exception_ptr`` on the left.
+
+   The fourth and fifth overload returns ``true`` only if the |expected| value
+   is *valid* and its managed object compares equal wth the *T* via *T*'s
+   ``operator ==``.
+
+.. function:: bool operator < (expected const&, expected const&) noexcept
+              bool operator < (expected const&, exception_ptr) noexcept
+              bool operator < (exception_ptr, expected const&) noexcept
+              bool operator < (expected const&, T const&) noexcept
+              bool operator < (T const&, expected const&) noexcept
+
+   For the first overload, if the right |expected| is *invalid*, it will
+   return ``false``. If the left |expected| is *invalid* it will return
+   ``true``.
+
+   The second overload returns ``true`` if the |expected| is *invalid*,
+   **unless** the ``std::exception_ptr`` on the right is equal to ``nullptr``.
+
+   The third overload returns ``true`` if the |expected| is *valid*, or if
+   the ``std::exception_ptr`` on the left is equal to ``nullptr``.
+
+   The fourth overload will return ``true`` if the |expected| is *invalid*.
+   If the |expected| is *valid*, the result of comparing its managed object with
+   *T* via ``operator <`` is returned.
+
+   The fifth overload will return ``false`` if the |expected| is *invalid*.
+   If the |expected| is *valid*, the result of comparing its managed object
+   with *T* via ``operator <`` is returned.
+
+.. note:: The rest of the relational operators for |expected| are implemented
+   in terms of ``operator ==`` and ``operator <``.
+
+.. function:: bool operator == (result const&, result const&)
+              bool operator == (result const&, error_condition const&)
+              bool operator == (error_condition const&, result const&)
+              bool operator == (result const&, error_code const&)
+              bool operator == (error_code const&, result const&)
+              bool operator == (result const&, T const&)
+              bool operator == (T const&, result const&)
+
+   For the first overload if only one of the |result| objects is *valid*,
+   it will return ``false``. If both |result| objects are *invalid*, the
+   result of comparing their ``error_condition`` is returned. Otherwise, the
+   |result| values compare via ``operator ==``.
+
+   The second, third, fourth, and fifth overload will return ``false`` if
+   the |result| object is *valid* (even if the ``std::error_condition`` or
+   ``std::error_code`` were to return ``false`` in a boolean context. This was
+   done to minimize issues with differing categories). If the |result| is
+   *invalid*, its :func:`result\<T>::condition` is compared against the
+   ``std::error_condition`` or ``std::error_code`` via ``operator ==``.
+
+   The sixth and seventh overloads will return ``false`` if |result| is
+   *invalid*. Otherwise the |result| value is compared with the given *T*
+   via ``operator ==``.
+
+.. function:: bool operator < (result const&, result const&)
+              bool operator < (result const&, error_condition const&)
+              bool operator < (error_condition const&, result const&)
+              bool operator < (result const&, T const&)
+              bool operator < (T const&, result const&)
+
+   For the first overload, if both |result| objects are *invalid*, the
+   ``operator <`` comparison of their :func:`result\<T>::condition` are
+   returned. If both |result| objects are *valid*, the comparison of their
+   values via ``operator <`` is returned. If the |result| on the left is
+   *invalid*, but the |result| on the right is not, ``true`` is returned.
+   Otherwise ``false``.
+
+   The second overload returns ``false`` if the |result| is *valid* (even
+   if the ``std::error_condition`` would evaluate to ``false`` in a boolean
+   context. This was done to minimize issues with differing categories). If
+   the |result| is *invalid*, its :func:`result\<T>::condition` is compared
+   against the ``std::error_condition`` via ``operator <``
+
+   Conversely, the third overload returns ``true`` if the |result| is *valid*.
+   If the |result| is *invalid*, its :func:`result\<T>::condition` is compared
+   against the ``std::error_condition`` via ``operator <``.
+
+   For the fourth overload, if the |result| is *invalid*, ``false`` is returned.
+   Otherwise, the comparison of the |result| value and *T* via ``operator <``
+   is returned.
+
+   For the fifth overload, if the |result| is *invalid*, ``true`` is returned.
+   Otherwise, the comparison of the |result| value and *T* via ``operator <``
+   is returned.
+
+.. note:: The rest of the relational operators for |result| are implemented
    in terms of ``operator ==`` and ``operator <``.
 
 Specializations
