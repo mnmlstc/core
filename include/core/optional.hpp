@@ -1584,6 +1584,11 @@ auto make_optional (Type&& value) -> optional<decay_t<Type>> {
 }
 
 template <class T>
+auto make_expected (::std::exception_ptr error) -> expected<T> {
+  return expected<T> { error };
+}
+
+template <class T>
 auto make_expected (T&& value) -> enable_if_t<
   not ::std::is_base_of< ::std::exception, decay_t<T>>::value,
   expected<decay_t<T>>
@@ -1592,16 +1597,11 @@ auto make_expected (T&& value) -> enable_if_t<
 template <class T, class U>
 auto make_expected (U&& value) -> enable_if_t<
   ::std::is_base_of< ::std::exception, decay_t<U>>::value,
-  T
+  expected<T>
 > {
   return make_expected<T>(
     ::std::make_exception_ptr(::core::forward<U>(value))
   );
-}
-
-template <class T>
-auto make_expected (::std::exception_ptr error) -> expected<T> {
-  return expected<T> { error };
 }
 
 template <class T>

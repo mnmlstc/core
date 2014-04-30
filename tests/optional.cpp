@@ -654,8 +654,12 @@ int main () {
       auto error = core::make_expected<std::string>(
         std::make_exception_ptr(std::logic_error { "error" })
       );
+      auto logic_error = core::make_expected<std::string>(
+        std::logic_error { "logic-error" }
+      );
 
       assert::is_true(bool(value));
+      assert::is_true(not logic_error);
       assert::is_true(not error);
 
       assert::equal(*value, std::string { "make-expected" });
