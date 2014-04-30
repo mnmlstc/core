@@ -629,6 +629,10 @@ struct expected final {
     return this->ptr;
   }
 
+  [[gnu::deprecated]] ::std::exception_ptr get_ptr () const noexcept(false) {
+    return this->pointer();
+  }
+
 private:
 
   void reset () {
@@ -968,6 +972,10 @@ struct expected<void> final {
   ::std::exception_ptr pointer () const noexcept(false) {
     if (*this) { throw bad_expected_type { "valid expected<void>" }; }
     return this->ptr;
+  }
+
+  [[gnu::deprecated]] ::std::exception_ptr get_ptr () const noexcept(false) {
+    return this->pointer();
   }
 
 private:
