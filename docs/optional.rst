@@ -41,6 +41,8 @@ void. This type was provided to allow generic use of |result|. *Technically*,
 this type can be replaced with a ``std::error_condition``. However it removes
 the ability to mark a function as returning ``void``.
 
+The optional component resides in the ``<core/optional.hpp>`` header.
+
 .. namespace:: core
 
 .. class:: in_place_t
@@ -103,7 +105,9 @@ Optional Type
    .. versionadded:: 1.1
 
       |optional| follows the N3793_ proposal. This means |optional| is now
-      usable as a constexpr-able type.
+      usable as a constexpr-able type. Additionally, |optional| now has the
+      other comparison operators available. These are implemented in terms of
+      ``operator ==`` and ``operator <``.
 
    An |optional| object is *engaged* when one of the following occurs:
 
@@ -119,18 +123,18 @@ Optional Type
       *disengaged* |optional|.
 
 
-   .. warning:: An |optional|'s :type:`value_type` *may not* be:
-
-      * :class:`in_place_t`
-      * :class:`nullopt_t`
-      * ``std::nullptr_t``
-      * ``void``
-      * any type for which ``std::is_reference<T>::value`` is *true*.
-      * any type for which ``std::is_object<T>::value`` is *false*
-
    .. type:: value_type
 
       Represents the underlying type stored within an |optional|.
+
+      .. warning:: An |optional|'s :type:`value_type` *may not* be:
+
+         * :class:`in_place_t`
+         * :class:`nullopt_t`
+         * ``std::nullptr_t``
+         * ``void``
+         * any type for which ``std::is_reference<T>::value`` is *true*.
+         * any type for which ``std::is_object<T>::value`` is *false*
 
    .. function:: optional (optional const&)
 
@@ -261,13 +265,33 @@ Expected Type
    *invalid*. Like |optional| it does not model a pointer, but rather an object
    and provides the pointer access operator overloads for convenience.
 
-   .. note:: It is ok to use a type that overloads the address operator with
-      |expected|. This will not negatively affect the use of placement new
-      internally.
+   An |expected| object is *valid* when one of the following occurs:
+
+    * The object is initialized with a value of type *T*
+    * The object is assigned a *valid* |expected|
+    * The object is default-initialized.
+
+   An |expected| object is *invalid* when one of the following occurs:
+
+    * The object is initialized with a ``std::exception_ptr`` or an *invalid*
+      |expected|.
+    * The object is assigned a ``std::exception_ptr`` or an *invalid*
+      |expected|.
+
+   .. versionadded:: 1.1 In addition to ``operator ==`` and ``operator <``,
+      |expected| is now comparable via the other relational operators.
 
    .. type:: value_type
 
       Represents the given type *T*.
+
+      .. warning:: An |expected|'s :type:`value_type` *may not* be:
+
+         * :class:`in_place_t`
+         * :class:`nullopt_t`
+         * ``std::exception_ptr``
+         * any type for which ``std::is_reference<T>::value`` is *true*.
+         * any type for which ``std::is_object<T>::value`` is *false*.
 
    .. function:: explicit expected (std::exception_ptr) noexcept
 
@@ -317,9 +341,19 @@ Expected Type
       swapped and the *valid* object is moved into the *invalid* object, and
       vice versa.
 
-   .. function:: operator bool () const noexcept
+   .. function:: explicit operator bool () const noexcept
 
       :returns: Whether the |expected| is *valid* or *invalid*.
+
+   .. function:: value_type const* operator -> () const noexcept
+                 value_type* operator -> () noexcept
+
+      Accessing the managed object when the |expected| is *invalid* will
+      result in undefined behavior.
+
+      .. versionadded:: 1.1
+
+      :returns: pointer to the object managed by the |expected|
 
    .. function:: value_type const& operator * () const noexcept
                  value_type& operator * () noexcept
@@ -341,6 +375,15 @@ Expected Type
       :returns: The object managed by |expected| if *valid*, otherwise, *value*
                 is returned. This function will not compile if *U* is not
                 convertible to :type:`expected\<T>::value_type`.
+
+   .. function:: void emplace (std::initializer_list<U>, Args)
+                 void emplace (Args)
+
+      .. versionadded:: 1.1
+
+      Constructs the object managed by |expected|. If the |expected| is
+      already *valid*, it will first destruct the object it is currently
+      managing.
 
    .. function:: E expect () const
 
@@ -364,6 +407,16 @@ Expected Type
    .. function:: std::exception_ptr pointer () const
 
       This function will throw if |expected| is *invalid*.
+
+      .. versionadded:: 1.1 Replaces :func:`get_ptr`.
+
+      :returns: The exception pointer managed by |expected|
+      :throws: :class:`bad_expected_type`
+      :noexcept: ``false``
+
+   .. function:: std::exception_ptr get_ptr () const
+
+      .. deprecated:: 1.1 Use :func:`pointer` as a replacement.
 
       :returns: The exception pointer managed by |expected|
       :throws: :class:`bad_expected_type`
@@ -396,6 +449,8 @@ Functions
 .. function:: expected<T> make_expected (T&& value)
               expected<T> make_expected (E&& exception)
               expected<T> make_expected (std::exception_ptr)
+
+   .. versionadded:: 1.1 The overload version which takes exception type *E*
 
    The first overload returns a *valid* |expected| containing a T constructed
    with *value*. The second overload returns an *invalid* |expected| with
@@ -449,6 +504,11 @@ Operators
               bool operator == (expected const&, T const&) noexcept
               bool operator == (T const&, expected const&) noexcept
 
+   .. versionchanged:: 1.1 The comparison of an |expected| to an exception_ptr
+      no longer compare the actual underlying exception_ptr if the |expected|
+      is *invalid*. Comparing an |expected| to a ``std::exception_ptr`` now
+      works as though one compared an |optional| to ``nullopt``.
+
    For the first overload if only one of the |expected| values is *valid*,
    it will return ``false``. If both |expected| values are *invalid*, it will
    return ``true`` Otherwise, the |expected| values compare their managed
@@ -489,6 +549,8 @@ Operators
               bool operator == (result const&, T const&)
               bool operator == (T const&, result const&)
 
+   .. versionadded:: 1.1
+
    For the first overload if only one of the |result| objects is *valid*,
    it will return ``false``. If both |result| objects are *invalid*, the
    result of comparing their ``error_condition`` is returned. Otherwise, the
@@ -510,6 +572,8 @@ Operators
               bool operator < (error_condition const&, result const&)
               bool operator < (result const&, T const&)
               bool operator < (T const&, result const&)
+
+   .. versionadded:: 1.1
 
    For the first overload, if both |result| objects are *invalid*, the
    ``operator <`` comparison of their :func:`result\<T>::condition` are
@@ -538,6 +602,15 @@ Operators
 
 .. note:: The rest of the relational operators for |result| are implemented
    in terms of ``operator ==`` and ``operator <``.
+
+Swap
+^^^^
+
+.. function:: void swap (optional&, optional&)
+              void swap (expected&, expected&)
+              void swap (result&, result&)
+
+   These swap functions are provided to allow for ADL calls to swap.
 
 Specializations
 ---------------
@@ -588,12 +661,19 @@ Specializations
 
    .. function:: std::exception_ptr pointer () const
 
+      Throws if |expected-v| is *valid*.
+
       :returns: The managed exception_ptr if the |expected-v| is *invalid*.
       :throws: :class:`bad_expected_type` if the |expected-v| is *valid*.
       :noexcept: ``false``.
 
-      Returns the 
+   .. function:: std::exception_ptr get_ptr () const
 
+      .. deprecated:: 1.1 Use :func:`pointer` as a replacement.
+
+      :returns: The managed exception_ptr if the |expected-v| is *invalid*.
+      :throws: :class:`bad_expected_type` if the |expected-v| is *valid*.
+      :noexcept: ``false``.
 
 .. class:: result<void>
 
