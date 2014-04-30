@@ -543,9 +543,42 @@ int main () {
       assert::not_equal(invalid, rhs);
     },
 
-    task("operator-greater-equal") = [] { assert::fail(); },
-    task("operator-less-equal") = [] { assert::fail(); },
-    task("operator-greater") = [] { assert::fail(); },
+    task("operator-greater-equal") = [] {
+      core::expected<int> lhs { 5 };
+      core::expected<int> rhs { 4 };
+      core::expected<int> invalid { ::std::exception_ptr { } };
+
+      assert::greater_equal(lhs, rhs);
+      assert::greater_equal(lhs, invalid);
+      assert::greater_equal(invalid, ::std::exception_ptr { });
+      assert::greater_equal(lhs, 3);
+      assert::greater_equal(lhs, 5);
+      assert::greater_equal(6, rhs);
+      assert::greater_equal(4, rhs);
+    },
+
+    task("operator-less-equal") = [] {
+      core::expected<int> lhs { 5 };
+      core::expected<int> rhs { 6 };
+      core::expected<int> invalid { ::std::exception_ptr { } };
+
+      assert::less_equal(lhs, rhs);
+      assert::less_equal(invalid, rhs);
+      assert::less_equal(::std::exception_ptr { }, invalid);
+      assert::less_equal(lhs, 5);
+      assert::less_equal(lhs, 6);
+      assert::less_equal(5, rhs);
+      assert::less_equal(6, rhs);
+    },
+
+    task("operator-greater") = [] {
+      core::expected<int> lhs { 6 };
+      core::expected<int> rhs { 5 };
+
+      assert::greater(lhs, rhs);
+      assert::greater(lhs, 5);
+      assert::greater(6, rhs);
+    },
 
     task("operator-less") = [] {
       core::expected<int> lhs { 5 };
