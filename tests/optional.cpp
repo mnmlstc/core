@@ -518,6 +518,12 @@ int main () {
       assert::equal(*nothrow, 51);
     },
 
+    task("arrow-operator") = [] {
+      core::expected<std::string> nothrow { "words" };
+      assert::is_true(bool(nothrow));
+      assert::equal(nothrow->at(0), 'w');
+    },
+
     task("operator-equal") = [] {
       core::expected<int> lhs { 5 };
       core::expected<int> rhs { 6 };
@@ -666,6 +672,34 @@ int main () {
     }
   };
 
+  test("result") = {
+    task("copy-value-constructor") = [] { assert::fail(); },
+    task("move-value-constructor") = [] { assert::fail(); },
+    task("copy-constructor") = [] { assert::fail(); },
+    task("move-constructor") = [] { assert::fail(); },
+    task("error-condition-constructor") = [] { assert::fail(); },
+    task("error-condition-enum-constructor") = [] { assert::fail(); },
+    task("copy-value-assign-operator") = [] { assert::fail(); },
+    task("move-value-assign-operator") = [] { assert::fail(); },
+    task("copy-assign-operator") = [] { assert::fail(); },
+    task("move-assign-operator") = [] { assert::fail(); },
+    task("error-condition-assign-operator") = [] { assert::fail(); },
+    task("error-condition-enum-assign-operator") = [] assert::fail(); },
+    task("operator-star") = [] { assert::fail(); },
+    task("operator-arrow") = [] { assert::fail(); },
+    task("operator-equal") = [] { assert::fail(); },
+    task("operator-not-equal") = [] { assert::fail(); },
+    task("operator-greater-equal") = [] { assert::fail(); },
+    task("operator-less-equal") = [] { assert::fail(); },
+    task("operator-greater") = [] { assert::fail(); },
+    task("operator-less") = [] { assert::fail(); },
+    task("value-or") = [] { assert::fail(); },
+    task("value") = [] { assert::fail(); },
+    task("condition") = [] { assert::fail(); },
+    task("swap") = [] { assert::fail(); },
+    task("make-result") = [] { assert::fail(); }
+  };
+
   test("expected<void>") = {
     task("default-constructor") = [] {
       core::expected<void> value { };
@@ -797,6 +831,11 @@ int main () {
       assert::equal(rhs.pointer(), lhs_ptr);
 
     }
+  };
+
+
+  test("result<void>") = {
+    task("copy-constructor") = [] { assert::fail(); }
   };
 
   monitor::run();
