@@ -684,7 +684,7 @@ int main () {
     task("copy-assign-operator") = [] { assert::fail(); },
     task("move-assign-operator") = [] { assert::fail(); },
     task("error-condition-assign-operator") = [] { assert::fail(); },
-    task("error-condition-enum-assign-operator") = [] assert::fail(); },
+    task("error-condition-enum-assign-operator") = [] { assert::fail(); },
     task("operator-star") = [] { assert::fail(); },
     task("operator-arrow") = [] { assert::fail(); },
     task("operator-equal") = [] { assert::fail(); },
