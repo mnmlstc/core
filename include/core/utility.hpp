@@ -111,19 +111,20 @@ struct scope_guard final {
   );
 
   explicit scope_guard (Callable callable) noexcept :
-    callable { ::core::move(callable) }
+    callable { ::core::move(callable) }, dismissed(false)
   { }
 
   scope_guard (scope_guard const&) = delete;
   scope_guard (scope_guard&&) = default;
   scope_guard () = delete;
-  ~scope_guard () noexcept { callable(); }
-
+  ~scope_guard () noexcept { if (!dismissed) callable(); }
+  void dismiss() noexcept { dismissed = true; }
   scope_guard& operator = (scope_guard const&) = delete;
   scope_guard& operator = (scope_guard&&) = default;
 
 private:
   Callable callable;
+  bool dismissed;
 };
 
 template <class Callable>
