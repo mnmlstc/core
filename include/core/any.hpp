@@ -6,6 +6,7 @@
 #include <memory>
 
 #include <core/type_traits.hpp>
+#include <core/utility.hpp>
 
 namespace core {
 inline namespace v1 {
@@ -60,7 +61,11 @@ struct any_dispatch_select<Type, false> {
     allocator_type alloc { };
     auto const& value = *static_cast<Type* const>(source);
     auto pointer = allocator_traits::allocate(alloc, 1);
+    auto scope = make_scope_guard([&alloc, pointer] {
+      allocator_traits::deallocate(alloc, pointer, 1);
+    });
     allocator_traits::construct(alloc, pointer, value);
+    scope.dismiss();
     data = pointer;
   }
 
