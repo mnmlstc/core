@@ -10,6 +10,15 @@ int main () {
       bool value { false };
       { auto scope = core::make_scope_guard([&]{ value = true; }); }
       assert::is_true(value);
+    },
+
+    task("dismiss") = [] {
+      bool value { false };
+      {
+        auto scope = core::make_scope_guard([&] { value = true; });
+        scope.dismiss();
+      }
+      assert::is_false(value);
     }
   };
 

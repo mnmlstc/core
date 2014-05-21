@@ -56,6 +56,11 @@ type lists.
       int x = new int { 4 }
       auto scope_guard = core::make_scope_guard([x] { delete x; });
 
+   .. function:: void dismiss () noexcept
+
+      Calling dismiss on a scope_guard will result in its *Callable* never
+      being invoked. This can be seen as a way to *rollback* bookkeeping code.
+
 .. function:: make_scope_guard(Callable callable) noexcept
 
    Constructs a :class:`scope_guard\<Callable>` from the given *callable*.
