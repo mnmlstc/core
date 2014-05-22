@@ -1017,6 +1017,14 @@ struct result<void> final {
   result (result&&) = default;
   result () = default;
 
+  template <
+    class ErrorConditionEnum,
+    class=enable_if_t<std::is_error_condition_enum<ErrorConditionEnum>::value>
+  > result& operator = (ErrorConditionEnum e) noexcept {
+    result { e }.swap(*this);
+    return *this;
+  }
+
   result& operator = (::std::error_condition const& ec) {
     result { ec }.swap(*this);
     return *this;
@@ -1030,7 +1038,7 @@ struct result<void> final {
     swap(this->cnd, that.cnd);
   }
 
-  explicit operator bool () const noexcept { return bool(this->cnd); }
+  explicit operator bool () const noexcept { return not this->cnd; }
 
   ::std::error_condition const& condition () const noexcept(false) {
     if (*this) { throw bad_result_condition { "result<void> is valid" }; }
