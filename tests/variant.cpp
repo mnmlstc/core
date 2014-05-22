@@ -204,7 +204,7 @@ int main () {
         std::ignore = std::get<0>(vector);
       });
 
-      assert::equal(std::get<0>(integer), 64);
+      assert::equal(std::get<0>(integer), 64u);
       assert::equal(std::get<1>(string), std::string { "get" });
       assert::equal(std::get<2>(vector)[0], std::string { "1" });
       assert::equal(std::get<2>(vector)[1], std::string { "2" });

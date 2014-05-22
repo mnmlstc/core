@@ -268,7 +268,7 @@ struct optional final : private impl::storage<Type> {
       ::std::is_nothrow_move_constructible<value_type>
     >::value
   ) {
-    using std::swap;
+    using ::std::swap;
     if (not *this and not that) { return; }
     if (*this and that) {
       swap(**this, *that);
@@ -401,16 +401,16 @@ struct expected final {
     "Cannot have expected with throwable destructor (undefined behavior)"
   );
 
-  explicit expected (::std::exception_ptr ptr) noexcept :
+  expected (::std::exception_ptr ptr) noexcept :
     ptr { ptr }
   { }
 
-  explicit expected (value_type const& val) :
+  expected (value_type const& val) :
     val { val },
     valid { true }
   { }
 
-  explicit expected (value_type&& val) noexcept(nothrow) :
+  expected (value_type&& val) noexcept(nothrow) :
     val { ::core::move(val) },
     valid { true }
   { }
@@ -693,26 +693,26 @@ struct result final {
     class=enable_if_t<
       ::std::is_error_condition_enum<ErrorConditionEnum>::value
     >
-  > explicit result (ErrorConditionEnum e) noexcept :
+  > result (ErrorConditionEnum e) noexcept :
     valid { static_cast<core::underlying_type_t<ErrorConditionEnum>>(e) == 0 }
   {
     if (*this) { ::new (::std::addressof(this->val)) value_type { }; }
     else { ::new (::std::addressof(this->cnd)) ::std::error_condition { e }; }
   }
 
-  explicit result (::std::error_condition const& ec) :
-    valid { ec }
+  result (::std::error_condition const& ec) :
+    valid { not ec }
   {
     if (*this) { ::new (::std::addressof(this->val)) value_type { }; }
     else { ::new (::std::addressof(this->cnd)) ::std::error_condition { ec }; }
   }
 
-  explicit result (value_type const& val) :
+  result (value_type const& val) :
     val { val },
     valid { true }
   { }
 
-  explicit result (value_type&& val) noexcept(nothrow) :
+  result (value_type&& val) noexcept(nothrow) :
     val { ::core::move(val) },
     valid { true }
   { }
@@ -800,6 +800,16 @@ struct result final {
     return *this;
   }
 
+  template <
+    class ErrorConditionEnum,
+    class=enable_if_t<
+      ::std::is_error_condition_enum<ErrorConditionEnum>::value
+    >
+  > result& operator = (ErrorConditionEnum e) {
+    result { e }.swap(*this);
+    return *this;
+  }
+
   result& operator = (value_type const& value) {
     if (not *this) { this->emplace(value); }
     else { **this = value; }
@@ -841,7 +851,7 @@ struct result final {
     }
 
     auto& to_invalidate = *this ? *this : that;
-    auto to_validate = *this ? that : *this;
+    auto& to_validate = *this ? that : *this;
     auto cnd = to_validate.cnd;
     to_validate.emplace(::core::move(*to_invalidate));
     to_invalidate = cnd;
@@ -1099,34 +1109,25 @@ template <class T>
 bool operator == (
   result<T> const& lhs,
   ::std::error_condition const& rhs
-) noexcept {
-  if (not lhs and rhs) { return lhs.condition() == rhs; }
-  return bool(lhs);
-}
+) noexcept { return not lhs and rhs and lhs.condition() == rhs; }
 
 template <class T>
 bool operator == (
   ::std::error_condition const& lhs,
   result<T> const& rhs
-) noexcept {
-  if (lhs and not rhs) { return lhs == rhs.condition(); }
-  return bool(rhs);
-}
+) noexcept { return lhs and not rhs and lhs == rhs.condition(); }
 
 template <class T>
-bool operator == (result<T> const& lhs, ::std::error_code const& rhs) noexcept {
-  if (not lhs and rhs) { return lhs.condition() == rhs; }
-  return bool(lhs);
-}
+bool operator == (
+  result<T> const& lhs,
+  ::std::error_code const& rhs
+) noexcept { return not lhs and rhs and lhs.condition() == rhs; }
 
 template <class T>
 bool operator == (
   ::std::error_code const& lhs,
   result<T> const& rhs
-) noexcept {
-  if (lhs and not rhs) { return lhs == rhs.condition(); }
-  return bool(rhs);
-}
+) noexcept { return lhs and not rhs and lhs == rhs.condition(); }
 
 template <class T>
 bool operator == (result<T> const& res, T const& value) noexcept {
@@ -1230,6 +1231,7 @@ bool operator < (
   ::std::error_condition const& lhs,
   result<T> const& rhs
 ) noexcept { return rhs or lhs < rhs.condition(); }
+
 template <>
 inline bool operator < <void> (
   result<void> const& lhs,
@@ -1617,8 +1619,17 @@ auto make_result (::std::error_condition const& e) -> result<T> {
   return result<T> { e };
 }
 
-template <class T>
-auto make_result (T&& value) -> result<decay_t<T>> {
+template <
+  class T,
+  class ErrorConditionEnum,
+  class=enable_if_t<
+    std::is_error_condition_enum<ErrorConditionEnum>::value
+  >
+> auto make_result (ErrorConditionEnum e) -> result<T> {
+  return result<T> { e };
+}
+
+template <class T> auto make_result (T&& value) -> result<decay_t<T>> {
   return result<T> { ::core::forward<T>(value) };
 }
 
