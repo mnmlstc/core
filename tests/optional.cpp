@@ -1084,7 +1084,91 @@ int main () {
 
 
   test("result<void>") = {
-    task("copy-constructor") = [] { assert::fail(); }
+    task("default-constructor") = [] {
+      core::result<void> value;
+      assert::is_true(bool(value));
+    },
+
+    task("copy-constructor") = [] {
+      core::result<void> value { };
+      core::result<void> copy { value };
+      assert::equal(copy, value);
+    },
+
+    task("move-constructor") = [] {
+      core::result<void> value { };
+      core::result<void> move { core::move(value) };
+      assert::equal(value, move);
+    },
+
+    task("error-condition-constructor") = [] {
+      auto const error = make_error_condition(std::errc::permission_denied);
+      core::result<void> value { error };
+      assert::is_false(bool(value));
+      assert::equal(value, error);
+    },
+
+    task("error-condition-enum-constructor") = [] {
+      core::result<void> value { std::errc::permission_denied };
+      assert::is_false(bool(value));
+      assert::equal(value, make_error_condition(std::errc::permission_denied));
+    },
+
+    task("copy-assign-operator") = [] {
+      core::result<void> value { std::errc::permission_denied };
+      core::result<void> copy { };
+
+      assert::is_false(bool(value));
+      value = copy;
+      assert::is_true(bool(value));
+    },
+
+    task("move-assign-operator") = [] {
+      core::result<void> value { std::errc::permission_denied };
+      core::result<void> move { };
+      assert::is_false(bool(value));
+      value = core::move(move);
+      assert::is_true(bool(value));
+    },
+
+    task("error-condition-assign-operator") = [] {
+      core::result<void> value { };
+      auto const error = make_error_condition(std::errc::permission_denied);
+      assert::is_true(bool(value));
+      value = error;
+      assert::is_false(bool(value));
+    },
+
+    task("error-condition-enum-assign-operator") = [] {
+      core::result<void> value { };
+      assert::is_true(bool(value));
+      value = std::errc::permission_denied;
+      assert::is_false(bool(value));
+    },
+
+    task("operator-equal") = [] {
+      core::result<void> lhs_valid { };
+      core::result<void> rhs_valid { };
+      core::result<void> lhs_invalid { std::errc::permission_denied };
+      core::result<void> rhs_invalid { std::errc::permission_denied };
+
+      assert::equal(lhs_valid, rhs_valid);
+      assert::equal(lhs_invalid, rhs_invalid);
+    },
+
+    task("condition") = [] {
+      auto const condition = make_error_condition(std::errc::permission_denied);
+      core::result<void> valid { };
+      core::result<void> invalid { condition };
+
+      assert::is_true(bool(valid));
+      assert::is_false(bool(invalid));
+
+      assert::equal(invalid, condition);
+      assert::throws<core::bad_result_condition>([&] {
+        std::ignore = valid.condition();
+      });
+    },
   };
 
   monitor::run();
