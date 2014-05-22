@@ -1000,7 +1000,7 @@ struct result<void> final {
     cnd { val, cat }
   { }
 
-  explicit result (::std::error_condition const& ec) :
+  result (::std::error_condition const& ec) :
     cnd { ec }
   { }
 
@@ -1009,7 +1009,7 @@ struct result<void> final {
     class=enable_if_t<
       ::std::is_error_condition_enum<ErrorConditionEnum>::value
     >
-  > explicit result (ErrorConditionEnum e) noexcept :
+  > result (ErrorConditionEnum e) noexcept :
     cnd { e }
   { }
 
