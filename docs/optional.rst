@@ -10,7 +10,7 @@ Optional Component
 .. |result| replace:: :class:`result <result\<T>>`
 
 .. |expected-v| replace:: :class:`expected\<void>`
-.. |result-v| replace:: :class`result\<void>`
+.. |result-v| replace:: :class:`result\<void>`
 
 The optional component contains several types that store an optional value.
 Arguably the most well known is the |optional| type (for which this component
@@ -265,9 +265,13 @@ Expected Type
    *invalid*. Like |optional| it does not model a pointer, but rather an object
    and provides the pointer access operator overloads for convenience.
 
+   .. note:: |expected| does *not* implement the interface proposed in N4015_.
+      |expected| was originally written over a year in advance of the proposal.
+
    An |expected| object is *valid* when one of the following occurs:
 
     * The object is initialized with a value of type *T*
+    * The object is constructed with a *valid* |expected|
     * The object is assigned a *valid* |expected|
     * The object is default-initialized.
 
@@ -298,8 +302,8 @@ Expected Type
       Initializes the |expected| with the given exception_ptr. The |expected|
       is then placed into an *invalid* state.
 
-   .. function:: explicit expected (value_type const&)
-                 explicit expected (value_type&&)
+   .. function:: expected (value_type const&)
+                 expected (value_type&&)
 
       Initializes the |expected| with the given value. Afterwards, the
       |expected| is in a *valid* state.
@@ -316,6 +320,12 @@ Expected Type
       default constructs a :type:`expected\<T>::value_type` inside the
       |expected|.
 
+   .. function:: explicit expected (in_place_t, std::initializer_list<U>, Args)
+                 explicit expected (in_place_t, Args)
+
+      Constructs a new |expected| into an *engaged* state by constructing a
+      :type:`value_type` in place with the given arguments.
+
    .. function:: expected& operator = (expected const&)
                  expected& operator = (expected&&)
 
@@ -328,6 +338,11 @@ Expected Type
       holds an exception_ptr, it is destructed, and the
       :type:`expected\<T>::value_type` is initialized (*not assigned*) the
       incoming value.
+
+   .. function:: expected& operator = (std::exception_ptr)
+
+      If the |expected| is in a *valid* state, it will be placed into an
+      *invalid* state.
 
    .. function:: void swap (expected& that)
 
@@ -427,10 +442,178 @@ Result Type
 
 .. class:: result<T>
 
+   .. versionadded:: 1.1
+
    |result| works much like |expected|. However, it does not manage an
    exception, but rather a ``std::error_condition``. This is done to provide a
    nice rounding out for functions which may want to signal an error, but not
    require the 'output' value to be passed by reference or by pointer.
+
+   A |result| object is *valid* when one of the following occurs:
+
+    * The object is initialized with a value of type *T*.
+    * The object is constructed with a *valid* |result|.
+    * The object is assigned a *valid* |result|.
+    * The object is default initialized.
+    * The object is constructed with a ``std::error_condition`` whose value
+      is 0.
+    * The object is assigned a ``std::error_condition`` whose value is 0.
+
+   A |result| object is *invalid* when one of the following occurs:
+    * The object is initialized with a non-zero ``std::error_condition``.
+    * The object is assigned a non-zero ``std:error_condition``.
+
+   .. type:: value_type
+
+      Represents the given type *T*.
+
+      .. warning:: A |result|'s :type:`value_type` *may not* be:
+
+         * :class:`in_place_t`
+         * :class:`nullopt_t`
+         * ``std::error_condition``
+         * any type for which ``std::is_error_condition_enum<T>::value`` is
+           *true*
+         * any type for which ``std::is_reference<T>::value`` is *true*.
+         * any type for which ``std::is_object<T>::value`` is *false*.
+         * any type for which ``std::is_nothrow_destructible<T>::value`` is
+           *false*
+
+   .. function:: result (int val, ::std::error_category const& cat) noexcept
+                 result (std::error_condition const& condition) noexcept
+                 result (ErrorConditionEnum e) noexcept
+
+      Initializes the |result| to be *invalid*. The third overload may be
+      passed any value for which ``std::is_error_condition_enum`` is *true*.
+
+   .. function:: result (value_type const& value)
+                 result (value_type&& value)
+
+      Initializes |result| into a *valid* state with the given *value*. The
+      move constructor is marked ``noexcept`` *only* if
+      ``std::is_nothrow_move_constructible`` is *true* for :type:`value_type`.
+
+   .. function:: result (in_place_t p, std::initializer<U> il, Args&& args)
+                 result (in_place_t p, Args&& args)
+
+      Initializes |result| into a *valid* state by constructing a
+      :type:`value_type` in place with the given arguments. These constructors
+      only participate if :type:`value_type` is constructible with the given
+      arguments. *args* is a variadic template of arguments.
+
+   .. function:: result (result const& that)
+                 result (result&& that)
+
+      Copies or moves the state stored in *that* into |result| as well as its
+      managed value or error condition.
+
+   .. function:: result ()
+
+      Initializes |result| into a *valid* state by default constructing a
+      :type:`value_type`.
+
+   .. function:: result& operator = (result const& that)
+                 result& operator = (result&& that)
+
+      Assigns the contents and state of *that* to |result|. If the state of
+      *that* and |result| differ, the condition or object managed by |result|
+      will be destroyed and |result|'s state will then be constructed with
+      the data stored in *that*.
+
+   .. function:: result& operator = (std::error_condition const& condition)
+                 result& operator = (ErrorConditionEnum e)
+
+      Assigns the given *condition* or error condition enum value *e* to
+      |result|. If |result| is in a *valid* state, its managed object will
+      be destructed, and the incoming value assigned. If *condition* or *e*
+      would result in a default constructed :type:`value_type`, (such as
+      ``bool(condition) == false``), the managed object is still destructed
+      and |result| will then be assigned a default constructed
+      :type:`value_type`.
+
+   .. function:: result& operator = (value_type const& value)
+                 result& operator = (value_type&& value)
+                 result& operator = (U&& value)
+
+      Assigns *value* to |result|. If |result| is in a *valid* state, its
+      managed object is also assigned *value*. If it is in an *invalid* state,
+      it will then destroy the stored condition, and then place the |result|
+      into a valid state.
+
+      The third overload requires that :type:`value_type` be assignable and
+      constructible from *U*.
+
+   .. function:: void swap (result& that)
+
+      Swaps the state of *that* with |result|. If both *that* and |result|
+      are *valid*, then they swap their managed objects. If both *that* and
+      |result| are *invalid*, they swap their managed conditions.
+      If their states differ, the *invalid* instance is constructed with the
+      contents of the *valid* instance via move construction. The *valid*
+      instance is then invalidated with the previously *invalid* instance's
+      condition.
+
+      :noexcept: ``std::is_nothrow_move_constructible<value_type>`` and
+                 ``core::is_nothrow_swappable<value_type>``
+
+   .. function:: explicit operator bool () const noexcept
+
+      :returns: Whether |result| is *valid* or *invalid*.
+
+
+   .. function:: value_type const& operator * () const noexcept
+                 value_type& operator * () noexcept
+
+      Calling this function when |result| is *invalid* will result in
+      undefined behavior.
+
+      :returns: The object managed by |result|.
+
+   .. function:: value_type const* operator -> () const noexcept
+                 value_type* operator -> () noexcept
+
+      Calling this function when |result| is *invalid* will result in
+      undefined behavior.
+
+      :returns: The address of the object managed by |result|
+
+   .. function:: void emplace (std::initializer_list<T> il, Args&& args)
+                 void emplace (Args&& args)
+
+      Destroys whatever state is managed by |result| and then reinitializes
+      it to be *valid* while constructing a :type:`value_type` with the given
+      arguments. *args* is a variadic template argument.
+
+   .. function:: value_type const& value () const
+                 value_type& value ()
+
+      If |result| is *invalid*, this function will throw a ``std::system_error``
+      exception with the managed error condition.
+
+      :returns: Object managed by |result|
+      :throws: ``std::system_error``
+
+   .. function:: value_type value_or (U&& value) const&
+                 value_type value_or (U&& value) &&
+
+      If |result| is in an *invalid* state, a :type:`value_type` converted
+      from *value* is returned. Otherwise, the |result|'s managed object is
+      copied or moved into the returning value, depending on whether |result|
+      is an rvalue or const lvalue reference.
+
+      :requires: :type:`value_type` be move or copy constructible
+                 and that *U* is convertible to :type:`value_type`.
+
+      :returns: :type:`value_type`
+
+   .. function:: std::error_condition const& condition () const
+
+      If |result| is *invalid*, the condition it manages is returned. Otherwise
+      an exception is thrown.
+
+      :returns: ``std::error_condition`` managed by |result|
+      :noexcept: false
+      :throws: :class:`bad_result_condition`
 
 Functions
 ---------
@@ -457,6 +640,17 @@ Functions
    an exception_ptr to *exception*. For this version to be usable, *E* must
    inherit from ``std::exception``. The third overload takes an exception
    pointer and returns an *invalid* |expected| from it.
+
+.. function:: result<T> make_result (T&& value)
+              result<T> make_result (std::error_condition cnd)
+              result<T> make_result (ErrorConditionEnum e)
+
+   .. versionadded:: 1.1
+
+   The first overload returns a *valid* |result| containing a T constructed
+   with *value*. The second overload returns an *invalid* |expected| with an
+   error_condition. The last overload takes any type for which
+   ``std::is_error_condition_enum`` is *true*.
 
 
 Operators
@@ -687,6 +881,46 @@ Specializations
    code to be written, and worrying about whether or not you might accidentally
    instantiate a |result-v| isn't something one should have to worry about.
 
+   The copy, move, and default constructors as well as the copy and move
+   assignment operators for |result-v| are defaulted, letting the stored
+   ``std::error_condition`` be managed instead.
+
+   .. type:: value_type
+
+      Always ``void``.
+
+   .. function:: result (int value, std::error_category const& category)
+                 result (std::error_condition cnd)
+                 result (ErrorConditionEnum e)
+
+      Constructs the |result-v| with the given value. Any type for which
+      ``std::is_error_condition_enum`` is *true* may be used as an argument in
+      the third overload.
+
+   .. function:: result& operator = (std::error_condition const& condition)
+                 result& operator = (ErrorConditionEnum e) noexcept
+
+      Assigns |result-v| with the given value. Any value for which
+      ``std::is_error_condition_enum`` is *true* may be used in the second
+      overload.
+
+   .. function:: explicit operator bool () const noexcept
+
+      :returns: Whether the |result-v| is *valid* or *invalid*.
+
+   .. function:: void swap (result& that)
+
+      Swaps the stored ``std::error_condition`` with *that*.
+
+   .. function:: std::error_condition const& condition () const
+
+      If the |result-v| is *valid*, it will throw an exception.
+      Otherwise, the ``std::error_condition`` stored will be returned.
+
+      :noexcept: false
+      :throws: :class:`bad_result_condition`
+      :returns: The stored ``std::error_condition`` if |result-v| is *invalid*.
+
 std::hash
 ^^^^^^^^^
 
@@ -718,3 +952,4 @@ std::hash
    ``std::hash<value_type>::result_type``.
 
 .. _N3793: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2013/n3793.html
+.. _N4015: https://isocpp.org/files/papers/n4015.pdf

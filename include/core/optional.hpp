@@ -655,11 +655,6 @@ struct result final {
   >::value;
 
   static_assert(
-    not ::std::is_error_condition_enum<value_type>::value,
-    "Cannot have result with an error condition enum as the value (ill-formed)"
-  );
-
-  static_assert(
     not ::std::is_same<decay_t<value_type>, nullopt_t>::value,
     "Cannot have result<nullopt_t> (ill-formed)"
   );
@@ -667,6 +662,21 @@ struct result final {
   static_assert(
     not ::std::is_same<decay_t<value_type>, in_place_t>::value,
     "Cannot have result<in_place_t> (ill-formed)"
+  );
+
+  static_assert(
+    not ::std::is_same<decay_t<value_type>, ::std::error_condition>::value,
+    "Cannot have result<error_condition> (tautological)"
+  );
+
+  static_assert(
+    not ::std::is_error_condition_enum<value_type>::value,
+    "Cannot have result with an error condition enum as the value (ill-formed)"
+  );
+
+  static_assert(
+    not ::std::is_reference<value_type>::value,
+    "Cannot have result<T&> (ill-formed)"
   );
 
   static_assert(
