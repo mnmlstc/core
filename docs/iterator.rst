@@ -11,8 +11,32 @@ respect to iterators. Specifically the free form functions that work like
 
 .. namespace:: core
 
-.. function:: cbegin (Container const& container)
+.. function:: constexpr auto size (Container const& container) noexcept
 
+   :returns: ``container.size()`` or ``N`` if *container* is an array.
+
+.. function:: constexpr auto empty (Container const& container) noexcept
+
+   :returns: ``container.empty()`` or ``false`` if *container* is an array.
+
+.. function:: constexpr auto front (Container const& container)
+              constexpr auto front (Container& container)
+
+   :returns: ``container.front()`` or ``container[0]`` if *container* is an
+             array.
+
+.. function:: constexpr auto back (Container const& container)
+              constexpr auto back (Container&)
+
+   :returns: ``container.back()`` or ``container[N - 1]`` if *container* is
+             an array.
+
+.. function:: constexpr auto data (Container const& container) noexcept
+              constexpr auto data (Container& container) noexcept
+
+   :returns: ``container.data()`` or ``container`` if *container* is an array.
+
+.. function:: cbegin (Container const& container)
 
    :returns: ``std::begin(container)``
 
