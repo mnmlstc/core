@@ -71,6 +71,17 @@ struct basic_string_view {
     };
   }
 
+  template <class Allocator=std::allocator<CharT>>
+  ::std::basic_string<CharT, Traits, Allocator> to_string (
+    Allocator const& allocator = Allocator()
+  ) const {
+    return ::std::basic_string<CharT, Traits, Allocator> {
+      this->data(),
+      this->size(),
+      allocator
+    };
+  }
+
   constexpr const_iterator begin () const noexcept { return this->data(); }
   constexpr const_iterator end () const noexcept {
     return this->data() + this->size();
@@ -331,7 +342,7 @@ template <class CharT, class Traits>
 ::std::basic_ostream<CharT, Traits>& operator << (
   ::std::basic_ostream<CharT, Traits>& os,
   basic_string_view<CharT, Traits> const& str
-) { for (auto ch : str) { os << ch; } return os; }
+) { return os << str.to_string(); }
 
 template <class CharT, class Traits>
 void swap (

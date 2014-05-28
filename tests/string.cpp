@@ -86,6 +86,13 @@ int main () {
       assert::equal(str, std::string { "explicit-string-cast" });
     },
 
+    task("to-string") = [] {
+      core::string_view ref { "to-string" };
+      auto str = ref.to_string();
+
+      assert::equal(str, "to-string");
+    },
+
     task("max-size") = [] {
       constexpr core::string_view ref { };
 
