@@ -8,6 +8,74 @@
 namespace core {
 inline namespace v1 {
 
+/* capacity */
+template <class Container>
+constexpr auto size (Container const& container) noexcept -> decltype(
+  container.size()
+) { return container.size(); }
+
+template <class T, ::std::size_t N>
+constexpr ::std::size_t size (T const (&)[N]) noexcept { return N; }
+
+template <class Container>
+constexpr bool empty (Container const& container) noexcept {
+  return container.empty();
+}
+
+template <class T, std::size_t N>
+constexpr bool empty (T const (&)[N]) noexcept { return false; }
+
+/* element access */
+template <class Container>
+constexpr auto front (Container const& container) -> decltype(
+  container.front()
+) { return container.front(); }
+
+template <class Container>
+constexpr auto front (Container& container) -> decltype(container.front()) {
+  return container.front();
+}
+
+template <class T, ::std::size_t N>
+constexpr T const& front (T const (&array)[N]) noexcept { return array[0]; }
+
+template <class T, ::std::size_t N>
+constexpr T& front (T (&array)[N]) noexcept { return array[0]; }
+
+template <class Container>
+constexpr auto back (Container const& container) -> decltype(
+  container.back()
+) { return container.back(); }
+
+template <class Container>
+constexpr auto back (Container& container) -> decltype(container.back()) {
+  return container.back();
+}
+
+template <class T, ::std::size_t N>
+constexpr T const& back (T const (&array)[N]) noexcept { return array[N - 1]; }
+
+template <class T, ::std::size_t N>
+constexpr T& back (T (&array)[N]) noexcept { return array[N - 1]; }
+
+/* data access */
+template <class Container>
+constexpr auto data (Container const& container) noexcept -> decltype(
+  container.data()
+) { return container.data(); }
+
+template <class Container>
+constexpr auto data (Container& container) noexcept -> decltype(
+  container.data()
+) { return container.data(); }
+
+template <class T, ::std::size_t N>
+constexpr T const* data (T const (&array)[N]) noexcept { return array; }
+
+template <class T, ::std::size_t N>
+constexpr T* data (T (&array)[N]) noexcept { return array; }
+
+/* iteration */
 template <class Container>
 auto cbegin (Container const& container) -> decltype(::std::begin(container)) {
   return ::std::begin(container);
