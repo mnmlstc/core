@@ -825,7 +825,7 @@ Min/Max Operations
    uses ``operator <``. The second version uses *compare*.
 
    :returns: ``true`` if such permutation exists otherwise transforms *range*
-             into the first permutation and returns ``false`.
+             into the first permutation and returns ``false``.
    :requires: *range* must provide BidirectionalIterators.
 
 .. function:: bool prev_permutation (Range&& range)
@@ -836,6 +836,6 @@ Min/Max Operations
    uses ``operator <``. The second version uses *compare*.
 
    :returns: ``true`` if such permutation exists otherwise transforms *range*
-             into the first permutation and returns ``false`.
+             into the first permutation and returns ``false``.
 
    :requires: *range* must provide BidirectionalIterators.
