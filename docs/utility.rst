@@ -9,6 +9,8 @@ The utility component provides additional functions and meta templates that
 cannot be categorized. Most of the utilities provided are for working with
 type lists.
 
+The utility component can be found in the ``<core/utility.hpp>`` header.
+
 .. namespace:: core
 
 .. class:: integer_sequence<T, Is>

@@ -17,6 +17,8 @@ make a small object optimization to avoid allocations for small and integral
 types. The MNMLSTC Core any implements this optimization, and attempts to
 follow the proposal as closely as possible.
 
+The any component resides in ``<core/any.hpp>``.
+
 .. note:: The |any| component does *not* implement the
    *allocator.uses.construction* constructors defined in the any proposal. The
    reason for this is due to:

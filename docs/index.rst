@@ -14,15 +14,15 @@ rather than by feature.
    :maxdepth: 1
 
    Using MNMLSTC Core <usage>
-   type-traits
-   functional
-   algorithm
-   iterator
-   optional
-   numeric
-   variant
-   utility
-   memory
-   string
-   range
-   any
+   Type Traits <type-traits>
+   Functional Utilities <functional>
+   Algorithms <algorithm>
+   Iterator Utilities <iterator>
+   Optional Types <optional>
+   Numeric Algorithms <numeric>
+   Variant Type <variant>
+   Uncategorized Utilities <utility>
+   Memory <memory>
+   String Utilities <string>
+   Range Type <range>
+   Any Type <any>

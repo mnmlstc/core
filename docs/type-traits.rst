@@ -22,6 +22,8 @@ Only type traits not provided by the C++11 standard are documented. If a
 type trait provided by MNMLSTC Core differs from the standard in any way, it is
 also documented here.
 
+The type traits component can be found in the ``<core/type_traits.hpp>`` header.
+
 .. type:: is_null_pointer<T>
 
    An alias for ``std::true_type`` if *T* is any form of the type

@@ -17,6 +17,8 @@ The |range| component implements the interface and behavior discussed within
 N3350_. Some decisions pertaining to open questions were made, and these are
 discussed below.
 
+The range component resides in the ``<core/range.hpp>``.
+
 .. namespace:: cpp
 
 .. class:: is_range<R>

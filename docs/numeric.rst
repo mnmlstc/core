@@ -13,6 +13,8 @@ begin and end to the range of elements. Because MNMLSTC Core provides a
 :class:`range <range\<T>>` type, there is no logical reason a version of these
 functions that take a range are not provided.
 
+The numeric component resides in the ``<core/numeric.hpp>`` header.
+
 .. note:: Several functions in this component take a range as its input, and
    an output iterator for output. These functions *do not* change the output
    to also be a range. An iterator *must* be passed to them (This reduces the

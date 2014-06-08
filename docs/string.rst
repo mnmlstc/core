@@ -12,6 +12,8 @@ The string component contains types related to strings, and utilities for
 strings. Specifically, the |string_view| class resides in the
 string component.
 
+The string component resides in the ``<core/string.hpp>`` header.
+
 .. namespace:: core
 
 .. class:: basic_string_view<T>

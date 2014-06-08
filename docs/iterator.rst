@@ -9,6 +9,8 @@ The iterator component provides the additional functions provided in C++14 with
 respect to iterators. Specifically the free form functions that work like
 ``std::begin`` and ``std::end``.
 
+The iterator component can be found in ``<core/iterator.hpp>``.
+
 .. namespace:: core
 
 .. function:: constexpr auto size (Container const& container) noexcept

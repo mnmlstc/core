@@ -11,6 +11,8 @@ algorithm headers. There are a few small differences (namely that this
 component relies on the :ref:`core-range-component`), however these differences
 are discussed below.
 
+The algorithm component can be found in the ``<core/algorithm.hpp>`` header.
+
 .. note:: All of the functions in this component that take a range take
    universal references in most cases. The reasons for this are:
 
