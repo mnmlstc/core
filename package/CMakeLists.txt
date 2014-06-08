@@ -49,7 +49,7 @@ set(CPACK_WIX_UI_DIALOG "${PROJECT_SOURCE_DIR}/package/dialog.bmp")
 #------------------------------------------------------------------------------
 # DEB Configuration
 #------------------------------------------------------------------------------
-set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE any)
+set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE all)
 set(CPACK_DEBIAN_PACKAGE_MAINTAINER "MNMLSTC <development@mnmlstc.com>")
 set(CPACK_DEBIAN_PACKAGE_DEPENDS "cmake (>= 2.8.12)")
 
