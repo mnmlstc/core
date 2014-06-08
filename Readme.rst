@@ -34,14 +34,14 @@ Requirements
 
 There are several requirements to fully use MNMLSTC Core:
 
- * A C++11 compliant compiler (GCC 4.8.1 or Clang 3.3 meet the minimum feature
+ * A C++11 compliant compiler (GCC 4.8.2 or Clang 3.3 meet the minimum feature
    set required to build and use MNMLSTC Core)
  * `CMake 2.8.11 <http://cmake.org>`_
  * `MNMLSTC Unittest <https://github.com/mnmlstc/unittest>`_
  * `Sphinx Documentation Generator <http://sphinx-doc.org>`_
- * `Cloud Sphinx Theme <https://pypi.python.org/pypi/cloud_sptheme>`_
+ * `Sphinx RTD Theme <https://pypi.python.org/pypi/sphinx_rtd_theme>`_
 
 MNMLSTC Unittest is only necessary if building and running the unit tests.
 
-Sphinx and the Cloud Sphinx Theme are only necessary if generating
+Sphinx and the Sphinx RTD Theme are only necessary if generating
 documentation manually.
