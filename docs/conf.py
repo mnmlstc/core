@@ -1,8 +1,8 @@
-import cloud_sptheme as csp
+import sphinx_rtd_theme as theme
 import os
 
 project = 'MNMLSTC Core'
-copyright = '2013, MNMLSTC'
+copyright = '2013 - 2014, MNMLSTC'
 
 version = '1.1'
 release = '1.1'
@@ -10,15 +10,14 @@ release = '1.1'
 highlight_language = 'cpp'
 
 html_static_path = ['static']
-html_theme_path = [csp.get_theme_dir()]
-html_theme = 'cloud'
+html_theme_path = [theme.get_html_theme_path()]
+html_theme = 'sphinx_rtd_theme'
 
 exclude_patterns = ['_build']
 templates_path = ['_templates']
 source_suffix = '.rst'
 master_doc = 'index'
 
-extensions = ['cloud_sptheme.ext.issue_tracker', 'sphinx.ext.todo']
+extensions = ['sphinx.ext.todo']
 
-issue_tracker_url = 'https://github.com/mnmlstc/core/issues'
 todo_include_todos = True
