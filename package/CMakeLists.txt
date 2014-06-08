@@ -25,7 +25,7 @@ set(CPACK_OUTPUT_FILE_PREFIX ${PACK_BINARY_DIR})
 set(CPACK_GENERATOR ${GENERATORS})
 set(CPACK_PACKAGE_NAME ${PROJECT_NAME})
 set(CPACK_PACKAGE_VENDOR "MNMLSTC")
-set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "C++11 extension to standard library")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "C++14 features for C++11")
 set(CPACK_PACKAGE_DESCRIPTION_FILE "${PROJECT_SOURCE_DIR}/Readme.rst")
 set(CPACK_RESOURCE_FILE_LICENSE "${PROJECT_SOURCE_DIR}/License.rst")
 
@@ -50,12 +50,16 @@ set(CPACK_WIX_UI_DIALOG "${PROJECT_SOURCE_DIR}/package/dialog.bmp")
 # DEB Configuration
 #------------------------------------------------------------------------------
 set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE any)
+set(CPACK_DEBIAN_PACKAGE_MAINTAINER "MNMLSTC <development@mnmlstc.com>")
+set(CPACK_DEBIAN_PACKAGE_DEPENDS "cmake (>= 2.8.12)")
 
 #------------------------------------------------------------------------------
 # RPM Configuration
 #------------------------------------------------------------------------------
 set(CPACK_RPM_PACKAGE_ARCHITECTURE noarch)
 set(CPACK_RPM_PACKAGE_REQUIRES "cmake >= 2.8.12")
-set(CPACK_RPM_PACKAGE_RELEASE ${CORE_VERSION})
+set(CPACK_RPM_PACKAGE_RELEASE 1)
+set(CPACK_RPM_PACKAGE_LICENSE "ASL 2.0")
+set(CPACK_RPM_PACKAGE_GROUP "Development/Libraries")
 
 include(CPack)
