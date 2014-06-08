@@ -51,15 +51,21 @@ set(CPACK_WIX_UI_DIALOG "${PROJECT_SOURCE_DIR}/package/dialog.bmp")
 #------------------------------------------------------------------------------
 set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE all)
 set(CPACK_DEBIAN_PACKAGE_MAINTAINER "MNMLSTC <development@mnmlstc.com>")
-set(CPACK_DEBIAN_PACKAGE_DEPENDS "cmake (>= 2.8.12)")
 
 #------------------------------------------------------------------------------
 # RPM Configuration
 #------------------------------------------------------------------------------
 set(CPACK_RPM_PACKAGE_ARCHITECTURE noarch)
-set(CPACK_RPM_PACKAGE_REQUIRES "cmake >= 2.8.12")
 set(CPACK_RPM_PACKAGE_RELEASE 1)
 set(CPACK_RPM_PACKAGE_LICENSE "ASL 2.0")
 set(CPACK_RPM_PACKAGE_GROUP "Development/Libraries")
+# HACK: Fixes CPack generating a 'hot trash' RPM that has file conflicts.
+set(CPACK_RPM_SPEC_MORE_DEFINE "%define ignore \#")
+set(CPACK_RPM_USER_FILELIST
+  "%ignore /usr"
+  "%ignore /usr/local"
+  "%ignore /usr/local/share"
+  "%ignore /usr/local/include"
+)
 
 include(CPack)
