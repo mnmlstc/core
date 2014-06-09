@@ -34,7 +34,6 @@ list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/configure")
 
 # Used by cmake-dependent-option
 list(APPEND RPM_DEP "UNIX" "NOT APPLE" "BUILD_PACKAGE")
-list(APPEND DEB_DEP "UNIX" "NOT APPLE" "BUILD_PACKAGE")
 list(APPEND PKG_DEP "APPLE" "BUILD_PACKAGE")
 list(APPEND MSI_DEP "WIN32" "BUILD_PACKAGE")
 
@@ -44,7 +43,6 @@ option(BUILD_DOCS "Build documentation with Sphinx Documentation Generator")
 
 cmake_dependent_option(BUILD_PACKAGE_MSI "Create an MSI" ON "${MSI_DEP}" OFF)
 cmake_dependent_option(BUILD_PACKAGE_RPM "Create an RPM" ON "${RPM_DEP}" OFF)
-cmake_dependent_option(BUILD_PACKAGE_DEB "Create a DEB" ON "${DEB_DEP}" OFF)
 cmake_dependent_option(BUILD_PACKAGE_PKG "Create a PKG" ON "${PKG_DEP}" OFF)
 
 if (APPLE AND ${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
