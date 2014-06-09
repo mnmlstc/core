@@ -61,13 +61,9 @@ set(CPACK_RPM_PACKAGE_ARCHITECTURE noarch)
 set(CPACK_RPM_PACKAGE_RELEASE 1)
 set(CPACK_RPM_PACKAGE_LICENSE "ASL 2.0")
 set(CPACK_RPM_PACKAGE_GROUP "Development/Libraries")
-# HACK: Fixes CPack generating a 'hot trash' RPM that has file conflicts.
-set(CPACK_RPM_SPEC_MORE_DEFINE "%define ignore \#")
-set(CPACK_RPM_USER_FILELIST
-  "%ignore /usr"
-  "%ignore /usr/local"
-  "%ignore /usr/local/share"
-  "%ignore /usr/local/include"
-)
+
+# Prevents CPack from generating file conflicts
+set(CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION "/usr/share/doc/mnmlstc")
+list(APPEND CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION "/usr/share/cmake")
 
 include(CPack)
