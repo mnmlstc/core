@@ -1,0 +1,330 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Type Traits Component &mdash; MNMLSTC Core 1.1 documentation</title>
+  
+
+  
+  
+
+  
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="top" title="MNMLSTC Core 1.1 documentation" href="index.html"/>
+        <link rel="next" title="Functional Component" href="functional.html"/>
+        <link rel="prev" title="Using MNMLSTC Core" href="usage.html"/> 
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.6.2/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-nav-search">
+        <a href="index.html" class="fa fa-home"> MNMLSTC Core</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        
+        
+            <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Using MNMLSTC Core</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="usage.html#library-layout">Library Layout</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage.html#feature-addition-and-deprecation">Feature Addition and Deprecation</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">Type Traits</a></li>
+<li class="toctree-l1"><a class="reference internal" href="functional.html">Functional Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="algorithm.html">Algorithms</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="algorithm.html#non-modifying-sequence-operations">Non-Modifying Sequence Operations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="algorithm.html#modifying-sequence-operations">Modifying Sequence Operations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="algorithm.html#partitioning-operations">Partitioning Operations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="algorithm.html#sorting-operations">Sorting Operations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="algorithm.html#binary-search-operations">Binary Search Operations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="algorithm.html#set-operations">Set Operations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="algorithm.html#heap-operations">Heap Operations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="algorithm.html#min-max-operations">Min/Max Operations</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="iterator.html">Iterator Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="optional.html">Optional Types</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="optional.html#optional-type">Optional Type</a></li>
+<li class="toctree-l2"><a class="reference internal" href="optional.html#expected-type">Expected Type</a></li>
+<li class="toctree-l2"><a class="reference internal" href="optional.html#result-type">Result Type</a></li>
+<li class="toctree-l2"><a class="reference internal" href="optional.html#functions">Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="optional.html#specializations">Specializations</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="numeric.html">Numeric Algorithms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="variant.html">Variant Type</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="variant.html#specializations">Specializations</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="utility.html">Uncategorized Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="memory.html">Memory</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="memory.html#polymorphic-smart-pointer">Polymorphic Smart Pointer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="memory.html#deep-copying-smart-pointer">Deep Copying Smart Pointer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="memory.html#dumbest-smart-pointer">Dumbest Smart Pointer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="memory.html#utilities">Utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="memory.html#comparison-operators">Comparison Operators</a></li>
+<li class="toctree-l2"><a class="reference internal" href="memory.html#make-functions">Make Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="memory.html#specializations">Specializations</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="string.html">String Utilities</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="string.html#specializations">Specializations</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="range.html">Range Type</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="range.html#specialization">Specialization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="range.html#answers-to-open-questions">Answers to Open Questions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="any.html">Any Type</a></li>
+</ul>
+
+        
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">MNMLSTC Core</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>Type Traits Component</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          <a href="_sources/type-traits.txt" rel="nofollow"> View page source</a>
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main">
+            
+  <div class="section" id="type-traits-component">
+<span id="core-type-traits-component"></span><h1>Type Traits Component<a class="headerlink" href="#type-traits-component" title="Permalink to this headline">¶</a></h1>
+<p>The type traits component contains many utilities that are available in C++14,
+as well as a few custom types. Such as, <a class="reference internal" href="#is_nothrow_swappable:T:" title="is_nothrow_swappable&lt;T&gt;"><tt class="xref cpp cpp-type docutils literal"><span class="pre">is_nothrow_swappable</span></tt></a> and
+<a class="reference internal" href="#is_swappable:T:" title="is_swappable&lt;T&gt;"><tt class="xref cpp cpp-type docutils literal"><span class="pre">is_swappable</span></tt></a>. <em>Most</em> of the types provided within this component are
+in fact simple type aliases defined for C++14. e.g.,
+<tt class="docutils literal"><span class="pre">typename</span> <span class="pre">std::decay&lt;T&gt;::type</span></tt> is aliased to <tt class="docutils literal"><span class="pre">core::decay_t&lt;T&gt;</span></tt>. All types
+that are used as type <em>modifiers</em> (rather than type <em>properties</em>) have the
+equivalent alias available.</p>
+<p>Only type traits not provided by the C++11 standard are documented. If a
+type trait provided by MNMLSTC Core differs from the standard in any way, it is
+also documented here.</p>
+<p>The type traits component can be found in the <tt class="docutils literal"><span class="pre">&lt;core/type_traits.hpp&gt;</span></tt> header.</p>
+<dl class="type">
+<dt id="is_null_pointer:T:">
+<em class="property">type </em><tt class="descname">is_null_pointer&lt;T&gt;</tt><a class="headerlink" href="#is_null_pointer:T:" title="Permalink to this definition">¶</a></dt>
+<dd><p>An alias for <tt class="docutils literal"><span class="pre">std::true_type</span></tt> if <em>T</em> is any form of the type
+<tt class="docutils literal"><span class="pre">std::nullptr_t</span></tt>. This includes its <em>const</em> and <em>volatile</em> qualified
+counterparts.</p>
+</dd></dl>
+
+<dl class="type">
+<dt id="is_unpackable:T:">
+<em class="property">type </em><tt class="descname">is_unpackable&lt;T&gt;</tt><a class="headerlink" href="#is_unpackable:T:" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a type <em>T</em>, checks if the type may be used with <a class="reference internal" href="functional.html#unpack_t" title="unpack_t"><tt class="xref cpp cpp-class docutils literal"><span class="pre">unpack_t</span></tt></a> and
+<a class="reference internal" href="functional.html#invoke__X" title="invoke"><tt class="xref cpp cpp-func docutils literal"><span class="pre">invoke()</span></tt></a>.</p>
+</dd></dl>
+
+<dl class="type">
+<dt id="is_runpackable:T:">
+<em class="property">type </em><tt class="descname">is_runpackable&lt;T&gt;</tt><a class="headerlink" href="#is_runpackable:T:" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a type <em>T</em>, checks if the type may be used with <a class="reference internal" href="functional.html#runpack_t" title="runpack_t"><tt class="xref cpp cpp-class docutils literal"><span class="pre">runpack_t</span></tt></a> and
+<a class="reference internal" href="functional.html#invoke__X" title="invoke"><tt class="xref cpp cpp-func docutils literal"><span class="pre">invoke()</span></tt></a>.</p>
+</dd></dl>
+
+<dl class="type">
+<dt id="class_of:T:">
+<em class="property">type </em><tt class="descname">class_of&lt;T&gt;</tt><a class="headerlink" href="#class_of:T:" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a member function pointer type <em>T</em>, it extracts the underlying
+class type. For example, a type <tt class="docutils literal"><span class="pre">void</span> <span class="pre">A::*()</span></tt> will given the type <em>A</em> as
+its <tt class="docutils literal"><span class="pre">type</span></tt> member.</p>
+</dd></dl>
+
+<dl class="type">
+<dt id="invokable:Args:">
+<em class="property">type </em><tt class="descname">invokable&lt;Args&gt;</tt><a class="headerlink" href="#invokable:Args:" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a typelist <em>Args</em>, checks if the first type in <em>Args</em> may be invoked
+with the rest of the arguments in <em>Args</em>. The rule for deciding if <em>Args</em>
+follows the <em>INVOKE</em> pseudo expression.</p>
+</dd></dl>
+
+<dl class="type">
+<dt id="invoke_of:Args:">
+<em class="property">type </em><tt class="descname">invoke_of&lt;Args&gt;</tt><a class="headerlink" href="#invoke_of:Args:" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a typelist <em>Args</em>, the member typedef <tt class="docutils literal"><span class="pre">type</span></tt> will represent the
+return type if <em>Args</em> is invoked according to the <em>INVOKE</em> pseudo-expression.</p>
+</dd></dl>
+
+<dl class="type">
+<dt id="result_of:T:">
+<em class="property">type </em><tt class="descname">result_of&lt;T&gt;</tt><a class="headerlink" href="#result_of:T:" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is an SFINAE capable version of result_of. It relies on
+<a class="reference internal" href="#invoke_of:Args:" title="invoke_of&lt;Args&gt;"><tt class="xref cpp cpp-type docutils literal"><span class="pre">invoke_of&lt;Args&gt;</span></tt></a> to work correctly.</p>
+</dd></dl>
+
+<dl class="type">
+<dt id="common_type:Ts:">
+<em class="property">type </em><tt class="descname">common_type&lt;Ts&gt;</tt><a class="headerlink" href="#common_type:Ts:" title="Permalink to this definition">¶</a></dt>
+<dd><p>A more compiler agnostic version of <tt class="docutils literal"><span class="pre">std::common_type&lt;Ts&gt;</span></tt>. This was
+implemented to workaround an issue with Clang&#8217;s <tt class="docutils literal"><span class="pre">std::common_type</span></tt>
+attempting to discover the common type of two <tt class="docutils literal"><span class="pre">void&amp;&amp;</span></tt>.</p>
+</dd></dl>
+
+<dl class="type">
+<dt id="is_swappable:T:">
+<em class="property">type </em><tt class="descname">is_swappable&lt;T&gt;</tt><a class="headerlink" href="#is_swappable:T:" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unfortunately, this type is not as strong as one would like to believe. It
+always returns true for a given type, even if an expression is malformed.
+(For instance, given a type <em>T const</em>, it will return true). The only way
+to fix this would be to place an <tt class="docutils literal"><span class="pre">enable_if</span></tt> on std::swap. And that&#8217;s
+not happening.</p>
+</dd></dl>
+
+<dl class="type">
+<dt id="is_nothrow_swappable:T:">
+<em class="property">type </em><tt class="descname">is_nothrow_swappable&lt;T&gt;</tt><a class="headerlink" href="#is_nothrow_swappable:T:" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unlike <a class="reference internal" href="#is_swappable:T:" title="is_swappable&lt;T&gt;"><tt class="xref cpp cpp-type docutils literal"><span class="pre">is_swappable</span></tt></a>, <a class="reference internal" href="#is_nothrow_swappable:T:" title="is_nothrow_swappable&lt;T&gt;"><tt class="xref cpp cpp-type docutils literal"><span class="pre">is_nothrow_swappable</span></tt></a> is actually quite strong.
+It will be <tt class="docutils literal"><span class="pre">std::true_type</span></tt> if a given swap call on a type is actually
+marked as <em>noexcept</em>, and <tt class="docutils literal"><span class="pre">std::false_type</span></tt> otherwise. This type
+is comparable to libc++&#8217;s internal <tt class="docutils literal"><span class="pre">__is_nothrow_swappable</span></tt>.</p>
+</dd></dl>
+
+<dl class="type">
+<dt id="all_traits:Args:">
+<em class="property">type </em><tt class="descname">all_traits&lt;Args&gt;</tt><a class="headerlink" href="#all_traits:Args:" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a typelist <em>Args</em>, where each type in <em>Args</em> is a type trait property
+that contains a boolean member value, it will ether be equivalent to
+<tt class="docutils literal"><span class="pre">std::true_type</span></tt> if <em>all</em> of the traits <tt class="docutils literal"><span class="pre">value</span></tt> members are true.
+Otherwise, it will be equivalent to <tt class="docutils literal"><span class="pre">std::false_type</span></tt></p>
+</dd></dl>
+
+<dl class="type">
+<dt id="any_traits:Args:">
+<em class="property">type </em><tt class="descname">any_traits&lt;Args&gt;</tt><a class="headerlink" href="#any_traits:Args:" title="Permalink to this definition">¶</a></dt>
+<dd><p>Works much like <a class="reference internal" href="#all_traits:Args:" title="all_traits&lt;Args&gt;"><tt class="xref cpp cpp-type docutils literal"><span class="pre">all_traits&lt;Args&gt;</span></tt></a>, however only <em>one</em> of the given
+traits in <em>Args</em> must be true.</p>
+</dd></dl>
+
+<dl class="type">
+<dt id="no_traits:Args:">
+<em class="property">type </em><tt class="descname">no_traits&lt;Args&gt;</tt><a class="headerlink" href="#no_traits:Args:" title="Permalink to this definition">¶</a></dt>
+<dd><p>The inverse of <a class="reference internal" href="#all_traits:Args:" title="all_traits&lt;Args&gt;"><tt class="xref cpp cpp-type docutils literal"><span class="pre">all_traits&lt;Args&gt;</span></tt></a>. Will only be true if every
+trait in <em>Args</em> is false.</p>
+</dd></dl>
+
+</div>
+
+
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="functional.html" class="btn btn-neutral float-right" title="Functional Component"/>Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="usage.html" class="btn btn-neutral" title="Using MNMLSTC Core"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2013 - 2014, MNMLSTC.
+    </p>
+  </div>
+
+  <a href="https://github.com/snide/sphinx_rtd_theme">Sphinx theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'1.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

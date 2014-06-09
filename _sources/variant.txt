@@ -22,6 +22,8 @@ paths that are desired without requiring a user to implement a visitor functor
 separately. *This means that a variant is capable of performing a type-based
 switch statement*
 
+The variant component resides in ``<core/variant.hpp>``.
+
 .. namespace:: core
 
 .. class:: bad_variant_get

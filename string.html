@@ -1,71 +1,156 @@
 
 
-
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
-
-<html xmlns="http://www.w3.org/1999/xhtml">
-  <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>String Component &mdash; MNMLSTC Core 1.0 documentation</title>
-    
-    <link rel="stylesheet" href="_static/cloud.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noticia+Text|Open+Sans|Droid+Sans+Mono" type="text/css" />
-    
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '',
-        VERSION:     '1.0',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="_static/jquery.cookie.js"></script>
-    <script type="text/javascript" src="_static/cloud.js"></script>
-    <link rel="top" title="MNMLSTC Core 1.0 documentation" href="index.html" />
-    <link rel="next" title="Range Component" href="range.html" />
-    <link rel="prev" title="Memory Component" href="memory.html" /> 
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-  </head>
-  <body>
-    <div class="relbar-top">
-        
-    <div class="related">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="genindex.html" title="General Index"
-             accesskey="I">index</a></li>
-        <li class="right" >
-          <a href="range.html" title="Range Component"
-             accesskey="N">next</a> &nbsp; &nbsp;</li>
-        <li class="right" >
-          <a href="memory.html" title="Memory Component"
-             accesskey="P">previous</a> &nbsp; &nbsp;</li>
-    <li><a href="index.html">MNMLSTC Core 1.0 documentation</a> &raquo;</li>
- 
-      </ul>
-    </div>
-    </div>
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>String Component &mdash; MNMLSTC Core 1.1 documentation</title>
   
 
-    <div class="document">
-      <div class="documentwrapper">
-        <div class="bodywrapper">
-          <div class="body">
+  
+  
+
+  
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="top" title="MNMLSTC Core 1.1 documentation" href="index.html"/>
+        <link rel="next" title="Range Component" href="range.html"/>
+        <link rel="prev" title="Memory Component" href="memory.html"/> 
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.6.2/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-nav-search">
+        <a href="index.html" class="fa fa-home"> MNMLSTC Core</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        
+        
+            <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Using MNMLSTC Core</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="usage.html#library-layout">Library Layout</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage.html#feature-addition-and-deprecation">Feature Addition and Deprecation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="type-traits.html">Type Traits</a></li>
+<li class="toctree-l1"><a class="reference internal" href="functional.html">Functional Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="algorithm.html">Algorithms</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="algorithm.html#non-modifying-sequence-operations">Non-Modifying Sequence Operations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="algorithm.html#modifying-sequence-operations">Modifying Sequence Operations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="algorithm.html#partitioning-operations">Partitioning Operations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="algorithm.html#sorting-operations">Sorting Operations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="algorithm.html#binary-search-operations">Binary Search Operations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="algorithm.html#set-operations">Set Operations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="algorithm.html#heap-operations">Heap Operations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="algorithm.html#min-max-operations">Min/Max Operations</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="iterator.html">Iterator Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="optional.html">Optional Types</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="optional.html#optional-type">Optional Type</a></li>
+<li class="toctree-l2"><a class="reference internal" href="optional.html#expected-type">Expected Type</a></li>
+<li class="toctree-l2"><a class="reference internal" href="optional.html#result-type">Result Type</a></li>
+<li class="toctree-l2"><a class="reference internal" href="optional.html#functions">Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="optional.html#specializations">Specializations</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="numeric.html">Numeric Algorithms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="variant.html">Variant Type</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="variant.html#specializations">Specializations</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="utility.html">Uncategorized Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="memory.html">Memory</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="memory.html#polymorphic-smart-pointer">Polymorphic Smart Pointer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="memory.html#deep-copying-smart-pointer">Deep Copying Smart Pointer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="memory.html#dumbest-smart-pointer">Dumbest Smart Pointer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="memory.html#utilities">Utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="memory.html#comparison-operators">Comparison Operators</a></li>
+<li class="toctree-l2"><a class="reference internal" href="memory.html#make-functions">Make Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="memory.html#specializations">Specializations</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">String Utilities</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#specializations">Specializations</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="range.html">Range Type</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="range.html#specialization">Specialization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="range.html#answers-to-open-questions">Answers to Open Questions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="any.html">Any Type</a></li>
+</ul>
+
+        
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">MNMLSTC Core</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>String Component</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          <a href="_sources/string.txt" rel="nofollow"> View page source</a>
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main">
             
   <div class="section" id="string-component">
 <span id="core-string-component"></span><h1>String Component<a class="headerlink" href="#string-component" title="Permalink to this headline">¶</a></h1>
 <p>The string component contains types related to strings, and utilities for
 strings. Specifically, the <a class="reference internal" href="#basic_string_view:T:" title="basic_string_view&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">string_view</span></tt></a> class resides in the
 string component.</p>
+<p>The string component resides in the <tt class="docutils literal"><span class="pre">&lt;core/string.hpp&gt;</span></tt> header.</p>
 <dl class="class">
 <dt id="basic_string_view:T:">
 <em class="property">class </em><tt class="descname">basic_string_view&lt;T&gt;</tt><a class="headerlink" href="#basic_string_view:T:" title="Permalink to this definition">¶</a></dt>
@@ -137,7 +222,7 @@ viewing has been destructed will result in undefined behavior.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Type :</th><td class="field-body"><a class="reference internal" href="#basic_string_view:T:::size_type" title="basic_string_view&lt;T&gt;::size_type"><tt class="xref cpp cpp-type docutils literal"><span class="pre">size_type</span></tt></a></td>
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><a class="reference internal" href="#basic_string_view:T:::size_type" title="basic_string_view&lt;T&gt;::size_type"><tt class="xref cpp cpp-type docutils literal"><span class="pre">size_type</span></tt></a></td>
 </tr>
 </tbody>
 </table>
@@ -153,7 +238,7 @@ string.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Postcondition :</th><td class="field-body"><a class="reference internal" href="#basic_string_view:T:::sizeCCE" title="basic_string_view&lt;T&gt;::size"><tt class="xref cpp cpp-func docutils literal"><span class="pre">size()</span></tt></a> == <em>str</em>.size()</td>
+<tr class="field-odd field"><th class="field-name">Postcondition:</th><td class="field-body"><a class="reference internal" href="iterator.html#size__ContainerCRCE" title="size"><tt class="xref cpp cpp-func docutils literal"><span class="pre">size()</span></tt></a> == <em>str</em>.size()</td>
 </tr>
 </tbody>
 </table>
@@ -168,7 +253,7 @@ maximum length of the given length.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Postcondition :</th><td class="field-body"><a class="reference internal" href="#basic_string_view:T:::sizeCCE" title="basic_string_view&lt;T&gt;::size"><tt class="xref cpp cpp-func docutils literal"><span class="pre">size()</span></tt></a> == <em>len</em></td>
+<tr class="field-odd field"><th class="field-name">Postcondition:</th><td class="field-body"><a class="reference internal" href="iterator.html#size__ContainerCRCE" title="size"><tt class="xref cpp cpp-func docutils literal"><span class="pre">size()</span></tt></a> == <em>len</em></td>
 </tr>
 </tbody>
 </table>
@@ -201,7 +286,7 @@ defined.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Postcondition :</th><td class="field-body"><a class="reference internal" href="#basic_string_view:T:::emptyCCE" title="basic_string_view&lt;T&gt;::empty"><tt class="xref cpp cpp-func docutils literal"><span class="pre">empty()</span></tt></a> == true</td>
+<tr class="field-odd field"><th class="field-name">Postcondition:</th><td class="field-body"><a class="reference internal" href="iterator.html#empty__ContainerCRCE" title="empty"><tt class="xref cpp cpp-func docutils literal"><span class="pre">empty()</span></tt></a> == true</td>
 </tr>
 </tbody>
 </table>
@@ -281,7 +366,7 @@ defined.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><a class="reference internal" href="#basic_string_view:T:::sizeCCE" title="basic_string_view&lt;T&gt;::size"><tt class="xref cpp cpp-func docutils literal"><span class="pre">size()</span></tt></a></td>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><a class="reference internal" href="iterator.html#size__ContainerCRCE" title="size"><tt class="xref cpp cpp-func docutils literal"><span class="pre">size()</span></tt></a></td>
 </tr>
 </tbody>
 </table>
@@ -374,14 +459,14 @@ should be treated as such.</td>
 <dt id="basic_string_view:T:::remove_prefix__size_type">
 void <tt class="descname">remove_prefix</tt><big>(</big><a class="reference internal" href="#basic_string_view:T:::size_type" title="basic_string_view&lt;T&gt;::size_type">size_type</a> <em>n</em><big>)</big><a class="headerlink" href="#basic_string_view:T:::remove_prefix__size_type" title="Permalink to this definition">¶</a></dt>
 <dd><p>Moves the front of the <a class="reference internal" href="#basic_string_view:T:" title="basic_string_view&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">string_view</span></tt></a> forward <em>n</em> characters or
-<a class="reference internal" href="#basic_string_view:T:::sizeCCE" title="basic_string_view&lt;T&gt;::size"><tt class="xref cpp cpp-func docutils literal"><span class="pre">size()</span></tt></a> if <em>n</em> is greater than <a class="reference internal" href="#basic_string_view:T:::sizeCCE" title="basic_string_view&lt;T&gt;::size"><tt class="xref cpp cpp-func docutils literal"><span class="pre">size()</span></tt></a>.</p>
+<a class="reference internal" href="iterator.html#size__ContainerCRCE" title="size"><tt class="xref cpp cpp-func docutils literal"><span class="pre">size()</span></tt></a> if <em>n</em> is greater than <a class="reference internal" href="iterator.html#size__ContainerCRCE" title="size"><tt class="xref cpp cpp-func docutils literal"><span class="pre">size()</span></tt></a>.</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="basic_string_view:T:::remove_suffix__size_type">
 void <tt class="descname">remove_suffix</tt><big>(</big><a class="reference internal" href="#basic_string_view:T:::size_type" title="basic_string_view&lt;T&gt;::size_type">size_type</a> <em>n</em><big>)</big><a class="headerlink" href="#basic_string_view:T:::remove_suffix__size_type" title="Permalink to this definition">¶</a></dt>
 <dd><p>Moves the end of the <a class="reference internal" href="#basic_string_view:T:" title="basic_string_view&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">string_view</span></tt></a> backwards <em>n</em> characters or
-<a class="reference internal" href="#basic_string_view:T:::sizeCCE" title="basic_string_view&lt;T&gt;::size"><tt class="xref cpp cpp-func docutils literal"><span class="pre">size()</span></tt></a> if <em>n</em> is greater than <a class="reference internal" href="#basic_string_view:T:::sizeCCE" title="basic_string_view&lt;T&gt;::size"><tt class="xref cpp cpp-func docutils literal"><span class="pre">size()</span></tt></a>.</p>
+<a class="reference internal" href="iterator.html#size__ContainerCRCE" title="size"><tt class="xref cpp cpp-func docutils literal"><span class="pre">size()</span></tt></a> if <em>n</em> is greater than <a class="reference internal" href="iterator.html#size__ContainerCRCE" title="size"><tt class="xref cpp cpp-func docutils literal"><span class="pre">size()</span></tt></a>.</p>
 </dd></dl>
 
 <dl class="function">
@@ -392,8 +477,7 @@ void <tt class="descname">clear</tt><big>(</big><big>)</big><tt class="descclass
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name" colspan="2">Postconditions :</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><a class="reference internal" href="#basic_string_view:T:::emptyCCE" title="basic_string_view&lt;T&gt;::empty"><tt class="xref cpp cpp-func docutils literal"><span class="pre">empty()</span></tt></a> == true</td>
+<tr class="field-odd field"><th class="field-name">Postconditions:</th><td class="field-body"><a class="reference internal" href="iterator.html#empty__ContainerCRCE" title="empty"><tt class="xref cpp cpp-func docutils literal"><span class="pre">empty()</span></tt></a> == true</td>
 </tr>
 </tbody>
 </table>
@@ -408,11 +492,11 @@ void <tt class="descname">clear</tt><big>(</big><big>)</big><tt class="descclass
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">a new <a class="reference internal" href="#basic_string_view:T:" title="basic_string_view&lt;T&gt;"><tt class="xref cpp cpp-class docutils literal"><span class="pre">string_view</span></tt></a> with starting point <em>pos</em> and a length of
 <em>n</em> characters. If <em>n</em> is equal to <a class="reference internal" href="#basic_string_view:T:::npos__constexpr" title="basic_string_view&lt;T&gt;::npos"><tt class="xref cpp cpp-member docutils literal"><span class="pre">npos</span></tt></a>, or
-<em>pos</em> + <em>n</em> is greater than <a class="reference internal" href="#basic_string_view:T:::sizeCCE" title="basic_string_view&lt;T&gt;::size"><tt class="xref cpp cpp-func docutils literal"><span class="pre">size()</span></tt></a>, the length will be
+<em>pos</em> + <em>n</em> is greater than <a class="reference internal" href="iterator.html#size__ContainerCRCE" title="size"><tt class="xref cpp cpp-func docutils literal"><span class="pre">size()</span></tt></a>, the length will be
 the remainder of the string. Otherwise it will be <em>n</em>
 characters.</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Throws :</th><td class="field-body"><tt class="docutils literal"><span class="pre">std::out_of_range</span></tt> if <em>pos</em> is greater than <a class="reference internal" href="#basic_string_view:T:::sizeCCE" title="basic_string_view&lt;T&gt;::size"><tt class="xref cpp cpp-func docutils literal"><span class="pre">size()</span></tt></a></td>
+<tr class="field-even field"><th class="field-name">Throws:</th><td class="field-body"><tt class="docutils literal"><span class="pre">std::out_of_range</span></tt> if <em>pos</em> is greater than <a class="reference internal" href="iterator.html#size__ContainerCRCE" title="size"><tt class="xref cpp cpp-func docutils literal"><span class="pre">size()</span></tt></a></td>
 </tr>
 </tbody>
 </table>
@@ -476,8 +560,8 @@ positive value if this <a class="reference internal" href="#basic_string_view:T:
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><a class="reference internal" href="#basic_string_view:T:::value_type" title="basic_string_view&lt;T&gt;::value_type"><tt class="xref cpp cpp-type docutils literal"><span class="pre">value_type</span></tt></a> located at <em>idx</em>.</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Throws :</th><td class="field-body"><tt class="docutils literal"><span class="pre">std::out_of_range</span></tt> if <em>idx</em> is greater than or equal to
-<a class="reference internal" href="#basic_string_view:T:::sizeCCE" title="basic_string_view&lt;T&gt;::size"><tt class="xref cpp cpp-func docutils literal"><span class="pre">size()</span></tt></a>.</td>
+<tr class="field-even field"><th class="field-name">Throws:</th><td class="field-body"><tt class="docutils literal"><span class="pre">std::out_of_range</span></tt> if <em>idx</em> is greater than or equal to
+<a class="reference internal" href="iterator.html#size__ContainerCRCE" title="size"><tt class="xref cpp cpp-func docutils literal"><span class="pre">size()</span></tt></a>.</td>
 </tr>
 </tbody>
 </table>
@@ -672,72 +756,67 @@ void <tt class="descname">swap</tt><big>(</big><em>basic_string_view&amp;</em>, 
 
 
           </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="range.html" class="btn btn-neutral float-right" title="Range Component"/>Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="memory.html" class="btn btn-neutral" title="Memory Component"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2013 - 2014, MNMLSTC.
+    </p>
+  </div>
+
+  <a href="https://github.com/snide/sphinx_rtd_theme">Sphinx theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>
+</footer>
         </div>
       </div>
-      <div class="sphinxsidebar">
-        <div class="sphinxsidebarwrapper">
-  <div class="sphinxlocaltoc">
-  <h3><a href="index.html">Table Of Contents</a></h3>
-  <ul>
-<li><a class="reference internal" href="#">String Component</a><ul>
-<li><a class="reference internal" href="#specializations">Specializations</a></li>
-</ul>
-</li>
-</ul>
+
+    </section>
 
   </div>
-  <h4>Previous topic</h4>
-  <p class="topless"><a href="memory.html"
-                        title="previous chapter">Memory Component</a></p>
-  <h4>Next topic</h4>
-  <p class="topless"><a href="range.html"
-                        title="next chapter">Range Component</a></p>
-  <h3>This Page</h3>
-  <ul class="this-page-menu">
-    <li><a href="_sources/string.txt"
-           rel="nofollow">Show Source</a></li>
-  </ul>
-<div id="searchbox" style="display: none">
-  <h3>Quick search</h3>
-    <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
-    </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
-</div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
-        </div>
-      </div>
-      <div class="clearer"></div>
-    </div>
-    <div class="relbar-bottom">
-        
-    <div class="related">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="genindex.html" title="General Index"
-             >index</a></li>
-        <li class="right" >
-          <a href="range.html" title="Range Component"
-             >next</a> &nbsp; &nbsp;</li>
-        <li class="right" >
-          <a href="memory.html" title="Memory Component"
-             >previous</a> &nbsp; &nbsp;</li>
-    <li><a href="index.html">MNMLSTC Core 1.0 documentation</a> &raquo;</li>
- 
-      </ul>
-    </div>
-    </div>
+  
 
-    <div class="footer">
-        &copy; Copyright 2013, MNMLSTC.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
-    </div>
-    <!-- cloud_sptheme 1.4 -->
-  </body>
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'1.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
 </html>

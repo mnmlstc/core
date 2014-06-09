@@ -14,6 +14,8 @@ Additionally, the functional component provides a :class:`function_traits\<T>`
 object to discern at compile time the return type and arity of a function. The
 ability to discover the types of a given function's argument is also possible.
 
+The functional component can be found in the ``<core/functional.hpp>`` header.
+
 .. namespace:: core
 
 .. class:: unpack_t

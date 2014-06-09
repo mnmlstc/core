@@ -1,65 +1,149 @@
 
 
-
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
-
-<html xmlns="http://www.w3.org/1999/xhtml">
-  <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>Variant Component &mdash; MNMLSTC Core 1.0 documentation</title>
-    
-    <link rel="stylesheet" href="_static/cloud.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noticia+Text|Open+Sans|Droid+Sans+Mono" type="text/css" />
-    
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '',
-        VERSION:     '1.0',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="_static/jquery.cookie.js"></script>
-    <script type="text/javascript" src="_static/cloud.js"></script>
-    <link rel="top" title="MNMLSTC Core 1.0 documentation" href="index.html" />
-    <link rel="next" title="Utility Component" href="utility.html" />
-    <link rel="prev" title="Optional Component" href="optional.html" /> 
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-  </head>
-  <body>
-    <div class="relbar-top">
-        
-    <div class="related">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="genindex.html" title="General Index"
-             accesskey="I">index</a></li>
-        <li class="right" >
-          <a href="utility.html" title="Utility Component"
-             accesskey="N">next</a> &nbsp; &nbsp;</li>
-        <li class="right" >
-          <a href="optional.html" title="Optional Component"
-             accesskey="P">previous</a> &nbsp; &nbsp;</li>
-    <li><a href="index.html">MNMLSTC Core 1.0 documentation</a> &raquo;</li>
- 
-      </ul>
-    </div>
-    </div>
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Variant Component &mdash; MNMLSTC Core 1.1 documentation</title>
   
 
-    <div class="document">
-      <div class="documentwrapper">
-        <div class="bodywrapper">
-          <div class="body">
+  
+  
+
+  
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="top" title="MNMLSTC Core 1.1 documentation" href="index.html"/>
+        <link rel="next" title="Utility Component" href="utility.html"/>
+        <link rel="prev" title="Numeric Component" href="numeric.html"/> 
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.6.2/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-nav-search">
+        <a href="index.html" class="fa fa-home"> MNMLSTC Core</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        
+        
+            <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Using MNMLSTC Core</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="usage.html#library-layout">Library Layout</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage.html#feature-addition-and-deprecation">Feature Addition and Deprecation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="type-traits.html">Type Traits</a></li>
+<li class="toctree-l1"><a class="reference internal" href="functional.html">Functional Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="algorithm.html">Algorithms</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="algorithm.html#non-modifying-sequence-operations">Non-Modifying Sequence Operations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="algorithm.html#modifying-sequence-operations">Modifying Sequence Operations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="algorithm.html#partitioning-operations">Partitioning Operations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="algorithm.html#sorting-operations">Sorting Operations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="algorithm.html#binary-search-operations">Binary Search Operations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="algorithm.html#set-operations">Set Operations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="algorithm.html#heap-operations">Heap Operations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="algorithm.html#min-max-operations">Min/Max Operations</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="iterator.html">Iterator Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="optional.html">Optional Types</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="optional.html#optional-type">Optional Type</a></li>
+<li class="toctree-l2"><a class="reference internal" href="optional.html#expected-type">Expected Type</a></li>
+<li class="toctree-l2"><a class="reference internal" href="optional.html#result-type">Result Type</a></li>
+<li class="toctree-l2"><a class="reference internal" href="optional.html#functions">Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="optional.html#specializations">Specializations</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="numeric.html">Numeric Algorithms</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">Variant Type</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#specializations">Specializations</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="utility.html">Uncategorized Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="memory.html">Memory</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="memory.html#polymorphic-smart-pointer">Polymorphic Smart Pointer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="memory.html#deep-copying-smart-pointer">Deep Copying Smart Pointer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="memory.html#dumbest-smart-pointer">Dumbest Smart Pointer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="memory.html#utilities">Utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="memory.html#comparison-operators">Comparison Operators</a></li>
+<li class="toctree-l2"><a class="reference internal" href="memory.html#make-functions">Make Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="memory.html#specializations">Specializations</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="string.html">String Utilities</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="string.html#specializations">Specializations</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="range.html">Range Type</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="range.html#specialization">Specialization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="range.html#answers-to-open-questions">Answers to Open Questions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="any.html">Any Type</a></li>
+</ul>
+
+        
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">MNMLSTC Core</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>Variant Component</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          <a href="_sources/variant.txt" rel="nofollow"> View page source</a>
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main">
             
   <div class="section" id="variant-component">
 <span id="core-variant-component"></span><h1>Variant Component<a class="headerlink" href="#variant-component" title="Permalink to this headline">¶</a></h1>
@@ -75,6 +159,7 @@ pattern matching via lambdas. This allows a user to define the different code
 paths that are desired without requiring a user to implement a visitor functor
 separately. <em>This means that a variant is capable of performing a type-based
 switch statement</em></p>
+<p>The variant component resides in <tt class="docutils literal"><span class="pre">&lt;core/variant.hpp&gt;</span></tt>.</p>
 <dl class="class">
 <dt id="bad_variant_get">
 <em class="property">class </em><tt class="descname">bad_variant_get</tt><a class="headerlink" href="#bad_variant_get" title="Permalink to this definition">¶</a></dt>
@@ -82,7 +167,7 @@ switch statement</em></p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Inherits :</th><td class="field-body"><tt class="docutils literal"><span class="pre">std::logic_error</span></tt></td>
+<tr class="field-odd field"><th class="field-name">Inherits:</th><td class="field-body"><tt class="docutils literal"><span class="pre">std::logic_error</span></tt></td>
 </tr>
 </tbody>
 </table>
@@ -104,7 +189,7 @@ is initialized.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Requires :</th><td class="field-body"><em>T</em> be of a type from which any type in <em>Ts</em> is constructible.</td>
+<tr class="field-odd field"><th class="field-name">Requires:</th><td class="field-body"><em>T</em> be of a type from which any type in <em>Ts</em> is constructible.</td>
 </tr>
 </tbody>
 </table>
@@ -207,11 +292,11 @@ the type of the value returned will be affected as well.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Noexcept :</th><td class="field-body">false</td>
+<tr class="field-odd field"><th class="field-name">Noexcept:</th><td class="field-body">false</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The element located at N in the type list.</td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Throws :</th><td class="field-body"><a class="reference internal" href="#bad_variant_get" title="bad_variant_get"><tt class="xref cpp cpp-class docutils literal"><span class="pre">bad_variant_get</span></tt></a> if N != <a class="reference internal" href="#variant:Ts:::whichC" title="variant&lt;Ts&gt;::which"><tt class="xref cpp cpp-func docutils literal"><span class="pre">which()</span></tt></a>.</td>
+<tr class="field-odd field"><th class="field-name">Throws:</th><td class="field-body"><a class="reference internal" href="#bad_variant_get" title="bad_variant_get"><tt class="xref cpp cpp-class docutils literal"><span class="pre">bad_variant_get</span></tt></a> if N != <a class="reference internal" href="#variant:Ts:::whichC" title="variant&lt;Ts&gt;::which"><tt class="xref cpp cpp-func docutils literal"><span class="pre">which()</span></tt></a>.</td>
 </tr>
 </tbody>
 </table>
@@ -294,72 +379,67 @@ to get the value from the variant.</p>
 
 
           </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="utility.html" class="btn btn-neutral float-right" title="Utility Component"/>Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="numeric.html" class="btn btn-neutral" title="Numeric Component"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2013 - 2014, MNMLSTC.
+    </p>
+  </div>
+
+  <a href="https://github.com/snide/sphinx_rtd_theme">Sphinx theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>
+</footer>
         </div>
       </div>
-      <div class="sphinxsidebar">
-        <div class="sphinxsidebarwrapper">
-  <div class="sphinxlocaltoc">
-  <h3><a href="index.html">Table Of Contents</a></h3>
-  <ul>
-<li><a class="reference internal" href="#">Variant Component</a><ul>
-<li><a class="reference internal" href="#specializations">Specializations</a></li>
-</ul>
-</li>
-</ul>
+
+    </section>
 
   </div>
-  <h4>Previous topic</h4>
-  <p class="topless"><a href="optional.html"
-                        title="previous chapter">Optional Component</a></p>
-  <h4>Next topic</h4>
-  <p class="topless"><a href="utility.html"
-                        title="next chapter">Utility Component</a></p>
-  <h3>This Page</h3>
-  <ul class="this-page-menu">
-    <li><a href="_sources/variant.txt"
-           rel="nofollow">Show Source</a></li>
-  </ul>
-<div id="searchbox" style="display: none">
-  <h3>Quick search</h3>
-    <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
-    </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
-</div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
-        </div>
-      </div>
-      <div class="clearer"></div>
-    </div>
-    <div class="relbar-bottom">
-        
-    <div class="related">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="genindex.html" title="General Index"
-             >index</a></li>
-        <li class="right" >
-          <a href="utility.html" title="Utility Component"
-             >next</a> &nbsp; &nbsp;</li>
-        <li class="right" >
-          <a href="optional.html" title="Optional Component"
-             >previous</a> &nbsp; &nbsp;</li>
-    <li><a href="index.html">MNMLSTC Core 1.0 documentation</a> &raquo;</li>
- 
-      </ul>
-    </div>
-    </div>
+  
 
-    <div class="footer">
-        &copy; Copyright 2013, MNMLSTC.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
-    </div>
-    <!-- cloud_sptheme 1.4 -->
-  </body>
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'1.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
 </html>

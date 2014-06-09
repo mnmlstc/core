@@ -1,0 +1,1521 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Algorithm Component &mdash; MNMLSTC Core 1.1 documentation</title>
+  
+
+  
+  
+
+  
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="top" title="MNMLSTC Core 1.1 documentation" href="index.html"/>
+        <link rel="next" title="Iterator Component" href="iterator.html"/>
+        <link rel="prev" title="Functional Component" href="functional.html"/> 
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.6.2/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-nav-search">
+        <a href="index.html" class="fa fa-home"> MNMLSTC Core</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        
+        
+            <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Using MNMLSTC Core</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="usage.html#library-layout">Library Layout</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage.html#feature-addition-and-deprecation">Feature Addition and Deprecation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="type-traits.html">Type Traits</a></li>
+<li class="toctree-l1"><a class="reference internal" href="functional.html">Functional Utilities</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">Algorithms</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#non-modifying-sequence-operations">Non-Modifying Sequence Operations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#modifying-sequence-operations">Modifying Sequence Operations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#partitioning-operations">Partitioning Operations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#sorting-operations">Sorting Operations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#binary-search-operations">Binary Search Operations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#set-operations">Set Operations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#heap-operations">Heap Operations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#min-max-operations">Min/Max Operations</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="iterator.html">Iterator Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="optional.html">Optional Types</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="optional.html#optional-type">Optional Type</a></li>
+<li class="toctree-l2"><a class="reference internal" href="optional.html#expected-type">Expected Type</a></li>
+<li class="toctree-l2"><a class="reference internal" href="optional.html#result-type">Result Type</a></li>
+<li class="toctree-l2"><a class="reference internal" href="optional.html#functions">Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="optional.html#specializations">Specializations</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="numeric.html">Numeric Algorithms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="variant.html">Variant Type</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="variant.html#specializations">Specializations</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="utility.html">Uncategorized Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="memory.html">Memory</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="memory.html#polymorphic-smart-pointer">Polymorphic Smart Pointer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="memory.html#deep-copying-smart-pointer">Deep Copying Smart Pointer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="memory.html#dumbest-smart-pointer">Dumbest Smart Pointer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="memory.html#utilities">Utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="memory.html#comparison-operators">Comparison Operators</a></li>
+<li class="toctree-l2"><a class="reference internal" href="memory.html#make-functions">Make Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="memory.html#specializations">Specializations</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="string.html">String Utilities</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="string.html#specializations">Specializations</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="range.html">Range Type</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="range.html#specialization">Specialization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="range.html#answers-to-open-questions">Answers to Open Questions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="any.html">Any Type</a></li>
+</ul>
+
+        
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">MNMLSTC Core</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>Algorithm Component</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          <a href="_sources/algorithm.txt" rel="nofollow"> View page source</a>
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main">
+            
+  <div class="section" id="algorithm-component">
+<span id="core-algorithm-component"></span><h1>Algorithm Component<a class="headerlink" href="#algorithm-component" title="Permalink to this headline">¶</a></h1>
+<p>The algorithm component can be seen as a competitor to the Boost.Range
+algorithm headers. There are a few small differences (namely that this
+component relies on the <a class="reference internal" href="range.html#core-range-component"><em>Range Component</em></a>), however these differences
+are discussed below.</p>
+<p>The algorithm component can be found in the <tt class="docutils literal"><span class="pre">&lt;core/algorithm.hpp&gt;</span></tt> header.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>All of the functions in this component that take a range take
+universal references in most cases. The reasons for this are:</p>
+<blockquote>
+<div><ul class="simple">
+<li>there should be a minimal amount of overhead</li>
+<li>we shouldn&#8217;t add to this overhead</li>
+<li>we have perfect forwarding</li>
+</ul>
+</div></blockquote>
+<p class="last">In the author&#8217;s opinion, causing additional parameters to be passed to the
+underlying functions by value is an unnecessary cost. The only cost that
+should be incurred is the one to <a class="reference internal" href="range.html#make_range__T.T" title="make_range"><tt class="xref cpp cpp-func docutils literal"><span class="pre">make_range()</span></tt></a>.</p>
+</div>
+<div class="section" id="non-modifying-sequence-operations">
+<span id="core-algorithm-component-non-modifying-sequence-operations"></span><h2>Non-Modifying Sequence Operations<a class="headerlink" href="#non-modifying-sequence-operations" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="all_of__RangeRR.UnaryPredicateRR">
+bool <tt class="descname">all_of</tt><big>(</big>Range&amp;&amp; <em>range</em>, UnaryPredicate&amp;&amp; <em>up</em><big>)</big><a class="headerlink" href="#all_of__RangeRR.UnaryPredicateRR" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><tt class="docutils literal"><span class="pre">true</span></tt> if <em>up</em> returns <tt class="docutils literal"><span class="pre">true</span></tt> for <strong>all</strong> elements in <em>range</em>.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Requires:</th><td class="field-body"><em>range</em> must provide InputIterators.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="any_of__RangeRR.UnaryPredicateRR">
+bool <tt class="descname">any_of</tt><big>(</big>Range&amp;&amp; <em>range</em>, UnaryPredicate&amp;&amp; <em>up</em><big>)</big><a class="headerlink" href="#any_of__RangeRR.UnaryPredicateRR" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><tt class="docutils literal"><span class="pre">true</span></tt> if <em>up</em> returns <tt class="docutils literal"><span class="pre">true</span></tt> for <strong>any</strong> elements in <em>range</em>.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Requires:</th><td class="field-body"><em>range</em> must provide InputIterators.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="none_of__RangeRR.UnaryPredicateRR">
+bool <tt class="descname">none_of</tt><big>(</big>Range&amp;&amp; <em>range</em>, UnaryPredicate&amp;&amp; <em>up</em><big>)</big><a class="headerlink" href="#none_of__RangeRR.UnaryPredicateRR" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><tt class="docutils literal"><span class="pre">true</span></tt> if <em>up</em> returns <tt class="docutils literal"><span class="pre">false</span></tt> for <strong>all</strong> elements in <em>range</em>.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Requires:</th><td class="field-body"><em>range</em> must provide InputIterators.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="for_each__RangeRR.UnaryFunctionRR">
+decay_t&lt;UnaryFunction&gt; <tt class="descname">for_each</tt><big>(</big>Range&amp;&amp; <em>range</em>, UnaryFunction&amp;&amp; <em>f</em><big>)</big><a class="headerlink" href="#for_each__RangeRR.UnaryFunctionRR" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><em>f</em> by value.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Requires:</th><td class="field-body"><em>range</em> must provide InputIterators.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="count__RangeRR.TCR">
+difference_type <tt class="descname">count</tt><big>(</big>Range&amp;&amp; <em>range</em>, T const&amp; <em>value</em><big>)</big><a class="headerlink" href="#count__RangeRR.TCR" title="Permalink to this definition">¶</a></dt>
+<dt id="count_if__RangeRR.UnaryPredicateRR">
+difference_type <tt class="descname">count_if</tt><big>(</big>Range&amp;&amp; <em>range</em>, UnaryPredicate&amp;&amp; <em>up</em><big>)</big><a class="headerlink" href="#count_if__RangeRR.UnaryPredicateRR" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Number of elements equal to <em>value</em> or times <em>up</em> returned true.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Requires:</th><td class="field-body"><em>range</em> must provide InputIterators</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="mismatch__RangeRR.InputIt2RR">
+pair&lt;InputIt1, InputIt2&gt; <tt class="descname">mismatch</tt><big>(</big>Range&amp;&amp; <em>range</em>, InputIt2&amp;&amp; <em>it</em><big>)</big><a class="headerlink" href="#mismatch__RangeRR.InputIt2RR" title="Permalink to this definition">¶</a></dt>
+<dt id="mismatch__RangeRR.InputIt2RR.BinaryPredicateRR">
+pair&lt;InputIt1, InputIt2&gt; <tt class="descname">mismatch</tt><big>(</big>Range&amp;&amp; <em>range</em>, InputIt2&amp;&amp; <em>it</em>, BinaryPredicate&amp;&amp; <em>bp</em><big>)</big><a class="headerlink" href="#mismatch__RangeRR.InputIt2RR.BinaryPredicateRR" title="Permalink to this definition">¶</a></dt>
+<dd><p>The first overload uses <tt class="docutils literal"><span class="pre">operator</span> <span class="pre">==</span></tt>, while the second uses <em>bp</em>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The first mismatching pair of elements from <em>range</em> and the
+range starting at <em>it</em>.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Requires:</th><td class="field-body"><em>range</em> must provide InputIterators</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="equal__RangeRR.InputItRR">
+bool <tt class="descname">equal</tt><big>(</big>Range&amp;&amp; <em>range</em>, InputIt&amp;&amp; <em>it</em><big>)</big><a class="headerlink" href="#equal__RangeRR.InputItRR" title="Permalink to this definition">¶</a></dt>
+<dt id="equal__RangeRR.InputItRR.BinaryPredicateRR">
+bool <tt class="descname">equal</tt><big>(</big>Range&amp;&amp; <em>range</em>, InputIt&amp;&amp; <em>it</em>, BinaryPredicate&amp;&amp; <em>bp</em><big>)</big><a class="headerlink" href="#equal__RangeRR.InputItRR.BinaryPredicateRR" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><tt class="docutils literal"><span class="pre">true</span></tt> if <em>range</em> and the elements in <em>it</em> are equal. The
+first version uses <tt class="docutils literal"><span class="pre">operator</span> <span class="pre">==</span></tt>. The second uses <em>bp</em>.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Requires:</th><td class="field-body"><em>range</em> must provide InputIterators</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="find__RangeRR.TCR">
+InputIt <tt class="descname">find</tt><big>(</big>Range&amp;&amp; <em>range</em>, T const&amp; <em>value</em><big>)</big><a class="headerlink" href="#find__RangeRR.TCR" title="Permalink to this definition">¶</a></dt>
+<dt id="find_if__RangeRR.UnaryPredicateRR">
+InputIt <tt class="descname">find_if</tt><big>(</big>Range&amp;&amp; <em>range</em>, UnaryPredicate&amp;&amp; <em>p</em><big>)</big><a class="headerlink" href="#find_if__RangeRR.UnaryPredicateRR" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">iterator to the item found in <em>range</em>. If no item is found or if
+<em>p</em> never returns true, the iterator is equal to the end of the
+range.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Requires:</th><td class="field-body"><em>range</em> must provide InputIterators</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="find_end__Range1RR.Range2RR">
+ForwardIt <tt class="descname">find_end</tt><big>(</big>Range1&amp;&amp; <em>range1</em>, Range2&amp;&amp; <em>range2</em><big>)</big><a class="headerlink" href="#find_end__Range1RR.Range2RR" title="Permalink to this definition">¶</a></dt>
+<dt id="find_end__Range1RR.Range2RR.BinaryPredicateRR">
+ForwardIt <tt class="descname">find_end</tt><big>(</big>Range1&amp;&amp; <em>range1</em>, Range2&amp;&amp; <em>range2</em>, BinaryPredicate&amp;&amp; <em>bp</em><big>)</big><a class="headerlink" href="#find_end__Range1RR.Range2RR.BinaryPredicateRR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Searches for the last subsequence of elements in <em>range2</em> within <em>range1</em>.
+The first version uses <tt class="docutils literal"><span class="pre">operator</span> <span class="pre">==</span></tt>. The second uses the provided
+binary predicate <em>bp</em>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Iterator to the beginning of the last subsequence in <em>range1</em>.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Requires:</th><td class="field-body">Both <em>range1</em> and <em>range2</em> must provide ForwardIterators</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="find_first_of__IRangeRR.FRangeRR">
+InputIt <tt class="descname">find_first_of</tt><big>(</big>IRange&amp;&amp; <em>irange</em>, FRange&amp;&amp; <em>frange</em><big>)</big><a class="headerlink" href="#find_first_of__IRangeRR.FRangeRR" title="Permalink to this definition">¶</a></dt>
+<dt id="find_first_of__IRangeRR.FRangeRR.BinaryPredicateRR">
+InputIt <tt class="descname">find_first_of</tt><big>(</big>IRange&amp;&amp; <em>irange</em>, FRange&amp;&amp; <em>frange</em>, BinaryPredicate&amp;&amp; <em>bp</em><big>)</big><a class="headerlink" href="#find_first_of__IRangeRR.FRangeRR.BinaryPredicateRR" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Iterator to the first element in <em>irange</em> that is also in <em>frange</em>.
+If no such element is found, the end of <em>irange</em> is returned.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Requires:</th><td class="field-body"><em>irange</em> must provide InputIterators, <em>frange</em> must provide
+ForwardIterators.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="adjacent_find__RangeRR">
+ForwardIt <tt class="descname">adjacent_find</tt><big>(</big>Range&amp;&amp; <em>range</em><big>)</big><a class="headerlink" href="#adjacent_find__RangeRR" title="Permalink to this definition">¶</a></dt>
+<dt id="adjacent_find__RangeRR.BinaryPredicateRR">
+ForwardIt <tt class="descname">adjacent_find</tt><big>(</big>Range&amp;&amp; <em>range</em>, BinaryPredicate&amp;&amp; <em>bp</em><big>)</big><a class="headerlink" href="#adjacent_find__RangeRR.BinaryPredicateRR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Searches <em>range</em> for two consecutive identical elements. The first version
+uses <tt class="docutils literal"><span class="pre">operator</span> <span class="pre">==</span></tt> to compare the elements, the second version uses the
+given binary predicate <em>bp</em>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">ForwardIterator to the first of the identical elements. If no
+such elements are found, the end of <em>range</em> is returned.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Requires:</th><td class="field-body"><em>range</em> must provide ForwardIterators.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="search__Range1RR.Range2RR">
+ForwardIt <tt class="descname">search</tt><big>(</big>Range1&amp;&amp; <em>range1</em>, Range2&amp;&amp; <em>range2</em><big>)</big><a class="headerlink" href="#search__Range1RR.Range2RR" title="Permalink to this definition">¶</a></dt>
+<dt id="search__Range1RR.Range2RR.BinaryPredicateRR">
+ForwardIt <tt class="descname">search</tt><big>(</big>Range1&amp;&amp; <em>range1</em>, Range2&amp;&amp; <em>range2</em>, BinaryPredicate&amp;&amp; <em>bp</em><big>)</big><a class="headerlink" href="#search__Range1RR.Range2RR.BinaryPredicateRR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Searches for the first occurrence of the subsequence of elements in <em>range2</em>
+in <em>range1</em>. <tt class="docutils literal"><span class="pre">operator</span> <span class="pre">==</span></tt> is used for the first version, while <em>bp</em> is
+utilized for the second.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Forward iterator to the subsequence, if found. Otherwise the end
+of <em>range1</em>.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Requires:</th><td class="field-body"><em>range1</em> and <em>range2</em> must provide ForwardIterators</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="search_n__RangeRR.SizeRR.TCR">
+ForwardIt <tt class="descname">search_n</tt><big>(</big>Range&amp;&amp; <em>range</em>, Size&amp;&amp; <em>count</em>, T const&amp; <em>value</em><big>)</big><a class="headerlink" href="#search_n__RangeRR.SizeRR.TCR" title="Permalink to this definition">¶</a></dt>
+<dt id="search_n__RangeRR.SizeRR.TCR.BinaryPredicateRR">
+ForwardIt <tt class="descname">search_n</tt><big>(</big>Range&amp;&amp; <em>range</em>, Size&amp;&amp; <em>count</em>, T const&amp; <em>value</em>, BinaryPredicate&amp;&amp; <em>bp</em><big>)</big><a class="headerlink" href="#search_n__RangeRR.SizeRR.TCR.BinaryPredicateRR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Searches <em>range</em> for the first sequence of <em>count</em> identical elements equal
+to <em>value</em>. The first version uses <tt class="docutils literal"><span class="pre">operator</span> <span class="pre">==</span></tt>. The second uses the
+provided binary predicate <em>bp</em>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">ForwardIterator to the start of the discovered sequence of the
+end of <em>range</em> if no such sequence was found.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Requires:</th><td class="field-body"><em>range</em> must provide ForwardIterators</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="modifying-sequence-operations">
+<span id="core-alglorithm-component-modifying-sequence-operations"></span><h2>Modifying Sequence Operations<a class="headerlink" href="#modifying-sequence-operations" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="copy__RangeRR.OutputItRR">
+decay_t&lt;OutputIt&gt; <tt class="descname">copy</tt><big>(</big>Range&amp;&amp; <em>range</em>, OutputIt&amp;&amp; <em>it</em><big>)</big><a class="headerlink" href="#copy__RangeRR.OutputItRR" title="Permalink to this definition">¶</a></dt>
+<dt id="copy_if__RangeRR.OutputItRR.UnaryPredicateRR">
+decay_t&lt;OutputIt&gt; <tt class="descname">copy_if</tt><big>(</big>Range&amp;&amp; <em>range</em>, OutputIt&amp;&amp; <em>it</em>, UnaryPredicate&amp;&amp; <em>up</em><big>)</big><a class="headerlink" href="#copy_if__RangeRR.OutputItRR.UnaryPredicateRR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Copies the elements in <em>range</em> to <em>it</em>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Iterator to one past the last element written.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Requires:</th><td class="field-body"><em>range</em> must provide InputIterators.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="copy_backward__RangeRR.BidirItRR">
+decay_t&lt;BidirIt&gt; <tt class="descname">copy_backward</tt><big>(</big>Range&amp;&amp; <em>range</em>, BidirIt&amp;&amp; <em>it</em><big>)</big><a class="headerlink" href="#copy_backward__RangeRR.BidirItRR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Copies the elements from <em>range</em> to the range starting at <em>it</em>.
+The elements are copied in reverse order (the last element is copied first),
+but their relative order is preserved.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Iterator to the last element copied.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Requires:</th><td class="field-body"><em>range</em> must provide BidirectionalIterators.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="move__RangeRR.OutputItRR">
+decay_t&lt;OutputIt&gt; <tt class="descname">move</tt><big>(</big>Range&amp;&amp; <em>range</em>, OutputIt&amp;&amp; <em>it</em><big>)</big><a class="headerlink" href="#move__RangeRR.OutputItRR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Moves the elements in <em>range</em> to another range starting at <em>it</em>. The
+elements in <em>range</em> are in a valid but null state after moving.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Iterator to one past the last element written.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Requires:</th><td class="field-body"><em>range</em> must provide InputIterators.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="move_backward__RangeRR.BidirItRR">
+decay_t&lt;BidirIt&gt; <tt class="descname">move_backward</tt><big>(</big>Range&amp;&amp; <em>range</em>, BidirIt&amp;&amp; <em>it</em><big>)</big><a class="headerlink" href="#move_backward__RangeRR.BidirItRR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Moves the elements from <em>range</em> to another range starting at <em>it</em>.
+The elements are moved in reverse order (the last element is moved first),
+but their relative order is preserved.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Iterator to the last element moved.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Requires:</th><td class="field-body"><em>range</em> must provide BidirectionalIterators.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="fill__RangeRR.TCR">
+void <tt class="descname">fill</tt><big>(</big>Range&amp;&amp; <em>range</em>, T const&amp; <em>value</em><big>)</big><a class="headerlink" href="#fill__RangeRR.TCR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fills <em>range</em> with a copy of <em>value</em>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Requires:</th><td class="field-body"><em>range</em> must provide ForwardIterators.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="transform__RangeRR.OutputItRR.UnaryOperationRR">
+decay_t&lt;OutputIt&gt; <tt class="descname">transform</tt><big>(</big>Range&amp;&amp; <em>range</em>, OutputIt&amp;&amp; <em>it</em>, UnaryOperation&amp;&amp; <em>op</em><big>)</big><a class="headerlink" href="#transform__RangeRR.OutputItRR.UnaryOperationRR" title="Permalink to this definition">¶</a></dt>
+<dt id="transform__Range1RR.Range2RR.OutputItRR.BinaryOperationRR">
+decay_t&lt;OutputIt&gt; <tt class="descname">transform</tt><big>(</big>Range1&amp;&amp; <em>range1</em>, Range2&amp;&amp; <em>range2</em>, OutputIt&amp;&amp; <em>it</em>, BinaryOperation&amp;&amp; <em>op</em><big>)</big><a class="headerlink" href="#transform__Range1RR.Range2RR.OutputItRR.BinaryOperationRR" title="Permalink to this definition">¶</a></dt>
+<dt id="transform_if__RangeRR.OutputIt.UnaryOperation.UnaryPredicate">
+OutputIt <tt class="descname">transform_if</tt><big>(</big>Range&amp;&amp; <em>range</em>, OutputIt <em>it</em>, UnaryOperation <em>op</em>, UnaryPredicate <em>up</em><big>)</big><a class="headerlink" href="#transform_if__RangeRR.OutputIt.UnaryOperation.UnaryPredicate" title="Permalink to this definition">¶</a></dt>
+<dt id="transform_if__Range1RR.Range2RR.OutputIt.BinaryOperation.BinaryPredicate">
+OutputIt <tt class="descname">transform_if</tt><big>(</big>Range1&amp;&amp; <em>range1</em>, Range2&amp;&amp; <em>range2</em>, OutputIt <em>it</em>, BinaryOperation <em>op</em>, BinaryPredicate <em>bp</em><big>)</big><a class="headerlink" href="#transform_if__Range1RR.Range2RR.OutputIt.BinaryOperation.BinaryPredicate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies the given function to <em>range</em> and stores the result in another
+range, beginning at <em>it</em>. The first version applies the unary operation <em>op</em>
+to the elements in <em>range</em>. The second version applies the binary operation
+<em>op</em> to pairs of elements from <em>range1</em> and <em>range2</em>. The conditional
+versions do not perfectly forward their arguments as the algorithm is
+performed in situ. <a class="reference internal" href="#transform_if__RangeRR.OutputIt.UnaryOperation.UnaryPredicate" title="transform_if"><tt class="xref cpp cpp-func docutils literal"><span class="pre">transform_if()</span></tt></a> can be considered a merging of
+<a class="reference internal" href="#copy_if__RangeRR.OutputItRR.UnaryPredicateRR" title="copy_if"><tt class="xref cpp cpp-func docutils literal"><span class="pre">copy_if()</span></tt></a> and <a class="reference internal" href="#transform__RangeRR.OutputItRR.UnaryOperationRR" title="transform"><tt class="xref cpp cpp-func docutils literal"><span class="pre">transform()</span></tt></a>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Iterator to one past the last element transformed.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Requires:</th><td class="field-body"><a class="reference internal" href="#transform__RangeRR.OutputItRR.UnaryOperationRR" title="transform"><tt class="xref cpp cpp-func docutils literal"><span class="pre">transform()</span></tt></a> uses InputIterators. <a class="reference internal" href="#transform_if__RangeRR.OutputIt.UnaryOperation.UnaryPredicate" title="transform_if"><tt class="xref cpp cpp-func docutils literal"><span class="pre">transform_if()</span></tt></a> uses
+ForwardIterators.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="remove__RangeRR.TCR">
+ForwardIt <tt class="descname">remove</tt><big>(</big>Range&amp;&amp; <em>range</em>, T const&amp; <em>value</em><big>)</big><a class="headerlink" href="#remove__RangeRR.TCR" title="Permalink to this definition">¶</a></dt>
+<dt id="remove_if__RangeRR.UnaryPredicateRR">
+ForwardIt <tt class="descname">remove_if</tt><big>(</big>Range&amp;&amp; <em>range</em>, UnaryPredicate&amp;&amp; <em>up</em><big>)</big><a class="headerlink" href="#remove_if__RangeRR.UnaryPredicateRR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes all elements satisfying specific criteris from <em>range</em> and returns
+a past-the-end iterator for the new end of the range. The first version
+removes all elements that are equal to <em>value</em>, while the second version
+removes all eleents for which <em>up</em> returns <tt class="docutils literal"><span class="pre">true</span></tt>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Requires:</th><td class="field-body"><em>range</em> must provide ForwardIterators.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="remove_copy__RangeRR.OutputItRR.TCR">
+decay_t&lt;OutputIt&gt; <tt class="descname">remove_copy</tt><big>(</big>Range&amp;&amp; <em>range</em>, OutputIt&amp;&amp; <em>it</em>, T const&amp; <em>value</em><big>)</big><a class="headerlink" href="#remove_copy__RangeRR.OutputItRR.TCR" title="Permalink to this definition">¶</a></dt>
+<dt id="remove_copy_if__RangeRR.OutputItRR.UnaryPredicateRR">
+decay_t&lt;OutputIt&gt; <tt class="descname">remove_copy_if</tt><big>(</big>Range&amp;&amp; <em>range</em>, OutputIt&amp;&amp; <em>it</em>, UnaryPredicate&amp;&amp; <em>up</em><big>)</big><a class="headerlink" href="#remove_copy_if__RangeRR.OutputItRR.UnaryPredicateRR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Copies elements from <em>range</em> to another range beignning at <em>it</em>, omitting
+the elements which satisfy specific criteria. The first version ignores the
+elements equal to <em>value</em>. The second version ignores the elements for which
+<em>up</em> returns <tt class="docutils literal"><span class="pre">true</span></tt>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Iterator to the element past the last element copied.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Requires:</th><td class="field-body"><em>range</em> must provide InputIterators.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="remove_erase__RangeRR.TCR">
+void <tt class="descname">remove_erase</tt><big>(</big>Range&amp;&amp; <em>range</em>, T const&amp; <em>val</em><big>)</big><a class="headerlink" href="#remove_erase__RangeRR.TCR" title="Permalink to this definition">¶</a></dt>
+<dt id="remove_erase_if__RangeRR.UnaryPredicateRR">
+void <tt class="descname">remove_erase_if</tt><big>(</big>Range&amp;&amp; <em>range</em>, UnaryPredicate&amp;&amp; <em>up</em><big>)</big><a class="headerlink" href="#remove_erase_if__RangeRR.UnaryPredicateRR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calls <a class="reference internal" href="#remove_erase__RangeRR.TCR" title="remove_erase"><tt class="xref cpp cpp-func docutils literal"><span class="pre">remove_erase()</span></tt></a> (or <a class="reference internal" href="#remove_erase_if__RangeRR.UnaryPredicateRR" title="remove_erase_if"><tt class="xref cpp cpp-func docutils literal"><span class="pre">remove_erase_if()</span></tt></a>), and then calls
+<tt class="docutils literal"><span class="pre">::std::forward&lt;Range&gt;(range).erase()</span></tt> on the result. These two functions
+are provided because the remove -&gt; erase idiom is extremely common when
+working with containers.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Requires:</th><td class="field-body">The same requirements as <a class="reference internal" href="#remove__RangeRR.TCR" title="remove"><tt class="xref cpp cpp-func docutils literal"><span class="pre">remove()</span></tt></a> and <a class="reference internal" href="#remove_if__RangeRR.UnaryPredicateRR" title="remove_if"><tt class="xref cpp cpp-func docutils literal"><span class="pre">remove_if()</span></tt></a>
+respectively.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="replace__RangeRR.TCR.TCR">
+void <tt class="descname">replace</tt><big>(</big>Range&amp;&amp; <em>range</em>, T const&amp; <em>old</em>, T const&amp; <em>value</em><big>)</big><a class="headerlink" href="#replace__RangeRR.TCR.TCR" title="Permalink to this definition">¶</a></dt>
+<dt id="replace_if__RangeRR.UnaryPredRR.TCR">
+void <tt class="descname">replace_if</tt><big>(</big>Range&amp;&amp; <em>range</em>, UnaryPred&amp;&amp; <em>up</em>, T const&amp; <em>value</em><big>)</big><a class="headerlink" href="#replace_if__RangeRR.UnaryPredRR.TCR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Replaces all elements satisfying specific criteria with <em>value</em> in <em>range</em>.
+The first version replaces elements equal to <em>old</em>. The second version
+replaces elements for which <em>up</em> returns <tt class="docutils literal"><span class="pre">true</span></tt>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Requires:</th><td class="field-body"><em>range</em> must provide ForwardIterators</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="replace_copy__RangeRR.OutputItRR.TCR.TCR">
+decay_t&lt;OutputIt&gt; <tt class="descname">replace_copy</tt><big>(</big>Range&amp;&amp; <em>range</em>, OutputIt&amp;&amp; <em>it</em>, T const&amp; <em>old</em>, T const&amp; <em>value</em><big>)</big><a class="headerlink" href="#replace_copy__RangeRR.OutputItRR.TCR.TCR" title="Permalink to this definition">¶</a></dt>
+<dt id="replace_copy_if__RangeRR.OutputItRR.UnaryPredRR.TCR">
+decay_t&lt;OutputIt&gt; <tt class="descname">replace_copy_if</tt><big>(</big>Range&amp;&amp; <em>range</em>, OutputIt&amp;&amp; <em>it</em>, UnaryPred&amp;&amp; <em>up</em>, T const&amp; <em>value</em><big>)</big><a class="headerlink" href="#replace_copy_if__RangeRR.OutputItRR.UnaryPredRR.TCR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Copies the elements from <em>range</em> to another range beginning at <em>it</em>.
+Elements satisfying specific criteria are replaced with <em>value</em>. The first
+version replaces elements equal to <em>old</em>. The second version replaces
+elements for which <em>up</em> returns <tt class="docutils literal"><span class="pre">true</span></tt>. The source and destination
+ranges <em>cannot</em> overlap.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Requires:</th><td class="field-body"><em>range</em> must provide InputIterators.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="swap_ranges__RangeRR.ForwardItRR">
+decay_t&lt;ForwardIt&gt; <tt class="descname">swap_ranges</tt><big>(</big>Range&amp;&amp; <em>range</em>, ForwardIt&amp;&amp; <em>it</em><big>)</big><a class="headerlink" href="#swap_ranges__RangeRR.ForwardItRR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Exchanges elements between <em>range</em> and another range starting at <em>it</em>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Iterator to the element past the last element exchanged with range
+starting at <em>it</em>.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Requires:</th><td class="field-body"><em>range</em> must provide ForwardIterators.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="reverse__RangeRR">
+void <tt class="descname">reverse</tt><big>(</big>Range&amp;&amp; <em>range</em><big>)</big><a class="headerlink" href="#reverse__RangeRR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reverses the order of the elements in <em>range</em>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Requires:</th><td class="field-body"><em>range</em> must provide BidirectionalIterators.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="reverse_copy__RangeRR.OutputItRR">
+decay_t&lt;OutputIt&gt; <tt class="descname">reverse_copy</tt><big>(</big>Range&amp;&amp; <em>range</em>, OutputIt&amp;&amp; <em>it</em><big>)</big><a class="headerlink" href="#reverse_copy__RangeRR.OutputItRR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Copies the elements from <em>range</em> to another range starting at <em>it</em> where the
+elements in the new range are in reverse order.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Output iterator to the element past the last element copied.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Requires:</th><td class="field-body"><em>range</em> must provide BidirectionalIterators.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="rotate__RangeRR.ForwardItRR">
+void <tt class="descname">rotate</tt><big>(</big>Range&amp;&amp; <em>range</em>, ForwardIt&amp;&amp; <em>it</em><big>)</big><a class="headerlink" href="#rotate__RangeRR.ForwardItRR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs a left rotation on a range of elements. Specifically, it swaps
+the elements in <em>range</em> in such a way that the element at <em>it</em> becomes the
+first element of the range.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Due to an incorrect interface in libstdc++, this form of rotate
+returns <tt class="docutils literal"><span class="pre">void</span></tt>. Technically it is required to return a
+ForwardIterator, however this is ignored to take the path of least
+resistance.</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Requires:</th><td class="field-body"><em>range</em> must provide ForwardIterators.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="rotate_copy__RangeRR.ForwardItRR.OutputItRR">
+decay_t&lt;OutputIt&gt; <tt class="descname">rotate_copy</tt><big>(</big>Range&amp;&amp; <em>range</em>, ForwardIt&amp;&amp; <em>it</em>, OutputIt&amp;&amp; <em>ot</em><big>)</big><a class="headerlink" href="#rotate_copy__RangeRR.ForwardItRR.OutputItRR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Copies the elements from <em>range</em> to another range starting at <em>ot</em> where
+<em>it</em> will be the first element of the new range, and <em>it</em> - 1 becomes the
+last.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Output iterator to the element past the last element copied.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Requires:</th><td class="field-body"><em>range</em> must provide ForwardIterators.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="shuffle__RangeRR.URNGRR">
+void <tt class="descname">shuffle</tt><big>(</big>Range&amp;&amp; <em>range</em>, URNG&amp;&amp; <em>g</em><big>)</big><a class="headerlink" href="#shuffle__RangeRR.URNGRR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reorders elements in <em>range</em> so that each possible permutation of those
+elements has equal probablity of appearance. The random number generator
+is the function object <em>g</em>.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">As you may have noticed, <tt class="docutils literal"><span class="pre">random_shuffle</span></tt> does not make an
+appearance. This is due to the C++14 standard deprecating
+<tt class="docutils literal"><span class="pre">random_shuffle</span></tt>.</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Requires:</th><td class="field-body"><em>range</em> must provide RandomAccessIterators.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="unique__RangeRR">
+ForwardIt <tt class="descname">unique</tt><big>(</big>Range&amp;&amp; <em>range</em><big>)</big><a class="headerlink" href="#unique__RangeRR" title="Permalink to this definition">¶</a></dt>
+<dt id="unique__RangeRR.BinaryPredicateRR">
+ForwardIt <tt class="descname">unique</tt><big>(</big>Range&amp;&amp; <em>range</em>, BinaryPredicate&amp;&amp; <em>bp</em><big>)</big><a class="headerlink" href="#unique__RangeRR.BinaryPredicateRR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes all consecutive duplicate elements from <em>range</em> and returns a
+past-the-end iterator for the new logical end of the range. The first
+version uses <tt class="docutils literal"><span class="pre">operator</span> <span class="pre">==</span></tt>. The second version uses the predicate <em>bp</em>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Requires:</th><td class="field-body"><em>range</em> must provide ForwardIterators.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="unique_copy__RangeRR.OutputItRR">
+decay_t&lt;OutputIt&gt; <tt class="descname">unique_copy</tt><big>(</big>Range&amp;&amp; <em>range</em>, OutputIt&amp;&amp; <em>it</em><big>)</big><a class="headerlink" href="#unique_copy__RangeRR.OutputItRR" title="Permalink to this definition">¶</a></dt>
+<dt id="unique_copy__RangeRR.OutputItRR.BinaryPredRR">
+decay_t&lt;OutputIt&gt; <tt class="descname">unique_copy</tt><big>(</big>Range&amp;&amp; <em>range</em>, OutputIt&amp;&amp; <em>it</em>, BinaryPred&amp;&amp; <em>bp</em><big>)</big><a class="headerlink" href="#unique_copy__RangeRR.OutputItRR.BinaryPredRR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Copies the elements from <em>range</em> to another range beginning at <em>it</em> so
+that no consecutive equal elements exist. The first version uses
+<tt class="docutils literal"><span class="pre">operator</span> <span class="pre">==</span></tt> to compare elements. The second version uses the predicate
+<em>bp</em>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Requires:</th><td class="field-body"><em>range</em> must provide InputIterators.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="partitioning-operations">
+<span id="core-algorithm-component-partitioning-operations"></span><h2>Partitioning Operations<a class="headerlink" href="#partitioning-operations" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="is_partitioned__RangeRR.UnaryPredicateRR">
+bool <tt class="descname">is_partitioned</tt><big>(</big>Range&amp;&amp; <em>range</em>, UnaryPredicate&amp;&amp; <em>up</em><big>)</big><a class="headerlink" href="#is_partitioned__RangeRR.UnaryPredicateRR" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><tt class="docutils literal"><span class="pre">true</span></tt> if all the elements in <em>range</em> that satisfy predicate
+<em>up</em> appear before all the elements that don&#8217;t or if <em>range</em> is
+empty.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Requires:</th><td class="field-body"><em>range</em> must provide InputIterators.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="partition__RangeRR.UnaryPredicateRR">
+ForwardIt <tt class="descname">partition</tt><big>(</big>Range&amp;&amp; <em>range</em>, UnaryPredicate&amp;&amp; <em>up</em><big>)</big><a class="headerlink" href="#partition__RangeRR.UnaryPredicateRR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reorders elements in <em>range</em> such that all elements for which <em>up</em> return
+<tt class="docutils literal"><span class="pre">true</span></tt> come before the elements where <em>up</em> returns <tt class="docutils literal"><span class="pre">false</span></tt>. Relative
+order is <em>not</em> preserved.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Requires:</th><td class="field-body"><em>range</em> must provide ForwardIterators.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="partition_copy__RangeRR.OutputTrueRR.OutputFalseRR.UnaryPredicateRR">
+ <tt class="descname">partition_copy</tt><big>(</big>Range&amp;&amp; <em>range</em>, OutputTrue&amp;&amp; <em>ot</em>, OutputFalse&amp;&amp; <em>of</em>, UnaryPredicate&amp;&amp; <em>up</em><big>)</big><a class="headerlink" href="#partition_copy__RangeRR.OutputTrueRR.OutputFalseRR.UnaryPredicateRR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Copies the elements from <em>range</em> to different ranges depending on the result
+of <em>up</em>. The elements that cause <em>up</em> to return <tt class="docutils literal"><span class="pre">true</span></tt> are copied to the
+range starting at <em>ot</em>, and those that return <tt class="docutils literal"><span class="pre">false</span></tt> are copied to the
+range starting at <em>of</em>.</p>
+<p>It is undefined behavior to have the input range overlap <em>ot</em> or <em>of</em>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><tt class="docutils literal"><span class="pre">std::pair&lt;decay_t&lt;OutputTrue&gt;,</span> <span class="pre">decay_t&lt;OutputFalse&gt;&gt;</span></tt></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Requires:</th><td class="field-body"><em>range</em> must provide InputIterators.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="stable_partition__RangeRR.UnaryPredicateRR">
+BidirIt <tt class="descname">stable_partition</tt><big>(</big>Range&amp;&amp; <em>range</em>, UnaryPredicate&amp;&amp; <em>up</em><big>)</big><a class="headerlink" href="#stable_partition__RangeRR.UnaryPredicateRR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reorders the elements in <em>range</em> in the same way as <a class="reference internal" href="#partition__RangeRR.UnaryPredicateRR" title="partition"><tt class="xref cpp cpp-func docutils literal"><span class="pre">partition()</span></tt></a>.
+Unlike <a class="reference internal" href="#partition__RangeRR.UnaryPredicateRR" title="partition"><tt class="xref cpp cpp-func docutils literal"><span class="pre">partition()</span></tt></a>, the order of elements is preserved.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Requires:</th><td class="field-body"><em>range</em> must provide BidirectionalIterators.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="partition_point__RangeRR.UnaryPredicateRR">
+ForwardIt <tt class="descname">partition_point</tt><big>(</big>Range&amp;&amp; <em>range</em>, UnaryPredicate&amp;&amp; <em>up</em><big>)</big><a class="headerlink" href="#partition_point__RangeRR.UnaryPredicateRR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Examines <em>range</em> and locates the end of the first partition (i.e., the first
+element in <em>range</em> that does not satisfy <em>up</em>. If all elements satisfy
+<em>up</em>, the end of <em>range</em> is returned.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Requires:</th><td class="field-body"><em>range</em> must provide ForwardIterators.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="sorting-operations">
+<span id="core-algorithm-component-sorting-operations"></span><h2>Sorting Operations<a class="headerlink" href="#sorting-operations" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="is_sorted__RangeRR">
+bool <tt class="descname">is_sorted</tt><big>(</big>Range&amp;&amp; <em>range</em><big>)</big><a class="headerlink" href="#is_sorted__RangeRR" title="Permalink to this definition">¶</a></dt>
+<dt id="is_sorted__RangeRR.CompareRR">
+bool <tt class="descname">is_sorted</tt><big>(</big>Range&amp;&amp; <em>range</em>, Compare&amp;&amp; <em>comp</em><big>)</big><a class="headerlink" href="#is_sorted__RangeRR.CompareRR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks if the elements in <em>range</em> are sorted in ascending order. The first
+version uses <tt class="docutils literal"><span class="pre">operator</span> <span class="pre">&lt;</span></tt> to compare elements. The second uses the
+comparison function <em>comp</em>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Requires:</th><td class="field-body"><em>range</em> must provide ForwardIterators.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="is_sorted_until__RangeRR">
+ForwardIt <tt class="descname">is_sorted_until</tt><big>(</big>Range&amp;&amp; <em>range</em><big>)</big><a class="headerlink" href="#is_sorted_until__RangeRR" title="Permalink to this definition">¶</a></dt>
+<dt id="is_sorted_until__RangeRR.CompareRR">
+ForwardIt <tt class="descname">is_sorted_until</tt><big>(</big>Range&amp;&amp; <em>range</em>, Compare&amp;&amp; <em>comp</em><big>)</big><a class="headerlink" href="#is_sorted_until__RangeRR.CompareRR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Inspects <em>range</em> and finds the largest sub range in which elements
+are sorted in ascending order. The first version uses <tt class="docutils literal"><span class="pre">operator</span> <span class="pre">&lt;</span></tt>. The
+second version uses the given comparison function <em>comp</em>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Requires:</th><td class="field-body"><em>range</em> must provide ForwardIterators.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="sort__RangeRR">
+void <tt class="descname">sort</tt><big>(</big>Range&amp;&amp; <em>range</em><big>)</big><a class="headerlink" href="#sort__RangeRR" title="Permalink to this definition">¶</a></dt>
+<dt id="sort__RangeRR.CompareRR">
+void <tt class="descname">sort</tt><big>(</big>Range&amp;&amp; <em>range</em>, Compare&amp;&amp; <em>comp</em><big>)</big><a class="headerlink" href="#sort__RangeRR.CompareRR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sorts the elements in <em>range</em> in ascending order. The order of elements
+equal to each other is no guaranteed to be preserved. The first version
+uses <tt class="docutils literal"><span class="pre">operator</span> <span class="pre">&lt;</span></tt>. The second version uses the given comparison function
+<em>comp</em>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Requires:</th><td class="field-body"><em>range</em> must provide RandomAccessIterators.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="partial_sort__RangeRR.RandomItRR">
+void <tt class="descname">partial_sort</tt><big>(</big>Range&amp;&amp; <em>range</em>, RandomIt&amp;&amp; <em>it</em><big>)</big><a class="headerlink" href="#partial_sort__RangeRR.RandomItRR" title="Permalink to this definition">¶</a></dt>
+<dt id="partial_sort__RangeRR.RandomItRR.CompareRR">
+void <tt class="descname">partial_sort</tt><big>(</big>Range&amp;&amp; <em>range</em>, RandomIt&amp;&amp; <em>it</em>, Compare&amp;&amp; <em>cmp</em><big>)</big><a class="headerlink" href="#partial_sort__RangeRR.RandomItRR.CompareRR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rearranges elements in <em>range</em> so that the range contains the sorted
+<tt class="docutils literal"><span class="pre">it</span> <span class="pre">-</span> <span class="pre">range.begin()</span></tt> smallest elements.</p>
+<p>The order of elements equal to each other is not guaranteed to be preserved.
+The order of the remaining elements in <em>range</em> is unspecified. The first
+version uses <tt class="docutils literal"><span class="pre">operator</span> <span class="pre">&lt;</span></tt>. The second version uses the provided comparison
+function <em>comp</em>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Requires:</th><td class="field-body"><em>range</em> must provide RandomAccessIterators.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="partial_sort_copy__IRangeRR.RRangeRR">
+RandomIt <tt class="descname">partial_sort_copy</tt><big>(</big>IRange&amp;&amp; <em>irange</em>, RRange&amp;&amp; <em>rrange</em><big>)</big><a class="headerlink" href="#partial_sort_copy__IRangeRR.RRangeRR" title="Permalink to this definition">¶</a></dt>
+<dt id="partial_sort_copy__IRangeRR.RRangeRR.CompareRR">
+RandomIt <tt class="descname">partial_sort_copy</tt><big>(</big>IRange&amp;&amp; <em>irange</em>, RRange&amp;&amp; <em>rrange</em>, Compare&amp;&amp; <em>cmp</em><big>)</big><a class="headerlink" href="#partial_sort_copy__IRangeRR.RRangeRR.CompareRR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sorts the elements in <em>irange</em> in ascending order, storing the result in
+<em>rrange</em>. The order of elements which are equal is not guaranteed to be
+preserved. The first version uses <tt class="docutils literal"><span class="pre">operator</span> <span class="pre">&lt;</span></tt>. The second uses the
+comparison function <em>comp</em>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Requires:</th><td class="field-body"><em>irange</em> must provide InputIterators, <em>rrange</em> must provide
+RandomAccessIterators.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="stable_sort__RangeRR">
+void <tt class="descname">stable_sort</tt><big>(</big>Range&amp;&amp; <em>range</em><big>)</big><a class="headerlink" href="#stable_sort__RangeRR" title="Permalink to this definition">¶</a></dt>
+<dt id="stable_sort__RangeRR.CompareRR">
+void <tt class="descname">stable_sort</tt><big>(</big>Range&amp;&amp; <em>range</em>, Compare&amp;&amp; <em>cmp</em><big>)</big><a class="headerlink" href="#stable_sort__RangeRR.CompareRR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sorts elements in <em>range</em> in the same way as <a class="reference internal" href="#sort__RangeRR" title="sort"><tt class="xref cpp cpp-func docutils literal"><span class="pre">sort()</span></tt></a>, with the exception
+that the order of equal elements is guaranteed to be preserved.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Requires:</th><td class="field-body"><em>range</em> must provide RandomAccessIterators.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="nth_element__RangeRR.RandomItRR">
+void <tt class="descname">nth_element</tt><big>(</big>Range&amp;&amp; <em>range</em>, RandomIt&amp;&amp; <em>it</em><big>)</big><a class="headerlink" href="#nth_element__RangeRR.RandomItRR" title="Permalink to this definition">¶</a></dt>
+<dt id="nth_element__RangeRR.RandomItRR.CompareRR">
+void <tt class="descname">nth_element</tt><big>(</big>Range&amp;&amp; <em>range</em>, RandomIt&amp;&amp; <em>it</em>, Compare&amp;&amp; <em>cmp</em><big>)</big><a class="headerlink" href="#nth_element__RangeRR.RandomItRR.CompareRR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Partial sorting algorithm that rearranges elements in <em>range</em> such that
+the element pointed at by <em>it</em> is changed to whatever element would occur in
+that position if <em>range</em> was sorted and al of the elements before this new
+element at <em>it</em> are less than or equal to the elements after <em>it</em>.</p>
+<p>If <em>it</em> is the end iterator of <em>range</em>, this function has no effect.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Requires:</th><td class="field-body"><em>range</em> must provide RandomAccessIterators.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="binary-search-operations">
+<span id="core-algorithm-component-binary-search-operations"></span><h2>Binary Search Operations<a class="headerlink" href="#binary-search-operations" title="Permalink to this headline">¶</a></h2>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">These operations are intended for sorted/partitioned ranges <em>only</em>.</p>
+</div>
+<dl class="function">
+<dt id="lower_bound__RangeRR.TCR">
+ForwardIt <tt class="descname">lower_bound</tt><big>(</big>Range&amp;&amp; <em>range</em>, T const&amp; <em>value</em><big>)</big><a class="headerlink" href="#lower_bound__RangeRR.TCR" title="Permalink to this definition">¶</a></dt>
+<dt id="lower_bound__RangeRR.TCR.CompareRR">
+ForwardIt <tt class="descname">lower_bound</tt><big>(</big>Range&amp;&amp; <em>range</em>, T const&amp; <em>value</em>, Compare&amp;&amp; <em>cmp</em><big>)</big><a class="headerlink" href="#lower_bound__RangeRR.TCR.CompareRR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns an iterator pointing to the first element in <em>range</em> that is <strong>not
+less than</strong> <em>value</em>. The range must be partially ordered. A fully sorted
+range or a range resulting from <a class="reference internal" href="#partition__RangeRR.UnaryPredicateRR" title="partition"><tt class="xref cpp cpp-func docutils literal"><span class="pre">partition()</span></tt></a> meets this criteria. The
+first version uses <tt class="docutils literal"><span class="pre">operator</span> <span class="pre">&lt;</span></tt> to compare elements, while the second uses
+the given function <em>cmp</em>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Requires:</th><td class="field-body"><em>range</em> must provide ForwardIterators.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="upper_bound__RangeRR.TCR">
+ForwardIt <tt class="descname">upper_bound</tt><big>(</big>Range&amp;&amp; <em>range</em>, T const&amp; <em>value</em><big>)</big><a class="headerlink" href="#upper_bound__RangeRR.TCR" title="Permalink to this definition">¶</a></dt>
+<dt id="upper_bound__RangeRR.TCR.CompareRR">
+ForwardIt <tt class="descname">upper_bound</tt><big>(</big>Range&amp;&amp; <em>range</em>, T const&amp; <em>value</em>, Compare&amp;&amp; <em>cmp</em><big>)</big><a class="headerlink" href="#upper_bound__RangeRR.TCR.CompareRR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns an iterator pointing to the first element in <em>range</em> that is
+<em>greater</em> than value. The same ordering restructions in <a class="reference internal" href="#lower_bound__RangeRR.TCR" title="lower_bound"><tt class="xref cpp cpp-func docutils literal"><span class="pre">lower_bound()</span></tt></a>
+apply. The first version uses <tt class="docutils literal"><span class="pre">operator</span> <span class="pre">&lt;</span></tt>. The second uses the
+comparison function <em>cmp</em>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Requires:</th><td class="field-body"><em>range</em> must provide ForwardIterators.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="binary_search__RangeRR.TCR">
+bool <tt class="descname">binary_search</tt><big>(</big>Range&amp;&amp; <em>range</em>, T const&amp; <em>value</em><big>)</big><a class="headerlink" href="#binary_search__RangeRR.TCR" title="Permalink to this definition">¶</a></dt>
+<dt id="binary_search__RangeRR.TCR.CompareRR">
+bool <tt class="descname">binary_search</tt><big>(</big>Range&amp;&amp; <em>range</em>, T const&amp; <em>value</em>, Compare&amp;&amp; <em>cmp</em><big>)</big><a class="headerlink" href="#binary_search__RangeRR.TCR.CompareRR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks if an element equal to <em>value</em> resides within <em>range</em>. Requires that
+<em>range</em> be partitioned. The first version uses <tt class="docutils literal"><span class="pre">operator</span> <span class="pre">&lt;</span></tt>. The second
+uses the given function <em>cmp</em>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Requires:</th><td class="field-body"><em>range</em> must provide ForwardIterators.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="equal_range__RangeRR.TCR">
+range&lt;ForwardIt&gt; <tt class="descname">equal_range</tt><big>(</big>Range&amp;&amp; <em>range</em>, T const&amp; <em>value</em><big>)</big><a class="headerlink" href="#equal_range__RangeRR.TCR" title="Permalink to this definition">¶</a></dt>
+<dt id="equal_range__RangeRR.TCR.CompareRR">
+range&lt;ForwardIt&gt; <tt class="descname">equal_range</tt><big>(</big>Range&amp;&amp; <em>range</em>, T const&amp; <em>value</em>, Compare&amp;&amp; <em>cmp</em><big>)</big><a class="headerlink" href="#equal_range__RangeRR.TCR.CompareRR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a range containing all elements equivalent to <em>value</em> in <em>range</em>.
+The first version uses <tt class="docutils literal"><span class="pre">operator</span> <span class="pre">&lt;</span></tt>. The second uses the given comparison
+function <em>cmp</em>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Requires:</th><td class="field-body"><em>range</em> must provide ForwardIterators and must be correctly
+partitioned.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="set-operations">
+<span id="core-algorithm-component-set-operations"></span><h2>Set Operations<a class="headerlink" href="#set-operations" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="merge__Range1RR.Range2RR.OutputItRR">
+decay_t&lt;OutputIt&gt; <tt class="descname">merge</tt><big>(</big>Range1&amp;&amp; <em>range1</em>, Range2&amp;&amp; <em>range2</em>, OutputIt&amp;&amp; <em>it</em><big>)</big><a class="headerlink" href="#merge__Range1RR.Range2RR.OutputItRR" title="Permalink to this definition">¶</a></dt>
+<dt id="merge__Range1RR.Range2RR.OutputItRR.CompareRR">
+decay_t&lt;OutputIt&gt; <tt class="descname">merge</tt><big>(</big>Range1&amp;&amp; <em>range1</em>, Range2&amp;&amp; <em>range2</em>, OutputIt&amp;&amp; <em>it</em>, Compare&amp;&amp; <em>cmp</em><big>)</big><a class="headerlink" href="#merge__Range1RR.Range2RR.OutputItRR.CompareRR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Merges sorted <em>range1</em> and sorted <em>range2</em> into one sorted range beginning
+at <em>it</em>. The first version uses <tt class="docutils literal"><span class="pre">operator</span> <span class="pre">&lt;</span></tt> to compare elements. The
+second uses the comparison function <em>cmp</em>. The relative order of elements
+is preserved. If the destination range overlaps either <em>range1</em> or <em>range2</em>,
+the resulting behavior is undefined. (It is ok if <em>range1</em> and <em>range2</em>
+are overlapping)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Requires:</th><td class="field-body"><em>range1</em> and <em>range2</em> must provide InputIterators.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="inplace_merge__RangeRR.BidirRR">
+void <tt class="descname">inplace_merge</tt><big>(</big>Range&amp;&amp; <em>range</em>, Bidir&amp;&amp; <em>it</em><big>)</big><a class="headerlink" href="#inplace_merge__RangeRR.BidirRR" title="Permalink to this definition">¶</a></dt>
+<dt id="inplace_merge__RangeRR.BidirRR.CompareRR">
+void <tt class="descname">inplace_merge</tt><big>(</big>Range&amp;&amp; <em>range</em>, Bidir&amp;&amp; <em>it</em>, Compare&amp;&amp; <em>cmp</em><big>)</big><a class="headerlink" href="#inplace_merge__RangeRR.BidirRR.CompareRR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Merges two consecutive sorted ranges (<tt class="docutils literal"><span class="pre">[range.begin(),</span> <span class="pre">it)</span></tt> and
+<tt class="docutils literal"><span class="pre">[it,</span> <span class="pre">range.end())</span></tt>) into one sorted range. The order of equal elements
+is preserved. The first version uses <tt class="docutils literal"><span class="pre">operator</span> <span class="pre">&lt;</span></tt>. The second version uses
+the comparison function <em>cmp</em>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Requires:</th><td class="field-body"><em>range</em> must provide BidirectionalIterators</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="includes__Range1RR.Range2RR">
+bool <tt class="descname">includes</tt><big>(</big>Range1&amp;&amp; <em>range1</em>, Range2&amp;&amp; <em>range2</em><big>)</big><a class="headerlink" href="#includes__Range1RR.Range2RR" title="Permalink to this definition">¶</a></dt>
+<dt id="includes__Range1RR.Range2RR.CompareRR">
+bool <tt class="descname">includes</tt><big>(</big>Range1&amp;&amp; <em>range1</em>, Range2&amp;&amp; <em>range2</em>, Compare&amp;&amp; <em>cmp</em><big>)</big><a class="headerlink" href="#includes__Range1RR.Range2RR.CompareRR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns <tt class="docutils literal"><span class="pre">true</span></tt> if every element from <em>range2</em> is found within the bounds
+of <em>range1</em> or if <em>range2</em> is empty. The first version uses <tt class="docutils literal"><span class="pre">operator</span> <span class="pre">&lt;</span></tt>.
+The second uses <em>cmp</em> as a comparison function.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Requires:</th><td class="field-body"><em>range1</em> and <em>range2</em> must provide InputIterators.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="set_difference__Range1RR.Range2RR.OutputItRR">
+decay_t&lt;OutputIt&gt; <tt class="descname">set_difference</tt><big>(</big>Range1&amp;&amp; <em>range1</em>, Range2&amp;&amp; <em>range2</em>, OutputIt&amp;&amp; <em>it</em><big>)</big><a class="headerlink" href="#set_difference__Range1RR.Range2RR.OutputItRR" title="Permalink to this definition">¶</a></dt>
+<dt id="set_difference__Range1RR.Range2RR.OutputItRR.CompareRR">
+decay_t&lt;OutputIt&gt; <tt class="descname">set_difference</tt><big>(</big>Range1&amp;&amp; <em>range1</em>, Range2&amp;&amp; <em>range2</em>, OutputIt&amp;&amp; <em>it</em>, Compare&amp;&amp; <em>cmp</em><big>)</big><a class="headerlink" href="#set_difference__Range1RR.Range2RR.OutputItRR.CompareRR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Copies the elements from <em>range1</em> which are not found in <em>range2</em> to the
+range beginning at <em>it</em>. The first version uses <tt class="docutils literal"><span class="pre">operator</span> <span class="pre">&lt;</span></tt>. The second
+uses <em>cmp</em> as a comparison function.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Requires:</th><td class="field-body"><em>range1</em> and <em>range2</em> must provide InputIterators.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="set_intersection__Range1RR.Range2RR.OutputItRR">
+decay_t&lt;OutputIt&gt; <tt class="descname">set_intersection</tt><big>(</big>Range1&amp;&amp; <em>range1</em>, Range2&amp;&amp; <em>range2</em>, OutputIt&amp;&amp; <em>it</em><big>)</big><a class="headerlink" href="#set_intersection__Range1RR.Range2RR.OutputItRR" title="Permalink to this definition">¶</a></dt>
+<dt id="set_intersection__Range1RR.Range2RR.OutputItRR.CompareRR">
+decay_t&lt;OutputIt&gt; <tt class="descname">set_intersection</tt><big>(</big>Range1&amp;&amp; <em>range1</em>, Range2&amp;&amp; <em>range2</em>, OutputIt&amp;&amp; <em>it</em>, Compare&amp;&amp; <em>cmp</em><big>)</big><a class="headerlink" href="#set_intersection__Range1RR.Range2RR.OutputItRR.CompareRR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a sorted range beginning at <em>it</em> consisting of elements that are
+found in both <em>range1</em> and <em>range2</em>. The first version expects <em>range1</em>
+and <em>range2</em> to be sorted with <tt class="docutils literal"><span class="pre">operator</span> <span class="pre">&lt;</span></tt>. The second version expects
+them to be sorted by <em>cmp</em>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Requires:</th><td class="field-body"><em>range1</em> and <em>range2</em> must provide InputIterators.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="set_symmetric_difference__Range1RR.Range2RR.OutputItRR">
+decay_t&lt;OutputIt&gt; <tt class="descname">set_symmetric_difference</tt><big>(</big>Range1&amp;&amp; <em>range1</em>, Range2&amp;&amp; <em>range2</em>, OutputIt&amp;&amp; <em>it</em><big>)</big><a class="headerlink" href="#set_symmetric_difference__Range1RR.Range2RR.OutputItRR" title="Permalink to this definition">¶</a></dt>
+<dt id="set_symmetric_difference__Range1RR.Range2RR.OutputItRR.CompareRR">
+decay_t&lt;OutputIt&gt; <tt class="descname">set_symmetric_difference</tt><big>(</big>Range1&amp;&amp; <em>range1</em>, Range2&amp;&amp; <em>range2</em>, OutputIt&amp;&amp; <em>it</em>, Compare&amp;&amp; <em>cmp</em><big>)</big><a class="headerlink" href="#set_symmetric_difference__Range1RR.Range2RR.OutputItRR.CompareRR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Copies the symmetric difference of <em>range1</em> and <em>range2</em> (i.e., the elements
+found in either of the ranges but not both) to a range starting at <em>it</em>. The
+result is also sorted. The first version expects <em>range1</em> and <em>range2</em> to be
+sorted with <tt class="docutils literal"><span class="pre">operator</span> <span class="pre">&lt;</span></tt>. The second version expects them to be sorted
+with <em>cmp</em>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Requires:</th><td class="field-body"><em>range1</em> and <em>range2</em> must provide InputIterators.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="set_union__Range1RR.Range2RR.OutputItRR">
+decay_t&lt;OutputIt&gt; <tt class="descname">set_union</tt><big>(</big>Range1&amp;&amp; <em>range1</em>, Range2&amp;&amp; <em>range2</em>, OutputIt&amp;&amp; <em>it</em><big>)</big><a class="headerlink" href="#set_union__Range1RR.Range2RR.OutputItRR" title="Permalink to this definition">¶</a></dt>
+<dt id="set_union__Range1RR.Range2RR.OutputItRR.CompareRR">
+decay_t&lt;OutputIt&gt; <tt class="descname">set_union</tt><big>(</big>Range1&amp;&amp; <em>range1</em>, Range2&amp;&amp; <em>range2</em>, OutputIt&amp;&amp; <em>it</em>, Compare&amp;&amp; <em>cmp</em><big>)</big><a class="headerlink" href="#set_union__Range1RR.Range2RR.OutputItRR.CompareRR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a sorted range starting at <em>it</em> consisting of all elements
+present in one or both <em>range1</em> and <em>range2</em>. The resulting range cannot
+overlap with either <em>range1</em> or <em>range2</em>. The first version expects both
+ranges to be sorted with <tt class="docutils literal"><span class="pre">operator</span> <span class="pre">&lt;</span></tt>. The second version expects them
+to be sorted via <em>cmp</em>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Requires:</th><td class="field-body"><em>range1</em> and <em>range2</em> must provide InputIterators.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="heap-operations">
+<span id="core-algorithm-component-heap-operations"></span><h2>Heap Operations<a class="headerlink" href="#heap-operations" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="is_heap__RangeRR">
+bool <tt class="descname">is_heap</tt><big>(</big>Range&amp;&amp; <em>range</em><big>)</big><a class="headerlink" href="#is_heap__RangeRR" title="Permalink to this definition">¶</a></dt>
+<dt id="is_heap__RangeRR.CompareRR">
+bool <tt class="descname">is_heap</tt><big>(</big>Range&amp;&amp; <em>range</em>, Compare&amp;&amp; <em>compare</em><big>)</big><a class="headerlink" href="#is_heap__RangeRR.CompareRR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks if the elements in <em>range</em> are a max heap. Uses <tt class="docutils literal"><span class="pre">operator</span> <span class="pre">&lt;</span></tt> or
+<em>cmp</em> as a comparison function.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Require:</th><td class="field-body"><em>range</em> must provide RandomAccessIterators.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="is_heap_until__RangeRR">
+RandomIt <tt class="descname">is_heap_until</tt><big>(</big>Range&amp;&amp; <em>range</em><big>)</big><a class="headerlink" href="#is_heap_until__RangeRR" title="Permalink to this definition">¶</a></dt>
+<dt id="is_heap_until__RangeRR.CompareRR">
+RandomIt <tt class="descname">is_heap_until</tt><big>(</big>Range&amp;&amp; <em>range</em>, Compare&amp;&amp; <em>compare</em><big>)</big><a class="headerlink" href="#is_heap_until__RangeRR.CompareRR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find the largest subrange within <em>range</em> which is a max heap. Uses
+<tt class="docutils literal"><span class="pre">operator</span> <span class="pre">&lt;</span></tt> or <em>compare</em> as the comparison function.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Require:</th><td class="field-body"><em>range</em> must provide RandomAccessIterators.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="make_heap__RangeRR">
+void <tt class="descname">make_heap</tt><big>(</big>Range&amp;&amp; <em>range</em><big>)</big><a class="headerlink" href="#make_heap__RangeRR" title="Permalink to this definition">¶</a></dt>
+<dt id="make_heap__RangeRR.CompareRR">
+void <tt class="descname">make_heap</tt><big>(</big>Range&amp;&amp; <em>range</em>, Compare&amp;&amp; <em>compare</em><big>)</big><a class="headerlink" href="#make_heap__RangeRR.CompareRR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a max heap in <em>range</em>. Uses <tt class="docutils literal"><span class="pre">operator</span> <span class="pre">&lt;</span></tt> or <em>compare</em>
+as the comparison function.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Requires:</th><td class="field-body"><em>range</em> must provide RandomAccessIterators.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="push_heap__RangeRR">
+void <tt class="descname">push_heap</tt><big>(</big>Range&amp;&amp; <em>range</em><big>)</big><a class="headerlink" href="#push_heap__RangeRR" title="Permalink to this definition">¶</a></dt>
+<dt id="push_heap__RangeRR.CompareRR">
+void <tt class="descname">push_heap</tt><big>(</big>Range&amp;&amp; <em>range</em>, Compare&amp;&amp; <em>compare</em><big>)</big><a class="headerlink" href="#push_heap__RangeRR.CompareRR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Inserts the element at <tt class="docutils literal"><span class="pre">range.end()</span> <span class="pre">-</span> <span class="pre">1</span></tt> into the max heap defined by
+<tt class="docutils literal"><span class="pre">[range.begin(),</span> <span class="pre">range.end()</span> <span class="pre">-</span> <span class="pre">1)</span></tt>. Uses <tt class="docutils literal"><span class="pre">operator</span> <span class="pre">&lt;</span></tt> or <em>compare</em>
+as the comparison function.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Requires:</th><td class="field-body"><em>range</em> must provide RandomAccessIterators.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pop_heap__RangeRR">
+void <tt class="descname">pop_heap</tt><big>(</big>Range&amp;&amp; <em>range</em><big>)</big><a class="headerlink" href="#pop_heap__RangeRR" title="Permalink to this definition">¶</a></dt>
+<dt id="pop_heap__RangeRR.CompareRR">
+void <tt class="descname">pop_heap</tt><big>(</big>Range&amp;&amp; <em>range</em>, Compare&amp;&amp; <em>compare</em><big>)</big><a class="headerlink" href="#pop_heap__RangeRR.CompareRR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Swaps the value at <tt class="docutils literal"><span class="pre">range.begin()</span></tt> and the value in <tt class="docutils literal"><span class="pre">range.end()</span> <span class="pre">-</span> <span class="pre">1</span></tt>
+and turns this subrange into a max heap. Uses <tt class="docutils literal"><span class="pre">operator</span> <span class="pre">&lt;</span></tt> or <em>compare</em>
+as the comparison function.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Requires:</th><td class="field-body"><em>range</em> must provide RandomAccessIterators.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="sort_heap__RangeRR">
+void <tt class="descname">sort_heap</tt><big>(</big>Range&amp;&amp; <em>range</em><big>)</big><a class="headerlink" href="#sort_heap__RangeRR" title="Permalink to this definition">¶</a></dt>
+<dt id="sort_heap__RangeRR.CompareRR">
+void <tt class="descname">sort_heap</tt><big>(</big>Range&amp;&amp; <em>range</em>, Compare&amp;&amp; <em>compare</em><big>)</big><a class="headerlink" href="#sort_heap__RangeRR.CompareRR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts a max heap (<em>range</em>) into a sorted range in ascending order.
+The resulting range is no longer a heap. Uses <tt class="docutils literal"><span class="pre">operator</span> <span class="pre">&lt;</span></tt> or <em>compare</em>
+as the comparison function.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Requires:</th><td class="field-body"><em>range</em> must provide RandomAccessIterators.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="min-max-operations">
+<span id="core-algorithm-component-min-max-operations"></span><h2>Min/Max Operations<a class="headerlink" href="#min-max-operations" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="max_element__RangeRR">
+ForwardIt <tt class="descname">max_element</tt><big>(</big>Range&amp;&amp; <em>range</em><big>)</big><a class="headerlink" href="#max_element__RangeRR" title="Permalink to this definition">¶</a></dt>
+<dt id="max_element__RangeRR.CompareRR">
+ForwardIt <tt class="descname">max_element</tt><big>(</big>Range&amp;&amp; <em>range</em>, Compare&amp;&amp; <em>compare</em><big>)</big><a class="headerlink" href="#max_element__RangeRR.CompareRR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Finds the greatest element in <em>range</em>. Uses <tt class="docutils literal"><span class="pre">operator</span> <span class="pre">&lt;</span></tt> or <em>compare</em> as
+the comparison function.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Requires:</th><td class="field-body"><em>range</em> must provide ForwardIterators.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="min_element__RangeRR">
+ForwardIt <tt class="descname">min_element</tt><big>(</big>Range&amp;&amp; <em>range</em><big>)</big><a class="headerlink" href="#min_element__RangeRR" title="Permalink to this definition">¶</a></dt>
+<dt id="min_element__RangeRR.CompareRR">
+ForwardIt <tt class="descname">min_element</tt><big>(</big>Range&amp;&amp; <em>range</em>, Compare&amp;&amp; <em>compare</em><big>)</big><a class="headerlink" href="#min_element__RangeRR.CompareRR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Finds the smallest element in <em>range</em>. Uses <tt class="docutils literal"><span class="pre">operator</span> <span class="pre">&lt;</span></tt> or <em>compare</em> as
+the comparison function.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Requires:</th><td class="field-body"><em>range</em> must provide ForwardIterators.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="minmax_element__RangeRR">
+std::pair&lt;ForwardIt, ForwardIt&gt; <tt class="descname">minmax_element</tt><big>(</big>Range&amp;&amp; <em>range</em><big>)</big><a class="headerlink" href="#minmax_element__RangeRR" title="Permalink to this definition">¶</a></dt>
+<dt id="minmax_element__RangeRR.CompareRR">
+std::pair&lt;ForwardIt, ForwardIt&gt; <tt class="descname">minmax_element</tt><big>(</big>Range&amp;&amp; <em>range</em>, Compare&amp;&amp; <em>compare</em><big>)</big><a class="headerlink" href="#minmax_element__RangeRR.CompareRR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Finds the greatest and smallest element in <em>range</em>. Uses <tt class="docutils literal"><span class="pre">operator</span> <span class="pre">&lt;</span></tt> or
+<em>compare</em> as the comparison function.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Requires:</th><td class="field-body"><em>range</em> must provide ForwardIterators.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="lexicographical_compare__Range1RR.Range2RR">
+bool <tt class="descname">lexicographical_compare</tt><big>(</big>Range1&amp;&amp; <em>range1</em>, Range2&amp;&amp; <em>range2</em><big>)</big><a class="headerlink" href="#lexicographical_compare__Range1RR.Range2RR" title="Permalink to this definition">¶</a></dt>
+<dt id="lexicographical_compare__Range1RR.Range2RR.CompareRR">
+bool <tt class="descname">lexicographical_compare</tt><big>(</big>Range1&amp;&amp; <em>range1</em>, Range2&amp;&amp; <em>range2</em>, Compare&amp;&amp; <em>compare</em><big>)</big><a class="headerlink" href="#lexicographical_compare__Range1RR.Range2RR.CompareRR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks if <em>range1</em> is lexicographically less than <em>range2</em>. Uses
+<tt class="docutils literal"><span class="pre">operator</span> <span class="pre">&lt;</span></tt> or <em>compare</em> as the comparison function.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Requires:</th><td class="field-body"><em>range1</em> and <em>range2</em> must provide InputIterators.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="is_permutation__Range1RR.Range2RR">
+ <tt class="descname">is_permutation</tt><big>(</big>Range1&amp;&amp; <em>range1</em>, Range2&amp;&amp; <em>range2</em><big>)</big><a class="headerlink" href="#is_permutation__Range1RR.Range2RR" title="Permalink to this definition">¶</a></dt>
+<dt id="is_permutation__Range1RR.Range2RR.BinaryPredicateRR">
+ <tt class="descname">is_permutation</tt><big>(</big>Range1&amp;&amp; <em>range1</em>, Range2&amp;&amp; <em>range2</em>, BinaryPredicate&amp;&amp; <em>bp</em><big>)</big><a class="headerlink" href="#is_permutation__Range1RR.Range2RR.BinaryPredicateRR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns <tt class="docutils literal"><span class="pre">true</span></tt> if there exists a permutation of the elements in <em>range</em>
+that makes it equal to <em>range2</em>. The first version uses <tt class="docutils literal"><span class="pre">operator</span> <span class="pre">==</span></tt>.
+The second version uses the given binary predicate <em>bp</em>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Requires:</th><td class="field-body"><em>range1</em> and <em>range2</em> must provide ForwardIterators.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="next_permutation__RangeRR">
+bool <tt class="descname">next_permutation</tt><big>(</big>Range&amp;&amp; <em>range</em><big>)</big><a class="headerlink" href="#next_permutation__RangeRR" title="Permalink to this definition">¶</a></dt>
+<dt id="next_permutation__RangeRR.CompareRR">
+bool <tt class="descname">next_permutation</tt><big>(</big>Range&amp;&amp; <em>range</em>, Compare&amp;&amp; <em>compare</em><big>)</big><a class="headerlink" href="#next_permutation__RangeRR.CompareRR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transforms <em>range</em> into the next permutation from the set of all
+permutations that are lexicographically ordered. The first version
+uses <tt class="docutils literal"><span class="pre">operator</span> <span class="pre">&lt;</span></tt>. The second version uses <em>compare</em>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><tt class="docutils literal"><span class="pre">true</span></tt> if such permutation exists otherwise transforms <em>range</em>
+into the first permutation and returns <tt class="docutils literal"><span class="pre">false</span></tt>.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Requires:</th><td class="field-body"><em>range</em> must provide BidirectionalIterators.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="prev_permutation__RangeRR">
+bool <tt class="descname">prev_permutation</tt><big>(</big>Range&amp;&amp; <em>range</em><big>)</big><a class="headerlink" href="#prev_permutation__RangeRR" title="Permalink to this definition">¶</a></dt>
+<dt id="prev_permutation__RangeRR.CompareRR">
+bool <tt class="descname">prev_permutation</tt><big>(</big>Range&amp;&amp; <em>range</em>, Compare&amp;&amp; <em>compare</em><big>)</big><a class="headerlink" href="#prev_permutation__RangeRR.CompareRR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transforms <em>range</em> into the previous permutation from the set of all
+permutations that are lexicographically ordered. The first version
+uses <tt class="docutils literal"><span class="pre">operator</span> <span class="pre">&lt;</span></tt>. The second version uses <em>compare</em>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><tt class="docutils literal"><span class="pre">true</span></tt> if such permutation exists otherwise transforms <em>range</em>
+into the first permutation and returns <tt class="docutils literal"><span class="pre">false</span></tt>.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Requires:</th><td class="field-body"><em>range</em> must provide BidirectionalIterators.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="iterator.html" class="btn btn-neutral float-right" title="Iterator Component"/>Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="functional.html" class="btn btn-neutral" title="Functional Component"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2013 - 2014, MNMLSTC.
+    </p>
+  </div>
+
+  <a href="https://github.com/snide/sphinx_rtd_theme">Sphinx theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'1.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
