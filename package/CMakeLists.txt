@@ -9,10 +9,6 @@ endif ()
 #  list(APPEND GENERATORS "PackageMaker")
 #endif ()
 
-if (BUILD_PACKAGE_DEB)
-  list(APPEND GENERATORS "DEB")
-endif ()
-
 if (BUILD_PACKAGE_RPM)
   list(APPEND GENERATORS "RPM")
 endif ()
@@ -47,12 +43,6 @@ set(CPACK_WIX_PRODUCT_ICON "${PROJECT_SOURCE_DIR}/package/mnmlstc.ico")
 set(CPACK_WIX_LICENSE_RTF "${PROJECT_SOURCE_DIR}/package/License.rtf")
 set(CPACK_WIX_UI_BANNER "${PROJECT_SOURCE_DIR}/package/banner.bmp")
 set(CPACK_WIX_UI_DIALOG "${PROJECT_SOURCE_DIR}/package/dialog.bmp")
-
-#------------------------------------------------------------------------------
-# DEB Configuration
-#------------------------------------------------------------------------------
-set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE all)
-set(CPACK_DEBIAN_PACKAGE_MAINTAINER "MNMLSTC <development@mnmlstc.com>")
 
 #------------------------------------------------------------------------------
 # RPM Configuration
