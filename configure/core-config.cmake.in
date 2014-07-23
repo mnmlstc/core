@@ -5,4 +5,7 @@ set(CORE_VERSION 1.1.0)
 set_and_check(CORE_INCLUDE_DIR "@PACKAGE_INCLUDE_INSTALL_DIR@")
 set_and_check(CORE_CMAKE_DIR "@PACKAGE_CMAKE_INSTALL_DIR@")
 
+set(CORE_INCLUDE_DIRS ${CORE_INCLUDE_DIR})
+set(core_INCLUDE_DIRS ${CORE_INCLUDE_DIR})
+
 check_required_components(core)
