@@ -302,6 +302,7 @@ using u16string_view = basic_string_view<char16_t>;
 using wstring_view = basic_string_view<wchar_t>;
 using string_view = basic_string_view<char>;
 
+/* string_view comparison string_view */
 template <class CharT, typename Traits>
 bool operator == (
   basic_string_view<CharT, Traits> lhs,
@@ -337,6 +338,154 @@ bool operator < (
   basic_string_view<CharT, Traits> lhs,
   basic_string_view<CharT, Traits> rhs
 ) noexcept { return lhs.compare(rhs) < 0; }
+
+/* string_view comparison string */
+template <class CharT, class Traits, class Allocator>
+bool operator == (
+  basic_string_view<CharT, Traits> lhs,
+  ::std::basic_string<CharT, Traits, Allocator> const& rhs
+) noexcept { return lhs == basic_string_view<CharT, Traits> { rhs }; }
+
+template <class CharT, class Traits, class Allocator>
+bool operator != (
+  basic_string_view<CharT, Traits> lhs,
+  ::std::basic_string<CharT, Traits, Allocator> const& rhs
+) noexcept { return lhs != basic_string_view<CharT, Traits> { rhs }; }
+
+template <class CharT, class Traits, class Allocator>
+bool operator >= (
+  basic_string_view<CharT, Traits> lhs,
+  ::std::basic_string<CharT, Traits, Allocator> const& rhs
+) noexcept { return lhs >= basic_string_view<CharT, Traits> { rhs }; }
+
+template <class CharT, class Traits, class Allocator>
+bool operator <= (
+  basic_string_view<CharT, Traits> lhs,
+  ::std::basic_string<CharT, Traits, Allocator> const& rhs
+) noexcept { return lhs <= basic_string_view<CharT, Traits> { rhs }; }
+
+template <class CharT, class Traits, class Allocator>
+bool operator > (
+  basic_string_view<CharT, Traits> lhs,
+  ::std::basic_string<CharT, Traits, Allocator> const& rhs
+) noexcept { return lhs > basic_string_view<CharT, Traits> { rhs }; }
+
+template <class CharT, class Traits, class Allocator>
+bool operator < (
+  basic_string_view<CharT, Traits> lhs,
+  ::std::basic_string<CharT, Traits, Allocator> const& rhs
+) noexcept { return lhs < basic_string_view<CharT, Traits> { rhs }; }
+
+/* string comparison string_view */
+template <class CharT, class Traits, class Allocator>
+bool operator == (
+  ::std::basic_string<CharT, Traits, Allocator> const& lhs,
+  basic_string_view<CharT, Traits> rhs
+) noexcept { return basic_string_view<CharT, Traits> { lhs } == rhs; }
+
+template <class CharT, class Traits, class Allocator>
+bool operator != (
+  ::std::basic_string<CharT, Traits, Allocator> const& lhs,
+  basic_string_view<CharT, Traits> rhs
+) noexcept { return basic_string_view<CharT, Traits> { lhs } != rhs; }
+
+template <class CharT, class Traits, class Allocator>
+bool operator >= (
+  ::std::basic_string<CharT, Traits, Allocator> const& lhs,
+  basic_string_view<CharT, Traits> rhs
+) noexcept { return basic_string_view<CharT, Traits> { lhs } >= rhs; }
+
+template <class CharT, class Traits, class Allocator>
+bool operator <= (
+  ::std::basic_string<CharT, Traits, Allocator> const& lhs,
+  basic_string_view<CharT, Traits> rhs
+) noexcept { return basic_string_view<CharT, Traits> { lhs } <= rhs; }
+
+template <class CharT, class Traits, class Allocator>
+bool operator > (
+  ::std::basic_string<CharT, Traits, Allocator> const& lhs,
+  basic_string_view<CharT, Traits> rhs
+) noexcept { return basic_string_view<CharT, Traits> { lhs } > rhs; }
+
+template <class CharT, class Traits, class Allocator>
+bool operator < (
+  ::std::basic_string<CharT, Traits, Allocator> const& lhs,
+  basic_string_view<CharT, Traits> rhs
+) noexcept { return basic_string_view<CharT, Traits> { lhs } < rhs; }
+
+/* string_view comparison CharT* */
+template <class CharT, class Traits>
+bool operator == (
+  basic_string_view<CharT, Traits> lhs,
+  CharT const* rhs
+) noexcept { return lhs == basic_string_view<CharT, Traits> { rhs }; }
+
+template <class CharT, class Traits>
+bool operator != (
+  basic_string_view<CharT, Traits> lhs,
+  CharT const* rhs
+) noexcept { return lhs != basic_string_view<CharT, Traits> { rhs }; }
+
+template <class CharT, class Traits>
+bool operator >= (
+  basic_string_view<CharT, Traits> lhs,
+  CharT const* rhs
+) noexcept { return lhs >= basic_string_view<CharT, Traits> { rhs }; }
+
+template <class CharT, class Traits>
+bool operator <= (
+  basic_string_view<CharT, Traits> lhs,
+  CharT const* rhs
+) noexcept { return lhs <= basic_string_view<CharT, Traits> { rhs }; }
+
+template <class CharT, class Traits>
+bool operator > (
+  basic_string_view<CharT, Traits> lhs,
+  CharT const* rhs
+) noexcept { return lhs > basic_string_view<CharT, Traits> { rhs }; }
+
+template <class CharT, class Traits>
+bool operator < (
+  basic_string_view<CharT, Traits> lhs,
+  CharT const* rhs
+) noexcept { return lhs < basic_string_view<CharT, Traits> { rhs }; }
+
+/* CharT* comparison string_view */
+template <class CharT, class Traits>
+bool operator == (
+  CharT const* lhs,
+  basic_string_view<CharT, Traits> rhs
+) noexcept { return basic_string_view<CharT, Traits> { lhs } == rhs; }
+
+template <class CharT, class Traits>
+bool operator != (
+  CharT const* lhs,
+  basic_string_view<CharT, Traits> rhs
+) noexcept { return basic_string_view<CharT, Traits> { lhs } != rhs; }
+
+template <class CharT, class Traits>
+bool operator >= (
+  CharT const* lhs,
+  basic_string_view<CharT, Traits> rhs
+) noexcept { return basic_string_view<CharT, Traits> { lhs } >= rhs; }
+
+template <class CharT, class Traits>
+bool operator <= (
+  CharT const* lhs,
+  basic_string_view<CharT, Traits> rhs
+) noexcept { return basic_string_view<CharT, Traits> { lhs } <= rhs; }
+
+template <class CharT, class Traits>
+bool operator > (
+  CharT const* lhs,
+  basic_string_view<CharT, Traits> rhs
+) noexcept { return basic_string_view<CharT, Traits> { lhs } > rhs; }
+
+template <class CharT, class Traits>
+bool operator < (
+  CharT const* lhs,
+  basic_string_view<CharT, Traits> rhs
+) noexcept { return basic_string_view<CharT, Traits> { lhs } < rhs; }
 
 template <class CharT, class Traits>
 ::std::basic_ostream<CharT, Traits>& operator << (

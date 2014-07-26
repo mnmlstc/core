@@ -382,6 +382,51 @@ int main () {
       assert::equal(values["one"], 1);
       assert::equal(values["two"], 2);
       assert::equal(values["thr"], 3);
+    },
+
+    task("issue-20") = [] {
+      core::string_view const ref { "b" };
+      std::string const str { "b" };
+
+      /* string comparisons */
+      assert::equal(ref, str);
+      assert::not_equal(ref, std::string { "a" });
+      assert::greater_equal(ref, std::string { "a" });
+      assert::greater_equal(ref, str);
+      assert::less_equal(ref, str);
+      assert::less_equal(ref, std::string { "c" });
+      assert::greater(ref, std::string { "a" });
+      assert::less(ref, std::string { "c" });
+
+      assert::equal(str, ref);
+      assert::not_equal(std::string { "a" }, ref);
+      assert::greater_equal(std::string { "c" }, ref);
+      assert::greater_equal(str, ref);
+      assert::less_equal(str, ref);
+      assert::less_equal(std::string { "a" }, ref);
+      assert::greater(std::string { "c" }, ref);
+      assert::less(std::string { "a" }, ref);
+
+      /* char comparisons */
+      assert::equal(ref, "b");
+      assert::not_equal(ref, "a");
+      assert::greater_equal(ref, "a");
+      assert::greater_equal(ref, "b");
+      assert::less_equal(ref, "b");
+      assert::less_equal(ref, "c");
+      assert::greater(ref, "a");
+      assert::less(ref, "c");
+
+      assert::equal(str, ref);
+      assert::not_equal("a", ref);
+      assert::greater_equal("c", ref);
+      assert::greater_equal(str, ref);
+      assert::less_equal(str, ref);
+      assert::less_equal("a", ref);
+      assert::greater("c", ref);
+      assert::less("a", ref);
+
+
     }
   };
 
