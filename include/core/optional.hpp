@@ -105,9 +105,9 @@ struct storage<T, true> {
     engaged { that.engaged }
   {
     if (not this->engaged) { return; }
-    ::new(::std::addressof(this->val)) value_type {
+    ::new(::std::addressof(this->val)) value_type (
       ::core::move(that.val)
-    };
+    );
   }
 
   constexpr storage (value_type const& value) :
