@@ -238,6 +238,13 @@ int main () {
       assert::is_true(static_cast<bool>(value));
       value = {};
       assert::is_false(static_cast<bool>(value));
+    },
+
+    task("issue-23") = [] {
+      struct A { };
+      auto foo = [] () -> core::optional<A> { return core::nullopt; };
+      auto const a = foo();
+      assert::is_false(bool(a));
     }
   };
 

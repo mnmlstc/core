@@ -52,14 +52,14 @@ struct storage {
     engaged { that.engaged }
   {
     if (not this->engaged) { return; }
-    ::new(::std::addressof(this->val)) value_type { that.val };
+    ::new (::std::addressof(this->val)) value_type(that.val);
   }
 
   storage (storage&& that) noexcept(nothrow_mv_ctor) :
     engaged { that.engaged }
   {
     if (not this->engaged) { return; }
-    ::new(::std::addressof(this->val)) value_type { ::core::move(that.val) };
+    ::new (::std::addressof(this->val)) value_type(::core::move(that.val));
   }
 
   constexpr storage (value_type const& value) :
@@ -98,16 +98,14 @@ struct storage<T, true> {
     engaged { that.engaged }
   {
     if (not this->engaged) { return; }
-    ::new(::std::addressof(this->val)) value_type { that.val };
+    ::new (::std::addressof(this->val)) value_type(that.val);
   }
 
   storage (storage&& that) noexcept(nothrow_mv_ctor) :
     engaged { that.engaged }
   {
     if (not this->engaged) { return; }
-    ::new(::std::addressof(this->val)) value_type {
-      ::core::move(that.val)
-    };
+    ::new (::std::addressof(this->val)) value_type(::core::move(that.val));
   }
 
   constexpr storage (value_type const& value) :
