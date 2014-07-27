@@ -267,6 +267,21 @@ int main () {
 
       assert::equal(map[variant_type { "hash" }], 9);
       assert::equal(map[variant_type { 9.8 }], 12);
+    },
+
+    task("issue-23") = [] {
+      struct A { };
+      struct B { };
+      using variant_type = core::variant<A, B>;
+      auto foo = [] () -> variant_type { return A { }; };
+      auto bar = [] () -> variant_type { return B { }; };
+      auto const a = foo();
+      auto const b = bar();
+      auto const c = a;
+
+      assert::equal(a.which(), 0u);
+      assert::equal(b.which(), 1u);
+
     }
   };
 

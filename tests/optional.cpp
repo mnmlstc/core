@@ -243,8 +243,14 @@ int main () {
     task("issue-23") = [] {
       struct A { };
       auto foo = [] () -> core::optional<A> { return core::nullopt; };
+      auto bar = [] () -> core::optional<A> { return A { }; };
       auto const a = foo();
+      auto const b = bar();
+      auto const c = b;
+
       assert::is_false(bool(a));
+      assert::is_true(bool(b));
+      assert::is_true(bool(c));
     }
   };
 
@@ -676,6 +682,21 @@ int main () {
       assert::is_true(not error);
 
       assert::equal(*value, std::string { "make-expected" });
+    },
+
+    task("issue-23") = [] {
+      struct A { };
+      auto foo = [] () -> core::expected<A> {
+        return std::make_exception_ptr(std::logic_error { "error" });
+      };
+      auto bar = [] () -> core::expected<A> { return A { }; };
+      auto const a = foo();
+      auto const b = bar();
+      auto const c = b;
+
+      assert::is_false(bool(a));
+      assert::is_true(bool(b));
+      assert::is_true(bool(c));
     }
   };
 
@@ -954,7 +975,23 @@ int main () {
       assert::is_true(bool(value));
       assert::is_false(bool(condition));
       assert::is_false(bool(error));
+    },
+
+    task("issue-23") = [] {
+      struct A { };
+      auto foo = [] () -> core::result<A> {
+        return std::errc::permission_denied;
+      };
+      auto bar = [] () -> core::result<A> { return A { }; };
+      auto const a = foo();
+      auto const b = bar();
+      auto const c = b;
+
+      assert::is_false(bool(a));
+      assert::is_true(bool(b));
+      assert::is_true(bool(c));
     }
+
   };
 
   test("expected<void>") = {

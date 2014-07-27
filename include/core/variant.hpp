@@ -111,7 +111,7 @@ class variant final {
 
     template <class T>
     void operator ()(T const& value) const {
-      new (::std::addressof(this->data.get())) T { value };
+      new (::std::addressof(this->data.get())) T(value);
     }
   };
 
@@ -121,7 +121,9 @@ class variant final {
 
     template <class T>
     void operator () (T&& value) {
-      new (::std::addressof(this->data.get())) decay_t<T> { ::std::move(value) };
+      ::new (::std::addressof(this->data.get())) decay_t<T>(
+        ::core::move(value)
+      );
     }
   };
 
@@ -341,7 +343,7 @@ public:
   template < ::std::size_t N>
   auto get () && noexcept(false) -> element<N>&& {
     if (this->tag != N) { throw bad_variant_get { "incorrect type" }; }
-    return ::std::move(reinterpret_cast<element<N>&>(this->data));
+    return ::core::move(reinterpret_cast<element<N>&>(this->data));
   }
 
   template < ::std::size_t N>
