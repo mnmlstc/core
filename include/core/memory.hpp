@@ -388,7 +388,7 @@ struct observer_ptr final {
 
   explicit operator const_pointer () const noexcept { return this->get(); }
   explicit operator pointer () noexcept { return this->get(); }
-  explicit operator bool () noexcept { return this->get(); }
+  explicit operator bool () const noexcept { return this->get(); }
 
   reference operator * () const noexcept { return *this->get(); }
   pointer operator -> () const noexcept { return this->get(); }
