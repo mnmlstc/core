@@ -44,6 +44,18 @@ struct typelist_index<Index, T, T, Types...> {
   static constexpr ::std::size_t value = Index;
 };
 
+template < ::std::size_t N, class... Types> struct typelist_count;
+
+template < ::std::size_t N, class T>
+struct typelist_count<N, T> : ::std::integral_constant< ::std::size_t, N> { };
+
+template < ::std::size_t N, class T, class Head, class... Types>
+struct typelist_count<N, T, Head, Types...> : ::std::conditional<
+  ::std::is_same<T, Head>::value,
+  typelist_count<N + 1, T, Types...>,
+  typelist_count<N, T, Types...>
+>::type { };
+
 } /* namespace impl */
 
 template <class T>
@@ -78,6 +90,12 @@ template <class T, class... Ts>
 using typelist_index = ::std::integral_constant<
   ::std::size_t,
   impl::typelist_index<0ul, T, Ts...>::type::value
+>;
+
+template <class T, class... Ts>
+using typelist_count = ::std::integral_constant<
+  ::std::size_t,
+  impl::typelist_count<0ul, T, Ts...>::value
 >;
 
 /* N3761 (with some additions) */

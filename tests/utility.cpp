@@ -36,5 +36,23 @@ int main () {
     }
   };
 
+  test("typelist-count") = {
+    task("unique") = [] {
+      constexpr auto value = core::typelist_count<
+        int,
+        void, float, int
+      >::value;
+      static_assert(value == 1, "");
+    },
+
+    task("none") = [] {
+      constexpr auto value = core::typelist_count<
+        void,
+        int, float, char*
+      >::value;
+      static_assert(value == 0, "");
+    },
+  };
+
   monitor::run();
 }

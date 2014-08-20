@@ -29,9 +29,16 @@ The utility component can be found in the ``<core/utility.hpp>`` header.
 
    :inherits: ``std::integral_constant<std::size_t, N>``
 
-   The type of std::integral_constant that :class:`typelist_index\<T, Ts>` will
-   inherit from depends on where *T* exists in the type list *Ts*. No attempts
-   are made to allow multiple *T*s in *Ts*.
+   The type of ``std::integral_constant`` that :class:`typelist_index\<T, Ts>`
+   will inherit from depends on where *T* exists in the type list *Ts*. No
+   attempts are made to allow multiple *T*\ s in *Ts*.
+
+.. class:: typelist_count<T, Ts>
+
+   :inherits: ``std::integral_constant<std::size_t, N>``
+
+   The type of ``std::integral_constant`` that :class:`typelist_count\<T, Ts>`
+   will inherit from depends on how many *T* exists in the type list *Ts*.
 
 .. class:: type_at<N, Ts>
 
