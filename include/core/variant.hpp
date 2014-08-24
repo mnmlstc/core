@@ -219,11 +219,7 @@ public:
     data { }, tag { that.tag }
   { that.visit(mover { ::std::ref(this->data) }); }
 
-  template <
-    class=enable_if_t<
-      ::std::is_default_constructible<type_at_t<0, Ts...>>::value
-    >
-  > variant () : variant { type_at_t<0, Ts...> { } } { }
+  variant () : variant { type_at_t<0, Ts...> { } } { }
 
   ~variant () { this->visit(destroyer { }); }
 

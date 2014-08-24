@@ -281,8 +281,16 @@ int main () {
 
       assert::equal(a.which(), 0u);
       assert::equal(b.which(), 1u);
+    },
 
-    }
+    task("issue-25") = [] {
+      struct A { A (int) { } };
+      struct B { B (double) { } };
+      using variant_type = core::variant<A, B>;
+
+      variant_type variant { B { 0.0 } };
+      assert::equal(variant.which(), 1u);
+    },
   };
 
   monitor::run();
