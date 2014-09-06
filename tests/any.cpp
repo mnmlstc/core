@@ -4,165 +4,162 @@
 
 #include <cstdint>
 
-#include <unittest/unittest.hpp>
+#define CATCH_CONFIG_MAIN
+#include <catch.hpp>
 
-int main () {
-  using namespace unittest;
+TEST_CASE("constructors", "[constructors]") {
+  SECTION("default") {
+    core::any value;
 
-  test("any") = {
-    task("default-constructor") = [] {
-      core::any value;
+    CHECK(value.empty());
+    CHECK(value.type() == typeid(void));
+  }
 
-      assert::is_true(value.empty());
-      assert::equal(value.type(), typeid(void));
-    },
-    task("value-constructor") = [] {
-      std::string text { "value-constructor" };
-      core::any copy { text };
+  SECTION("value") {
+    std::string text { "value-constructor" };
+    core::any copy { text };
 
-      assert::is_false(copy.empty());
-      assert::is_false(text.empty());
-      assert::equal(copy.type(), typeid(text));
+    CHECK_FALSE(copy.empty());
+    CHECK_FALSE(text.empty());
+    CHECK(copy.type() == typeid(text));
 
-      core::any move { std::move(text) };
+    core::any move { std::move(text) };
 
-      assert::is_false(move.empty());
-      assert::is_true(text.empty());
-      assert::equal(move.type(), typeid(text));
-    },
+    CHECK_FALSE(move.empty());
+    CHECK(text.empty());
+    CHECK(move.type() == typeid(text));
+  }
 
-    task("copy-constructor") = [] {
-      core::any value { std::string { "copy-constructor" } };
-      core::any ctor { value };
+  SECTION("copy") {
+    core::any value { std::string { "copy-constructor" } };
+    core::any ctor { value };
 
-      assert::is_false(value.empty());
-      assert::is_false(ctor.empty());
-      assert::equal(ctor.type(), value.type());
-    },
+    CHECK_FALSE(value.empty());
+    CHECK_FALSE(ctor.empty());
+    CHECK(ctor.type() == value.type());
+  }
 
-    task("move-constructor") = [] {
-      core::any value { std::string { "move-constructor" } };
-      core::any ctor { std::move(value) };
+  SECTION("move") {
+    core::any value { std::string { "move-constructor" } };
+    core::any ctor { std::move(value) };
 
-      assert::is_false(ctor.empty());
-      assert::is_true(value.empty());
-      assert::equal(ctor.type(), typeid(std::string));
-    },
+    CHECK_FALSE(ctor.empty());
+    CHECK(value.empty());
+    CHECK(ctor.type() == typeid(std::string));
+  }
+}
 
-    task("rvalue-assign") = [] {
-      std::string text { "rvalue-assign works!" };
-      core::any value;
-      value = std::move(text);
+TEST_CASE("assignment", "[assignment]") {
+  SECTION("rvalue") {
+    std::string text { "rvalue-assign works!" };
+    core::any value;
+    value = std::move(text);
 
-      assert::is_false(value.empty());
-      assert::is_true(text.empty());
-      assert::equal(value.type(), typeid(text));
-    },
+    CHECK_FALSE(value.empty());
+    CHECK(text.empty());
+    CHECK(value.type() == typeid(text));
+  }
 
-    task("lvalue-assign") = [] {
-      std::uint64_t integer = 42;
-      core::any value;
-      value = integer;
-      assert::is_false(value.empty());
-      assert::equal(value.type(), typeid(integer));
-    },
+  SECTION("lvalue") {
+    std::uint64_t integer = 42;
+    core::any value;
+    value = integer;
+    CHECK_FALSE(value.empty());
+    CHECK(value.type() == typeid(integer));
+  }
 
-    task("copy-assign") = [] {
-      std::uint64_t integer = 42;
-      core::any value { integer };
-      core::any assigned;
-      assigned = value;
-      assert::is_false(value.empty());
-      assert::is_false(assigned.empty());
-      assert::equal(typeid(integer), assigned.type());
-    },
+  SECTION("copy") {
+    std::uint64_t integer = 42;
+    core::any value { integer };
+    core::any assigned;
+    assigned = value;
+    CHECK_FALSE(value.empty());
+    CHECK_FALSE(assigned.empty());
+    CHECK(typeid(integer) == assigned.type());
+  }
 
-    task("move-assign") = [] {
-      std::uint64_t integer = 42;
-      core::any value { integer };
-      core::any assigned;
-      assigned = std::move(value);
-      assert::is_true(value.empty());
-      assert::is_false(assigned.empty());
-      assert::equal(typeid(integer), assigned.type());
-    },
+  SECTION("move") {
+    std::uint64_t integer = 42;
+    core::any value { integer };
+    core::any assigned;
+    assigned = std::move(value);
+    CHECK(value.empty());
+    CHECK_FALSE(assigned.empty());
+    CHECK(typeid(integer) == assigned.type());
+  }
 
-    task("value-assign") = [] {
-      std::uint64_t integer { 42 };
-      core::any value { };
-      value = integer;
-      assert::is_false(value.empty());
-      assert::equal(typeid(integer), value.type());
-      assert::equal(core::any_cast<std::uint64_t>(value), 42u);
-    },
+  SECTION("value") {
+    std::uint64_t integer { 42 };
+    core::any value { };
+    value = integer;
+    CHECK_FALSE(value.empty());
+    CHECK(typeid(integer) == value.type());
+    CHECK(core::any_cast<std::uint64_t>(value) == 42u);
+  }
+}
 
-    task("swap") = [] {
-      using std::swap;
-      std::uint64_t integer = 42;
-      core::any value { integer };
-      core::any to_swap { };
-      swap(value, to_swap);
-      assert::is_true(value.empty());
-      assert::is_false(to_swap.empty());
-    },
+TEST_CASE("swap", "[modifiers]") {
+  using std::swap;
+  std::uint64_t integer = 42;
+  core::any value { integer };
+  core::any to_swap { };
+  swap(value, to_swap);
+  CHECK(value.empty());
+  CHECK_FALSE(to_swap.empty());
+}
 
-    task("clear") = [] {
-      core::any value { std::string { "clear" } };
-      assert::is_false(value.empty());
-      value.clear();
-      assert::is_true(value.empty());
-    },
+TEST_CASE("clear", "[modifiers]") {
+  core::any value { std::string { "clear" } };
+  CHECK_FALSE(value.empty());
+  value.clear();
+  CHECK(value.empty());
+}
 
-    task("type") = [] {
-      std::uint64_t integer = 42;
-      core::any value { integer };
-      assert::equal(typeid(integer), value.type());
-    },
+TEST_CASE("type", "[modifiers]") {
+  std::uint64_t integer = 42;
+  core::any value { integer };
+  CHECK(typeid(integer) == value.type());
+}
 
-    task("cast-const-ref") = [] {
-      std::uint64_t integer = 42;
-      core::any const value { integer };
-      auto integer_value = core::any_cast<std::uint64_t>(value);
+TEST_CASE("any-cast", "[any-cast]") {
+  SECTION("const-reference") {
+    std::uint64_t integer = 42;
+    core::any const value { integer };
+    auto integer_value = core::any_cast<std::uint64_t>(value);
 
-      assert::equal(integer_value, integer);
-      assert::throws<core::bad_any_cast>([&value] {
-        core::any_cast<double>(value);
-      });
-    },
+    CHECK(integer_value == integer);
+    CHECK_THROWS_AS(core::any_cast<double>(value), core::bad_any_cast);
+  }
 
-    task("cast-const-ptr") = [] {
-      std::uint64_t integer = 42;
-      core::any const value { integer };
-      auto integer_ptr = core::any_cast<std::uint64_t>(std::addressof(value));
-      auto double_ptr = core::any_cast<double>(std::addressof(value));
+  SECTION("const-pointer") {
+    std::uint64_t integer = 42;
+    core::any const value { integer };
+    auto integer_ptr = core::any_cast<std::uint64_t>(std::addressof(value));
+    auto double_ptr = core::any_cast<double>(std::addressof(value));
 
-      assert::is_not_null(integer_ptr);
-      assert::is_null(double_ptr);
-      assert::equal(*integer_ptr, integer);
-      assert::is_true(std::is_pointer<decltype(integer_ptr)>::value);
-    },
+    REQUIRE(integer_ptr != nullptr);
+    CHECK(double_ptr == nullptr);
+    CHECK(*integer_ptr == integer);
+    CHECK(std::is_pointer<decltype(integer_ptr)>::value);
+  }
 
-    task("cast-ref") = []{
-      std::uint64_t integer = 42;
-      core::any value { integer };
-      auto integer_value = core::any_cast<std::uint64_t>(value);
+  SECTION("reference") {
+    std::uint64_t integer = 42;
+    core::any value { integer };
+    auto integer_value = core::any_cast<std::uint64_t>(value);
 
-      assert::equal(integer_value, integer);
-      assert::throws<core::bad_any_cast>([&value]{
-        core::any_cast<double>(value);
-      });
-    },
+    CHECK(integer_value == integer);
+    CHECK_THROWS_AS(core::any_cast<double>(value), core::bad_any_cast);
+  }
 
-    task("cast-ptr") = []{
-      std::uint64_t integer = 42;
-      core::any value { integer };
-      auto integer_ptr = core::any_cast<std::uint64_t>(std::addressof(value));
-      auto double_ptr = core::any_cast<double>(std::addressof(value));
+  SECTION("pointer") {
+    std::uint64_t integer = 42;
+    core::any value { integer };
+    auto integer_ptr = core::any_cast<std::uint64_t>(std::addressof(value));
+    auto double_ptr = core::any_cast<double>(std::addressof(value));
 
-      assert::is_not_null(integer_ptr);
-      assert::is_null(double_ptr);
-      assert::equal(*integer_ptr, integer);
-    },
-  };
-  monitor::run();
+    REQUIRE(integer_ptr != nullptr);
+    CHECK(double_ptr == nullptr);
+    CHECK(*integer_ptr == integer);
+  }
 }

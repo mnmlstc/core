@@ -36,12 +36,14 @@ There are several requirements to fully use MNMLSTC Core:
 
  * A C++11 compliant compiler (GCC 4.8.2 or Clang 3.3 meet the minimum feature
    set required to build and use MNMLSTC Core)
- * `CMake 2.8.11 <http://cmake.org>`_
- * `MNMLSTC Unittest <https://github.com/mnmlstc/unittest>`_
+ * `CMake 3.0.0 <http://cmake.org>`_
+
+Additionally, to actively develop MNMLSTC Core, the following are required:
  * `Sphinx Documentation Generator <http://sphinx-doc.org>`_
  * `Sphinx RTD Theme <https://pypi.python.org/pypi/sphinx_rtd_theme>`_
-
-MNMLSTC Unittest is only necessary if building and running the unit tests.
+ * `WiX Toolset <http://wixtoolset.org>`_
 
 Sphinx and the Sphinx RTD Theme are only necessary if generating
 documentation manually.
+
+WiX Toolset is only required if building packages for Windows.

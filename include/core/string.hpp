@@ -188,7 +188,7 @@ struct basic_string_view {
   size_type find_first_not_of (basic_string_view that) const {
     for (auto iter = this->begin(); iter != this->end(); ++iter) {
       if (traits::find(that.data(), that.size(), *iter)) { continue; }
-      return ::std::distance(this->begin(), iter);
+      return static_cast<size_type>(::std::distance(this->begin(), iter));
     }
     return npos;
   }
@@ -196,7 +196,9 @@ struct basic_string_view {
   size_type find_last_not_of (basic_string_view that) const {
     for (auto iter = this->rbegin(); iter != this->rend(); ++iter) {
       if (traits::find(that.data(), that.size(), *iter)) { continue; }
-      return this->size() - ::std::distance(this->rbegin(), iter) - 1;
+      auto const distance = static_cast<size_type>(
+        ::std::distance(this->rbegin(), iter));
+      return this->size() - distance - 1;
     }
     return npos;
   }
@@ -208,7 +210,7 @@ struct basic_string_view {
       traits::eq
     );
     if (iter == this->end()) { return npos; }
-    return ::std::distance(this->begin(), iter);
+    return static_cast<size_type>(::std::distance(this->begin(), iter));
   }
 
   size_type find_last_of (basic_string_view that) const {
@@ -218,7 +220,9 @@ struct basic_string_view {
       traits::eq
     );
     if (iter == this->rend()) { return npos; }
-    return this->size() - ::std::distance(this->rbegin(), iter) - 1;
+    auto const distance = static_cast<size_type>(
+      ::std::distance(this->rbegin(), iter));
+    return this->size() - distance - 1;
   }
 
   size_type rfind (basic_string_view that) const {
@@ -238,7 +242,7 @@ struct basic_string_view {
       traits::eq
     );
     if (iter == this->end()) { return npos; }
-    return ::std::distance(this->begin(), iter);
+    return static_cast<size_type>(::std::distance(this->begin(), iter));
   }
 
   /* functions that take a single CharT */
@@ -250,7 +254,7 @@ struct basic_string_view {
       [value](value_type val) { return traits::eq(val, value); }
     );
     if (iter == end) { return npos; }
-    return ::std::distance(this->begin(), iter);
+    return static_cast<size_type>(::std::distance(this->begin(), iter));
   }
 
   size_type find_last_not_of (value_type value) const {
@@ -261,7 +265,9 @@ struct basic_string_view {
       [value](value_type val) { return traits::eq(val, value); }
     );
     if (iter == end) { return npos; }
-    return this->size() - ::std::distance(this->rbegin(), iter) - 1;
+    auto const distance = static_cast<size_type>(
+      ::std::distance(this->rbegin(), iter));
+    return this->size() - distance - 1;
   }
 
   size_type find_first_of (value_type value) const {
@@ -276,14 +282,16 @@ struct basic_string_view {
     auto end = this->rend();
     auto iter = ::std::find(this->rbegin(), end, value);
     if (iter == end) { return npos; }
-    return this->size() - ::std::distance(this->rbegin(), iter) -1;
+    auto const distance = static_cast<size_type>(
+      ::std::distance(this->rbegin(), iter));
+    return this->size() - distance -1;
   }
 
   size_type find (value_type value) const {
     auto end = this->end();
     auto iter = ::std::find(this->begin(), end, value);
     if (iter == end) { return npos; }
-    return ::std::distance(this->begin(), iter);
+    return static_cast<size_type>(::std::distance(this->begin(), iter));
   }
 
   void swap (basic_string_view& that) noexcept {

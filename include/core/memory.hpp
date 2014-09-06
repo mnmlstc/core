@@ -340,6 +340,8 @@ struct observer_ptr final {
   using const_reference = add_lvalue_reference_t<add_const_t<element_type>>;
   using reference = add_lvalue_reference_t<element_type>;
 
+  observer_ptr (observer_ptr const&) noexcept = default;
+
   constexpr observer_ptr (::std::nullptr_t) noexcept : ptr { nullptr } { }
   explicit observer_ptr (pointer ptr) noexcept : ptr { ptr } { }
 
@@ -367,6 +369,8 @@ struct observer_ptr final {
     observer_ptr { ptr }.swap(*this);
     return *this;
   }
+
+  observer_ptr& operator = (observer_ptr const&) noexcept = default;
 
   template <
     class T,

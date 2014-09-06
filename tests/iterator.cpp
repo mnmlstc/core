@@ -6,7 +6,8 @@
 
 #include <cstdint>
 
-#include <unittest/unittest.hpp>
+#define CATCH_CONFIG_MAIN
+#include <catch.hpp>
 
 template <class T>
 std::ostream& operator << (std::ostream& os, std::vector<T> const& vec) {
@@ -19,52 +20,45 @@ std::ostream& operator << (std::ostream& os, std::vector<T> const& vec) {
   return os << "]";
 }
 
-int main () {
-  using namespace unittest;
+TEST_CASE("iterator") {
   std::vector<std::uint64_t> value = { 1, 2, 3, 4, 5 };
 
-  test("iterator") = {
-    task("size") = [value] {
-      int array[5];
-      assert::equal(core::size(value), value.size());
-      static_assert(core::size(array) == 5, "core::size");
-    },
+  SECTION("size") {
+    int array[5];
+    CHECK(core::size(value) == value.size());
+    static_assert(core::size(array) == 5, "core::size");
+  }
 
-    task("empty") = [value] {
-      int array[5];
-      assert::is_false(core::empty(value));
-      static_assert(not core::empty(array), "core::empty");
-    },
+  SECTION("empty") {
+    int array[5];
+    CHECK_FALSE(core::empty(value));
+    static_assert(not core::empty(array), "core::empty");
+  }
 
-    task("front") = [value] {
-      constexpr int array[5] { 0, 1, 2, 3, 4 };
-      assert::equal(core::front(value), value.front());
-      static_assert(core::front(array) == 0, "core::front");
-    },
+  SECTION("front") {
+    constexpr int array[5] { 0, 1, 2, 3, 4 };
+    CHECK(core::front(value) == value.front());
+    static_assert(core::front(array) == 0, "core::front");
+  }
 
-    task("back") = [value] {
-      constexpr int array[5] { 0, 1, 2, 3, 4 };
-      assert::equal(core::back(value), value.back());
-      static_assert(core::back(array) == 4, "core::back");
-    },
+  SECTION("back") {
+    constexpr int array[5] { 0, 1, 2, 3, 4 };
+    CHECK(core::back(value) == value.back());
+    static_assert(core::back(array) == 4, "core::back");
+  }
 
-    task("data") = [value] {
-      int array[5] { 1, 2, 3, 4, 5 };
-      assert::equal(core::data(value), value.data());
-      assert::equal(core::data(array), std::addressof(array[0]));
-    },
+  SECTION("data") {
+    int array[5] { 1, 2, 3, 4, 5 };
+    CHECK(core::data(value) == value.data());
+    CHECK(core::data(array) == std::addressof(array[0]));
+  }
 
-    task("cbegin") = [value] {
-      assert::equal(core::cbegin(value), value.begin());
-    },
-    task("cend") = [value] { assert::equal(core::cend(value), value.end()); },
+  SECTION("cbegin") { CHECK(core::cbegin(value) == value.begin()); }
+  SECTION("cend") { CHECK(core::cend(value) == value.end()); }
 
-    task("infix-ostream-iterator") = [value] {
-      std::ostringstream stream;
-      stream << value;
-      assert::equal(stream.str(), std::string { "[1,2,3,4,5]" });
-    }
-  };
-
-  monitor::run();
+  SECTION("infix-ostream-iterator") {
+    std::ostringstream stream;
+    stream << value;
+    CHECK(stream.str() == "[1,2,3,4,5]");
+  }
 }

@@ -375,7 +375,7 @@ struct hash<core::v1::variant<Ts...>> {
   using result_type = size_t;
   result_type operator () (argument_type const& value) const {
     return value.match(hash<Ts> { }...);
-  };
+  }
 };
 
 template <size_t I, class... Ts>

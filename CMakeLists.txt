@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.11)
+cmake_minimum_required(VERSION 3.0.0)
 project(core CXX)
 
 #------------------------------------------------------------------------------
@@ -18,8 +18,7 @@ set(CORE_VERSION_MAJOR 1)
 set(CORE_VERSION_MINOR 1)
 set(CORE_VERSION_PATCH 0)
 set(CORE_VERSION
-  ${CORE_VERSION_MAJOR}.${CORE_VERSION_MINOR}.${CORE_VERSION_PATCH}
-)
+  ${CORE_VERSION_MAJOR}.${CORE_VERSION_MINOR}.${CORE_VERSION_PATCH})
 
 set(TEST_SOURCE_DIR "${PROJECT_SOURCE_DIR}/tests")
 set(TEST_BINARY_DIR "${PROJECT_BINARY_DIR}/tests")
@@ -37,97 +36,15 @@ list(APPEND RPM_DEP "UNIX" "NOT APPLE" "BUILD_PACKAGE")
 list(APPEND PKG_DEP "APPLE" "BUILD_PACKAGE")
 list(APPEND MSI_DEP "WIN32" "BUILD_PACKAGE")
 
-option(BUILD_WITH_LIBCXX "Use libc++ as stdlib" OFF)
+# This is overridden on the next line as it gets turned into a cache variable
+string(COMPARE EQUAL ${CMAKE_CXX_COMPILER_ID} "AppleClang" BUILD_WITH_LIBCXX)
+option(BUILD_WITH_LIBCXX "Use libc++ as stdlib" ${BUILD_WITH_LIBCXX})
 option(BUILD_PACKAGE "Build package with CPack" OFF)
 option(BUILD_DOCS "Build documentation with Sphinx Documentation Generator")
 
 cmake_dependent_option(BUILD_PACKAGE_MSI "Create an MSI" ON "${MSI_DEP}" OFF)
 cmake_dependent_option(BUILD_PACKAGE_RPM "Create an RPM" ON "${RPM_DEP}" OFF)
 cmake_dependent_option(BUILD_PACKAGE_PKG "Create a PKG" ON "${PKG_DEP}" OFF)
-
-if (APPLE AND ${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
-  set(BUILD_WITH_LIBCXX ON CACHE BOOL "Use libc++ as stdlib" ON)
-endif ()
-
-#------------------------------------------------------------------------------
-# Compiler Environment Check
-#------------------------------------------------------------------------------
-set(USE_STDLIB_LIBCXX "-stdlib=libc++")
-set(USE_STD_CXX11 "-std=c++11")
-
-set(USE_EXCEPTIONS "-fexceptions")
-set(USE_RTTI "-frtti")
-
-set(USE_PEDANTIC "-pedantic")
-
-set(WARN_EVERYTHING "-Weverything")
-set(WARN_NOEXCEPT "-Wnoexcept")
-set(WARN_ONE_LINE "-WL")
-set(WARN_ERROR "-Werror")
-set(WARN_EXTRA "-Wextra")
-set(WARN_ALL "-Wall")
-
-# MSVC is currently unsupported, but this is here for when they get their
-# act together.
-if (MSVC)
-  set(USE_EXCEPTIONS "/Ehsc")
-
-  set(WARN_EVERYTHING "-Wall") # Yes, I am aware of the irony.
-  set(WARN_ERROR "-Werror")
-  set(WARN_ALL "-W4")
-endif ()
-
-check_cxx_compiler_flag(${USE_STDLIB_LIBCXX} CAN_USE_STDLIB_LIBCXX)
-check_cxx_compiler_flag(${USE_STD_CXX11} CAN_USE_STD_CXX11)
-
-check_cxx_compiler_flag(${USE_EXCEPTIONS} CAN_USE_EXCEPTIONS)
-check_cxx_compiler_flag(${USE_RTTI} CAN_USE_RTTI)
-
-check_cxx_compiler_flag(${USE_PEDANTIC} CAN_USE_PEDANTIC)
-
-check_cxx_compiler_flag(${WARN_EVERYTHING} CAN_WARN_EVERYTHING)
-check_cxx_compiler_flag(${WARN_NOEXCEPT} CAN_WARN_NOEXCEPT)
-check_cxx_compiler_flag(${WARN_ONE_LINE} CAN_WARN_ONE_LINE)
-check_cxx_compiler_flag(${WARN_ERROR} CAN_WARN_ERROR)
-check_cxx_compiler_flag(${WARN_EXTRA} CAN_WARN_EXTRA)
-check_cxx_compiler_flag(${WARN_ALL} CAN_WARN_ALL)
-
-if (CAN_USE_STDLIB_LIBCXX AND BUILD_WITH_LIBCXX)
-  set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} ${USE_STDLIB_LIBCXX}")
-endif ()
-
-if (CAN_USE_STD_CXX11)
-  set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} ${USE_STD_CXX11}")
-endif ()
-
-# These headers are required
-check_include_file_cxx(initializer_list HAVE_INITIALIZER_LIST)
-check_include_file_cxx(type_traits HAVE_TYPE_TRAITS)
-check_include_file_cxx(tuple HAVE_TUPLE)
-
-check_include_file_cxx(cstdint HAVE_CSTDINT)
-check_include_file_cxx(cstddef HAVE_CSTDDEF)
-
-# Handle Insane Environment
-if (NOT HAVE_INITIALIZER_LIST)
-  message(FATAL_ERROR "standard header <initializer_list> could not be found")
-endif ()
-
-if (NOT HAVE_TYPE_TRAITS)
-  message(FATAL_ERROR "standard header <type_traits> could not be found")
-endif ()
-
-if (NOT HAVE_TUPLE)
-  message(FATAL_ERROR "standard header <tuple> could not be found")
-endif ()
-
-if (NOT HAVE_CSTDINT)
-  message(FATAL_ERROR "standard header <cstdint> could not be found")
-endif ()
-
-if (NOT HAVE_CSTDDEF)
-  message(FATAL_ERROR "standard header <cstddef> could not be found")
-endif ()
 
 #------------------------------------------------------------------------------
 # Configuration
@@ -145,31 +62,11 @@ configure_package_config_file(
   PATH_VARS INCLUDE_INSTALL_DIR CMAKE_INSTALL_DIR
 )
 
-include_directories(${PROJECT_SOURCE_DIR}/include)
+add_library(core INTERFACE)
 
-if (CAN_USE_STDLIB_LIBCXX AND BUILD_WITH_LIBCXX)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${USE_STDLIB_LIBCXX}")
-endif ()
-
-if (CAN_USE_STD_CXX11)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${USE_STD_CXX11}")
-endif ()
-
-if (CAN_USE_PEDANTIC)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${USE_PEDANTIC}")
-endif ()
-
-if (CAN_WARN_ALL)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${WARN_ALL}")
-endif ()
-
-if (CAN_WARN_NOEXCEPT)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${WARN_NOEXCEPT}")
-endif ()
-
-if (CAN_WARN_EXTRA)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${WARN_EXTRA}")
-endif ()
+target_include_directories(core INTERFACE
+  $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>)
 
 if (BUILD_TESTING)
   set(CMAKE_TEST_COMMAND ctest)
@@ -195,8 +92,11 @@ install(FILES
 
 install(DIRECTORY "${PROJECT_SOURCE_DIR}/include/core"
   DESTINATION ${INCLUDE_INSTALL_DIR}
-  FILES_MATCHING PATTERN "*.hpp"
-)
+  FILES_MATCHING PATTERN "*.hpp")
+
+install(TARGETS core EXPORT core-export)
+export(TARGETS core NAMESPACE mnmlstc:: FILE core-export.cmake)
+install(EXPORT core-export NAMESPACE mnmlstc:: DESTINATION ${CMAKE_INSTALL_DIR})
 
 if (BUILD_DOCS)
   install(DIRECTORY "${DOCS_BINARY_DIR}/"

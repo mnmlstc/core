@@ -17,7 +17,8 @@ using data_type = add_pointer_t<void>;
 template <class Type>
 using is_small = ::std::integral_constant<
   bool,
-  sizeof(decay_t<Type>) <= sizeof(void*)
+  sizeof(decay_t<Type>) <= sizeof(void*) and
+  ::std::is_nothrow_copy_constructible<Type>::value
 >;
 
 struct any_dispatch {
@@ -40,15 +41,15 @@ struct any_dispatch_select<Type, true> {
 
   static void clone (data_type const& source, data_type& data) {
     allocator_type alloc { };
-    auto const& value = reinterpret_cast<Type const&>(source);
-    auto& ref = reinterpret_cast<Type&>(data);
-    allocator_traits::construct(alloc, ::std::addressof(ref), value);
+    auto const& value = reinterpret_cast<Type const>(source);
+    auto ptr = reinterpret_cast<Type*>(::std::addressof(data));
+    allocator_traits::construct(alloc, ptr, value);
   }
 
   static void destroy (data_type& data) {
     allocator_type alloc { };
-    auto& ref = reinterpret_cast<Type&>(data);
-    allocator_traits::destroy(alloc, ::std::addressof(ref));
+    auto ptr = reinterpret_cast<Type*>(::std::addressof(data));
+    allocator_traits::destroy(alloc, ptr);
   }
 };
 
