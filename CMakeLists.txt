@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.0)
-project(core CXX)
+project(core VERSION 1.2.0.0 LANGUAGES CXX)
 
 #------------------------------------------------------------------------------
 # Modules, Variables, and Options
@@ -13,12 +13,6 @@ include(CTest)
 set(INCLUDE_INSTALL_DIR "include" CACHE INTERNAL "Header Files")
 set(CMAKE_INSTALL_DIR "share/cmake/core" CACHE INTERNAL "CMake Files")
 set(DOCS_INSTALL_DIR "share/doc/mnmlstc/core" CACHE INTERNAL "Documentation")
-
-set(CORE_VERSION_MAJOR 1)
-set(CORE_VERSION_MINOR 1)
-set(CORE_VERSION_PATCH 0)
-set(CORE_VERSION
-  ${CORE_VERSION_MAJOR}.${CORE_VERSION_MINOR}.${CORE_VERSION_PATCH})
 
 set(TEST_SOURCE_DIR "${PROJECT_SOURCE_DIR}/tests")
 set(TEST_BINARY_DIR "${PROJECT_BINARY_DIR}/tests")
@@ -51,7 +45,6 @@ cmake_dependent_option(BUILD_PACKAGE_PKG "Create a PKG" ON "${PKG_DEP}" OFF)
 #------------------------------------------------------------------------------
 write_basic_package_version_file(
   "${PROJECT_BINARY_DIR}/${PROJECT_NAME}-config-version.cmake"
-  VERSION ${CORE_VERSION}
   COMPATIBILITY SameMajorVersion
 )
 
@@ -67,6 +60,9 @@ add_library(core INTERFACE)
 target_include_directories(core INTERFACE
   $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>)
+
+export(TARGETS core NAMESPACE mnmlstc:: FILE core-export.cmake)
+export(PACKAGE core)
 
 if (BUILD_TESTING)
   set(CMAKE_TEST_COMMAND ctest)
@@ -94,9 +90,8 @@ install(DIRECTORY "${PROJECT_SOURCE_DIR}/include/core"
   DESTINATION ${INCLUDE_INSTALL_DIR}
   FILES_MATCHING PATTERN "*.hpp")
 
-install(TARGETS core EXPORT core-export)
-export(TARGETS core NAMESPACE mnmlstc:: FILE core-export.cmake)
-install(EXPORT core-export NAMESPACE mnmlstc:: DESTINATION ${CMAKE_INSTALL_DIR})
+install(TARGETS core EXPORT core-targets)
+install(EXPORT core-targets NAMESPACE mnmlstc:: DESTINATION ${CMAKE_INSTALL_DIR})
 
 if (BUILD_DOCS)
   install(DIRECTORY "${DOCS_BINARY_DIR}/"
