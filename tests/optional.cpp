@@ -1,3 +1,4 @@
+#define CATCH_CONFIG_MAIN
 #include <core/optional.hpp>
 
 #include <unordered_map>
@@ -7,7 +8,6 @@
 
 #include <cstdint>
 
-#define CATCH_CONFIG_MAIN
 #include <catch.hpp>
 
 struct variadic {
@@ -468,777 +468,737 @@ TEST_CASE("expected-constructors", "[expected][constructors]") {
     CHECK(value.value().empty());
     CHECK(move.value() == "move");
   }
-
-  SECTION("exception-ptr") {
-    auto ptr = std::make_exception_ptr(std::logic_error { "test" });
-    core::expected<int> value { ptr };
-
-    CHECK_FALSE(value);
-    auto exception = value.expect<std::logic_error>();
-    CHECK(std::string { exception.what() } == "test");
-  }
 }
 
-TEST_CASE("expected-assignment", "[expected][assignment]") {
-  SECTION("copy-value") {
-    core::expected<int> value { };
-    value = 5;
-    CHECK(value);
-    CHECK(value.value() == 5);
-  }
+TEST_CASE("expected-constructor-exception-ptr", "[expected][constructor]") {
+  auto ptr = std::make_exception_ptr(std::logic_error { "test" });
+  core::expected<int> value { ptr };
 
-  SECTION("move-value") {
-    core::expected<std::string> value { };
-    std::string str { "move" };
-    value = std::move(str);
-    CHECK(value);
-    CHECK(str.empty());
-    CHECK(value.value() == "move");
-  }
-
-  SECTION("move") {
-    core::expected<std::string> value { "move" };
-    core::expected<std::string> move { };
-    move = std::move(value);
-
-    CHECK(value);
-    CHECK(move);
-    CHECK(value.value().empty());
-
-    CHECK(move.value() == "move");
-  }
-
-  SECTION("copy") {
-    core::expected<std::string> value { "copy" };
-    core::expected<std::string> copy { };
-    copy = value;
-
-    CHECK(value);
-    CHECK(copy);
-    CHECK(copy.value() == value.value());
-
-    CHECK(copy.value() == "copy");
-  }
-
-  SECTION("exception-ptr") {
-    std::logic_error exception { "error" };
-    auto ptr = std::make_exception_ptr(exception);
-    core::expected<std::string> value { };
-    value = ptr;
-
-    CHECK_FALSE(value);
-    CHECK(value == ptr);
-    CHECK_THROWS_AS(value.raise(), std::logic_error);
-  }
+  CHECK_FALSE(value);
+  auto exception = value.expect<std::logic_error>();
+  CHECK(std::string { exception.what() } == "test");
 }
 
-TEST_CASE("expected-operators", "[expected][operators]") {
-  SECTION("dereference") {
-    core::expected<int> nothrow { 51 };
-
-    CHECK(nothrow);
-    CHECK(*nothrow == 51);
-  }
-
-  SECTION("arrow") {
-    core::expected<std::string> nothrow { "words" };
-    CHECK(nothrow);
-    CHECK(nothrow->at(0) == 'w');
-  }
-
-  SECTION("equal") {
-    core::expected<int> lhs { 5 };
-    core::expected<int> rhs { 6 };
-
-    CHECK(lhs == 5);
-    CHECK(6 == rhs);
-    CHECK(lhs == core::expected<int> { 5 });
-    CHECK(core::expected<int> { 6 } == rhs);
-  }
-
-  SECTION("not-equal") {
-    core::expected<int> lhs { 5 };
-    core::expected<int> rhs { 6 };
-
-    core::expected<int> invalid { ::std::exception_ptr { } };
-
-    CHECK(lhs);
-    CHECK(rhs);
-    CHECK(lhs != rhs);
-    CHECK(lhs != invalid);
-    CHECK(invalid != rhs);
-  }
-
-  SECTION("greater-equal") {
-    core::expected<int> lhs { 5 };
-    core::expected<int> rhs { 4 };
-    core::expected<int> invalid { ::std::exception_ptr { } };
-
-    CHECK(lhs >= rhs);
-    CHECK(lhs >= invalid);
-    CHECK(invalid >= ::std::exception_ptr { });
-    CHECK(lhs >= 3);
-    CHECK(lhs >= 5);
-    CHECK(6 >= rhs);
-    CHECK(4 >= rhs);
-  }
-
-  SECTION("less-equal") {
-    core::expected<int> lhs { 5 };
-    core::expected<int> rhs { 6 };
-    core::expected<int> invalid { ::std::exception_ptr { } };
-
-    CHECK(lhs <= rhs);
-    CHECK(invalid <= rhs);
-    CHECK(::std::exception_ptr { } <= invalid);
-    CHECK(lhs <= 5);
-    CHECK(lhs <= 6);
-    CHECK(5 <= rhs);
-    CHECK(6 <= rhs);
-  }
-
-  SECTION("greater") {
-    core::expected<int> lhs { 6 };
-    core::expected<int> rhs { 5 };
-
-    CHECK(lhs > rhs);
-    CHECK(lhs > 5);
-    CHECK(6 > rhs);
-  }
-
-  SECTION("less") {
-    core::expected<int> lhs { 5 };
-    core::expected<int> rhs { 6 };
-
-    CHECK(lhs < rhs);
-    CHECK(lhs < 6);
-  }
+TEST_CASE("expected-assignment-copy-value", "[expected][assignment]") {
+  core::expected<int> value { };
+  value = 5;
+  CHECK(value);
+  CHECK(value.value() == 5);
 }
 
-TEST_CASE("expected-methods", "[expected][methods]") {
-  SECTION("value-or") {
-    std::logic_error error { "error" };
-    core::expected<std::string> value1 { std::make_exception_ptr(error) };
-    core::expected<std::string> value2 { "value-or" };
-    auto first = value1.value_or("value-or");
-    auto second = value2.value_or("not-value");
-    auto third = core::expected<std::string> { "value-or" }.value_or("empty");
-
-    CHECK(first == "value-or");
-    CHECK(second == "value-or");
-    CHECK(third == "value-or");
-  }
-
-  SECTION("value") {
-    auto ptr = std::make_exception_ptr(std::logic_error { "" });
-    core::expected<std::string> value { ptr };
-    CHECK_THROWS_AS(value.value(), std::logic_error);
-  }
-
-  SECTION("expect") {
-    core::expected<int> value { };
-    core::expected<int> error {
-      std::make_exception_ptr(std::logic_error { "error" })
-    };
-
-    CHECK(value);
-    CHECK_THROWS_AS(
-      value.expect<std::nested_exception>(),
-      core::bad_expected_type);
-    auto err = error.expect<std::logic_error>();
-    CHECK(std::string { err.what() } == "error");
-  }
-
-  SECTION("raise") {
-    core::expected<int> value { };
-    core::expected<int> error {
-      std::make_exception_ptr(std::logic_error { "raise" })
-    };
-    CHECK(value);
-    CHECK_THROWS_AS(value.raise(), core::bad_expected_type);
-    CHECK_THROWS_AS(error.raise(), std::logic_error);
-  }
+TEST_CASE("expected-assignment-move-value", "[expected][assignment]") {
+  core::expected<std::string> value { };
+  std::string str { "move" };
+  value = std::move(str);
+  CHECK(value);
+  CHECK(str.empty());
+  CHECK(value.value() == "move");
 }
 
-TEST_CASE("expected-functions", "[expected][functions]") {
-  SECTION("swap") {
-    using std::swap;
-    auto ptr = std::make_exception_ptr(std::logic_error { "swap" });
-    core::expected<int> error { ptr };
-    core::expected<int> value { 5 };
+TEST_CASE("expected-assignment-copy", "[expected][assignment]") {
+  core::expected<std::string> value { "copy" };
+  core::expected<std::string> copy { };
+  copy = value;
 
-    CHECK(value);
-    CHECK_FALSE(error);
+  CHECK(value);
+  CHECK(copy);
+  CHECK(copy.value() == value.value());
 
-    swap(value, error);
-
-    CHECK_FALSE(value);
-    CHECK(error);
-  }
-
-  SECTION("make_expected") {
-    auto value = core::make_expected(std::string { "make-expected" });
-    auto error = core::make_expected<std::string>(
-      std::make_exception_ptr(std::logic_error { "error" })
-    );
-    auto logic_error = core::make_expected<std::string>(
-      std::logic_error { "logic-error" }
-    );
-
-    CHECK(value);
-    CHECK_FALSE(logic_error);
-    CHECK_FALSE(error);
-    CHECK(*value == "make-expected");
-  }
+  CHECK(copy.value() == "copy");
 }
 
-TEST_CASE("expected-issues", "[expected][issues]") {
-  SECTION("issue-23") {
-    struct A { };
-    auto foo = [] () -> core::expected<A> {
-      return std::make_exception_ptr(std::logic_error { "error" });
-    };
-    auto bar = [] () -> core::expected<A> { return A { }; };
-    auto const a = foo();
-    auto const b = bar();
-    auto const c = b;
+TEST_CASE("expected-move-assignment", "[expected][assignment]") {
+  core::expected<std::string> value { "move" };
+  core::expected<std::string> move { };
+  move = std::move(value);
 
-    CHECK_FALSE(a);
-    CHECK(b);
-    CHECK(c);
-  }
-}
-TEST_CASE("result-constructors", "[result][constructors]") {
-  SECTION("copy-value") {
-    std::string value { "copy" };
-    core::result<std::string> result { value };
+  CHECK(value);
+  CHECK(move);
+  CHECK(value.value().empty());
 
-    CHECK(result);
-    CHECK(*result == "copy");
-  }
-
-  SECTION("move-value") {
-    std::string value { "move" };
-    core::result<std::string> result { std::move(value) };
-
-    CHECK(result);
-    CHECK(value.size() == 0u);
-    CHECK(*result == "move");
-  }
-
-  SECTION("copy") {
-    core::result<int> value { 7 };
-    core::result<int> copy { value };
-
-    CHECK(value);
-    CHECK(copy);
-    CHECK(*value == 7);
-    CHECK(*copy == 7);
-  }
-
-  SECTION("move") {
-    core::result<std::string> value { "move" };
-    core::result<std::string> move { core::move(value) };
-
-    CHECK(value);
-    CHECK(move);
-
-    CHECK(value->empty());
-    CHECK(move == std::string("move"));
-  }
-
-  SECTION("error-condition") {
-    ::std::error_condition error { std::errc::permission_denied };
-    core::result<std::string> value { error };
-    CHECK_FALSE(value);
-    CHECK(value.condition() == error);
-  }
-
-  SECTION("error-condition-enum") {
-    core::result<std::string> value { std::errc::permission_denied };
-    CHECK_FALSE(value);
-    constexpr auto compare = static_cast<
-      core::underlying_type_t<std::errc>
-    >(std::errc::permission_denied);
-    CHECK(value.condition().value() == compare);
-  }
+  CHECK(move.value() == "move");
 }
 
-TEST_CASE("result-assignment", "[result][assignment]") {
-  SECTION("copy-value") {
-    core::result<int> copy { };
-    copy = 4;
+TEST_CASE("expected-assignment-exception-ptr", "[expected][assignment]") {
+  std::logic_error exception { "error" };
+  auto ptr = std::make_exception_ptr(exception);
+  core::expected<std::string> value { };
+  value = ptr;
 
-    CHECK(copy);
-    CHECK(copy == 4);
-  }
-
-  SECTION("move-value") {
-    core::result<std::string> move { };
-
-    CHECK(move->empty());
-    move = "move";
-    CHECK(move == std::string { "move" });
-  }
-
-  SECTION("copy") {
-    core::result<std::string> value { "copy" };
-    core::result<std::string> copy { };
-    copy = value;
-
-    CHECK(value);
-    CHECK(copy);
-    CHECK(value == copy);
-    CHECK(copy == std::string("copy"));
-  }
-
-  SECTION("move") {
-    core::result<std::string> value { "move" };
-    core::result<std::string> move { };
-
-    move = core::move(value);
-
-    CHECK(value);
-    CHECK(move);
-    CHECK(value->empty());
-    CHECK(move == std::string("move"));
-  }
-
-  SECTION("error-condition") {
-    auto error = make_error_condition(std::errc::permission_denied);
-    core::result<std::string> value { };
-    value = error;
-    CHECK_FALSE(value);
-    CHECK(value.condition() == error);
-  }
-
-  SECTION("error-condition-enum") {
-    core::result<std::string> value { };
-    value = std::errc::permission_denied;
-    CHECK_FALSE(value);
-  }
+  CHECK_FALSE(value);
+  CHECK(value == ptr);
+  CHECK_THROWS_AS(value.raise(), std::logic_error);
 }
 
-TEST_CASE("result-operators", "[result][operators]") {
+TEST_CASE("expected-operator-dereference", "[expected][operators]") {
+  core::expected<int> nothrow { 51 };
 
-  SECTION("dereference") {
-    core::result<int> value { 6 };
-    CHECK(*value == 6);
-  }
-
-  SECTION("arrow") {
-    core::result<std::string> value { };
-    CHECK(value->empty());
-  }
-
-  SECTION("equal") {
-    core::result<std::string> lhs_valid { };
-    core::result<std::string> rhs_valid { };
-    core::result<std::string> invalid { std::errc::permission_denied };
-    std::string value { };
-    auto const condition = make_error_condition(std::errc::permission_denied);
-    auto const code = make_error_code(std::errc::permission_denied);
-
-    CHECK(lhs_valid == rhs_valid);
-    CHECK(invalid == condition);
-    CHECK(condition == invalid);
-    CHECK(invalid == code);
-    CHECK(code == invalid);
-    CHECK(lhs_valid == value);
-    CHECK(value == rhs_valid);
-  }
-
-  SECTION("not-equal") {
-    core::result<std::string> lhs_valid { "lhs" };
-    core::result<std::string> rhs_valid { "rhs" };
-    std::string value { "value" };
-    auto const condition = make_error_condition(std::errc::permission_denied);
-    auto const code = make_error_code(std::errc::permission_denied);
-
-    CHECK(lhs_valid != rhs_valid);
-    CHECK(lhs_valid != condition);
-    CHECK(condition != rhs_valid);
-    CHECK(lhs_valid != code);
-    CHECK(code != rhs_valid);
-    CHECK(lhs_valid != value);
-    CHECK(value != rhs_valid);
-  }
-
-  SECTION("greater-equal") {
-    core::result<int> lhs { 5 };
-    core::result<int> rhs { 4 };
-    auto const condition = make_error_condition(std::errc::permission_denied);
-    core::result<int> invalid { condition };
-
-    CHECK(lhs >= rhs);
-    CHECK(lhs >= invalid);
-    CHECK(invalid >= condition);
-    CHECK(lhs >= 3);
-    CHECK(lhs >= 5);
-    CHECK(6 >= rhs);
-    CHECK(4 >= rhs);
-  }
-
-  SECTION("less-equal") {
-    core::result<int> lhs { 3 };
-    core::result<int> rhs { 6 };
-    auto const condition = make_error_condition(std::errc::permission_denied);
-    core::result<int> invalid { condition };
-
-    CHECK(lhs <= rhs);
-    CHECK(invalid <= rhs);
-    CHECK(condition <= invalid);
-    CHECK(lhs <= 3);
-    CHECK(lhs <= 5);
-    CHECK(6 <= rhs);
-    CHECK(4 <= rhs);
-  }
-
-  SECTION("operator-greater") {
-    core::result<std::string> valid { "valid" };
-    auto const error = make_error_condition(std::errc::permission_denied);
-    auto const less_error = std::error_condition {
-      1,
-      std::generic_category()
-    };
-    core::result<std::string> invalid { error };
-
-    core::result<std::string> less_invalid { less_error };
-
-    CHECK(valid > invalid);
-    CHECK(invalid > less_invalid);
-    CHECK(valid > error);
-    CHECK(error > less_invalid);
-    CHECK(std::string { "zalid" } > valid);
-    CHECK(valid > std::string { "alid" });
-  }
-
-  SECTION("less") {
-    core::result<std::string> valid { "valid" };
-    auto const error = make_error_condition(std::errc::permission_denied);
-    auto const less_error = std::error_condition {
-      1,
-      std::generic_category()
-    };
-    core::result<std::string> invalid { error };
-
-    core::result<std::string> less_invalid { less_error };
-
-    CHECK(invalid < valid);
-    CHECK(less_invalid < invalid);
-    CHECK(error < valid);
-    CHECK(less_invalid < error);
-    CHECK(valid < std::string { "zalid" });
-    CHECK(std::string { "alid" } < valid);
-  }
+  CHECK(nothrow);
+  CHECK(*nothrow == 51);
 }
 
-TEST_CASE("result-methods", "[result][methods]") {
-  SECTION("value-or") {
-    core::result<std::string> value { "value" };
-    core::result<std::string> error { std::errc::permission_denied };
-    CHECK(value.value_or("") == "value");
-    CHECK(error.value_or("error") == "error");
-  }
-
-  SECTION("value") {
-    core::result<std::string> value { "value" };
-    core::result<std::string> thrower { std::errc::permission_denied };
-
-    CHECK(value.value() == "value");
-    CHECK_THROWS_AS(thrower.value(), std::system_error);
-  }
-
-  SECTION("condition") {
-    auto const error = make_error_condition(std::errc::permission_denied);
-    core::result<std::string> value { error };
-    CHECK(value.condition() == error);
-  }
+TEST_CASE("expected-operator-arrow", "[expected][operators]") {
+  core::expected<std::string> nothrow { "words" };
+  CHECK(nothrow);
+  CHECK(nothrow->at(0) == 'w');
 }
 
-TEST_CASE("result-functions", "[result][functions]") {
-  SECTION("swap") {
-    using ::std::swap;
-    core::result<std::string> lhs_valid { "lhs" };
-    core::result<std::string> rhs_valid { "rhs" };
-    auto const error = make_error_condition(std::errc::permission_denied);
-    core::result<std::string> invalid { error };
+TEST_CASE("expected-operator-equal", "[expected][operators]") {
+  core::expected<int> lhs { 5 };
+  core::expected<int> rhs { 6 };
 
-    swap(lhs_valid, rhs_valid);
-    CHECK(lhs_valid == std::string { "rhs" });
-    CHECK(rhs_valid == std::string { "lhs" });
-
-    swap(lhs_valid, invalid);
-
-    CHECK_FALSE(lhs_valid);
-    CHECK(invalid);
-    CHECK(lhs_valid == error);
-    CHECK(invalid == std::string { "rhs" });
-  }
-
-  SECTION("make-result") {
-    auto result = core::make_result(std::string { "value" });
-    auto condition = core::make_result<std::string>(
-      make_error_condition(std::errc::permission_denied)
-    );
-    auto error = core::make_result<std::string>(std::errc::permission_denied);
-    constexpr auto value = std::is_same<
-      decltype(result),
-      core::result<std::string>
-    >::value;
-
-    CHECK(value);
-    CHECK_FALSE(condition);
-    CHECK_FALSE(error);
-  }
+  CHECK(lhs == 5);
+  CHECK(6 == rhs);
+  CHECK(lhs == core::expected<int> { 5 });
+  CHECK(core::expected<int> { 6 } == rhs);
 }
 
-TEST_CASE("result-issues", "[result][issues]") {
-  SECTION("issue-23") {
-    struct A { };
-    auto foo = [] () -> core::result<A> {
-      return std::errc::permission_denied;
-    };
-    auto bar = [] () -> core::result<A> { return A { }; };
-    auto const a = foo();
-    auto const b = bar();
-    auto const c = b;
+TEST_CASE("expected-operator-not-equal", "[expected][operators]") {
+  core::expected<int> lhs { 5 };
+  core::expected<int> rhs { 6 };
 
-    CHECK_FALSE(a);
-    CHECK(b);
-    CHECK(c);
-  }
+  core::expected<int> invalid { ::std::exception_ptr { } };
+
+  CHECK(lhs);
+  CHECK(rhs);
+  CHECK(lhs != rhs);
+  CHECK(lhs != invalid);
+  CHECK(invalid != rhs);
+}
+
+TEST_CASE("expected-operator-greater-equal", "[expected][operators]") {
+  core::expected<int> lhs { 5 };
+  core::expected<int> rhs { 4 };
+  core::expected<int> invalid { ::std::exception_ptr { } };
+
+  CHECK(lhs >= rhs);
+  CHECK(lhs >= invalid);
+  CHECK(invalid >= ::std::exception_ptr { });
+  CHECK(lhs >= 3);
+  CHECK(lhs >= 5);
+  CHECK(6 >= rhs);
+  CHECK(4 >= rhs);
+}
+
+TEST_CASE("expected-operator-less-equal", "[expected][operators]") {
+  core::expected<int> lhs { 5 };
+  core::expected<int> rhs { 6 };
+  core::expected<int> invalid { ::std::exception_ptr { } };
+
+  CHECK(lhs <= rhs);
+  CHECK(invalid <= rhs);
+  CHECK(::std::exception_ptr { } <= invalid);
+  CHECK(lhs <= 5);
+  CHECK(lhs <= 6);
+  CHECK(5 <= rhs);
+  CHECK(6 <= rhs);
+}
+
+TEST_CASE("expected-operator-greater", "[expected][operators]") {
+  core::expected<int> lhs { 6 };
+  core::expected<int> rhs { 5 };
+
+  CHECK(lhs > rhs);
+  CHECK(lhs > 5);
+  CHECK(6 > rhs);
+}
+
+TEST_CASE("expected-operator-less", "[expected][operators]") {
+  core::expected<int> lhs { 5 };
+  core::expected<int> rhs { 6 };
+
+  CHECK(lhs < rhs);
+  CHECK(lhs < 6);
+}
+
+TEST_CASE("expected-method-value-or", "[expected][methods]") {
+  std::logic_error error { "error" };
+  core::expected<std::string> value1 { std::make_exception_ptr(error) };
+  core::expected<std::string> value2 { "value-or" };
+  auto first = value1.value_or("value-or");
+  auto second = value2.value_or("not-value");
+  auto third = core::expected<std::string> { "value-or" }.value_or("empty");
+
+  CHECK(first == "value-or");
+  CHECK(second == "value-or");
+  CHECK(third == "value-or");
+}
+
+TEST_CASE("expected-method-value", "[expected][methods]") {
+  auto ptr = std::make_exception_ptr(std::logic_error { "" });
+  core::expected<std::string> value { ptr };
+  CHECK_THROWS_AS(value.value(), std::logic_error);
+}
+
+TEST_CASE("expected-method-expect", "[expected][methods]") {
+  core::expected<int> value { };
+  core::expected<int> error {
+    std::make_exception_ptr(std::logic_error { "error" })
+  };
+
+  CHECK(value);
+  CHECK_THROWS_AS(
+    value.expect<std::nested_exception>(),
+    core::bad_expected_type);
+  auto err = error.expect<std::logic_error>();
+  CHECK(std::string { err.what() } == "error");
+}
+
+TEST_CASE("expected-method-raise", "[expected][methods]") {
+  core::expected<int> value { };
+  core::expected<int> error {
+    std::make_exception_ptr(std::logic_error { "raise" })
+  };
+  CHECK(value);
+  CHECK_THROWS_AS(value.raise(), core::bad_expected_type);
+  CHECK_THROWS_AS(error.raise(), std::logic_error);
+}
+
+TEST_CASE("expected-function-swap", "[expected][functions]") {
+  using std::swap;
+  auto ptr = std::make_exception_ptr(std::logic_error { "swap" });
+  core::expected<int> error { ptr };
+  core::expected<int> value { 5 };
+
+  CHECK(value);
+  CHECK_FALSE(error);
+
+  swap(value, error);
+
+  CHECK_FALSE(value);
+  CHECK(error);
+}
+
+TEST_CASE("expected-function-make-expected", "[expected][functions]") {
+  auto value = core::make_expected(std::string { "make-expected" });
+  auto error = core::make_expected<std::string>(
+    std::make_exception_ptr(std::logic_error { "error" })
+  );
+  auto logic_error = core::make_expected<std::string>(
+    std::logic_error { "logic-error" }
+  );
+
+  CHECK(value);
+  CHECK_FALSE(logic_error);
+  CHECK_FALSE(error);
+  CHECK(*value == "make-expected");
+}
+
+TEST_CASE("expected-issue-23", "[expected][issues]") {
+  struct A { };
+  auto foo = [] () -> core::expected<A> {
+    return std::make_exception_ptr(std::logic_error { "error" });
+  };
+  auto bar = [] () -> core::expected<A> { return A { }; };
+  auto const a = foo();
+  auto const b = bar();
+  auto const c = b;
+
+  CHECK_FALSE(a);
+  CHECK(b);
+  CHECK(c);
+}
+
+TEST_CASE("result-constructor-copy-value", "[result][constructors]") {
+  std::string value { "copy" };
+  core::result<std::string> result { value };
+
+  CHECK(result);
+  CHECK(*result == "copy");
+}
+
+TEST_CASE("result-constructor-move-value", "[result][constructors]") {
+  std::string value { "move" };
+  core::result<std::string> result { std::move(value) };
+
+  CHECK(result);
+  CHECK(value.size() == 0u);
+  CHECK(*result == "move");
+}
+
+TEST_CASE("result-constructor-copy", "[result][constructors]") {
+  core::result<int> value { 7 };
+  core::result<int> copy { value };
+
+  CHECK(value);
+  CHECK(copy);
+  CHECK(*value == 7);
+  CHECK(*copy == 7);
+}
+
+TEST_CASE("result-constructor-move", "[result][constructors]") {
+  core::result<std::string> value { "move" };
+  core::result<std::string> move { core::move(value) };
+
+  CHECK(value);
+  CHECK(move);
+
+  CHECK(value->empty());
+  CHECK(move == std::string("move"));
+}
+
+TEST_CASE("result-constructor-condition", "[result][constructors]") {
+  ::std::error_condition error { std::errc::permission_denied };
+  core::result<std::string> value { error };
+  CHECK_FALSE(value);
+  CHECK(value.condition() == error);
+}
+
+TEST_CASE("result-constructor-enum", "[result][constructors]") {
+  core::result<std::string> value { std::errc::permission_denied };
+  CHECK_FALSE(value);
+  constexpr auto compare = static_cast<
+    core::underlying_type_t<std::errc>
+  >(std::errc::permission_denied);
+  CHECK(value.condition().value() == compare);
+}
+
+TEST_CASE("result-assignment-copy-value", "[result][assignment]") {
+  core::result<int> copy { };
+  copy = 4;
+
+  CHECK(copy);
+  CHECK(copy == 4);
+}
+
+TEST_CASE("result-assignment-move-value", "[result][assignment]") {
+  core::result<std::string> move { };
+
+  CHECK(move->empty());
+  move = "move";
+  CHECK(move == std::string { "move" });
+}
+
+TEST_CASE("result-assignment-copy", "[result][assignment]") {
+  core::result<std::string> value { "copy" };
+  core::result<std::string> copy { };
+  copy = value;
+
+  CHECK(value);
+  CHECK(copy);
+  CHECK(value == copy);
+  CHECK(copy == std::string("copy"));
+}
+
+TEST_CASE("result-assignment-move", "[result][assignment]") {
+  core::result<std::string> value { "move" };
+  core::result<std::string> move { };
+
+  move = core::move(value);
+
+  CHECK(value);
+  CHECK(move);
+  CHECK(value->empty());
+  CHECK(move == std::string("move"));
+}
+
+TEST_CASE("result-assignment-condition", "[result][assignment]") {
+  auto error = make_error_condition(std::errc::permission_denied);
+  core::result<std::string> value { };
+  value = error;
+  CHECK_FALSE(value);
+  CHECK(value.condition() == error);
+}
+
+TEST_CASE("result-assignment-enum", "[result][assignment]") {
+  core::result<std::string> value { };
+  value = std::errc::permission_denied;
+  CHECK_FALSE(value);
+}
+
+TEST_CASE("result-operator-dereference", "[result][operators]") {
+  core::result<int> value { 6 };
+  CHECK(*value == 6);
+}
+
+TEST_CASE("result-operator-arrow", "[result][operators]") {
+  core::result<std::string> value { };
+  CHECK(value->empty());
+}
+
+TEST_CASE("result-operator-equal", "[result][operators]") {
+  core::result<std::string> lhs_valid { };
+  core::result<std::string> rhs_valid { };
+  core::result<std::string> invalid { std::errc::permission_denied };
+  std::string value { };
+  auto const condition = make_error_condition(std::errc::permission_denied);
+  auto const code = make_error_code(std::errc::permission_denied);
+
+  CHECK(lhs_valid == rhs_valid);
+  CHECK(invalid == condition);
+  CHECK(condition == invalid);
+  CHECK(invalid == code);
+  CHECK(code == invalid);
+  CHECK(lhs_valid == value);
+  CHECK(value == rhs_valid);
 }
 
 
-TEST_CASE("expected-void-constructors", "[expected][void][assignment]") {
-  SECTION("default") {
-    core::expected<void> value { };
-    CHECK(value);
-  }
+TEST_CASE("result-operator-not-equal", "[result][operators]") {
+  core::result<std::string> lhs_valid { "lhs" };
+  core::result<std::string> rhs_valid { "rhs" };
+  std::string value { "value" };
+  auto const condition = make_error_condition(std::errc::permission_denied);
+  auto const code = make_error_code(std::errc::permission_denied);
 
-  SECTION("copy") {
-    auto ptr = std::make_exception_ptr(std::logic_error { "" });
-    core::expected<void> value { ptr };
-    core::expected<void> copy { value };
-
-    CHECK_FALSE(value);
-    CHECK_FALSE(copy);
-
-    CHECK(value.pointer() == copy.pointer());
-    CHECK(value.pointer() == ptr);
-    CHECK(copy.pointer() == ptr);
-  }
-
-  SECTION("move") {
-    auto ptr = std::make_exception_ptr(std::logic_error { "" });
-    core::expected<void> value { ptr };
-    core::expected<void> move { std::move(value) };
-
-    CHECK_FALSE(move);
-    CHECK(move.pointer() == ptr);
-  }
-
-  SECTION("exception-pointer") {
-    auto ptr = std::make_exception_ptr(std::logic_error { "" });
-    core::expected<void> value { ptr };
-
-    CHECK_FALSE(value);
-    CHECK(ptr == value.pointer());
-  }
+  CHECK(lhs_valid != rhs_valid);
+  CHECK(lhs_valid != condition);
+  CHECK(condition != rhs_valid);
+  CHECK(lhs_valid != code);
+  CHECK(code != rhs_valid);
+  CHECK(lhs_valid != value);
+  CHECK(value != rhs_valid);
 }
 
-TEST_CASE("expected-void-assignment", "[expected][void][assignment]") {
-  SECTION("copy") {
-    auto ptr = std::make_exception_ptr(std::logic_error { "" });
-    core::expected<void> value { ptr };
-    core::expected<void> copy { };
+TEST_CASE("result-operator-greater-equal", "[result][operators]") {
+  core::result<int> lhs { 5 };
+  core::result<int> rhs { 4 };
+  auto const condition = make_error_condition(std::errc::permission_denied);
+  core::result<int> invalid { condition };
 
-    CHECK(copy);
-
-    copy = value;
-
-    CHECK_FALSE(value);
-    CHECK_FALSE(copy);
-
-    CHECK(value.pointer() == copy.pointer());
-    CHECK(value.pointer() == ptr);
-    CHECK(copy.pointer() == ptr);
-  }
-
-  SECTION("move") {
-    auto ptr = std::make_exception_ptr(std::logic_error { "" });
-    core::expected<void> value { ptr };
-    core::expected<void> move { };
-
-    CHECK(move);
-
-    move = std::move(value);
-
-    CHECK_FALSE(move);
-
-    CHECK(move.pointer() == ptr);
-  }
+  CHECK(lhs >= rhs);
+  CHECK(lhs >= invalid);
+  CHECK(invalid >= condition);
+  CHECK(lhs >= 3);
+  CHECK(lhs >= 5);
+  CHECK(6 >= rhs);
+  CHECK(4 >= rhs);
 }
 
-TEST_CASE("expected-void-operators", "[expected][void][operators]") {
-  SECTION("equal") {
-    auto ptr = std::make_exception_ptr(std::logic_error { "" });
-    core::expected<void> empty_lhs { };
-    core::expected<void> empty_rhs { };
+TEST_CASE("result-operator-less-equal", "[result][operators]") {
+  core::result<int> lhs { 3 };
+  core::result<int> rhs { 6 };
+  auto const condition = make_error_condition(std::errc::permission_denied);
+  core::result<int> invalid { condition };
 
-    core::expected<void> lhs { ptr };
-    core::expected<void> rhs { ptr };
-
-    CHECK(empty_lhs);
-    CHECK(empty_rhs);
-
-    CHECK(empty_lhs == empty_rhs);
-    CHECK(lhs.pointer() == rhs.pointer());
-    CHECK(lhs.pointer() == ptr);
-    CHECK(rhs.pointer() == ptr);
-    CHECK(lhs == ptr);
-    CHECK(ptr == rhs);
-  }
+  CHECK(lhs <= rhs);
+  CHECK(invalid <= rhs);
+  CHECK(condition <= invalid);
+  CHECK(lhs <= 3);
+  CHECK(lhs <= 5);
+  CHECK(6 <= rhs);
+  CHECK(4 <= rhs);
 }
 
-TEST_CASE("expected-void-methods", "[expected][void][methods]") {
-  SECTION("expect") {
-    core::expected<void> value { };
-    core::expected<void> error {
-      std::make_exception_ptr(std::logic_error { "error" })
-    };
-    CHECK(value);
-    CHECK_THROWS_AS(
-      value.expect<std::nested_exception>(),
-      core::bad_expected_type);
-    auto err = error.expect<std::logic_error>();
-    CHECK(std::string { err.what() } == "error");
-  }
+TEST_CASE("result-operator-greater", "[result][operators]") {
+  core::result<std::string> valid { "valid" };
+  auto const error = make_error_condition(std::errc::permission_denied);
+  auto const less_error = std::error_condition {
+    1,
+    std::generic_category()
+  };
+  core::result<std::string> invalid { error };
 
-  SECTION("raise") {
-    core::expected<void> value { };
-    core::expected<void> error {
-      std::make_exception_ptr(std::logic_error { "raise" })
-    };
+  core::result<std::string> less_invalid { less_error };
 
-    CHECK(value);
-    CHECK_THROWS_AS(value.raise(), core::bad_expected_type);
-    CHECK_THROWS_AS(error.raise(), std::logic_error);
-  }
+  CHECK(valid > invalid);
+  CHECK(invalid > less_invalid);
+  CHECK(valid > error);
+  CHECK(error > less_invalid);
+  CHECK(std::string { "zalid" } > valid);
+  CHECK(valid > std::string { "alid" });
 }
 
-TEST_CASE("expected-void-functions", "[expected][void][functions]") {
-  SECTION("swap") {
-    using std::swap;
-    auto lhs_ptr = std::make_exception_ptr(std::logic_error { "" });
-    auto rhs_ptr = std::make_exception_ptr(core::bad_expected_type { "" });
+TEST_CASE("result-operator-less", "[result][operators]") {
+  core::result<std::string> valid { "valid" };
+  auto const error = make_error_condition(std::errc::permission_denied);
+  auto const less_error = std::error_condition {
+    1,
+    std::generic_category()
+  };
+  core::result<std::string> invalid { error };
 
-    core::expected<void> lhs { lhs_ptr };
-    core::expected<void> rhs { rhs_ptr };
+  core::result<std::string> less_invalid { less_error };
 
-    CHECK_FALSE(lhs);
-    CHECK_FALSE(rhs);
-    CHECK(lhs.pointer() == lhs_ptr);
-    CHECK(rhs.pointer() == rhs_ptr);
-
-    swap(lhs, rhs);
-
-    CHECK_FALSE(lhs);
-    CHECK_FALSE(rhs);
-    CHECK(lhs.pointer() == rhs_ptr);
-    CHECK(rhs.pointer() == lhs_ptr);
-  }
+  CHECK(invalid < valid);
+  CHECK(less_invalid < invalid);
+  CHECK(error < valid);
+  CHECK(less_invalid < error);
+  CHECK(valid < std::string { "zalid" });
+  CHECK(std::string { "alid" } < valid);
 }
 
-TEST_CASE("result-void-constructors", "[result][void][constructors]") {
-  SECTION("default") {
-    core::result<void> value;
-    CHECK(value);
-  }
-
-  SECTION("copy") {
-    core::result<void> value { };
-    core::result<void> copy { value };
-    CHECK(copy == value);
-  }
-
-  SECTION("move") {
-    core::result<void> value { };
-    core::result<void> move { core::move(value) };
-    CHECK(value == move);
-  }
-
-  SECTION("error-condition") {
-    auto const error = make_error_condition(std::errc::permission_denied);
-    core::result<void> value { error };
-    CHECK_FALSE(value);
-    CHECK(value == error);
-  }
-
-  SECTION("error-condition-enum") {
-    core::result<void> value { std::errc::permission_denied };
-    CHECK_FALSE(value);
-    CHECK(value == make_error_condition(std::errc::permission_denied));
-  }
+TEST_CASE("result-method-value-or", "[result][methods]") {
+  core::result<std::string> value { "value" };
+  core::result<std::string> error { std::errc::permission_denied };
+  CHECK(value.value_or("") == "value");
+  CHECK(error.value_or("error") == "error");
 }
 
-TEST_CASE("result-void-assignment", "[result][void][assignment]") {
-  SECTION("copy") {
-    core::result<void> value { std::errc::permission_denied };
-    core::result<void> copy { };
+TEST_CASE("result-method-value", "[result][methods]") {
+  core::result<std::string> value { "value" };
+  core::result<std::string> thrower { std::errc::permission_denied };
 
-    CHECK_FALSE(value);
-    value = copy;
-    CHECK(value);
-  }
-
-  SECTION("move") {
-    core::result<void> value { std::errc::permission_denied };
-    core::result<void> move { };
-    CHECK_FALSE(value);
-    value = core::move(move);
-    CHECK(value);
-  }
-
-  SECTION("error-condition") {
-    core::result<void> value { };
-    auto const error = make_error_condition(std::errc::permission_denied);
-    CHECK(value);
-    value = error;
-    CHECK_FALSE(value);
-  }
-
-  SECTION("error-condition-enum") {
-    core::result<void> value { };
-    CHECK(value);
-    value = std::errc::permission_denied;
-    CHECK_FALSE(value);
-  }
+  CHECK(value.value() == "value");
+  CHECK_THROWS_AS(thrower.value(), std::system_error);
 }
 
-TEST_CASE("result-void-operators", "[result][void][operators]") {
-  SECTION("equal") {
-    core::result<void> lhs_valid { };
-    core::result<void> rhs_valid { };
-    core::result<void> lhs_invalid { std::errc::permission_denied };
-    core::result<void> rhs_invalid { std::errc::permission_denied };
-
-    CHECK(lhs_valid == rhs_valid);
-    CHECK(lhs_invalid == rhs_invalid);
-  }
+TEST_CASE("result-method-condition", "[result][methods]") {
+  auto const error = make_error_condition(std::errc::permission_denied);
+  core::result<std::string> value { error };
+  CHECK(value.condition() == error);
 }
 
-TEST_CASE("result-void-methods", "[expected][void][functions]") {
-  SECTION("condition") {
-    auto const condition = make_error_condition(std::errc::permission_denied);
-    core::result<void> valid { };
-    core::result<void> invalid { condition };
+TEST_CASE("result-function-swap", "[result][functions]") {
+  using ::std::swap;
+  core::result<std::string> lhs_valid { "lhs" };
+  core::result<std::string> rhs_valid { "rhs" };
+  auto const error = make_error_condition(std::errc::permission_denied);
+  core::result<std::string> invalid { error };
 
-    CHECK(valid);
-    CHECK_FALSE(invalid);
+  swap(lhs_valid, rhs_valid);
+  CHECK(lhs_valid == std::string { "rhs" });
+  CHECK(rhs_valid == std::string { "lhs" });
 
-    CHECK(invalid == condition);
-    CHECK_THROWS_AS(valid.condition(), core::bad_result_condition);
-  }
+  swap(lhs_valid, invalid);
+
+  CHECK_FALSE(lhs_valid);
+  CHECK(invalid);
+  CHECK(lhs_valid == error);
+  CHECK(invalid == std::string { "rhs" });
+}
+
+TEST_CASE("result-function-make-result", "[result][functions]") {
+  auto result = core::make_result(std::string { "value" });
+  auto condition = core::make_result<std::string>(
+    make_error_condition(std::errc::permission_denied)
+  );
+  auto error = core::make_result<std::string>(std::errc::permission_denied);
+  constexpr auto value = std::is_same<
+    decltype(result),
+    core::result<std::string>
+  >::value;
+
+  CHECK(value);
+  CHECK_FALSE(condition);
+  CHECK_FALSE(error);
+}
+
+TEST_CASE("result-issue-23", "[result][issues]") {
+  struct A { };
+  auto foo = [] () -> core::result<A> {
+    return std::errc::permission_denied;
+  };
+  auto bar = [] () -> core::result<A> { return A { }; };
+  auto const a = foo();
+  auto const b = bar();
+  auto const c = b;
+
+  CHECK_FALSE(a);
+  CHECK(b);
+  CHECK(c);
+}
+
+TEST_CASE("expected-void-constructor", "[expected][void][constructor]") {
+  core::expected<void> value { };
+  CHECK(value);
+}
+
+TEST_CASE("expected-void-constructor-copy", "[expected][void][constructor]") {
+  auto ptr = std::make_exception_ptr(std::logic_error { "" });
+  core::expected<void> value { ptr };
+  core::expected<void> copy { value };
+
+  CHECK_FALSE(value);
+  CHECK_FALSE(copy);
+
+  CHECK(value.pointer() == copy.pointer());
+  CHECK(value.pointer() == ptr);
+  CHECK(copy.pointer() == ptr);
+}
+
+TEST_CASE("expected-void-constructor-move", "[expected][void][assignment]") {
+  auto ptr = std::make_exception_ptr(std::logic_error { "" });
+  core::expected<void> value { ptr };
+  core::expected<void> move { std::move(value) };
+
+  CHECK_FALSE(move);
+  CHECK(move.pointer() == ptr);
+}
+
+TEST_CASE("expected-void-constructor-ptr", "[expected][void][constructor]") {
+  auto ptr = std::make_exception_ptr(std::logic_error { "" });
+  core::expected<void> value { ptr };
+
+  CHECK_FALSE(value);
+  CHECK(ptr == value.pointer());
+}
+
+TEST_CASE("expected-void-assignment-copy", "[expected][void][assignment]") {
+  auto ptr = std::make_exception_ptr(std::logic_error { "" });
+  core::expected<void> value { ptr };
+  core::expected<void> copy { };
+
+  CHECK(copy);
+
+  copy = value;
+
+  CHECK_FALSE(value);
+  CHECK_FALSE(copy);
+
+  CHECK(value.pointer() == copy.pointer());
+  CHECK(value.pointer() == ptr);
+  CHECK(copy.pointer() == ptr);
+}
+
+TEST_CASE("expected-void-assignment-move", "[expected][void][assignment]") {
+  auto ptr = std::make_exception_ptr(std::logic_error { "" });
+  core::expected<void> value { ptr };
+  core::expected<void> move { };
+
+  CHECK(move);
+
+  move = std::move(value);
+
+  CHECK_FALSE(move);
+
+  CHECK(move.pointer() == ptr);
+}
+
+TEST_CASE("expected-void-operator-equal", "[expected][void][operators]") {
+  auto ptr = std::make_exception_ptr(std::logic_error { "" });
+  core::expected<void> empty_lhs { };
+  core::expected<void> empty_rhs { };
+
+  core::expected<void> lhs { ptr };
+  core::expected<void> rhs { ptr };
+
+  CHECK(empty_lhs);
+  CHECK(empty_rhs);
+
+  CHECK(empty_lhs == empty_rhs);
+  CHECK(lhs.pointer() == rhs.pointer());
+  CHECK(lhs.pointer() == ptr);
+  CHECK(rhs.pointer() == ptr);
+  CHECK(lhs == ptr);
+  CHECK(ptr == rhs);
+}
+
+TEST_CASE("expected-void-method-expect", "[expected][void][methods]") {
+  core::expected<void> value { };
+  core::expected<void> error {
+    std::make_exception_ptr(std::logic_error { "error" })
+  };
+  CHECK(value);
+  CHECK_THROWS_AS(
+    value.expect<std::nested_exception>(),
+    core::bad_expected_type);
+  auto err = error.expect<std::logic_error>();
+  CHECK(std::string { err.what() } == "error");
+}
+
+TEST_CASE("expected-void-method-raise", "[expected][void][methods]") {
+  core::expected<void> value { };
+  core::expected<void> error {
+    std::make_exception_ptr(std::logic_error { "raise" })
+  };
+
+  CHECK(value);
+  CHECK_THROWS_AS(value.raise(), core::bad_expected_type);
+  CHECK_THROWS_AS(error.raise(), std::logic_error);
+}
+
+TEST_CASE("expected-void-function-swap", "[expected][void][functions]") {
+  using std::swap;
+  auto lhs_ptr = std::make_exception_ptr(std::logic_error { "" });
+  auto rhs_ptr = std::make_exception_ptr(core::bad_expected_type { "" });
+
+  core::expected<void> lhs { lhs_ptr };
+  core::expected<void> rhs { rhs_ptr };
+
+  CHECK_FALSE(lhs);
+  CHECK_FALSE(rhs);
+  CHECK(lhs.pointer() == lhs_ptr);
+  CHECK(rhs.pointer() == rhs_ptr);
+
+  swap(lhs, rhs);
+
+  CHECK_FALSE(lhs);
+  CHECK_FALSE(rhs);
+  CHECK(lhs.pointer() == rhs_ptr);
+  CHECK(rhs.pointer() == lhs_ptr);
+}
+
+TEST_CASE("result-void-constructor", "[result][void][constructors]") {
+  core::result<void> value;
+  CHECK(value);
+}
+
+TEST_CASE("result-void-constructor-copy", "[result][void][constructors]") {
+  core::result<void> value { };
+  core::result<void> copy { value };
+  CHECK(copy == value);
+}
+
+TEST_CASE("result-void-constructor-move", "[result][void][constructors]") {
+  core::result<void> value { };
+  core::result<void> move { core::move(value) };
+  CHECK(value == move);
+}
+
+TEST_CASE("result-void-constructor-cond", "[result][void][constructors]") {
+  auto const error = make_error_condition(std::errc::permission_denied);
+  core::result<void> value { error };
+  CHECK_FALSE(value);
+  CHECK(value == error);
+}
+
+TEST_CASE("result-void-constructor-enum", "[result][void][constructors]") {
+  core::result<void> value { std::errc::permission_denied };
+  CHECK_FALSE(value);
+  CHECK(value == make_error_condition(std::errc::permission_denied));
+}
+
+TEST_CASE("result-void-assignment-copy", "[result][void][assignment]") {
+  core::result<void> value { std::errc::permission_denied };
+  core::result<void> copy { };
+
+  CHECK_FALSE(value);
+  value = copy;
+  CHECK(value);
+}
+
+TEST_CASE("result-void-assignment-move", "[result][void][assignment]") {
+  core::result<void> value { std::errc::permission_denied };
+  core::result<void> move { };
+  CHECK_FALSE(value);
+  value = core::move(move);
+  CHECK(value);
+}
+
+TEST_CASE("result-void-assignment-error-cond", "[result][void][assignment]") {
+  core::result<void> value { };
+  auto const error = make_error_condition(std::errc::permission_denied);
+  CHECK(value);
+  value = error;
+  CHECK_FALSE(value);
+}
+
+TEST_CASE("result-void-assignment-error-enum", "[result][void][assignment]") {
+  core::result<void> value { };
+  CHECK(value);
+  value = std::errc::permission_denied;
+  CHECK_FALSE(value);
+}
+
+TEST_CASE("result-void-operator-equal", "[result][void][operators]") {
+  core::result<void> lhs_valid { };
+  core::result<void> rhs_valid { };
+  core::result<void> lhs_invalid { std::errc::permission_denied };
+  core::result<void> rhs_invalid { std::errc::permission_denied };
+
+  CHECK(lhs_valid == rhs_valid);
+  CHECK(lhs_invalid == rhs_invalid);
+}
+
+TEST_CASE("result-void-method-condition", "[expected][void][functions]") {
+  auto const condition = make_error_condition(std::errc::permission_denied);
+  core::result<void> valid { };
+  core::result<void> invalid { condition };
+
+  CHECK(valid);
+  CHECK_FALSE(invalid);
+
+  CHECK(invalid == condition);
+  CHECK_THROWS_AS(valid.condition(), core::bad_result_condition);
 }

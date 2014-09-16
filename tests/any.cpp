@@ -1,52 +1,51 @@
+#define CATCH_CONFIG_MAIN
 #include <core/any.hpp>
 #include <type_traits>
 #include <string>
+#include <vector>
 
 #include <cstdint>
 
-#define CATCH_CONFIG_MAIN
 #include <catch.hpp>
 
-TEST_CASE("constructors", "[constructors]") {
-  SECTION("default") {
-    core::any value;
+TEST_CASE("constructor", "[constructors]") {
+  core::any value;
 
-    CHECK(value.empty());
-    CHECK(value.type() == typeid(void));
-  }
+  CHECK(value.empty());
+  CHECK(value.type() == typeid(void));
+}
 
-  SECTION("value") {
-    std::string text { "value-constructor" };
-    core::any copy { text };
+TEST_CASE("constructor-value", "[constructors]") {
+  std::vector<char> text { 'v', 'a', 'l', 'u', 'e' };
+  core::any copy { text };
 
-    CHECK_FALSE(copy.empty());
-    CHECK_FALSE(text.empty());
-    CHECK(copy.type() == typeid(text));
+  CHECK_FALSE(copy.empty());
+  CHECK_FALSE(text.empty());
+  CHECK(copy.type() == typeid(text));
 
-    core::any move { std::move(text) };
+  core::any move { std::move(text) };
 
-    CHECK_FALSE(move.empty());
-    CHECK(text.empty());
-    CHECK(move.type() == typeid(text));
-  }
+  CHECK_FALSE(move.empty());
+  CHECK(text.empty());
+  CHECK(move.type() == typeid(text));
+}
 
-  SECTION("copy") {
-    core::any value { std::string { "copy-constructor" } };
-    core::any ctor { value };
+TEST_CASE("constructor-copy", "[constructors]") {
+  core::any value { std::string { "copy-constructor" } };
+  core::any ctor { value };
 
-    CHECK_FALSE(value.empty());
-    CHECK_FALSE(ctor.empty());
-    CHECK(ctor.type() == value.type());
-  }
+  CHECK_FALSE(value.empty());
+  CHECK_FALSE(ctor.empty());
+  CHECK(ctor.type() == value.type());
+}
 
-  SECTION("move") {
-    core::any value { std::string { "move-constructor" } };
-    core::any ctor { std::move(value) };
+TEST_CASE("constructor-move", "[constructors]") {
+  core::any value { std::string { "move-constructor" } };
+  core::any ctor { std::move(value) };
 
-    CHECK_FALSE(ctor.empty());
-    CHECK(value.empty());
-    CHECK(ctor.type() == typeid(std::string));
-  }
+  CHECK_FALSE(ctor.empty());
+  CHECK(value.empty());
+  CHECK(ctor.type() == typeid(std::string));
 }
 
 TEST_CASE("assignment", "[assignment]") {

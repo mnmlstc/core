@@ -45,15 +45,12 @@ cmake_dependent_option(BUILD_PACKAGE_PKG "Create a PKG" ON "${PKG_DEP}" OFF)
 #------------------------------------------------------------------------------
 write_basic_package_version_file(
   "${PROJECT_BINARY_DIR}/${PROJECT_NAME}-config-version.cmake"
-  COMPATIBILITY SameMajorVersion
-)
+  COMPATIBILITY SameMajorVersion)
 
 configure_package_config_file(
   "${PROJECT_SOURCE_DIR}/configure/${PROJECT_NAME}-config.cmake.in"
   "${PROJECT_BINARY_DIR}/${PROJECT_NAME}-config.cmake"
-  INSTALL_DESTINATION "${CMAKE_INSTALL_DIR}"
-  PATH_VARS INCLUDE_INSTALL_DIR CMAKE_INSTALL_DIR
-)
+  INSTALL_DESTINATION "${CMAKE_INSTALL_DIR}")
 
 add_library(core INTERFACE)
 
@@ -81,17 +78,19 @@ endif ()
 # Install
 #------------------------------------------------------------------------------
 install(FILES
-  ${PROJECT_BINARY_DIR}/core-config-version.cmake
-  ${PROJECT_BINARY_DIR}/core-config.cmake
-  DESTINATION ${CMAKE_INSTALL_DIR}
-)
+  ${PROJECT_BINARY_DIR}/${PROJECT_NAME}-config-version.cmake
+  ${PROJECT_BINARY_DIR}/${PROJECT_NAME}-config.cmake
+  DESTINATION ${CMAKE_INSTALL_DIR})
 
 install(DIRECTORY "${PROJECT_SOURCE_DIR}/include/core"
   DESTINATION ${INCLUDE_INSTALL_DIR}
   FILES_MATCHING PATTERN "*.hpp")
 
-install(TARGETS core EXPORT core-targets)
-install(EXPORT core-targets NAMESPACE mnmlstc:: DESTINATION ${CMAKE_INSTALL_DIR})
+install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}-targets)
+install(
+  EXPORT ${PROJECT_NAME}-targets
+  NAMESPACE mnmlstc::
+  DESTINATION ${CMAKE_INSTALL_DIR})
 
 if (BUILD_DOCS)
   install(DIRECTORY "${DOCS_BINARY_DIR}/"

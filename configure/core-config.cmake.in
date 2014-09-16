@@ -10,16 +10,15 @@ if (EXISTS "${CMAKE_CURRENT_LIST_DIR}/core-targets.cmake")
   include("${CMAKE_CURRENT_LIST_DIR}/core-targets.cmake")
 elseif (EXISTS "${CMAKE_CURRENT_LIST_DIR}/core-export.cmake")
   include("${CMAKE_CURRENT_LIST_DIR}/core-export.cmake")
-else ()
 endif ()
 
 # Provided for backwards compatibility
-get_target_property(CORE_INC_DIR mnmlstc::core INTERFACE_INCLUDE_DIRECTORIES)
+get_target_property(CORE_DIR mnmlstc::core INTERFACE_INCLUDE_DIRECTORIES)
 
 set_and_check(CORE_INCLUDE_DIR ${CORE_INC_DIR})
 set_and_check(CORE_INCLUDE_DIRS ${CORE_INCLUDE_DIR})
 set_and_check(core_INCLUDE_DIRS ${CORE_INCLUDE_DIR})
 
-unset(CORE_INC_DIR) # This shouldn't be exported
+unset(CORE_DIR) # This shouldn't be exported
 
 check_required_components(core)
