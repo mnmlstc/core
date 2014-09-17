@@ -37,6 +37,7 @@ set(CPACK_PACKAGE_INSTALL_DIRECTORY "mnmlstc/${PROJECT_NAME}")
 #------------------------------------------------------------------------------
 # Wix Configuration
 #------------------------------------------------------------------------------
+set(CPACK_WIX_CMAKE_PACKAGE_REGISTRY ${PROJECT_NAME})
 set(CPACK_WIX_UPGRADE_GUID "AE6C6986-200F-464C-83EF-C3A94C6C9995")
 set(CPACK_WIX_PRODUCT_GUID "*")
 set(CPACK_WIX_PRODUCT_ICON "${PROJECT_SOURCE_DIR}/package/mnmlstc.ico")
