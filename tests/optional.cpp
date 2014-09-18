@@ -188,6 +188,30 @@ TEST_CASE("optional-methods", "[optional][methods]") {
     CHECK(opt);
     CHECK(*opt == 4);
   }
+
+  SECTION("visit") {
+    core::optional<std::string> disengaged { };
+    core::optional<std::string> engaged { "visit" };
+    struct visitor {
+      void operator () (std::string& value) { value.append("or"); }
+      void operator () (core::nullopt_t) { }
+    };
+
+    engaged.visit(visitor());
+    CHECK(engaged.value() == "visitor");
+  }
+
+  SECTION("match") {
+    core::optional<std::string> disengaged { };
+    core::optional<std::string> engaged { "match" };
+
+    CHECK('m' == engaged.match(
+      [] (std::string const& str) { return str.at(0); },
+      [] (core::nullopt_t) { return '\0'; }));
+    CHECK('\0' == disengaged.match(
+      [] (std::string const&) { return 'm'; },
+      [] (core::nullopt_t) { return '\0'; }));
+  }
 }
 
 TEST_CASE("optional-functions", "[optional][functions]") {
@@ -305,6 +329,25 @@ TEST_CASE("constexpr-methods", "[constexpr][methods]") {
     constexpr int value_or_d = disengaged.value_or(7);
     static_assert(value_or_e == 5, "");
     static_assert(value_or_d == 7, "");
+  }
+
+  SECTION("visit") {
+    constexpr core::optional<int> engaged { 5 };
+    constexpr core::optional<int> disengaged { };
+
+    struct visitor final {
+      constexpr visitor () = default;
+      constexpr double operator () (int value, double) const noexcept {
+        return value + 5 * 2.0;
+      }
+      constexpr int operator () (core::nullopt_t, double) const noexcept { return 5; }
+    };
+
+    constexpr auto value_disengaged = disengaged.visit(visitor(), 2.0);
+    constexpr auto value_engaged = engaged.visit(visitor(), 2.0);
+
+    static_assert(value_disengaged == 5, "");
+    static_assert(value_engaged == 15.0, "");
   }
 }
 
@@ -654,6 +697,41 @@ TEST_CASE("expected-method-raise", "[expected][methods]") {
   CHECK_THROWS_AS(error.raise(), std::logic_error);
 }
 
+TEST_CASE("expected-method-visit", "[expected][methods]") {
+  core::expected<int> const valid { 4 };
+  core::expected<int> invalid {
+    std::make_exception_ptr(std::logic_error("error"))
+  };
+
+  struct visitor {
+    int operator () (int const& value) const { return value + 3; }
+    int operator () (std::exception_ptr const& ptr) {
+      std::rethrow_exception(ptr);
+    }
+
+    [[noreturn]] void operator () (int& value) { throw value; }
+    [[noreturn]] void operator () (std::exception_ptr& ptr) {
+      std::rethrow_exception(ptr);
+    }
+  };
+
+  CHECK(valid.visit(visitor()) == 7);
+  CHECK_THROWS_AS(invalid.visit(visitor()), std::logic_error);
+}
+
+TEST_CASE("expected-method-match", "[expected][methods]") {
+  core::expected<int> const valid { 4 };
+  core::expected<int> invalid {
+    std::make_exception_ptr(std::logic_error("error"))
+  };
+  CHECK(valid.match(
+    [] (int const& value) { return value + 3; },
+    [] (std::exception_ptr const&) { return 3; }) == 7);
+  CHECK(invalid.match(
+    [] (int&) { return false; },
+    [] (std::exception_ptr&) { return true; }));
+}
+
 TEST_CASE("expected-function-swap", "[expected][functions]") {
   using std::swap;
   auto ptr = std::make_exception_ptr(std::logic_error { "swap" });
@@ -937,6 +1015,36 @@ TEST_CASE("result-method-condition", "[result][methods]") {
   auto const error = make_error_condition(std::errc::permission_denied);
   core::result<std::string> value { error };
   CHECK(value.condition() == error);
+}
+
+TEST_CASE("result-method-visit", "[result][methods]") {
+  core::result<std::string> const value { "value" };
+  core::result<std::string> error { std::errc::permission_denied };
+
+  struct visitor {
+    bool operator () (std::string const&) const { return true; }
+    bool operator () (std::error_condition const&) const { return false; }
+
+    bool operator () (std::string&) { return false; }
+    bool operator () (std::error_condition&) { return true; }
+  };
+
+  CHECK(value.visit(visitor()));
+  CHECK(error.visit(visitor()));
+}
+
+TEST_CASE("result-method-match", "[result][methods]") {
+  core::result<std::string> const value { "value" };
+  core::result<std::string> error { std::errc::permission_denied };
+
+  CHECK(value.match(
+    [] (std::string const&) { return true; },
+    [] (std::error_condition const&) { return false; }
+  ));
+  CHECK(error.match(
+    [] (std::string&) { return false; },
+    [] (std::error_condition&) { return true; }
+  ));
 }
 
 TEST_CASE("result-function-swap", "[result][functions]") {

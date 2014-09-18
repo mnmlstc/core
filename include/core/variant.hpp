@@ -23,38 +23,6 @@ union discriminate<T, Ts...> {
   discriminate<Ts...> rest;
 };
 
-/* Used to provide lambda based pattern matching for the variant
- * Based off of Dave Abrahams C++11 'generic lambda' example.
- */
-template <class... Lambdas> struct overload;
-template <class Lambda> struct overload<Lambda> : Lambda {
-  using call_type = Lambda;
-  using call_type::operator ();
-};
-template <class Lambda, class... Lambdas>
-struct overload<Lambda, Lambdas...> :
-  private Lambda,
-  private overload<Lambdas...>::call_type
-{
-  using base_type = typename overload<Lambdas...>::call_type;
-
-  using lambda_type = Lambda;
-  using call_type = overload;
-
-  overload (Lambda&& lambda, Lambdas&&... lambdas) :
-    lambda_type(::core::forward<Lambda>(lambda)),
-    base_type(::core::forward<Lambdas>(lambdas)...)
-  { }
-
-  using lambda_type::operator ();
-  using base_type::operator ();
-};
-
-template <class... Lambdas>
-auto make_overload(Lambdas&&... lambdas) -> overload<Lambdas...> {
-  return overload<Lambdas...> { ::core::forward<Lambdas>(lambdas)... };
-}
-
 template <class Visitor, class Type, class Data, class Result, class... Args>
 auto visitor_gen () -> Result {
   return [](Visitor&& visitor, Data& data, Args&&... args) {
@@ -67,7 +35,6 @@ auto visitor_gen () -> Result {
 }
 
 } /* namespace impl */
-
 
 struct bad_variant_get final : ::std::logic_error {
   using ::std::logic_error::logic_error;

@@ -350,6 +350,55 @@ struct optional final : private impl::storage<Type> {
       : static_cast<value_type>(::core::forward<T>(val));
   }
 
+  /* member function extensions */
+  template <class Visitor, class... Args>
+  constexpr auto visit (Visitor&& visitor, Args&&... args) const -> common_type_t<
+    invoke_of_t<Visitor, value_type const&, Args...>,
+    invoke_of_t<Visitor, nullopt_t, Args...>
+  > {
+    return *this
+      ? invoke(
+          ::core::forward<Visitor>(visitor),
+          **this,
+          ::core::forward<Args>(args)...)
+      : invoke(
+          ::core::forward<Visitor>(visitor),
+          nullopt,
+          ::core::forward<Args>(args)...);
+  }
+
+  template <class Visitor, class... Args>
+  auto visit (Visitor&& visitor, Args&&... args) -> common_type_t<
+    invoke_of_t<Visitor, value_type&, Args...>,
+    invoke_of_t<Visitor, nullopt_t, Args...>
+  > {
+    return *this
+      ? invoke(
+          ::core::forward<Visitor>(visitor),
+          **this,
+          ::core::forward<Args>(args)...)
+      : invoke(
+          ::core::forward<Visitor>(visitor),
+          nullopt,
+          ::core::forward<Args>(args)...);
+  }
+
+  template <class... Visitors>
+  auto match (Visitors&&... visitors) const -> decltype(
+    this->visit(impl::make_overload(::core::forward<Visitors>(visitors)...))
+  ) {
+    return this->visit(
+      impl::make_overload(::core::forward<Visitors>(visitors)...));
+  }
+
+  template <class... Visitors>
+  auto match (Visitors&&... visitors) -> decltype(
+    this->visit(impl::make_overload(::core::forward<Visitors>(visitors)...))
+  ) {
+    return this->visit(
+      impl::make_overload(::core::forward<Visitors>(visitors)...));
+  }
+
 private:
   constexpr value_type const* ptr (::std::false_type) const noexcept {
     return &this->val;
@@ -627,6 +676,54 @@ struct expected final {
 
   [[gnu::deprecated]] ::std::exception_ptr get_ptr () const noexcept(false) {
     return this->pointer();
+  }
+
+  template <class Visitor, class... Args>
+  constexpr auto visit (Visitor&& visitor, Args&&... args) const -> common_type_t<
+    invoke_of_t<Visitor, value_type const&, Args...>,
+    invoke_of_t<Visitor, ::std::exception_ptr const&, Args...>
+  > {
+    return *this
+      ? invoke(
+          ::core::forward<Visitor>(visitor),
+          **this,
+          ::core::forward<Args>(args)...)
+      : invoke(
+          ::core::forward<Visitor>(visitor),
+          this->ptr,
+          ::core::forward<Args>(args)...);
+  }
+
+  template <class Visitor, class... Args>
+  auto visit (Visitor&& visitor, Args&&... args) -> common_type_t<
+    invoke_of_t<Visitor, value_type&, Args...>,
+    invoke_of_t<Visitor, std::exception_ptr&, Args...>
+  > {
+    return *this
+      ? invoke(
+          ::core::forward<Visitor>(visitor),
+          **this,
+          ::core::forward<Args>(args)...)
+      : invoke(
+          ::core::forward<Visitor>(visitor),
+          this->ptr,
+          ::core::forward<Args>(args)...);
+  }
+
+  template <class... Visitors>
+  auto match (Visitors&&... visitors) const -> decltype(
+    this->visit(impl::make_overload(::core::forward<Visitors>(visitors)...))
+  ) {
+    return this->visit(
+      impl::make_overload(::core::forward<Visitors>(visitors)...));
+  }
+
+  template <class... Visitors>
+  auto match (Visitors&&... visitors) -> decltype(
+    this->visit(impl::make_overload(::core::forward<Visitors>(visitors)...))
+  ) {
+    return this->visit(
+      impl::make_overload(::core::forward<Visitors>(visitors)...));
   }
 
 private:
@@ -933,6 +1030,56 @@ struct result final {
     if (*this) { throw bad_result_condition { "result<T> is valid" }; }
     return this->cnd;
   }
+
+  template <class Visitor, class... Args>
+  constexpr auto visit (Visitor&& visitor, Args&&... args) const -> common_type_t<
+    invoke_of_t<Visitor, value_type const&, Args...>,
+    invoke_of_t<Visitor, ::std::error_condition const&, Args...>
+  > {
+    return *this
+      ? invoke(
+          ::core::forward<Visitor>(visitor),
+          **this,
+          ::core::forward<Args>(args)...)
+      : invoke(
+          ::core::forward<Visitor>(visitor),
+          this->cnd,
+          ::core::forward<Args>(args)...);
+  }
+
+  template <class Visitor, class... Args>
+  auto visit (Visitor&& visitor, Args&&... args) -> common_type_t<
+    invoke_of_t<Visitor, value_type&, Args...>,
+    invoke_of_t<Visitor, ::std::error_condition&, Args...>
+  > {
+    return *this
+      ? invoke(
+          ::core::forward<Visitor>(visitor),
+          **this,
+          ::core::forward<Args>(args)...)
+      : invoke(
+          ::core::forward<Visitor>(visitor),
+          this->cnd,
+          ::core::forward<Args>(args)...);
+  }
+
+  template <class... Visitors>
+  auto match (Visitors&&... visitors) const -> decltype(
+    this->visit(impl::make_overload(::core::forward<Visitors>(visitors)...))
+  ) {
+    return this->visit(
+      impl::make_overload(::core::forward<Visitors>(visitors)...));
+  }
+
+  template <class... Visitors>
+  auto match (Visitors&&... visitors) -> decltype(
+    this->visit(impl::make_overload(::core::forward<Visitors>(visitors)...))
+  ) {
+    return this->visit(
+      impl::make_overload(::core::forward<Visitors>(visitors)...));
+  }
+
+
 
 private:
   void reset () {

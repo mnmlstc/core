@@ -61,13 +61,13 @@ template <class F> struct function_traits {
 
 /* N3727 */
 template <class Functor, class Object, class... Args>
-auto invoke (Functor&& functor, Object&& object, Args&&... args) -> enable_if_t<
+constexpr auto invoke (Functor&& functor, Object&& object, Args&&... args) -> enable_if_t<
   invokable<Functor, Object, Args...>::value,
   decltype((object.*functor)(::core::forward<Args>(args)...))
 > { return (object.*functor)(::core::forward<Args>(args)...); }
 
 template <class Functor, class Object, class... Args>
-auto invoke (Functor&& functor, Object&& object, Args&&... args) -> enable_if_t<
+constexpr auto invoke (Functor&& functor, Object&& object, Args&&... args) -> enable_if_t<
   invokable<Functor, Object, Args...>::value,
   decltype(
     ((*::core::forward<Object>(object)).*functor)(::core::forward<Args>(args)...)
@@ -79,13 +79,13 @@ auto invoke (Functor&& functor, Object&& object, Args&&... args) -> enable_if_t<
 }
 
 template <class Functor, class Object>
-auto invoke (Functor&& functor, Object&& object) -> enable_if_t<
+constexpr auto invoke (Functor&& functor, Object&& object) -> enable_if_t<
   invokable<Functor, Object>::value,
   decltype(object.*functor)
 > { return object.*functor; }
 
 template <class Functor, class Object>
-auto invoke (Functor&& functor, Object&& object) -> enable_if_t<
+constexpr auto invoke (Functor&& functor, Object&& object) -> enable_if_t<
   invokable<Functor, Object>::value,
   decltype((*::core::forward<Object>(object)).*functor)
 > { return (*::core::forward<Object>(object)).*functor; }
@@ -97,6 +97,41 @@ constexpr auto invoke (Functor&& functor, Args&&... args) -> enable_if_t<
 > { return ::core::forward<Functor>(functor)(::core::forward<Args>(args)...); }
 
 namespace impl {
+
+/* Used to provide lambda based 'pattern matching' for variant and optional
+ * types.
+ *
+ * Based off of Dave Abrahams C++11 'generic lambda' example.
+ */
+template <class... Lambdas> struct overload;
+template <class Lambda> struct overload<Lambda> : Lambda {
+  using call_type = Lambda;
+  using call_type::operator ();
+};
+
+template <class Lambda, class... Lambdas>
+struct overload<Lambda, Lambdas...> :
+  private Lambda,
+  private overload<Lambdas...>::call_type
+{
+  using base_type = typename overload<Lambdas...>::call_type;
+
+  using lambda_type = Lambda;
+  using call_type = overload;
+
+  overload (Lambda&& lambda, Lambdas&&... lambdas) :
+    lambda_type(::core::forward<Lambda>(lambda)),
+    base_type(::core::forward<Lambdas>(lambdas)...)
+  { }
+
+  using lambda_type::operator ();
+  using base_type::operator ();
+};
+
+template <class... Lambdas>
+auto make_overload(Lambdas&&... lambdas) -> overload<Lambdas...> {
+  return overload<Lambdas...> { ::core::forward<Lambdas>(lambdas)... };
+}
 
 template <class Functor, class U, ::std::size_t... I>
 auto unpack (
@@ -174,21 +209,24 @@ enable_if_t<
   );
 }
 
-template <class Functor, class Runpackable>
-auto invoke (
+/* Modified to force clang to *not* select this function in a bizarre corner
+ * case.
+ */
+template <
+  class Functor,
+  class Runpackable,
+  class=enable_if_t<is_runpackable<decay_t<Runpackable>>::value>
+> auto invoke (
   runpack_t,
   Functor&& functor,
   Runpackable&& unpackable
-) -> enable_if_t<
-  is_runpackable<decay_t<Runpackable>>::value,
-  decltype(
+) -> decltype(
     impl::runpack(
       ::std::forward<Functor>(functor),
       ::std::forward<Runpackable>(unpackable),
       make_index_sequence<function_traits<Functor>::arity> { }
     )
-  )
-> {
+  ) {
   return impl::runpack(
     ::std::forward<Functor>(functor),
     ::std::forward<Runpackable>(unpackable),
