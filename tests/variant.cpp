@@ -24,8 +24,8 @@ TEST_CASE("variant-constructors", "[variant][constructors]") {
     CHECK(string.type() == typeid(std::string));
     CHECK(integer.type() == typeid(std::uint64_t));
 
-    CHECK(std::get<0>(string) == std::string { "value-constructor" });
-    CHECK(std::get<1>(integer) == 64u);
+    CHECK(core::get<0>(string) == std::string { "value-constructor" });
+    CHECK(core::get<1>(integer) == 64u);
   }
 
   SECTION("move") {
@@ -34,8 +34,8 @@ TEST_CASE("variant-constructors", "[variant][constructors]") {
     variant_type move { std::move(variant) };
 
     CHECK(move.type() == typeid(std::string));
-    CHECK(std::get<0>(move) == std::string { "move" });
-    CHECK(std::get<0>(variant).empty());
+    CHECK(core::get<0>(move) == std::string { "move" });
+    CHECK(core::get<0>(variant).empty());
   }
 
   SECTION("copy") {
@@ -60,12 +60,12 @@ TEST_CASE("variant-assignment", "[variant][assignment]") {
     first = string;
 
     CHECK(first.type() == typeid(std::string));
-    CHECK(std::get<0>(first) == string);
+    CHECK(core::get<0>(first) == string);
 
     second = real;
 
     CHECK(second.type() == typeid(double));
-    CHECK(std::get<1>(second) == real);
+    CHECK(core::get<1>(second) == real);
   }
 
   SECTION("move") {
@@ -76,8 +76,8 @@ TEST_CASE("variant-assignment", "[variant][assignment]") {
     move = std::move(variant);
 
     CHECK(move.type() == typeid(std::string));
-    CHECK(std::get<0>(move) == std::string { "move" });
-    CHECK(std::get<0>(variant).empty());
+    CHECK(core::get<0>(move) == std::string { "move" });
+    CHECK(core::get<0>(variant).empty());
   }
 
   SECTION("copy") {
@@ -88,7 +88,7 @@ TEST_CASE("variant-assignment", "[variant][assignment]") {
     copy = variant;
 
     CHECK(copy.type() == typeid(double));
-    CHECK(std::get<1>(copy) == 9.8);
+    CHECK(core::get<1>(copy) == 9.8);
     CHECK(copy == variant);
   }
 }
@@ -200,16 +200,16 @@ TEST_CASE("variant-functions", "[variant][functions]") {
       std::vector<std::string>
     >;
 
-    variant_type vector { std::vector<std::string> { "1", "2", "3" } };
+    variant_type const vector { std::vector<std::string> { "1", "2", "3" } };
     variant_type string { std::string { "get" } };
     variant_type integer { static_cast<std::uint64_t>(64) };
 
-    CHECK_THROWS_AS(std::get<0>(vector), core::bad_variant_get);
-    CHECK(std::get<0>(integer) == 64u);
-    CHECK(std::get<1>(string) == std::string { "get" });
-    CHECK(std::get<2>(vector)[0] == std::string { "1" });
-    CHECK(std::get<2>(vector)[1] == std::string { "2" });
-    CHECK(std::get<2>(vector)[2] == std::string { "3" });
+    CHECK_THROWS_AS(core::get<0>(vector), core::bad_variant_get);
+    CHECK(core::get<0>(core::move(integer)) == 64u);
+    CHECK(core::get<1>(string) == "get");
+    CHECK(core::get<2>(vector)[0] == std::string { "1" });
+    CHECK(core::get<2>(vector)[1] == std::string { "2" });
+    CHECK(core::get<2>(vector)[2] == std::string { "3" });
   }
 
   SECTION("swap") {
@@ -220,14 +220,14 @@ TEST_CASE("variant-functions", "[variant][functions]") {
     variant_type lhs { 0.8 };
 
     swap(lhs_str, rhs_str);
-    CHECK(std::get<0>(lhs_str) == std::string { "rhs" });
-    CHECK(std::get<0>(rhs_str) == std::string { "lhs" });
+    CHECK(core::get<0>(lhs_str) == std::string { "rhs" });
+    CHECK(core::get<0>(rhs_str) == std::string { "lhs" });
 
     swap(lhs, rhs_str);
     CHECK(lhs.type() == typeid(std::string));
     CHECK(rhs_str.type() == typeid(double));
-    CHECK(std::get<0>(lhs) == std::string { "lhs" });
-    CHECK(std::get<1>(rhs_str) == 0.8);
+    CHECK(core::get<0>(lhs) == std::string { "lhs" });
+    CHECK(core::get<1>(rhs_str) == 0.8);
   }
 
   SECTION("hash") {

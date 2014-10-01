@@ -23,6 +23,9 @@ union discriminate<T, Ts...> {
   discriminate<Ts...> rest;
 };
 
+/* This is used to get around GCC's inability to expand lambdas in variadic
+ * template functions. You make me so sad sometimes, GCC.
+ */
 template <class Visitor, class Type, class Data, class Result, class... Args>
 auto visitor_gen () -> Result {
   return [](Visitor&& visitor, Data& data, Args&&... args) {
@@ -332,6 +335,39 @@ void swap (variant<Ts...>& lhs, variant<Ts...>& rhs) noexcept(
   noexcept(lhs.swap(rhs))
 ) { lhs.swap(rhs); }
 
+template < ::std::size_t I, class... Ts>
+auto get (variant<Ts...> const& v) noexcept(false) -> decltype(
+  v.template get<I>()
+) { return v.template get<I>(); }
+
+template < ::std::size_t I, class... Ts>
+auto get (variant<Ts...>&& v) noexcept(false) -> decltype(
+  ::core::move(v.template get<I>())
+) { return ::core::move(v.template get<I>()); }
+
+template < ::std::size_t I, class... Ts>
+auto get (variant<Ts...>& v) noexcept(false) -> decltype(
+  v.template get<I>()
+) { return v.template get<I>(); }
+
+template <class T, class... Ts>
+auto get (variant<Ts...> const& v) noexcept(false) -> enable_if_t<
+  typelist_count<T, Ts...>::value == 1,
+  decltype(::core::get<typelist_index<T, Ts...>::value>(v))
+> { return ::core::get<typelist_index<T, Ts...>::value>(v); }
+
+template <class T, class... Ts>
+auto get (variant<Ts...>&& v) noexcept(false) -> enable_if_t<
+  typelist_count<T, Ts...>::value == 1,
+  decltype(::core::move(::core::get<typelist_index<T, Ts...>::value>(v)))
+> { return ::core::move(::core::get<typelist_index<T, Ts...>::value>(v)); }
+
+template <class T, class... Ts>
+auto get (variant<Ts...>& v) noexcept(false) -> enable_if_t<
+  typelist_count<T, Ts...>::value == 1,
+  decltype(::core::get<typelist_index<T, Ts...>::value>(v))
+> { return ::core::get<typelist_index<T, Ts...>::value>(v); }
+
 }} /* namespace core::v1 */
 
 namespace std {
@@ -346,19 +382,22 @@ struct hash<core::v1::variant<Ts...>> {
 };
 
 template <size_t I, class... Ts>
-auto get (core::v1::variant<Ts...> const& variant) noexcept(false) -> decltype(
-  variant.template get<I>()
-) { return variant.template get<I>(); }
+[[gnu::deprecated, deprecated]]
+auto get (::core::v1::variant<Ts...> const& v) noexcept(false) -> decltype(
+  ::core::v1::get<I>(v)
+) { return ::core::v1::get<I>(v); }
 
 template <size_t I, class... Ts>
-auto get (core::v1::variant<Ts...>&& variant) noexcept(false) -> decltype(
-  variant.template get<I>()
-) { return variant.template get<I>(); }
+[[gnu::deprecated, deprecated]]
+auto get (::core::v1::variant<Ts...>&& v) noexcept(false) -> decltype(
+  ::core::v1::get<I>(v)
+) { return ::core::v1::get<I>(v); }
 
 template <size_t I, class... Ts>
-auto get (core::v1::variant<Ts...>& variant) noexcept (false) -> decltype(
-  variant.template get<I>()
-) { return variant.template get<I>(); }
+[[gnu::deprecated, deprecated]]
+auto get (::core::v1::variant<Ts...>& v) noexcept (false) -> decltype(
+  ::core::v1::get<I>(v)
+) { return ::core::v1::get<I>(v); }
 
 } /* namespace std */
 
