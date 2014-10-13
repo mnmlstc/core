@@ -15,7 +15,7 @@ endif ()
 # Provided for backwards compatibility
 get_target_property(CORE_DIR mnmlstc::core INTERFACE_INCLUDE_DIRECTORIES)
 
-set_and_check(CORE_INCLUDE_DIR ${CORE_INC_DIR})
+set_and_check(CORE_INCLUDE_DIR ${CORE_DIR})
 set_and_check(CORE_INCLUDE_DIRS ${CORE_INCLUDE_DIR})
 set_and_check(core_INCLUDE_DIRS ${CORE_INCLUDE_DIR})
 

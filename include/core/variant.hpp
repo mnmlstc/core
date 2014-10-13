@@ -240,9 +240,15 @@ public:
 
   template <class Visitor, class... Args>
   auto visit (Visitor&& visitor, Args&&... args) -> common_type_t<
-    invoke_of_t<Visitor, Ts, Args...>...
+    invoke_of_t<Visitor, add_lvalue_reference_t<Ts>, Args...>...
   > {
-    using return_type = common_type_t<invoke_of_t<Visitor, Ts, Args...>...>;
+    using return_type = common_type_t<
+      invoke_of_t<
+        Visitor,
+        add_lvalue_reference_t<Ts>,
+        Args...
+      >...
+    >;
     using function = return_type(*)(Visitor&&, storage_type&, Args&&...);
     constexpr ::std::size_t size = ::std::tuple_size<tuple_type>::value;
 
@@ -259,9 +265,15 @@ public:
 
   template <class Visitor, class... Args>
   auto visit (Visitor&& visitor, Args&&... args) const -> common_type_t<
-    invoke_of_t<Visitor, Ts, Args...>...
+    invoke_of_t<Visitor, add_lvalue_reference_t<add_const_t<Ts>>, Args...>...
   > {
-    using return_type = common_type_t<invoke_of_t<Visitor, Ts, Args...>...>;
+    using return_type = common_type_t<
+      invoke_of_t<
+        Visitor,
+        add_lvalue_reference_t<add_const_t<Ts>>,
+        Args...
+      >...
+    >;
     using function = return_type(*)(Visitor&&, storage_type const&, Args&&...);
     constexpr ::std::size_t size = ::std::tuple_size<tuple_type>::value;
 
