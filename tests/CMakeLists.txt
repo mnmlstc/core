@@ -42,6 +42,7 @@ function(add_unit_test name file)
       $<$<BOOL:${CAN_WARN_NO_CXX98_COMPAT}>:${WARN_NO_CXX98_COMPAT}>
       $<$<BOOL:${CAN_WARN_NO_WEAK_VTABLES}>:${WARN_NO_WEAK_VTABLES}>
       $<$<BOOL:${CAN_WARN_NO_UNUSED_MEMFN}>:${WARN_NO_UNUSED_MEMFN}>
+      $<$<BOOL:${CAN_WARN_NO_UNUSED_FUNC}>:${WARN_NO_UNUSED_FUNC}>
       $<$<BOOL:${CAN_WARN_NO_FLOAT_EQUAL}>:${WARN_NO_FLOAT_EQUAL}>
       $<$<BOOL:${CAN_WARN_NO_DEPRECATED}>:${WARN_NO_DEPRECATED}>
       $<$<BOOL:${CAN_WARN_NO_EXIT_TIME}>:${WARN_NO_EXIT_TIME}>
@@ -72,6 +73,7 @@ set(WARN_NO_INTERNAL_DECL "-Wno-unneeded-internal-declaration")
 set(WARN_NO_CXX98_COMPAT "-Wno-c++98-compat")
 set(WARN_NO_WEAK_VTABLES "-Wno-weak-vtables")
 set(WARN_NO_UNUSED_MEMFN "-Wno-unused-member-function")
+set(WARN_NO_UNUSED_FUNC "-Wno-unused-function")
 set(WARN_NO_FLOAT_EQUAL "-Wno-float-equal")
 set(WARN_NO_DEPRECATED "-Wno-deprecated-declarations")
 set(WARN_NO_EXIT_TIME "-Wno-exit-time-destructors")
@@ -101,6 +103,7 @@ check_cxx_compiler_flag(${WARN_NO_INTERNAL_DECL} CAN_WARN_NO_INTERNAL_DECL)
 check_cxx_compiler_flag(${WARN_NO_CXX98_COMPAT} CAN_WARN_NO_CXX98_COMPAT)
 check_cxx_compiler_flag(${WARN_NO_WEAK_VTABLES} CAN_WARN_NO_WEAK_VTABLES)
 check_cxx_compiler_flag(${WARN_NO_UNUSED_MEMFN} CAN_WARN_NO_UNUSED_MEMFN)
+check_cxx_compiler_flag(${WARN_NO_UNUSED_FUNC} CAN_WARN_NO_UNUSED_FUNC)
 check_cxx_compiler_flag(${WARN_NO_FLOAT_EQUAL} CAN_WARN_NO_FLOAT_EQUAL)
 check_cxx_compiler_flag(${WARN_NO_DEPRECATED} CAN_WARN_NO_DEPRECATED)
 check_cxx_compiler_flag(${WARN_NO_EXIT_TIME} CAN_WARN_NO_EXIT_TIME)

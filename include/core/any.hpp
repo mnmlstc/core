@@ -5,6 +5,8 @@
 #include <typeinfo>
 #include <memory>
 
+#include <cstring>
+
 #include <core/type_traits.hpp>
 #include <core/utility.hpp>
 
@@ -17,7 +19,7 @@ using data_type = add_pointer_t<void>;
 template <class Type>
 using is_small = ::std::integral_constant<
   bool,
-  sizeof(decay_t<Type>) <= sizeof(void*) and
+  sizeof(decay_t<Type>) <= sizeof(data_type) and
   ::std::is_nothrow_copy_constructible<Type>::value
 >;
 
@@ -31,36 +33,40 @@ struct any_dispatch {
   type_function const type;
 };
 
-template <class Type, bool=is_small<Type>::value>
-struct any_dispatch_select;
+template <class Type, bool=is_small<Type>::value> struct any_dispatch_select;
 
 template <class Type>
 struct any_dispatch_select<Type, true> {
-  using allocator_type = ::std::allocator<Type>;
+  using value_type = Type;
+  using pointer = add_pointer_t<value_type>;
+  using allocator_type = ::std::allocator<value_type>;
   using allocator_traits = ::std::allocator_traits<allocator_type>;
 
   static void clone (data_type const& source, data_type& data) {
     allocator_type alloc { };
-    auto const& value = reinterpret_cast<Type const>(source);
-    auto ptr = reinterpret_cast<Type*>(::std::addressof(data));
-    allocator_traits::construct(alloc, ptr, value);
+    value_type val { };
+    ::std::memcpy(::std::addressof(val), ::std::addressof(source), sizeof(val));
+    auto ptr = reinterpret_cast<pointer>(::std::addressof(data));
+    allocator_traits::construct(alloc, ptr, val);
   }
 
   static void destroy (data_type& data) {
     allocator_type alloc { };
-    auto ptr = reinterpret_cast<Type*>(::std::addressof(data));
+    auto ptr = reinterpret_cast<pointer>(::std::addressof(data));
     allocator_traits::destroy(alloc, ptr);
   }
 };
 
 template <class Type>
 struct any_dispatch_select<Type, false> {
-  using allocator_type = ::std::allocator<Type>;
+  using value_type = Type;
+  using pointer = add_pointer_t<value_type>;
+  using allocator_type = ::std::allocator<value_type>;
   using allocator_traits = ::std::allocator_traits<allocator_type>;
 
   static void clone (data_type const& source, data_type& data) {
     allocator_type alloc { };
-    auto const& value = *static_cast<Type* const>(source);
+    auto const& value = *static_cast<pointer const>(source);
     auto pointer = allocator_traits::allocate(alloc, 1);
     auto scope = make_scope_guard([&alloc, pointer] {
       allocator_traits::deallocate(alloc, pointer, 1);
@@ -72,7 +78,7 @@ struct any_dispatch_select<Type, false> {
 
   static void destroy (data_type& data) {
     allocator_type alloc { };
-    auto value = static_cast<Type*>(data);
+    auto value = static_cast<pointer>(data);
     allocator_traits::destroy(alloc, value);
     allocator_traits::deallocate(alloc, value, 1);
   }
@@ -251,8 +257,10 @@ ValueType* any_cast (any* operand) noexcept {
 template <
   class ValueType,
   class=enable_if_t<
-    ::std::is_reference<ValueType>::value or
-    ::std::is_copy_constructible<ValueType>::value
+    meta::any<
+      ::std::is_reference<ValueType>,
+      ::std::is_copy_constructible<ValueType>
+    >::value
   >
 > ValueType any_cast (any const& operand) {
   using type = remove_reference_t<ValueType>;
@@ -264,8 +272,10 @@ template <
 template <
   class ValueType,
   class=enable_if_t<
-    ::std::is_reference<ValueType>::value or
-    ::std::is_copy_constructible<ValueType>::value
+    meta::any<
+      ::std::is_reference<ValueType>,
+      ::std::is_copy_constructible<ValueType>
+    >::value
   >
 > ValueType any_cast (any&& operand) {
   using type = remove_reference_t<ValueType>;
@@ -277,8 +287,10 @@ template <
 template <
   class ValueType,
   class=enable_if_t<
-    ::std::is_reference<ValueType>::value or
-    ::std::is_copy_constructible<ValueType>::value
+    meta::any<
+      ::std::is_reference<ValueType>,
+      ::std::is_copy_constructible<ValueType>
+    >::value
   >
 > ValueType any_cast (any& operand) {
   using type = remove_reference_t<ValueType>;

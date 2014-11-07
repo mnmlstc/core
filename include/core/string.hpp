@@ -131,7 +131,9 @@ struct basic_string_view {
     this->len = 0;
   }
 
-  constexpr basic_string_view substr (size_type pos, size_type n=npos) const {
+  constexpr basic_string_view substr (
+    size_type pos=0,
+    size_type n=npos) const noexcept {
     return pos > this->size()
       ? throw ::std::out_of_range { "start position out of range" }
       : basic_string_view {
@@ -184,114 +186,172 @@ struct basic_string_view {
     return this->str[idx];
   }
 
-  /* functions that take a string-ref */
-  size_type find_first_not_of (basic_string_view that) const {
-    for (auto iter = this->begin(); iter != this->end(); ++iter) {
-      if (traits::find(that.data(), that.size(), *iter)) { continue; }
-      return static_cast<size_type>(::std::distance(this->begin(), iter));
-    }
-    return npos;
+  /* find-first-not-of */
+  size_type find_first_not_of (
+    basic_string_view str,
+    size_type pos = 0) const noexcept {
+    if (pos > this->size()) { return npos; }
+    auto begin = this->begin() + pos;
+    auto end = this->end();
+    auto const predicate = [str] (value_type v) { return str.find(v) == npos; };
+    auto iter = std::find_if(begin, end, predicate);
+    if (iter == end) { return npos; }
+    return static_cast<size_type>(::std::distance(this->begin(), iter));
   }
 
-  size_type find_last_not_of (basic_string_view that) const {
-    for (auto iter = this->rbegin(); iter != this->rend(); ++iter) {
-      if (traits::find(that.data(), that.size(), *iter)) { continue; }
-      auto const distance = static_cast<size_type>(
-        ::std::distance(this->rbegin(), iter));
-      return this->size() - distance - 1;
-    }
-    return npos;
+  size_type find_first_not_of (
+    pointer s,
+    size_type pos,
+    size_type n) const noexcept {
+      return this->find_first_not_of(basic_string_view { s, n }, pos);
   }
 
-  size_type find_first_of (basic_string_view that) const {
+  size_type find_first_not_of (pointer s, size_type pos = 0) const noexcept {
+    return this->find_first_not_of(basic_string_view { s }, pos);
+  }
+
+  size_type find_first_not_of (value_type c, size_type pos = 0) const noexcept {
+    return this->find_first_not_of(
+      basic_string_view { ::std::addressof(c), 1 },
+      pos);
+  }
+
+  /* find-first-of */
+  size_type find_first_of (
+    basic_string_view str,
+    size_type pos = 0) const noexcept {
+    if (pos > this->size()) { return npos; }
     auto iter = ::std::find_first_of(
-      this->begin(), this->end(),
-      that.begin(), that.end(),
-      traits::eq
-    );
+      this->begin() + pos, this->end(),
+      str.begin(), str.end(),
+      traits::eq);
     if (iter == this->end()) { return npos; }
     return static_cast<size_type>(::std::distance(this->begin(), iter));
   }
 
-  size_type find_last_of (basic_string_view that) const {
-    auto iter = ::std::find_first_of(
-      this->rbegin(), this->rend(),
-      that.rbegin(), that.rend(),
-      traits::eq
-    );
-    if (iter == this->rend()) { return npos; }
+  size_type find_first_of (pointer s, size_type p, size_type n) const noexcept {
+    return this->find_first_of(basic_string_view { s, n }, p);
+  }
+
+  size_type find_first_of (pointer s, size_type pos = 0) const noexcept {
+    return this->find_first_of(basic_string_view { s }, pos);
+  }
+
+  size_type find_first_of (value_type c, size_type pos = 0) const noexcept {
+    return this->find_first_of(
+      basic_string_view { ::std::addressof(c), 1 },
+      pos);
+  }
+
+  /* find */
+  size_type find (basic_string_view str, size_type pos = 0) const noexcept {
+    if (pos >= this->size()) { return npos; }
+    auto iter = ::std::search(
+      this->begin() + pos, this->end(),
+      str.begin(), str.end(),
+      traits::eq);
+    if (iter == this->end()) { return npos; }
+    return static_cast<size_type>(::std::distance(this->begin(), iter));
+  }
+
+  size_type find (pointer s, size_type p, size_type n) const noexcept {
+    return this->find(basic_string_view { s, n }, p);
+  }
+
+  size_type find (pointer s, size_type pos = 0) const noexcept {
+    return this->find(basic_string_view { s }, pos);
+  }
+
+  size_type find (value_type c, size_type pos = 0) const noexcept {
+    return this->find(basic_string_view { ::std::addressof(c), 1 }, pos);
+  }
+
+  size_type find_last_not_of (
+    basic_string_view str,
+    size_type pos = npos) const noexcept {
+    auto const offset = this->size() - ::std::min(this->size(), pos);
+    auto begin = this->rbegin() + static_cast<difference_type>(offset);
+    auto end = this->rend();
+    auto const predicate = [str] (value_type v) { return str.find(v) == npos; };
+    auto iter = ::std::find_if(begin, end, predicate);
+    if (iter == end) { return npos; }
     auto const distance = static_cast<size_type>(
       ::std::distance(this->rbegin(), iter));
     return this->size() - distance - 1;
   }
 
-  size_type rfind (basic_string_view that) const {
-    auto iter = ::std::search(
-      this->rbegin(), this->rend(),
-      that.rbegin(), that.rend(),
-      traits::eq
-    );
-    if (iter == this->rend()) { return npos; }
-    return this->size() - ::std::distance(this->rbegin(), iter) - 1;
+  size_type find_last_not_of (
+    pointer s,
+    size_type p,
+    size_type n) const noexcept {
+    return this->find_last_not_of(basic_string_view { s, n }, p);
   }
 
-  size_type find (basic_string_view that) const {
-    auto iter = ::std::search(
-      this->begin(), this->end(),
-      that.begin(), that.end(),
-      traits::eq
-    );
-    if (iter == this->end()) { return npos; }
-    return static_cast<size_type>(::std::distance(this->begin(), iter));
+  size_type find_last_not_of (pointer s, size_type p = npos) const noexcept {
+    return this->find_last_not_of(basic_string_view { s }, p);
   }
 
-  /* functions that take a single CharT */
-  size_type find_first_not_of (value_type value) const {
-    auto end = this->end();
-    auto iter = ::std::find_if_not(
-      this->begin(),
-      end,
-      [value](value_type val) { return traits::eq(val, value); }
-    );
-    if (iter == end) { return npos; }
-    return static_cast<size_type>(::std::distance(this->begin(), iter));
+  size_type find_last_not_of (
+    value_type c,
+    size_type pos = npos) const noexcept {
+    return this->find_last_not_of(
+      basic_string_view { ::std::addressof(c), 1 },
+      pos);
   }
 
-  size_type find_last_not_of (value_type value) const {
+  size_type find_last_of (
+    basic_string_view str,
+    size_type pos = npos) const noexcept {
+    auto const offset = this->size() - ::std::min(this->size(), pos);
+    auto begin = this->rbegin() + static_cast<difference_type>(offset);
     auto end = this->rend();
-    auto iter = ::std::find_if_not(
-      this->rbegin(),
-      end,
-      [value](value_type val) { return traits::eq(val, value); }
-    );
+
+    auto iter = ::std::find_first_of(
+      begin, end,
+      str.rbegin(), str.rend(),
+      traits::eq);
     if (iter == end) { return npos; }
     auto const distance = static_cast<size_type>(
       ::std::distance(this->rbegin(), iter));
     return this->size() - distance - 1;
   }
 
-  size_type find_first_of (value_type value) const {
-    return this->find(value);
+  size_type find_last_of (pointer s, size_type p, size_type n) const noexcept {
+    return this->find_last_of(basic_string_view { s, n }, p);
   }
 
-  size_type find_last_of (value_type value) const {
-    return this->rfind(value);
+  size_type find_last_of (pointer s, size_type p=npos) const noexcept {
+    return this->find_last_of(basic_string_view { s }, p);
   }
 
-  size_type rfind (value_type value) const {
+  size_type find_last_of (value_type c, size_type p=npos) const noexcept {
+    return this->find_last_of(basic_string_view { ::std::addressof(c), 1 }, p);
+  }
+
+  size_type rfind (basic_string_view str, size_type pos=npos) const noexcept {
+    auto const offset = this->size() - ::std::min(this->size(), pos);
+    auto begin = this->rbegin() + offset;
     auto end = this->rend();
-    auto iter = ::std::find(this->rbegin(), end, value);
+    auto iter = ::std::search(
+      begin, end,
+      str.rbegin(), str.rend(),
+      traits::eq);
     if (iter == end) { return npos; }
     auto const distance = static_cast<size_type>(
       ::std::distance(this->rbegin(), iter));
-    return this->size() - distance -1;
+    return this->size() - distance - 1;
   }
 
-  size_type find (value_type value) const {
-    auto end = this->end();
-    auto iter = ::std::find(this->begin(), end, value);
-    if (iter == end) { return npos; }
-    return static_cast<size_type>(::std::distance(this->begin(), iter));
+  size_type rfind (pointer s, size_type p, size_type n) const noexcept {
+    return this->rfind(basic_string_view { s, n }, p);
+  }
+
+  size_type rfind (pointer s, size_type p=npos) const noexcept {
+    return this->rfind(basic_string_view { s }, p);
+  }
+
+  size_type rfind (value_type c, size_type p=npos) const noexcept {
+    return this->rfind(basic_string_view { ::std::addressof(c), 1 }, p);
   }
 
   void swap (basic_string_view& that) noexcept {

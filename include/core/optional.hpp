@@ -18,18 +18,6 @@ namespace core {
 inline namespace v1 {
 namespace impl {
 
-template <class T>
-class has_addressof {
-  template <class U>
-  static auto test (U* ptr) noexcept -> decltype(ptr->operator&(), void());
-  template <class> static void test (...) noexcept(false);
-public:
-  static constexpr bool value = noexcept(test<T>(nullptr));
-};
-
-template <class T>
-struct addressof : ::std::integral_constant<bool, has_addressof<T>::value> { };
-
 struct place_t { };
 constexpr place_t place { };
 
@@ -230,7 +218,7 @@ struct optional final : private impl::storage<Type> {
   }
 
   optional& operator = (optional&& that) noexcept (
-    all_traits<
+    meta::all<
       ::std::is_nothrow_move_assignable<value_type>,
       ::std::is_nothrow_move_constructible<value_type>
     >::value
@@ -261,7 +249,7 @@ struct optional final : private impl::storage<Type> {
   }
 
   void swap (optional& that) noexcept(
-    all_traits<
+    meta::all<
       is_nothrow_swappable<value_type>,
       ::std::is_nothrow_move_constructible<value_type>
     >::value
@@ -289,7 +277,7 @@ struct optional final : private impl::storage<Type> {
   value_type& operator * () noexcept { return this->val; }
 
   constexpr value_type const* operator -> () const noexcept {
-    return this->ptr(impl::addressof<value_type> { });
+    return this->ptr(trait::address<value_type> { });
   }
 
   value_type* operator -> () noexcept { return ::std::addressof(this->val); }
@@ -327,7 +315,7 @@ struct optional final : private impl::storage<Type> {
   template <
     class T,
     class=enable_if_t<
-      all_traits<
+      meta::all<
         ::std::is_copy_constructible<value_type>,
         ::std::is_convertible<T, value_type>
       >::value
@@ -339,7 +327,7 @@ struct optional final : private impl::storage<Type> {
   template <
     class T,
     class=enable_if_t<
-      all_traits<
+      meta::all<
         ::std::is_move_constructible<value_type>,
         ::std::is_convertible<T, value_type>
       >::value
@@ -516,7 +504,7 @@ struct expected final {
   }
 
   expected& operator = (expected&& that) noexcept(
-    all_traits<
+    meta::all<
       ::std::is_nothrow_move_assignable<value_type>,
       ::std::is_nothrow_move_constructible<value_type>
     >::value
@@ -528,8 +516,8 @@ struct expected final {
   template <
     class T,
     class=enable_if_t<
-      all_traits<
-        no_traits<
+      meta::all<
+        meta::none<
           ::std::is_same<decay_t<T>, expected>,
           ::std::is_same<decay_t<T>, ::std::exception_ptr>
         >,
@@ -566,7 +554,7 @@ struct expected final {
   }
 
   void swap (expected& that) noexcept(
-    all_traits<
+    meta::all<
       is_nothrow_swappable<value_type>,
       ::std::is_nothrow_move_constructible<value_type>
     >::value
@@ -632,7 +620,7 @@ struct expected final {
   template <
     class T,
     class=enable_if_t<
-      all_traits<
+      meta::all<
         ::std::is_copy_constructible<value_type>,
         ::std::is_convertible<T, value_type>
       >::value
@@ -644,7 +632,7 @@ struct expected final {
   template <
     class T,
     class=enable_if_t<
-      all_traits<
+      meta::all<
         ::std::is_move_constructible<value_type>,
         ::std::is_convertible<T, value_type>
       >::value
@@ -876,7 +864,7 @@ struct result final {
   }
 
   result& operator = (result&& that) noexcept(
-    all_traits<
+    meta::all<
       ::std::is_nothrow_move_assignable<value_type>,
       ::std::is_nothrow_move_constructible<value_type>
     >::value
@@ -888,8 +876,8 @@ struct result final {
   template <
     class T,
     class=enable_if_t<
-      all_traits<
-        no_traits<
+      meta::all<
+        meta::none<
           ::std::is_same<decay_t<T>, result>,
           ::std::is_same<decay_t<T>, ::std::error_condition>
         >,
@@ -937,7 +925,7 @@ struct result final {
   }
 
   void swap (result& that) noexcept(
-    all_traits<
+    meta::all<
       is_nothrow_swappable<value_type>,
       ::std::is_nothrow_move_constructible<value_type>
     >::value
@@ -1003,7 +991,7 @@ struct result final {
   template <
     class T,
     class=enable_if_t<
-      all_traits<
+      meta::all<
         ::std::is_copy_constructible<value_type>,
         ::std::is_convertible<T, value_type>
       >::value
@@ -1015,7 +1003,7 @@ struct result final {
   template <
     class T,
     class=enable_if_t<
-      all_traits<
+      meta::all<
         ::std::is_move_constructible<value_type>,
         ::std::is_convertible<T, value_type>
       >::value

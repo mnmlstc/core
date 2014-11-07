@@ -3,37 +3,49 @@
 
 #include <type_traits>
 #include <utility>
+#include <tuple>
+
+#include <core/meta.hpp>
 
 namespace core {
 inline namespace v1 {
+namespace impl {
+
+/* workaround for gcc */
+template <class...> struct deducer { using type = void; };
+
+} /* namespace impl */
 
 /* custom type traits */
+template <class T> struct identity { using type = T; };
+
+/* a 'better named' (personal opinion!) form of the void_t type transformation
+ * alias trait by Walter E. Brown.
+ */
+template <class... Ts> using deduce_t = typename impl::deducer<Ts...>::type;
+
 /* tuple_size is used by unpack, so we expect it to be available.
  * We also expect ::std::get<N> to be available for the give type T
  */
+template <class T, class=void> struct is_unpackable : ::std::false_type { };
 template <class T>
-class is_unpackable {
-  template <class U> using tuple_size_t = typename ::std::tuple_size<U>::type;
-  template <class U> static void check (tuple_size_t<U>*) noexcept;
-  template <class> static void check (...) noexcept(false);
-public:
-  static constexpr bool value = noexcept(check<T>(nullptr));
-};
+struct is_unpackable<T, deduce_t<typename ::std::tuple_size<T>::type>> :
+  ::std::true_type
+{ };
 
-/* Used for types that have a .at(size_type) member function */
+/* Used for types that have a .at(size_type) member function. Used by
+ * invoke for 'runpacking'
+ */
+template <class T, class=void> struct is_runpackable : ::std::false_type { };
 template <class T>
-class is_runpackable {
-  template <class U>
-  static auto check (U* u) noexcept -> decltype(u->at(0ul), void());
-  template <class> static void check (...) noexcept(false);
-public:
-  static constexpr bool value = noexcept(check<T>(nullptr));
-};
+struct is_runpackable<T, deduce_t<decltype(std::declval<T>().at(0ul))>> :
+  ::std::true_type
+{ };
 
 /* extracts the class of a member function ponter */
-template <class T> struct class_of { using type = T; };
+template <class T> struct class_of : identity<T> { };
 template <class Signature, class Type>
-struct class_of<Signature Type::*> { using type = Type; };
+struct class_of<Signature Type::*> : identity<Type> { };
 
 /* forward declaration */
 template <class... Args> struct invokable;
@@ -93,6 +105,7 @@ using underlying_type_t = typename ::std::underlying_type<T>::type;
 
 /* custom type trait specializations */
 template <class... Args> using invoke_of_t = typename invoke_of<Args...>::type;
+template <class T> using identity_t = typename identity<T>::type;
 template <class T> using class_of_t = typename class_of<T>::type;
 
 namespace impl {
@@ -160,23 +173,24 @@ struct invoke_of<true, Args...> {
 using ::std::declval;
 using ::std::swap;
 
-template <class T, class U>
-class is_swappable {
-  template <class X, class Y>
-  static auto check (int) noexcept -> decltype(
-    swap(declval<X&>(), declval<Y&>()),
-    void()
-  );
-  template <class X, class Y> static void check (...) noexcept(false);
-public:
-  static constexpr bool value =
-    noexcept(check<T, U>(0)) and noexcept(check<U, T>(0));
-};
+template <class T, class U, class=void>
+struct is_swappable : ::std::false_type { };
 
 template <class T, class U>
-struct is_nothrow_swappable : ::std::integral_constant<
-  bool,
-  is_swappable<T, U>::value and noexcept(swap(declval<T&>(), declval<U&>()))
+struct is_swappable<
+  T,
+  U,
+  deduce_t<
+    decltype(swap(declval<T&>(), declval<U&>())),
+    decltype(swap(declval<U&>(), declval<T&>()))
+  >
+> : ::std::true_type { };
+
+template <class T, class U>
+struct is_nothrow_swappable : meta::all<
+  is_swappable<T, U>,
+  ::std::integral_constant<bool, noexcept(swap(declval<T&>(), declval<U&>()))>,
+  ::std::integral_constant<bool, noexcept(swap(declval<U&>(), declval<T&>()))>
 > { };
 
 } /* namespace impl */
@@ -200,21 +214,19 @@ template <class T> using result_of_t = typename result_of<T>::type;
 
 template <class... Ts> struct common_type;
 
-template <class T> struct common_type<T> { using type = decay_t<T>; };
+template <class T> struct common_type<T> : identity<decay_t<T>> { };
 template <class T, class U>
-struct common_type<T, U> {
-  using type = decay_t<
-    decltype(true ? ::std::declval<T>() : ::std::declval<U>())
-  >;
-};
+struct common_type<T, U> : identity<
+  decay_t<decltype(true ? ::std::declval<T>() : ::std::declval<U>())>
+> { };
 
 template <class T, class U, class... Ts>
-struct common_type<T, U, Ts...> {
-  using type = typename common_type<
+struct common_type<T, U, Ts...> : identity<
+  typename common_type<
     typename common_type<T, U>::type,
     Ts...
-  >::type;
-};
+  >::type
+> { };
 
 template <class... T> using common_type_t = typename common_type<T...>::type;
 
@@ -222,46 +234,529 @@ template <class... T> using common_type_t = typename common_type<T...>::type;
 template <class T> struct is_null_pointer : ::std::false_type { };
 
 template <>
-struct is_null_pointer<add_cv_t< ::std::nullptr_t>> : ::std::true_type { };
+struct is_null_pointer<add_cv_t<::std::nullptr_t>> : ::std::true_type { };
 template <>
-struct is_null_pointer< ::std::nullptr_t volatile> : ::std::true_type { };
+struct is_null_pointer<::std::nullptr_t volatile> : ::std::true_type { };
 template <>
-struct is_null_pointer< ::std::nullptr_t const> : ::std::true_type { };
+struct is_null_pointer<::std::nullptr_t const> : ::std::true_type { };
 template <>
-struct is_null_pointer< ::std::nullptr_t> : ::std::true_type { };
+struct is_null_pointer<::std::nullptr_t> : ::std::true_type { };
 
 /* is_swappable */
 template <class T, class U=T>
-using is_swappable = ::std::integral_constant<
-  bool,
-  impl::is_swappable<T, U>::value
->;
+using is_swappable = impl::is_swappable<T, U>;
 
 /* is_nothrow_swappable */
 template <class T, class U=T>
 using is_nothrow_swappable = impl::is_nothrow_swappable<T, U>;
 
-/* all-traits */
-template <class...> struct all_traits;
-template <class T, class... Args>
-struct all_traits<T, Args...> : ::std::integral_constant<bool,
-  T::value and all_traits<Args...>::value
-> { };
-template <> struct all_traits<> : ::std::true_type { };
+/* These are now deprecated. Use what they alias to instead */
+template <class... Args> using all_traits = meta::all<Args...>;
+template <class... Args> using any_traits = meta::any<Args...>;
+template <class... Args> using no_traits = meta::none<Args...>;
 
-/* any-traits */
-template <class...> struct any_traits;
-template <class T, class... Args>
-struct any_traits<T, Args...> : ::std::integral_constant<bool,
-  T::value or any_traits<Args...>::value
-> { };
-template <> struct any_traits<> : ::std::false_type { };
+/* This is equivalent to the Boost.TypeTraits dont_care type */
+using ignore_t = decltype(::std::ignore);
 
-/* no-traits */
-template <class... Args> struct no_traits : ::std::integral_constant<bool,
-  not all_traits<Args...>::value
+namespace trait {
+namespace impl {
+
+/* comparison */
+template <class, class, class, class=void> struct eq : ::std::false_type { };
+template <class, class, class, class=void> struct ne : ::std::false_type { };
+template <class, class, class, class=void> struct ge : ::std::false_type { };
+template <class, class, class, class=void> struct le : ::std::false_type { };
+template <class, class, class, class=void> struct gt : ::std::false_type { };
+template <class, class, class, class=void> struct lt : ::std::false_type { };
+
+/* arithmetic */
+template <class, class, class, class=void> struct mul : ::std::false_type { };
+template <class, class, class, class=void> struct div : ::std::false_type { };
+template <class, class, class, class=void> struct mod : ::std::false_type { };
+template <class, class, class, class=void> struct add : ::std::false_type { };
+template <class, class, class, class=void> struct sub : ::std::false_type { };
+
+/* bitwise */
+template <class, class, class, class=void> struct band : ::std::false_type { };
+template <class, class, class, class=void> struct bxor : ::std::false_type { };
+template <class, class, class, class=void> struct bor : ::std::false_type { };
+template <class, class, class, class=void> struct bsl : ::std::false_type { };
+template <class, class, class, class=void> struct bsr : ::std::false_type { };
+
+/* logical */
+template <class, class, class, class=void> struct land : ::std::false_type { };
+template <class, class, class, class=void> struct lor : ::std::false_type { };
+
+/* disgusting */
+template <class, class, class, class=void> struct comma : ::std::false_type { };
+
+/* prefix */
+template <class, class, class=void> struct negate : ::std::false_type { };
+template <class, class, class=void> struct plus : ::std::false_type { };
+
+template <class, class, class=void> struct inc : ::std::false_type { };
+template <class, class, class=void> struct dec : ::std::false_type { };
+
+template <class, class, class=void> struct lnot : ::std::false_type { };
+template <class, class, class=void> struct bnot : ::std::false_type { };
+
+/* postfix */
+template <class, class, class=void> struct postinc : ::std::false_type { };
+template <class, class, class=void> struct postdec : ::std::false_type { };
+
+/* special operator overloads */
+template <class, class, class, class=void> struct subscript :
+  ::std::false_type
+{ };
+
+template <class, class, class=void> struct dereference : ::std::false_type { };
+template <class, class, class=void> struct address : ::std::false_type { };
+template <class, class, class=void> struct arrow : ::std::false_type { };
+
+/* comparison - ignore */
+template <class T, class U>
+struct eq<
+  T, U, ignore_t,
+  deduce_t<decltype(::std::declval<T>() == ::std::declval<U>())>
+> : ::std::true_type { };
+
+template <class T, class U>
+struct ne<
+  T, U, ignore_t,
+  deduce_t<decltype(::std::declval<T>() != ::std::declval<U>())>
+> : ::std::true_type { };
+
+template <class T, class U>
+struct ge<
+  T, U, ignore_t,
+  deduce_t<decltype(::std::declval<T>() >= ::std::declval<U>())>
+> : ::std::true_type { };
+
+template <class T, class U>
+struct le<
+  T, U, ignore_t,
+  deduce_t<decltype(::std::declval<T>() <= ::std::declval<U>())>
+> : ::std::true_type { };
+
+template <class T, class U>
+struct gt<
+  T, U, ignore_t,
+  deduce_t<decltype(::std::declval<T>() > ::std::declval<U>())>
+> : ::std::true_type { };
+
+template <class T, class U>
+struct lt<
+  T, U, ignore_t,
+  deduce_t<decltype(::std::declval<T>() < ::std::declval<U>())>
+> : ::std::true_type { };
+
+/* arithmetic - ignore */
+template <class T, class U>
+struct mul<
+  T, U, ignore_t,
+  deduce_t<decltype(::std::declval<T>() * ::std::declval<T>())>
+> : ::std::true_type { };
+
+template <class T, class U>
+struct div<
+  T, U, ignore_t,
+  deduce_t<decltype(::std::declval<T>() / ::std::declval<U>())>
+> : ::std::true_type { };
+
+template <class T, class U>
+struct mod<
+  T, U, ignore_t,
+  deduce_t<decltype(::std::declval<T>() % ::std::declval<U>())>
+> : ::std::true_type { };
+
+template <class T, class U>
+struct add<
+  T, U, ignore_t,
+  deduce_t<decltype(::std::declval<T>() + ::std::declval<U>())>
+> : ::std::true_type { };
+
+template <class T, class U>
+struct sub<
+  T, U, ignore_t,
+  deduce_t<decltype(::std::declval<T>() - ::std::declval<U>())>
+> : ::std::true_type { };
+
+/* bitwise - ignore */
+template <class T, class U>
+struct band<
+  T, U, ignore_t,
+  deduce_t<decltype(::std::declval<T>() & ::std::declval<U>())>
+> : ::std::true_type { };
+
+template <class T, class U>
+struct bxor<
+  T, U, ignore_t,
+  deduce_t<decltype(::std::declval<T>() ^ ::std::declval<U>())>
+> : ::std::true_type { };
+
+template <class T, class U>
+struct bor<
+  T, U, ignore_t,
+  deduce_t<decltype(::std::declval<T>() | ::std::declval<U>())>
+> : ::std::true_type { };
+
+template <class T, class U>
+struct bsl<
+  T, U, ignore_t,
+  deduce_t<decltype(::std::declval<T>() << ::std::declval<U>())>
+> : ::std::true_type { };
+
+template <class T, class U>
+struct bsr<
+  T, U, ignore_t,
+  deduce_t<decltype(::std::declval<T>() >> ::std::declval<U>())>
+> : ::std::true_type { };
+
+template <class T>
+struct bnot<T, ignore_t, deduce_t<decltype(~::std::declval<T>())>> :
+  ::std::true_type
+{ };
+
+/* logic - ignore */
+template <class T, class U>
+struct land<
+  T, U, ignore_t,
+  deduce_t<decltype(::std::declval<T>() and ::std::declval<U>())>
+> : ::std::true_type { };
+
+template <class T, class U>
+struct lor<
+  T, U, ignore_t,
+  deduce_t<decltype(::std::declval<T>() or ::std::declval<U>())>
+> : ::std::true_type { };
+
+template <class T>
+struct lnot<T, ignore_t, deduce_t<decltype(not ::std::declval<T>())>> :
+  ::std::true_type
+{ };
+
+/* special operators - ignore */
+template <class T, class I>
+struct subscript<
+  T, I, ignore_t,
+  deduce_t<decltype(::std::declval<T>()[::std::declval<I>()])>
+> : ::std::true_type { };
+
+template <class T>
+struct dereference<
+  T, ignore_t,
+  deduce_t<decltype(::std::declval<T>().operator*())>
+> : ::std::true_type { };
+
+template <class T>
+struct address<
+  T, ignore_t,
+  deduce_t<decltype(::std::declval<T>().operator&())>
+> : ::std::true_type { };
+
+template <class T>
+struct arrow<
+  T, ignore_t,
+  deduce_t<decltype(::std::declval<T>().operator->())>
+> : ::std::true_type { };
+
+/* comparison */
+template <class T, class U, class R>
+struct eq<
+  T, U, R,
+  deduce_t<decltype(::std::declval<T>() == ::std::declval<U>())>
+> : ::std::is_convertible<
+  decltype(::std::declval<T>() == ::std::declval<U>()),
+  R
 > { };
 
-}} /* namespace core::v1 */
+template <class T, class U, class R>
+struct ne<
+  T, U, R,
+  deduce_t<decltype(::std::declval<T>() != ::std::declval<U>())>
+> : ::std::is_convertible<
+  decltype(::std::declval<T>() == ::std::declval<U>()),
+  R
+> { };
+
+template <class T, class U, class R>
+struct ge<
+  T, U, R,
+  deduce_t<decltype(::std::declval<T>() >= ::std::declval<U>())>
+> : ::std::is_convertible<
+  decltype(::std::declval<T>() >= ::std::declval<U>()),
+  R
+> { };
+
+template <class T, class U, class R>
+struct le<
+  T, U, R,
+  deduce_t<decltype(::std::declval<T>() <= ::std::declval<U>())>
+> : ::std::is_convertible<
+  decltype(::std::declval<T>() <= ::std::declval<U>()),
+  R
+> { };
+
+template <class T, class U, class R>
+struct gt<
+  T, U, R,
+  deduce_t<decltype(::std::declval<T>() > ::std::declval<U>())>
+> : ::std::is_convertible<
+  decltype(::std::declval<T>() > ::std::declval<U>()),
+  R
+> { };
+
+template <class T, class U, class R>
+struct lt<
+  T, U, R,
+  deduce_t<decltype(::std::declval<T>() < ::std::declval<U>())>
+> : ::std::is_convertible<
+  decltype(::std::declval<T>() < ::std::declval<U>()),
+  R
+> { };
+
+/* arithmetic */
+template <class T, class U, class R>
+struct mul<
+  T, U, R,
+  deduce_t<decltype(::std::declval<T>() * ::std::declval<U>())>
+> : ::std::is_convertible<
+  decltype(::std::declval<T>() * ::std::declval<U>()),
+  R
+> { };
+
+template <class T, class U, class R>
+struct div<
+  T, U, R,
+  deduce_t<decltype(::std::declval<T>() / ::std::declval<U>())>
+> : ::std::is_convertible<
+  decltype(::std::declval<T>() / ::std::declval<U>()),
+  R
+> { };
+
+template <class T, class U, class R>
+struct mod<
+  T, U, R,
+  deduce_t<decltype(::std::declval<T>() % ::std::declval<U>())>
+> : ::std::is_convertible<
+  decltype(::std::declval<T>() % ::std::declval<U>()),
+  R
+> { };
+
+template <class T, class U, class R>
+struct add<
+  T, U, R,
+  deduce_t<decltype(::std::declval<T>() + ::std::declval<U>())>
+> : ::std::is_convertible<
+  decltype(::std::declval<T>() + ::std::declval<U>()),
+  R
+> { };
+
+template <class T, class U, class R>
+struct sub<
+  T, U, R,
+  deduce_t<decltype(::std::declval<T>() - ::std::declval<U>())>
+> : ::std::is_convertible<
+  decltype(::std::declval<T>() - ::std::declval<U>()),
+  R
+> { };
+
+/* bitwise */
+template <class T, class U, class R>
+struct band<
+  T, U, R,
+  deduce_t<decltype(::std::declval<T>() & ::std::declval<U>())>
+> : ::std::is_convertible<
+  decltype(::std::declval<T>() & ::std::declval<U>()),
+  R
+> { };
+
+template <class T, class U, class R>
+struct bxor<
+  T, U, R,
+  deduce_t<decltype(::std::declval<T>() ^ ::std::declval<U>())>
+> : ::std::is_convertible<
+  decltype(::std::declval<T>() & ::std::declval<U>()),
+  R
+> { };
+
+template <class T, class U, class R>
+struct bor<
+  T, U, R,
+  deduce_t<decltype(::std::declval<T>() | ::std::declval<U>())>
+> : ::std::is_convertible<
+  decltype(::std::declval<T>() | ::std::declval<U>()),
+  R
+> { };
+
+template <class T, class U, class R>
+struct bsl<
+  T, U, R,
+  deduce_t<decltype(::std::declval<T>() << ::std::declval<U>())>
+> : ::std::is_convertible<
+  decltype(::std::declval<T>() << ::std::declval<U>()),
+  R
+> { };
+
+template <class T, class U, class R>
+struct bsr<
+  T, U, R,
+  deduce_t<decltype(::std::declval<T>() >> ::std::declval<U>())>
+> : ::std::is_convertible<
+  decltype(::std::declval<T>() >> ::std::declval<U>()),
+  R
+> { };
+
+template <class T, class R>
+struct bnot<T, R, deduce_t<decltype(~::std::declval<T>())>> :
+  ::std::is_convertible<decltype(~::std::declval<T>()), R>
+{ };
+
+/* logical */
+template <class T, class U, class R>
+struct land<
+  T, U, R,
+  deduce_t<decltype(::std::declval<T>() and ::std::declval<U>())>
+> : ::std::is_convertible<
+  decltype(::std::declval<T>() and ::std::declval<U>()),
+  R
+> { };
+
+template <class T, class U, class R>
+struct lor<
+  T, U, R,
+  deduce_t<decltype(::std::declval<T>() or ::std::declval<U>())>
+> : ::std::is_convertible<
+  decltype(::std::declval<T>() or ::std::declval<U>()),
+  R
+> { };
+
+template <class T, class R>
+struct lnot<T, R, deduce_t<decltype(not ::std::declval<T>())>> :
+  ::std::is_convertible<decltype(not ::std::declval<T>()), R>
+{ };
+
+/* disgusting */
+template <class T, class U, class R>
+struct comma<
+  T, U, R,
+  deduce_t<decltype((::std::declval<T>(), ::std::declval<U>()))>
+> : ::std::is_convertible<
+  decltype((::std::declval<T>(), ::std::declval<U>())),
+  R
+> { };
+
+/* unary */
+template <class T, class R>
+struct negate<
+  T, R, deduce_t<decltype(-::std::declval<T>())>
+> : ::std::is_convertible<decltype(-::std::declval<T>()), R> { };
+
+template <class T, class R>
+struct plus<
+  T, R, deduce_t<decltype(+::std::declval<T>())>
+> : ::std::is_convertible<decltype(+::std::declval<T>()), R> { };
+
+template <class T, class R>
+struct inc<
+  T, R, deduce_t<decltype(++::std::declval<T>())>
+> : ::std::is_convertible<decltype(++::std::declval<T>()), R> { };
+
+template <class T, class R>
+struct dec<
+  T, R, deduce_t<decltype(--::std::declval<T>())>
+> : ::std::is_convertible<decltype(--::std::declval<T>()), R> { };
+
+template <class T, class R>
+struct postinc<
+  T, R, deduce_t<decltype(::std::declval<T>()++)>
+> : ::std::is_convertible<decltype(::std::declval<T>()++), R> { };
+
+template <class T, class R>
+struct postdec<
+  T, R, deduce_t<decltype(::std::declval<T>()--)>
+> : ::std::is_convertible<decltype(::std::declval<T>()--), R> { };
+
+/* special operator overloads */
+template <class T, class I, class R>
+struct subscript<
+  T, I, R,
+  deduce_t<decltype(::std::declval<T>()[std::declval<I>()])>
+> : ::std::is_convertible<
+  decltype(::std::declval<T>()[::std::declval<I>()]),
+  R
+> { };
+
+template <class T, class R>
+struct address<T, R, deduce_t<decltype(::std::declval<T>().operator&())>> :
+  std::is_convertible<decltype(::std::declval<T>().operator&()), R>
+{ };
+
+template <class T, class R>
+struct arrow<T, R, deduce_t<decltype(::std::declval<T>().operator->())>> :
+  std::is_convertible<decltype(::std::declval<T>().operator->()), R>
+{ };
+
+} /* namespace impl */
+
+/* comparison */
+template <class T, class U=T, class R=ignore_t> using eq = impl::eq<T, U, R>;
+template <class T, class U=T, class R=ignore_t> using ne = impl::ne<T, U, R>;
+template <class T, class U=T, class R=ignore_t> using ge = impl::ge<T, U, R>;
+template <class T, class U=T, class R=ignore_t> using le = impl::le<T, U, R>;
+template <class T, class U=T, class R=ignore_t> using gt = impl::gt<T, U, R>;
+template <class T, class U=T, class R=ignore_t> using lt = impl::lt<T, U, R>;
+
+/* arithmetic */
+template <class T, class U=T, class R=ignore_t> using mul = impl::mul<T, U, R>;
+template <class T, class U=T, class R=ignore_t> using div = impl::div<T, U, R>;
+template <class T, class U=T, class R=ignore_t> using mod = impl::mod<T, U, R>;
+template <class T, class U=T, class R=ignore_t> using add = impl::add<T, U, R>;
+template <class T, class U=T, class R=ignore_t> using sub = impl::sub<T, U, R>;
+
+/* bitwise */
+template <class T, class U=T, class R=ignore_t>
+using band = impl::band<T, U, R>;
+
+template <class T, class U=T, class R=ignore_t>
+using bxor = impl::bxor<T, U, R>;
+
+template <class T, class U=T, class R=ignore_t> using bor = impl::bor<T, U, R>;
+template <class T, class U=T, class R=ignore_t> using bsl = impl::bsl<T, U, R>;
+template <class T, class U=T, class R=ignore_t> using bsr = impl::bsr<T, U, R>;
+template <class T, class R=ignore_t> using bnot = impl::bnot<T, R>;
+
+/* logical */
+template <class T, class U=T, class R=ignore_t>
+using land = impl::land<T, U, R>;
+
+template <class T, class U=T, class R=ignore_t> using lor = impl::lor<T, U, R>;
+template <class T, class R=ignore_t> using lnot = impl::lnot<T, R>;
+
+/* disgusting (we do not allow ignoring the return type) */
+template <class T, class U, class R> using comma = impl::comma<T, U, R>;
+
+/* unary (prefix) */
+template <class T, class R=ignore_t> using negate = impl::negate<T, R>;
+template <class T, class R=ignore_t> using plus = impl::plus<T, R>;
+
+template <class T, class R=ignore_t> using inc = impl::inc<T, R>;
+template <class T, class R=ignore_t> using dec = impl::dec<T, R>;
+
+/* unary (postfix) */
+template <class T, class R=ignore_t> using postinc = impl::postinc<T, R>;
+template <class T, class R=ignore_t> using postdec = impl::postdec<T, R>;
+
+/* special operators */
+template <class T, class I, class R=ignore_t>
+using subscript = impl::subscript<T, I, R>;
+
+template <class T, class R=ignore_t>
+using dereference = impl::dereference<T, R>;
+
+template <class T, class R=ignore_t> using address = impl::address<T, R>;
+template <class T, class R> using arrow = impl::arrow<T, R>;
+
+}}} /* namespace core::v1::trait */
 
 #endif /* CORE_TYPE_TRAITS_HPP */

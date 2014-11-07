@@ -164,7 +164,6 @@ TEST_CASE("optional-operators", "[optional][operators]") {
     CHECK(lhs < 5);
   }
 }
-
 TEST_CASE("optional-methods", "[optional][methods]") {
   SECTION("value") {
     core::optional<int> opt { };

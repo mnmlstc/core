@@ -3,4 +3,6 @@
 *.swp
 *~
 
+build-clang/
+build-gcc/
 build/

@@ -14,32 +14,24 @@ namespace core {
 inline namespace v1 {
 namespace impl {
 
+template <class T, class=void> struct begin : ::std::false_type { };
 template <class T>
-class begin {
-  template <class U>
-  static auto check (U&& u) noexcept -> decltype(::std::begin(u));
-  static void check (...) noexcept(false);
-public:
-  using type = decltype(check(::std::declval<T>()));
-  static constexpr bool value = noexcept(check(::std::declval<T>()));
-};
+struct begin<T, deduce_t<decltype(::std::begin(::std::declval<T>()))>> :
+  ::std::true_type
+{ using type = decltype(::std::begin(::std::declval<T>())); };
 
+template <class T, class=void> struct end : ::std::false_type { };
 template <class T>
-class end {
-  template <class U>
-  static auto check (U&& u) noexcept -> decltype(::std::end(u));
-  static void check (...) noexcept(false);
-public:
-  using type = decltype(check(::std::declval<T>()));
-  static constexpr bool value = noexcept(check(::std::declval<T>()));
-};
+struct end<T, deduce_t<decltype(::std::end(::std::declval<T>()))>> :
+  ::std::true_type
+{ using type = decltype(::std::end(::std::declval<T>())); };
+
+template <class T> using begin_t = typename begin<T>::type;
 
 } /* namespace impl */
 
 template <class R>
-struct is_range : ::std::integral_constant<bool,
-  impl::begin<R>::value and impl::end<R>::value
-> { };
+struct is_range : meta::all<impl::begin<R>, impl::end<R>> { };
 
 template <class Iterator>
 struct range {
@@ -81,11 +73,13 @@ struct range {
   >::value;
 
   template <
-    typename Range,
-    typename=enable_if_t<
-      not ::std::is_pointer<iterator>::value and
-      is_range<Range>::value and
-      ::std::is_convertible<typename impl::begin<Range>::type, iterator>::value
+    class Range,
+    class=enable_if_t<
+      meta::all<
+        meta::none<::std::is_pointer<iterator>>,
+        is_range<Range>,
+        ::std::is_convertible<impl::begin_t<Range>, iterator>
+      >::value
     >
   > explicit range (Range&& r) noexcept :
     range { ::std::begin(r), ::std::end(r) }

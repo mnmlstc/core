@@ -1,3 +1,4 @@
+#define CATCH_CONFIG_MAIN
 #include <core/functional.hpp>
 
 #include <unordered_map>
@@ -9,7 +10,6 @@
 
 #include <sstream>
 
-#define CATCH_CONFIG_MAIN
 #include <catch.hpp>
 
 TEST_CASE("functional") {
@@ -44,7 +44,7 @@ TEST_CASE("functional") {
     );
 
     CHECK(string == result);
-    CHECK_THROWS_AS([string] {
+    CHECK_THROWS([string] {
       std::ignore = core::invoke(
         core::runpack,
         [] (char, char, char, char) -> std::string {
@@ -52,7 +52,7 @@ TEST_CASE("functional") {
         },
         string
       );
-    }(), std::out_of_range);
+    }());
 
   }
 
