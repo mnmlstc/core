@@ -14,10 +14,38 @@ namespace impl {
 /* workaround for gcc */
 template <class...> struct deducer { using type = void; };
 
+using ::std::swap;
+
+template <class T, class U, class=void>
+struct is_swappable : ::std::false_type { };
+
+template <class T, class U>
+struct is_swappable<
+  T,
+  U,
+  typename deducer<
+    decltype(swap(::std::declval<T&>(), ::std::declval<U&>())),
+    decltype(swap(::std::declval<U&>(), ::std::declval<T&>()))
+  >::type
+> : ::std::true_type { };
+
+template <class T, class U>
+struct is_nothrow_swappable : meta::all<
+  is_swappable<T, U>,
+  meta::boolean<noexcept(swap(::std::declval<T&>(), ::std::declval<U&>()))>,
+  meta::boolean<noexcept(swap(::std::declval<U&>(), ::std::declval<T&>()))>
+> { };
+
 } /* namespace impl */
 
-/* custom type traits */
+/* custom type traits and types */
 template <class T> struct identity { using type = T; };
+
+/* This is equivalent to the Boost.TypeTraits dont_care type */
+template <::std::size_t I, class T>
+using tuple_element_t = typename ::std::tuple_element<I, T>::type;
+template <class T> using tuple_size_t = typename ::std::tuple_size<T>::type;
+using ignore_t = decltype(::std::ignore);
 
 /* a 'better named' (personal opinion!) form of the void_t type transformation
  * alias trait by Walter E. Brown.
@@ -29,7 +57,7 @@ template <class... Ts> using deduce_t = typename impl::deducer<Ts...>::type;
  */
 template <class T, class=void> struct is_unpackable : ::std::false_type { };
 template <class T>
-struct is_unpackable<T, deduce_t<typename ::std::tuple_size<T>::type>> :
+struct is_unpackable<T, deduce_t<tuple_size_t<T>>> :
   ::std::true_type
 { };
 
@@ -89,7 +117,7 @@ using remove_extent_t = typename ::std::remove_extent<T>::type;
 template <class T>
 using remove_all_extents_t = typename ::std::remove_all_extents<T>::type;
 
-template < ::std::size_t Len, ::std::size_t Align>
+template <::std::size_t Len, ::std::size_t Align>
 using aligned_storage_t = typename ::std::aligned_storage<Len, Align>::type;
 
 template <class T> using decay_t = typename ::std::decay<T>::type;
@@ -128,10 +156,14 @@ auto invoke_expr (Functor&& fun, Object&& obj, Args&&... args) -> enable_if_t<
 
 template <class Functor, class Object, class... Args>
 auto invoke_expr (Functor&& fun, Object&& obj, Args&&... args) -> enable_if_t<
-  ::std::is_member_function_pointer<remove_reference_t<Functor>>::value and
-  not ::std::is_base_of<
-    class_of_t<remove_reference_t<Functor>>,
-    remove_reference_t<Object>
+  meta::all<
+    ::std::is_member_function_pointer<remove_reference_t<Functor>>,
+    meta::boolean<
+      not ::std::is_base_of<
+        class_of_t<remove_reference_t<Functor>>,
+        remove_reference_t<Object>
+      >::value
+    >
   >::value,
   decltype(
     ((*::std::forward<Object>(obj)).*fun)(::std::forward<Args>(args)...)
@@ -159,48 +191,27 @@ auto invoke_expr (Functor&& functor, Object&& object) -> enable_if_t<
 >;
 
 template <class Functor, class... Args>
-auto invoke_expr (Functor&& functor, Args&&... args) -> decltype(
-  ::std::forward<Functor>(functor)(::std::forward<Args>(args)...)
-);
+auto invoke_expr (Functor&& functor, Args&&... args) -> enable_if_t<
+  not ::std::is_member_pointer<decay_t<Functor>>::value,
+  decltype(
+    ::std::forward<Functor>(functor)(::std::forward<Args>(args)...)
+  )
+>;
 
 template <bool, class... Args> struct invoke_of { };
 template <class... Args>
-struct invoke_of<true, Args...> {
-  using type = decltype(invoke_expr(::std::declval<Args>()...));
-};
-
-/* swappable implementation details */
-using ::std::declval;
-using ::std::swap;
-
-template <class T, class U, class=void>
-struct is_swappable : ::std::false_type { };
-
-template <class T, class U>
-struct is_swappable<
-  T,
-  U,
-  deduce_t<
-    decltype(swap(declval<T&>(), declval<U&>())),
-    decltype(swap(declval<U&>(), declval<T&>()))
-  >
-> : ::std::true_type { };
-
-template <class T, class U>
-struct is_nothrow_swappable : meta::all<
-  is_swappable<T, U>,
-  ::std::integral_constant<bool, noexcept(swap(declval<T&>(), declval<U&>()))>,
-  ::std::integral_constant<bool, noexcept(swap(declval<U&>(), declval<T&>()))>
-> { };
+struct invoke_of<true, Args...> :
+  identity<decltype(invoke_expr(::std::declval<Args>()...))>
+{ };
 
 } /* namespace impl */
 
-template <class... Args> struct invokable : ::std::integral_constant<
-  bool,
-  not ::std::is_same<
+template <class... Args>
+struct invokable : meta::none<
+  std::is_same<
     decltype(impl::invoke_expr(::std::declval<Args>()...)),
     impl::undefined
-  >::value
+  >
 > { };
 
 template <class... Args> struct invoke_of :
@@ -255,8 +266,6 @@ template <class... Args> using all_traits = meta::all<Args...>;
 template <class... Args> using any_traits = meta::any<Args...>;
 template <class... Args> using no_traits = meta::none<Args...>;
 
-/* This is equivalent to the Boost.TypeTraits dont_care type */
-using ignore_t = decltype(::std::ignore);
 
 namespace trait {
 namespace impl {

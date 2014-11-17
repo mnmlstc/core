@@ -55,7 +55,7 @@ template <class F> struct function_traits {
   using return_type = typename functor_type::return_type;
   using pointer = typename functor_type::pointer;
   static constexpr ::std::size_t arity = functor_type::arity - 1;
-  template < ::std::size_t N>
+  template <::std::size_t N>
   using argument = typename functor_type::template argument<N>;
 };
 
@@ -233,6 +233,11 @@ template <
     make_index_sequence<function_traits<Functor>::arity> { }
   );
 }
+
+template <class Functor, class T>
+auto apply (Functor&& f, T&& t) -> decltype(
+  invoke(unpack, ::std::forward<Functor>(f), ::std::forward<T>(t))
+) { return invoke(unpack, ::std::forward<Functor>(f), ::std::forward<T>(t)); }
 
 }} /* namespace core::v1 */
 

@@ -24,32 +24,29 @@ template <class T, T... I> struct integer_sequence {
 };
 
 template <class T, T Index, ::std::size_t N>
-struct sequence_generator {
-  static_assert(Index >= 0, "Index cannot be negative");
-  using type = typename sequence_generator<T, Index - 1, N - 1>::type::next;
-};
+struct sequence_generator : identity<
+  typename sequence_generator<T, Index - 1, N - 1>::type::next
+> { static_assert(Index >= 0, "Index cannot be negative"); };
 
 template <class T, T Index>
-struct sequence_generator<T, Index, 0ul> { using type = integer_sequence<T>; };
+struct sequence_generator<T, Index, 0ul> : identity<integer_sequence<T>> { };
 
-template < ::std::size_t Index, class T, class U, class... Types>
-struct typelist_index {
-  using type = typename typelist_index<Index + 1, T, Types...>::type;
-  static constexpr ::std::size_t value = Index;
-};
+template <::std::size_t Index, class T, class U, class... Types>
+struct typelist_index :
+  identity<typename typelist_index<Index + 1, T, Types...>::type>
+{ static constexpr ::std::size_t value = Index; };
 
-template < ::std::size_t Index, class T, class... Types>
-struct typelist_index<Index, T, T, Types...> {
-  using type = typelist_index;
-  static constexpr ::std::size_t value = Index;
-};
+template <::std::size_t Index, class T, class... Types>
+struct typelist_index<Index, T, T, Types...> : identity<
+  typelist_index<Index, T, T, Types...>
+> { static constexpr ::std::size_t value = Index; };
 
-template < ::std::size_t N, class... Types> struct typelist_count;
+template <::std::size_t N, class... Types> struct typelist_count;
 
-template < ::std::size_t N, class T>
-struct typelist_count<N, T> : ::std::integral_constant< ::std::size_t, N> { };
+template <::std::size_t N, class T>
+struct typelist_count<N, T> : meta::size<N> { };
 
-template < ::std::size_t N, class T, class Head, class... Types>
+template <::std::size_t N, class T, class Head, class... Types>
 struct typelist_count<N, T, Head, Types...> : ::std::conditional<
   ::std::is_same<T, Head>::value,
   typelist_count<N + 1, T, Types...>,
@@ -77,44 +74,40 @@ constexpr auto move (T&& t) noexcept -> decltype(
 template <class T, T... I>
 using integer_sequence = impl::integer_sequence<T, I...>;
 
-template < ::std::size_t... I>
-using index_sequence = integer_sequence< ::std::size_t, I...>;
+template <::std::size_t... I>
+using index_sequence = integer_sequence<::std::size_t, I...>;
 
 template <class T, T N>
 using make_integer_sequence = typename impl::sequence_generator<T, N, N>::type;
 
-template < ::std::size_t N>
-using make_index_sequence = make_integer_sequence< ::std::size_t, N>;
+template <::std::size_t N>
+using make_index_sequence = make_integer_sequence<::std::size_t, N>;
 
 template <class T, class... Ts>
-using typelist_index = ::std::integral_constant<
-  ::std::size_t,
+using typelist_index = meta::size<
   impl::typelist_index<0ul, T, Ts...>::type::value
 >;
 
 template <class T, class... Ts>
-using typelist_count = ::std::integral_constant<
-  ::std::size_t,
-  impl::typelist_count<0ul, T, Ts...>::value
->;
+using typelist_count = meta::size<impl::typelist_count<0ul, T, Ts...>::value>;
 
 /* N3761 (with some additions) */
-template < ::std::size_t N, class T, class... Ts>
-struct type_at { using type = typename type_at<N - 1, Ts...>::type; };
+template <::std::size_t N, class T, class... Ts>
+struct type_at : identity<typename type_at<N - 1, Ts...>::type> { };
 
 template <class T, class... Ts>
-struct type_at<0ul, T, Ts...> { using type = T; };
+struct type_at<0ul, T, Ts...> : identity<T> { };
 
-template < ::std::size_t N, class... Ts>
+template <::std::size_t N, class... Ts>
 using type_at_t = typename type_at<N, Ts...>::type;
 
-template < ::std::size_t N, class T, class... Ts>
+template <::std::size_t N, class T, class... Ts>
 constexpr auto value_at (T&& value, Ts&&...) -> enable_if_t<
   N == 0 and N < (sizeof...(Ts) + 1),
   decltype(::core::forward<T>(value))
 > { return ::core::forward<T>(value); }
 
-template < ::std::size_t N, class T, class... Ts>
+template <::std::size_t N, class T, class... Ts>
 constexpr auto value_at (T&&, Ts&&... values) -> enable_if_t<
   N != 0 and N < (sizeof...(Ts) + 1),
   type_at_t<N, T, Ts...>
@@ -153,6 +146,18 @@ auto make_scope_guard(Callable&& callable) -> scope_guard<decay_t<Callable>> {
   return scope_guard<decay_t<Callable>> {
     ::core::forward<Callable>(callable)
   };
+}
+
+template <class T, class U=T>
+T exchange (T& obj, U&& value) noexcept(
+  meta::all<
+    ::std::is_nothrow_move_constructible<T>,
+    ::std::is_nothrow_assignable<T, U>
+  >::value
+) {
+  T old = ::core::move(obj);
+  obj = ::core::forward<U>(value);
+  return old;
 }
 
 }} /* namespace core::v1 */

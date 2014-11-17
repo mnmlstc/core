@@ -29,8 +29,7 @@ list(APPEND PKG_DEP "APPLE" "BUILD_PACKAGE")
 list(APPEND MSI_DEP "WIN32" "BUILD_PACKAGE")
 
 # This is overridden on the next line as it gets turned into a cache variable
-string(COMPARE EQUAL ${CMAKE_CXX_COMPILER_ID} "AppleClang" BUILD_WITH_LIBCXX)
-option(BUILD_WITH_LIBCXX "Use libc++ as stdlib" ${BUILD_WITH_LIBCXX})
+option(BUILD_WITH_LIBCXX "Use libc++ as stdlib" OFF)
 option(BUILD_PACKAGE "Build package with CPack" OFF)
 option(BUILD_DOCS "Build documentation with Sphinx Documentation Generator")
 

@@ -69,11 +69,10 @@ class variant final {
     ::std::alignment_of<impl::discriminate<Ts...>>::value
   >;
 
-  template < ::std::size_t N>
+  template <::std::size_t N>
   using element = typename ::std::tuple_element<N, tuple_type>::type;
 
-  template < ::std::size_t N>
-  using index = ::std::integral_constant< ::std::size_t, N>;
+  template <::std::size_t N> using index = meta::size<N>;
 
   struct copier final {
     using data_type = ::std::reference_wrapper<storage_type>;
@@ -257,9 +256,9 @@ public:
     };
 
     return callers[this->tag](
-      ::std::forward<Visitor>(visitor),
+      ::core::forward<Visitor>(visitor),
       this->data,
-      ::std::forward<Args>(args)...
+      ::core::forward<Args>(args)...
     );
   }
 
@@ -280,8 +279,8 @@ public:
     static function const callers[size] = {
       impl::visitor_gen<
         Visitor,
-        Ts const,
-        storage_type const,
+        add_const_t<Ts>,
+        add_const_t<storage_type>,
         function,
         Args...
       >()...
@@ -312,19 +311,19 @@ public:
     );
   }
 
-  template < ::std::size_t N>
+  template <::std::size_t N>
   auto get () const& noexcept(false) -> element<N> const& {
     if (this->tag != N) { throw bad_variant_get { "incorrect type" }; }
     return reinterpret_cast<element<N> const&>(this->data);
   }
 
-  template < ::std::size_t N>
+  template <::std::size_t N>
   auto get () && noexcept(false) -> element<N>&& {
     if (this->tag != N) { throw bad_variant_get { "incorrect type" }; }
     return ::core::move(reinterpret_cast<element<N>&>(this->data));
   }
 
-  template < ::std::size_t N>
+  template <::std::size_t N>
   auto get () & noexcept(false) -> element<N>& {
     if (this->tag != N) { throw bad_variant_get { "incorrect type" }; }
     return reinterpret_cast<element<N>&>(this->data);

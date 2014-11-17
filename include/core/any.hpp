@@ -17,8 +17,7 @@ namespace impl {
 using data_type = add_pointer_t<void>;
 
 template <class Type>
-using is_small = ::std::integral_constant<
-  bool,
+using is_small = meta::boolean<
   sizeof(decay_t<Type>) <= sizeof(data_type) and
   ::std::is_nothrow_copy_constructible<Type>::value
 >;

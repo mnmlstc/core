@@ -131,6 +131,15 @@ struct basic_string_view {
     this->len = 0;
   }
 
+  size_type copy (CharT* s, size_type n, size_type pos = 0) const {
+    if (pos > this->size()) {
+      throw std::out_of_range { "position greater than size" };
+    }
+    auto const rlen = std::min(n, this->size() - pos);
+    ::std::copy_n(this->begin() + pos, rlen, s);
+    return rlen;
+  }
+
   constexpr basic_string_view substr (
     size_type pos=0,
     size_type n=npos) const noexcept {
@@ -166,17 +175,55 @@ struct basic_string_view {
       ) == 0;
   }
 
-  difference_type compare (basic_string_view that) const {
+  /* compare */
+  difference_type compare (basic_string_view s) const noexcept {
     auto cmp = traits::compare(
       this->data(),
-      that.data(),
-      ::std::min(this->size(), that.size())
+      s.data(),
+      ::std::min(this->size(), s.size())
     );
 
     if (cmp != 0) { return cmp; }
-    if (this->size() == that.size()) { return 0; }
-    if (this->size() < that.size()) { return -1; }
+    if (this->size() == s.size()) { return 0; }
+    if (this->size() < s.size()) { return -1; }
     return 1;
+  }
+
+  difference_type compare (
+    size_type pos,
+    size_type n,
+    basic_string_view s
+  ) const noexcept { return this->substr(pos, n).compare(s); }
+
+  difference_type compare (
+    size_type pos1,
+    size_type n1,
+    basic_string_view s,
+    size_type pos2,
+    size_type n2
+  ) const noexcept {
+    return this->substr(pos1, n1).compare(s.substr(pos2, n2));
+  }
+
+  difference_type compare (pointer s) const noexcept {
+    return this->compare(basic_string_view { s });
+  }
+
+  difference_type compare (
+    size_type pos,
+    size_type n,
+    pointer s
+  ) const noexcept {
+    return this->substr(pos, n).compare(basic_string_view { s });
+  }
+
+  difference_type compare (
+    size_type pos,
+    size_type n1,
+    pointer s,
+    size_type n2
+  ) {
+    return this->substr(pos, n1).compare(basic_string_view { s, n2 });
   }
 
   reference at (size_type idx) const {
