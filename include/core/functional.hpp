@@ -239,6 +239,353 @@ auto apply (Functor&& f, T&& t) -> decltype(
   invoke(unpack, ::std::forward<Functor>(f), ::std::forward<T>(t))
 ) { return invoke(unpack, ::std::forward<Functor>(f), ::std::forward<T>(t)); }
 
+/* function objects -- arithmetic */
+template <class T=void>
+struct plus {
+  using second_argument_type = T;
+  using first_argument_type = T;
+  using result_type = T;
+  constexpr T operator () (T const& l, T const& r) const { return l + r; }
+};
+
+template <class T=void>
+struct minus {
+  using second_argument_type = T;
+  using first_argument_type = T;
+  using result_type = T;
+
+  constexpr T operator () (T const& l, T const& r) const { return l - r; }
+};
+
+template <class T=void>
+struct multiplies {
+  using second_argument_type = T;
+  using first_argument_type = T;
+  using result_type = T;
+
+  constexpr T operator () (T const& l, T const& r) const { return l * r; }
+};
+
+template <class T=void>
+struct divides {
+  using second_argument_type = T;
+  using first_argument_type = T;
+  using result_type = T;
+
+  constexpr T operator () (T const& l, T const& r) const { return l / r; }
+};
+
+template <class T=void>
+struct modulus {
+  using second_argument_type = T;
+  using first_argument_type = T;
+  using result_type = T;
+
+  constexpr T operator () (T const& l, T const& r) const { return l % r; }
+};
+
+template <class T=void>
+struct negate {
+  using argument_type = T;
+  using result_type = T;
+
+  constexpr T operator () (T const& arg) const { return -arg; }
+};
+
+/* function objects -- comparisons */
+template <class T=void>
+struct equal_to {
+  using second_argument_type = T;
+  using first_argument_type = T;
+  using result_type = bool;
+
+  constexpr bool operator () (T const& l, T const& r) const { return l == r; }
+};
+
+template <class T=void>
+struct not_equal_to {
+  using second_argument_type = T;
+  using first_argument_type = T;
+  using result_type = bool;
+
+  constexpr bool operator () (T const& l, T const& r) const { return l != r; }
+};
+
+template <class T=void>
+struct greater_equal {
+  using second_argument_type = T;
+  using first_argument_type = T;
+  using result_type = bool;
+
+  constexpr bool operator () (T const& l, T const& r) const { return l >= r; }
+};
+
+template <class T=void>
+struct less_equal {
+  using second_argument_type = T;
+  using first_argument_type = T;
+  using result_type = bool;
+
+  constexpr bool operator () (T const& l, T const& r) const { return l <= r; }
+};
+
+template <class T=void>
+struct greater {
+  using second_argument_type = T;
+  using first_argument_type = T;
+  using result_type = bool;
+
+  constexpr bool operator () (T const& l, T const& r) const { return l > r; }
+};
+
+template <class T=void>
+struct less {
+  using second_argument_type = T;
+  using first_argument_type = T;
+  using result_type = bool;
+
+  constexpr bool operator () (T const& l, T const& r) const { return l < r; }
+};
+
+/* function objects -- logical */
+template <class T=void>
+struct logical_and {
+  using second_argument_type = T;
+  using first_argument_type = T;
+  using result_type = bool;
+
+  constexpr bool operator () (T const& l, T const& r) const { return l and r; }
+};
+
+template <class T=void>
+struct logical_or {
+  using second_argument_type = T;
+  using first_argument_type = T;
+  using result_type = bool;
+
+  constexpr bool operator () (T const& l, T const& r) const { return l or r; }
+};
+
+template <class T=void>
+struct logical_not {
+  using argument_type = T;
+  using result_type = bool;
+
+  constexpr bool operator () (T const& arg) const { return not arg; }
+};
+
+/* function objects -- bitwise */
+
+template <class T=void>
+struct bit_and {
+  using second_argument_type = T;
+  using first_argument_type = T;
+  using result_type = T;
+
+  constexpr bool operator () (T const& l, T const& r) const { return l & r; }
+};
+
+template <class T=void>
+struct bit_or {
+  using second_argument_type = T;
+  using first_argument_type = T;
+  using result_type = T;
+
+  constexpr bool operator () (T const& l, T const& r) const { return l | r; }
+};
+
+template <class T=void>
+struct bit_xor {
+  using second_argument_type = T;
+  using first_argument_type = T;
+  using result_type = T;
+
+  constexpr bool operator () (T const& l, T const& r) const { return l ^ r; }
+};
+
+template <class T=void>
+struct bit_not {
+  using argument_type = T;
+  using result_type = T;
+
+  constexpr bool operator () (T const& arg) const { return ~arg; }
+};
+
+/* function objects -- arithmetic specializations */
+template <> struct plus<void> {
+  using is_transparent = void;
+
+  template <class T, class U>
+  constexpr auto operator () (T&& t, U&& u) const -> decltype(
+    forward<T>(t) + forward<U>(u)
+  ) { return forward<T>(t) + forward<U>(u); }
+};
+
+template <> struct minus<void> {
+  using is_transparent = void;
+
+  template <class T, class U>
+  constexpr auto operator () (T&& t, U&& u) const -> decltype(
+    forward<T>(t) - forward<U>(u)
+  ) { return forward<T>(t) - forward<U>(u); }
+};
+
+template <> struct multiplies<void> {
+  using is_transparent = void;
+
+  template <class T, class U>
+  constexpr auto operator () (T&& t, U&& u) const -> decltype(
+    forward<T>(t) * forward<U>(u)
+  ) { return forward<T>(t) * forward<U>(u); }
+};
+
+template <> struct divides<void> {
+  using is_transparent = void;
+
+  template <class T, class U>
+  constexpr auto operator () (T&& t, U&& u) const -> decltype(
+    forward<T>(t) / forward<U>(u)
+  ) { return forward<T>(t) / forward<U>(u); }
+};
+
+template <> struct modulus<void> {
+  using is_transparent = void;
+
+  template <class T, class U>
+  constexpr auto operator () (T&& t, U&& u) const -> decltype(
+    forward<T>(t) % forward<U>(u)
+  ) { return forward<T>(t) % forward<U>(u); }
+};
+
+template <> struct negate<void> {
+  using is_transparent = void;
+
+  template <class T>
+  constexpr auto operator () (T&& t) const -> decltype(forward<T>(t)) {
+    return forward<T>(t);
+  }
+};
+
+/* function objects -- comparison specialization */
+template <> struct equal_to<void> {
+  using is_transparent = void;
+
+  template <class T, class U>
+  constexpr auto operator () (T&& t, U&& u) const -> decltype(
+    forward<T>(t) == forward<U>(u)
+  ) { return forward<T>(t) == forward<U>(u); }
+};
+
+template <> struct not_equal_to<void> {
+  using is_transparent = void;
+
+  template <class T, class U>
+  constexpr auto operator () (T&& t, U&& u) const -> decltype(
+    forward<T>(t) != forward<U>(u)
+  ) { return forward<T>(t) != forward<U>(u); }
+};
+
+template <> struct greater_equal<void> {
+  using is_transparent = void;
+
+  template <class T, class U>
+  constexpr auto operator () (T&& t, U&& u) const -> decltype(
+    forward<T>(t) >= forward<U>(u)
+  ) { return forward<T>(t) >= forward<U>(u); }
+};
+
+template <> struct less_equal<void> {
+  using is_transparent = void;
+
+  template <class T, class U>
+  constexpr auto operator () (T&& t, U&& u) const -> decltype(
+    forward<T>(t) <= forward<U>(u)
+  ) { return forward<T>(t) <= forward<U>(u); }
+};
+
+template <> struct greater<void> {
+  using is_transparent = void;
+
+  template <class T, class U>
+  constexpr auto operator () (T&& t, U&& u) const -> decltype(
+    forward<T>(t) > forward<U>(u)
+  ) { return forward<T>(t) > forward<U>(u); }
+};
+
+template <> struct less<void> {
+  using is_transparent = void;
+
+  template <class T, class U>
+  constexpr auto operator () (T&& t, U&& u) const -> decltype(
+    forward<T>(t) < forward<U>(u)
+  ) { return forward<T>(t) < forward<U>(u); }
+};
+
+/* function objects -- logical specializations */
+template <> struct logical_and<void> {
+  using is_transparent = void;
+
+  template <class T, class U>
+  constexpr auto operator () (T&& t, U&& u) const -> decltype(
+    forward<T>(t) and forward<U>(u)
+  ) { return forward<T>(t) and forward<U>(u); }
+};
+
+template <> struct logical_or<void> {
+  using is_transparent = void;
+
+  template <class T, class U>
+  constexpr auto operator () (T&& t, U&& u) const -> decltype(
+    forward<T>(t) or forward<U>(u)
+  ) { return forward<T>(t) or forward<U>(u); }
+};
+
+template <> struct logical_not<void> {
+  using is_transparent = void;
+
+  template <class T>
+  constexpr auto operator () (T&& t) const -> decltype(not forward<T>(t)) {
+    return not forward<T>(t);
+  }
+};
+
+/* function objects -- bitwise specializations */
+template <> struct bit_and<void> {
+  using is_transparent = void;
+
+  template <class T, class U>
+  constexpr auto operator () (T&& t, U&& u) const -> decltype(
+    forward<T>(t) & forward<U>(u)
+  ) { return forward<T>(t) & forward<U>(u); }
+};
+
+template <> struct bit_or<void> {
+  using is_transparent = void;
+
+  template <class T, class U>
+  constexpr auto operator () (T&& t, U&& u) const -> decltype(
+    forward<T>(t) | forward<U>(u)
+  ) { return forward<T>(t) | forward<U>(u); }
+};
+
+template <> struct bit_xor<void> {
+  using is_transparent = void;
+
+  template <class T, class U>
+  constexpr auto operator () (T&& t, U&& u) const -> decltype(
+    forward<T>(t) ^ forward<U>(u)
+  ) { return forward<T>(t) ^ forward<U>(u); }
+};
+
+template <> struct bit_not<void> {
+  using is_transparent = void;
+
+  template <class T, class U>
+  constexpr auto operator () (T&& t) const -> decltype(~forward<T>(t)) {
+    return ~forward<T>(t);
+  }
+};
+
 }} /* namespace core::v1 */
 
 #endif /* CORE_FUNCTIONAL_HPP */

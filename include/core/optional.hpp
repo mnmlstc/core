@@ -1772,7 +1772,7 @@ template <
   class T,
   class ErrorConditionEnum,
   class=enable_if_t<
-    std::is_error_condition_enum<ErrorConditionEnum>::value
+    ::std::is_error_condition_enum<ErrorConditionEnum>::value
   >
 > auto make_result (ErrorConditionEnum e) -> result<T> {
   return result<T> { e };
@@ -1780,6 +1780,11 @@ template <
 
 template <class T> auto make_result (T&& value) -> result<decay_t<T>> {
   return result<T> { ::core::forward<T>(value) };
+}
+
+template <class T>
+result<T> make_result (int val, ::std::error_category const& cat) {
+  return make_result<T>(::std::error_condition { val, cat });
 }
 
 template <class T>

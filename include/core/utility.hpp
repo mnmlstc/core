@@ -83,6 +83,9 @@ using make_integer_sequence = typename impl::sequence_generator<T, N, N>::type;
 template <::std::size_t N>
 using make_index_sequence = make_integer_sequence<::std::size_t, N>;
 
+template <class... Ts>
+using index_sequence_for = make_index_sequence<sizeof...(Ts)>;
+
 template <class T, class... Ts>
 using typelist_index = meta::size<
   impl::typelist_index<0ul, T, Ts...>::type::value
@@ -159,6 +162,13 @@ T exchange (T& obj, U&& value) noexcept(
   obj = ::core::forward<U>(value);
   return old;
 }
+
+template <class E>
+constexpr auto to_integral(E e) -> enable_if_t<
+  std::is_enum<E>::value,
+  underlying_type_t<E>
+> { return static_cast<underlying_type_t<E>>(e); }
+
 
 }} /* namespace core::v1 */
 
