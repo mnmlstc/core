@@ -5,41 +5,18 @@
 #include <utility>
 #include <tuple>
 
-#include <core/meta.hpp>
+#include <core/internal.hpp>
 
 namespace core {
 inline namespace v1 {
-namespace impl {
-
-/* workaround for gcc */
-template <class...> struct deducer { using type = void; };
-
-using ::std::swap;
-
-template <class T, class U, class=void>
-struct is_swappable : ::std::false_type { };
-
-template <class T, class U>
-struct is_swappable<
-  T,
-  U,
-  typename deducer<
-    decltype(swap(::std::declval<T&>(), ::std::declval<U&>())),
-    decltype(swap(::std::declval<U&>(), ::std::declval<T&>()))
-  >::type
-> : ::std::true_type { };
-
-template <class T, class U>
-struct is_nothrow_swappable : meta::all<
-  is_swappable<T, U>,
-  meta::boolean<noexcept(swap(::std::declval<T&>(), ::std::declval<U&>()))>,
-  meta::boolean<noexcept(swap(::std::declval<U&>(), ::std::declval<T&>()))>
-> { };
-
-} /* namespace impl */
 
 /* custom type traits and types */
-template <class T> struct identity { using type = T; };
+template <class T> using identity_t = typename meta::identity<T>::type;
+template <class T> using identity = meta::identity<T>;
+
+/* extracts the class of a member function ponter */
+template <class T> using class_of_t = impl::class_of_t<T>;
+template <class T> using class_of = impl::class_of<T>;
 
 /* This is equivalent to the Boost.TypeTraits dont_care type */
 template <::std::size_t I, class T>
@@ -50,7 +27,7 @@ using ignore_t = decltype(::std::ignore);
 /* a 'better named' (personal opinion!) form of the void_t type transformation
  * alias trait by Walter E. Brown.
  */
-template <class... Ts> using deduce_t = typename impl::deducer<Ts...>::type;
+template <class... Ts> using deduce_t = impl::deduce_t<Ts...>;
 
 /* tuple_size is used by unpack, so we expect it to be available.
  * We also expect ::std::get<N> to be available for the give type T
@@ -66,18 +43,14 @@ struct is_unpackable<T, deduce_t<tuple_size_t<T>>> :
  */
 template <class T, class=void> struct is_runpackable : ::std::false_type { };
 template <class T>
-struct is_runpackable<T, deduce_t<decltype(std::declval<T>().at(0ul))>> :
+struct is_runpackable<T, deduce_t<decltype(::std::declval<T>().at(0ul))>> :
   ::std::true_type
 { };
 
-/* extracts the class of a member function ponter */
-template <class T> struct class_of : identity<T> { };
-template <class Signature, class Type>
-struct class_of<Signature Type::*> : identity<Type> { };
-
 /* forward declaration */
-template <class... Args> struct invokable;
-template <class... Args> struct invoke_of;
+template <::std::size_t, class...> struct aligned_union;
+template <class...> struct invokable;
+template <class...> struct invoke_of;
 template <class T> struct result_of; /* SFINAE result_of */
 
 /* C++14 style aliases for standard traits */
@@ -117,10 +90,15 @@ using remove_extent_t = typename ::std::remove_extent<T>::type;
 template <class T>
 using remove_all_extents_t = typename ::std::remove_all_extents<T>::type;
 
-template <::std::size_t Len, ::std::size_t Align>
-using aligned_storage_t = typename ::std::aligned_storage<Len, Align>::type;
+template <
+  ::std::size_t Len,
+  ::std::size_t Align = alignof(typename ::std::aligned_storage<Len>::type)
+> using aligned_storage_t = typename ::std::aligned_storage<Len, Align>::type;
 
-template <class T> using decay_t = typename ::std::decay<T>::type;
+template <::std::size_t Len, class... Types>
+using aligned_union_t = typename aligned_union<Len, Types...>::type;
+
+template <class T> using decay_t = impl::decay_t<T>;
 
 template <bool B, class T = void>
 using enable_if_t = typename ::std::enable_if<B, T>::type;
@@ -131,85 +109,27 @@ using conditional_t = typename ::std::conditional<B, T, F>::type;
 template <class T>
 using underlying_type_t = typename ::std::underlying_type<T>::type;
 
+template <::std::size_t Len, class... Types>
+struct aligned_union {
+  using union_type = impl::discriminate<Types...>;
+  static constexpr ::std::size_t size () noexcept {
+    return Len > sizeof(union_type) ? Len : sizeof(union_type);
+  }
+
+  static constexpr ::std::size_t alignment_value = alignof(
+    impl::discriminate<Types...>
+  );
+
+  using type = aligned_storage_t<size(), alignment_value>;
+};
+
 /* custom type trait specializations */
 template <class... Args> using invoke_of_t = typename invoke_of<Args...>::type;
-template <class T> using identity_t = typename identity<T>::type;
-template <class T> using class_of_t = typename class_of<T>::type;
-
-namespace impl {
-
-struct undefined { undefined (...); };
-
-/* Get the result of an attempt at the INVOKE expression */
-/* fallback */
-template <class... Args> auto invoke_expr (undefined, Args&&...) -> undefined;
-
-template <class Functor, class Object, class... Args>
-auto invoke_expr (Functor&& fun, Object&& obj, Args&&... args) -> enable_if_t<
-  ::std::is_member_function_pointer<remove_reference_t<Functor>>::value and
-  ::std::is_base_of<
-    class_of_t<remove_reference_t<Functor>>,
-    remove_reference_t<Object>
-  >::value,
-  decltype((::std::forward<Object>(obj).*fun)(::std::forward<Args>(args)...))
->;
-
-template <class Functor, class Object, class... Args>
-auto invoke_expr (Functor&& fun, Object&& obj, Args&&... args) -> enable_if_t<
-  meta::all<
-    ::std::is_member_function_pointer<remove_reference_t<Functor>>,
-    meta::boolean<
-      not ::std::is_base_of<
-        class_of_t<remove_reference_t<Functor>>,
-        remove_reference_t<Object>
-      >::value
-    >
-  >::value,
-  decltype(
-    ((*::std::forward<Object>(obj)).*fun)(::std::forward<Args>(args)...)
-  )
->;
-
-template <class Functor, class Object>
-auto invoke_expr (Functor&& functor, Object&& object) -> enable_if_t<
-  ::std::is_member_object_pointer<remove_reference_t<Functor>>::value and
-  ::std::is_base_of<
-    class_of_t<remove_reference_t<Functor>>,
-    remove_reference_t<Object>
-  >::value,
-  decltype(::std::forward<Object>(object).*functor)
->;
-
-template <class Functor, class Object>
-auto invoke_expr (Functor&& functor, Object&& object) -> enable_if_t<
-  ::std::is_member_object_pointer<remove_reference_t<Functor>>::value and
-  not ::std::is_base_of<
-    class_of_t<remove_reference_t<Functor>>,
-    remove_reference_t<Object>
-  >::value,
-  decltype((*::std::forward<Object>(object)).*functor)
->;
-
-template <class Functor, class... Args>
-auto invoke_expr (Functor&& functor, Args&&... args) -> enable_if_t<
-  not ::std::is_member_pointer<decay_t<Functor>>::value,
-  decltype(
-    ::std::forward<Functor>(functor)(::std::forward<Args>(args)...)
-  )
->;
-
-template <bool, class... Args> struct invoke_of { };
-template <class... Args>
-struct invoke_of<true, Args...> :
-  identity<decltype(invoke_expr(::std::declval<Args>()...))>
-{ };
-
-} /* namespace impl */
 
 template <class... Args>
 struct invokable : meta::none<
   std::is_same<
-    decltype(impl::invoke_expr(::std::declval<Args>()...)),
+    decltype(impl::INVOKE(::std::declval<Args>()...)),
     impl::undefined
   >
 > { };

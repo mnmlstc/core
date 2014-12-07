@@ -10,6 +10,16 @@
 namespace core {
 inline namespace v1 {
 
+template <class R, class T>
+constexpr auto mem_fn (R T::* pdm) noexcept -> impl::pdm<R T::*> {
+  return impl::pdm<R T::*> { pdm };
+}
+
+template <class R, class T, class... Args>
+constexpr auto mem_fn(R(T::* pmf)(Args...)) noexcept -> impl::pmf<
+  R(T::*)(Args...)
+> { return impl::pmf<R(T::*)(Args...)> { pmf }; }
+
 template <class F> struct function_traits;
 
 template <class R, class... Args>
@@ -60,110 +70,44 @@ template <class F> struct function_traits {
 };
 
 /* N3727 */
-template <class Functor, class Object, class... Args>
-constexpr auto invoke (Functor&& functor, Object&& object, Args&&... args) -> enable_if_t<
-  invokable<Functor, Object, Args...>::value,
-  decltype((object.*functor)(::core::forward<Args>(args)...))
-> { return (object.*functor)(::core::forward<Args>(args)...); }
-
-template <class Functor, class Object, class... Args>
-constexpr auto invoke (Functor&& functor, Object&& object, Args&&... args) -> enable_if_t<
-  invokable<Functor, Object, Args...>::value,
-  decltype(
-    ((*::core::forward<Object>(object)).*functor)(::core::forward<Args>(args)...)
-  )
-> {
-  return (
-    (*::core::forward<Object>(object)).*functor
-  )(::core::forward<Args>(args)...);
-}
-
-template <class Functor, class Object>
-constexpr auto invoke (Functor&& functor, Object&& object) -> enable_if_t<
-  invokable<Functor, Object>::value,
-  decltype(object.*functor)
-> { return object.*functor; }
-
-template <class Functor, class Object>
-constexpr auto invoke (Functor&& functor, Object&& object) -> enable_if_t<
-  invokable<Functor, Object>::value,
-  decltype((*::core::forward<Object>(object)).*functor)
-> { return (*::core::forward<Object>(object)).*functor; }
+template <class Functor, class... Args>
+constexpr auto invoke (Functor&& f, Args&&... args) -> enable_if_t<
+  ::std::is_member_pointer<decay_t<Functor>>::value,
+  result_of_t<Functor&&(Args&&...)>
+> { return mem_fn(f)(core::forward<Args>(args)...); }
 
 template <class Functor, class... Args>
-constexpr auto invoke (Functor&& functor, Args&&... args) -> enable_if_t<
-  invokable<Functor, Args...>::value,
-  decltype(::core::forward<Functor>(functor)(::core::forward<Args>(args)...))
-> { return ::core::forward<Functor>(functor)(::core::forward<Args>(args)...); }
+constexpr auto invoke (Functor&& f, Args&&... args) -> enable_if_t<
+  not ::std::is_member_pointer<decay_t<Functor>>::value,
+  result_of_t<Functor&&(Args&&...)>
+> { return core::forward<Functor>(f)(core::forward<Args>(args)...); }
 
 namespace impl {
 
-/* Used to provide lambda based 'pattern matching' for variant and optional
- * types.
- *
- * Based off of Dave Abrahams C++11 'generic lambda' example.
- */
-template <class... Lambdas> struct overload;
-template <class Lambda> struct overload<Lambda> : Lambda {
-  using call_type = Lambda;
-  using call_type::operator ();
-};
+template <class F, class T, ::std::size_t... I>
+auto apply (F&& f, T&& t, index_sequence<I...>) -> decltype(
+  invoke(core::forward<F>(f), ::std::get<I>(core::forward<T>(t))...)
+) { return invoke(core::forward<F>(f), ::std::get<I>(core::forward<T>(t))...); }
 
-template <class Lambda, class... Lambdas>
-struct overload<Lambda, Lambdas...> :
-  private Lambda,
-  private overload<Lambdas...>::call_type
-{
-  using base_type = typename overload<Lambdas...>::call_type;
+} /* namespace impl */
 
-  using lambda_type = Lambda;
-  using call_type = overload;
+template <class Functor, class T>
+auto apply (Functor&& f, T&& t) -> decltype(
+  impl::apply(core::forward<Functor>(f), core::forward<T>(t))
+) { return impl::apply(core::forward<Functor>(f), core::forward<T>(t)); }
 
-  overload (Lambda&& lambda, Lambdas&&... lambdas) :
-    lambda_type(::core::forward<Lambda>(lambda)),
-    base_type(::core::forward<Lambdas>(lambdas)...)
-  { }
 
-  using lambda_type::operator ();
-  using base_type::operator ();
-};
-
-template <class... Lambdas>
-auto make_overload(Lambdas&&... lambdas) -> overload<Lambdas...> {
-  return overload<Lambdas...> { ::core::forward<Lambdas>(lambdas)... };
-}
-
-template <class Functor, class U, ::std::size_t... I>
-auto unpack (
-  Functor&& functor,
-  U&& unpackable,
-  index_sequence<I...>&&
-) -> invoke_of_t<
-  Functor,
-  decltype(::std::get<I>(::std::forward<U>(unpackable)))...
-> {
-  return ::core::v1::invoke(::std::forward<Functor>(functor),
-    ::std::get<I>(::std::forward<U>(unpackable))...
-  );
-}
+namespace impl {
 
 template <class U, ::std::size_t... I>
-auto unpack (U&& unpackable, index_sequence<I...>&&) -> invoke_of_t<
-  decltype(::std::get<I>(::std::forward<U>(unpackable)))...
-> {
-  return ::core::v1::invoke(::std::get<I>(::std::forward<U>(unpackable))...);
-}
+auto unpack (U&& u, index_sequence<I...>) -> decltype(
+  core::invoke(::std::get<I>(core::forward<U>(u))...)
+) { return core::invoke(::std::get<I>(core::forward<U>(u))...); }
 
-template <class Functor, class U, ::std::size_t... I>
-auto runpack (
-  Functor&& functor,
-  U&& runpackable,
-  index_sequence<I...>&&
-) -> invoke_of_t<Functor, decltype(::std::forward<U>(runpackable).at(I))...> {
-  return ::core::v1::invoke(
-    ::std::forward<Functor>(functor),
-    ::std::forward<U>(runpackable).at(I)...);
-}
+template <class F, class U, ::std::size_t... I>
+auto runpack (F&& f, U&& u, index_sequence<I...>) -> decltype(
+  core::invoke(core::forward<F>(f), core::forward<U>(u).at(I)...)
+) { return core::invoke(core::forward<F>(f), core::forward<U>(u).at(I)...); }
 
 } /* namespace impl */
 
@@ -173,241 +117,152 @@ constexpr unpack_t unpack { };
 struct runpack_t final { };
 constexpr runpack_t runpack { };
 
-template <class Functor, class Unpackable>
-auto invoke (unpack_t, Functor&& functor, Unpackable&& unpackable) ->
-enable_if_t<
-  is_unpackable<decay_t<Unpackable>>::value,
-  decltype(
-    impl::unpack(
-      ::std::forward<Functor>(functor),
-      ::std::forward<Unpackable>(unpackable),
-      make_index_sequence<::std::tuple_size<decay_t<Unpackable>>::value> { }
-    )
-  )
-> {
-  return impl::unpack(
-    ::std::forward<Functor>(functor),
-    ::std::forward<Unpackable>(unpackable),
-    make_index_sequence<::std::tuple_size<decay_t<Unpackable>>::value> { }
-  );
-}
+/* Use apply instead */
+template <
+  class F,
+  class U,
+  class I = make_index_sequence<::std::tuple_size<decay_t<U>>::value>
+> [[gnu::deprecated]] auto invoke (unpack_t, F&& f, U&& u) -> enable_if_t<
+  is_unpackable<decay_t<U>>::value,
+  decltype(impl::apply(core::forward<F>(f), core::forward<U>(u), I { }))
+> { return impl::apply(core::forward<F>(f), core::forward<U>(u), I { }); }
 
-template <class Unpackable>
-auto invoke (unpack_t, Unpackable&& unpackable) ->
-enable_if_t<
-  is_unpackable<decay_t<Unpackable>>::value,
-  decltype(
-    impl::unpack(
-      ::std::forward<Unpackable>(unpackable),
-      make_index_sequence<::std::tuple_size<decay_t<Unpackable>>::value> { }
-    )
-  )
-> {
-  return impl::unpack(
-    ::std::forward<Unpackable>(unpackable),
-    make_index_sequence<::std::tuple_size<decay_t<Unpackable>>::value> { }
-  );
-}
+template <
+  class U,
+  class I = make_index_sequence<::std::tuple_size<decay_t<U>>::value>
+> [[gnu::deprecated]] auto invoke (unpack_t, U&& u) -> enable_if_t<
+  is_unpackable<decay_t<U>>::value,
+  decltype(impl::unpack(core::forward<U>(u), I { }))
+> { return impl::unpack(core::forward<U>(u), I { }); }
 
 /* Modified to force clang to *not* select this function in a bizarre corner
  * case.
  */
 template <
-  class Functor,
-  class Runpackable,
-  class=enable_if_t<is_runpackable<decay_t<Runpackable>>::value>
-> auto invoke (
-  runpack_t,
-  Functor&& functor,
-  Runpackable&& unpackable
-) -> decltype(
-    impl::runpack(
-      ::std::forward<Functor>(functor),
-      ::std::forward<Runpackable>(unpackable),
-      make_index_sequence<function_traits<Functor>::arity> { }
-    )
-  ) {
-  return impl::runpack(
-    ::std::forward<Functor>(functor),
-    ::std::forward<Runpackable>(unpackable),
-    make_index_sequence<function_traits<Functor>::arity> { }
-  );
-}
+  class F,
+  class R,
+  class=enable_if_t<is_runpackable<decay_t<R>>::value>,
+  class I = make_index_sequence<function_traits<F>::arity>
+> auto invoke (runpack_t, F&& f, R&& r) -> decltype(
+  impl::runpack(core::forward<F>(f), core::forward<R>(r), I { })
+) { return impl::runpack(core::forward<F>(f), core::forward<R>(r), I { }); }
 
-template <class Functor, class T>
-auto apply (Functor&& f, T&& t) -> decltype(
-  invoke(unpack, ::std::forward<Functor>(f), ::std::forward<T>(t))
-) { return invoke(unpack, ::std::forward<Functor>(f), ::std::forward<T>(t)); }
+template <class F>
+struct apply_functor {
+  explicit apply_functor (F&& f) : f(core::forward<F>(f)) { }
+
+  template <class Applicable>
+  auto operator () (Applicable&& args) -> decltype(
+    core::apply(core::forward<F>(this->f), core::forward<Applicable>(args))
+  ) { return apply(core::forward<F>(f), core::forward<Applicable>(args)); }
+private:
+  F f;
+};
+
+template <class F>
+auto make_apply (F&& f) -> apply_functor<F> {
+  return apply_functor<F> { core::forward<F>(f) };
+}
 
 /* function objects -- arithmetic */
 template <class T=void>
-struct plus {
-  using second_argument_type = T;
-  using first_argument_type = T;
-  using result_type = T;
+struct plus : impl::binary<T, T, T> {
   constexpr T operator () (T const& l, T const& r) const { return l + r; }
 };
 
 template <class T=void>
-struct minus {
-  using second_argument_type = T;
-  using first_argument_type = T;
-  using result_type = T;
-
+struct minus : impl::binary<T, T, T> {
   constexpr T operator () (T const& l, T const& r) const { return l - r; }
 };
 
 template <class T=void>
-struct multiplies {
-  using second_argument_type = T;
-  using first_argument_type = T;
-  using result_type = T;
-
+struct multiplies : impl::binary<T, T, T> {
   constexpr T operator () (T const& l, T const& r) const { return l * r; }
 };
 
 template <class T=void>
-struct divides {
-  using second_argument_type = T;
-  using first_argument_type = T;
-  using result_type = T;
-
+struct divides : impl::binary<T, T, T> {
   constexpr T operator () (T const& l, T const& r) const { return l / r; }
 };
 
 template <class T=void>
-struct modulus {
-  using second_argument_type = T;
-  using first_argument_type = T;
-  using result_type = T;
-
+struct modulus : impl::binary<T, T, T> {
   constexpr T operator () (T const& l, T const& r) const { return l % r; }
 };
 
 template <class T=void>
-struct negate {
-  using argument_type = T;
-  using result_type = T;
-
+struct negate : impl::unary<T, T> {
   constexpr T operator () (T const& arg) const { return -arg; }
 };
 
 /* function objects -- comparisons */
 template <class T=void>
-struct equal_to {
-  using second_argument_type = T;
-  using first_argument_type = T;
-  using result_type = bool;
-
+struct equal_to : impl::binary<T, T, bool> {
   constexpr bool operator () (T const& l, T const& r) const { return l == r; }
 };
 
 template <class T=void>
-struct not_equal_to {
-  using second_argument_type = T;
-  using first_argument_type = T;
-  using result_type = bool;
-
+struct not_equal_to : impl::binary<T, T, bool> {
   constexpr bool operator () (T const& l, T const& r) const { return l != r; }
 };
 
 template <class T=void>
-struct greater_equal {
-  using second_argument_type = T;
-  using first_argument_type = T;
-  using result_type = bool;
-
+struct greater_equal : impl::binary<T, T, bool> {
   constexpr bool operator () (T const& l, T const& r) const { return l >= r; }
 };
 
 template <class T=void>
-struct less_equal {
-  using second_argument_type = T;
-  using first_argument_type = T;
-  using result_type = bool;
-
+struct less_equal : impl::binary<T, T, bool> {
   constexpr bool operator () (T const& l, T const& r) const { return l <= r; }
 };
 
 template <class T=void>
-struct greater {
-  using second_argument_type = T;
-  using first_argument_type = T;
-  using result_type = bool;
-
+struct greater : impl::binary<T, T, bool> {
   constexpr bool operator () (T const& l, T const& r) const { return l > r; }
 };
 
-template <class T=void>
-struct less {
-  using second_argument_type = T;
-  using first_argument_type = T;
-  using result_type = bool;
+template <class T=void> struct less;
 
+template <class T>
+struct less : impl::binary<T, T, bool> {
   constexpr bool operator () (T const& l, T const& r) const { return l < r; }
 };
 
 /* function objects -- logical */
 template <class T=void>
-struct logical_and {
-  using second_argument_type = T;
-  using first_argument_type = T;
-  using result_type = bool;
-
+struct logical_and : impl::binary<T, T, bool> {
   constexpr bool operator () (T const& l, T const& r) const { return l and r; }
 };
 
 template <class T=void>
-struct logical_or {
-  using second_argument_type = T;
-  using first_argument_type = T;
-  using result_type = bool;
-
+struct logical_or : impl::binary<T, T, bool> {
   constexpr bool operator () (T const& l, T const& r) const { return l or r; }
 };
 
 template <class T=void>
-struct logical_not {
-  using argument_type = T;
-  using result_type = bool;
-
+struct logical_not : impl::unary<T, bool>  {
   constexpr bool operator () (T const& arg) const { return not arg; }
 };
 
 /* function objects -- bitwise */
 
 template <class T=void>
-struct bit_and {
-  using second_argument_type = T;
-  using first_argument_type = T;
-  using result_type = T;
-
+struct bit_and : impl::binary<T, T, T> {
   constexpr bool operator () (T const& l, T const& r) const { return l & r; }
 };
 
 template <class T=void>
-struct bit_or {
-  using second_argument_type = T;
-  using first_argument_type = T;
-  using result_type = T;
-
+struct bit_or : impl::binary<T, T, T> {
   constexpr bool operator () (T const& l, T const& r) const { return l | r; }
 };
 
 template <class T=void>
-struct bit_xor {
-  using second_argument_type = T;
-  using first_argument_type = T;
-  using result_type = T;
-
+struct bit_xor : impl::binary<T, T, T> {
   constexpr bool operator () (T const& l, T const& r) const { return l ^ r; }
 };
 
 template <class T=void>
-struct bit_not {
-  using argument_type = T;
-  using result_type = T;
-
+struct bit_not : impl::unary<T, T> {
   constexpr bool operator () (T const& arg) const { return ~arg; }
 };
 
@@ -417,8 +272,8 @@ template <> struct plus<void> {
 
   template <class T, class U>
   constexpr auto operator () (T&& t, U&& u) const -> decltype(
-    forward<T>(t) + forward<U>(u)
-  ) { return forward<T>(t) + forward<U>(u); }
+    core::forward<T>(t) + core::forward<U>(u)
+  ) { return core::forward<T>(t) + core::forward<U>(u); }
 };
 
 template <> struct minus<void> {
@@ -426,8 +281,8 @@ template <> struct minus<void> {
 
   template <class T, class U>
   constexpr auto operator () (T&& t, U&& u) const -> decltype(
-    forward<T>(t) - forward<U>(u)
-  ) { return forward<T>(t) - forward<U>(u); }
+    core::forward<T>(t) - core::forward<U>(u)
+  ) { return core::forward<T>(t) - core::forward<U>(u); }
 };
 
 template <> struct multiplies<void> {
@@ -435,8 +290,8 @@ template <> struct multiplies<void> {
 
   template <class T, class U>
   constexpr auto operator () (T&& t, U&& u) const -> decltype(
-    forward<T>(t) * forward<U>(u)
-  ) { return forward<T>(t) * forward<U>(u); }
+    core::forward<T>(t) * core::forward<U>(u)
+  ) { return core::forward<T>(t) * core::forward<U>(u); }
 };
 
 template <> struct divides<void> {
@@ -444,8 +299,8 @@ template <> struct divides<void> {
 
   template <class T, class U>
   constexpr auto operator () (T&& t, U&& u) const -> decltype(
-    forward<T>(t) / forward<U>(u)
-  ) { return forward<T>(t) / forward<U>(u); }
+    core::forward<T>(t) / core::forward<U>(u)
+  ) { return core::forward<T>(t) / core::forward<U>(u); }
 };
 
 template <> struct modulus<void> {
@@ -453,16 +308,16 @@ template <> struct modulus<void> {
 
   template <class T, class U>
   constexpr auto operator () (T&& t, U&& u) const -> decltype(
-    forward<T>(t) % forward<U>(u)
-  ) { return forward<T>(t) % forward<U>(u); }
+    core::forward<T>(t) % core::forward<U>(u)
+  ) { return core::forward<T>(t) % core::forward<U>(u); }
 };
 
 template <> struct negate<void> {
   using is_transparent = void;
 
   template <class T>
-  constexpr auto operator () (T&& t) const -> decltype(forward<T>(t)) {
-    return forward<T>(t);
+  constexpr auto operator () (T&& t) const -> decltype(core::forward<T>(t)) {
+    return core::forward<T>(t);
   }
 };
 
@@ -472,8 +327,8 @@ template <> struct equal_to<void> {
 
   template <class T, class U>
   constexpr auto operator () (T&& t, U&& u) const -> decltype(
-    forward<T>(t) == forward<U>(u)
-  ) { return forward<T>(t) == forward<U>(u); }
+    core::forward<T>(t) == core::forward<U>(u)
+  ) { return core::forward<T>(t) == core::forward<U>(u); }
 };
 
 template <> struct not_equal_to<void> {
@@ -481,8 +336,8 @@ template <> struct not_equal_to<void> {
 
   template <class T, class U>
   constexpr auto operator () (T&& t, U&& u) const -> decltype(
-    forward<T>(t) != forward<U>(u)
-  ) { return forward<T>(t) != forward<U>(u); }
+    core::forward<T>(t) != core::forward<U>(u)
+  ) { return core::forward<T>(t) != core::forward<U>(u); }
 };
 
 template <> struct greater_equal<void> {
@@ -490,8 +345,8 @@ template <> struct greater_equal<void> {
 
   template <class T, class U>
   constexpr auto operator () (T&& t, U&& u) const -> decltype(
-    forward<T>(t) >= forward<U>(u)
-  ) { return forward<T>(t) >= forward<U>(u); }
+    core::forward<T>(t) >= core::forward<U>(u)
+  ) { return core::forward<T>(t) >= core::forward<U>(u); }
 };
 
 template <> struct less_equal<void> {
@@ -499,8 +354,8 @@ template <> struct less_equal<void> {
 
   template <class T, class U>
   constexpr auto operator () (T&& t, U&& u) const -> decltype(
-    forward<T>(t) <= forward<U>(u)
-  ) { return forward<T>(t) <= forward<U>(u); }
+    core::forward<T>(t) <= core::forward<U>(u)
+  ) { return core::forward<T>(t) <= core::forward<U>(u); }
 };
 
 template <> struct greater<void> {
@@ -508,8 +363,8 @@ template <> struct greater<void> {
 
   template <class T, class U>
   constexpr auto operator () (T&& t, U&& u) const -> decltype(
-    forward<T>(t) > forward<U>(u)
-  ) { return forward<T>(t) > forward<U>(u); }
+    core::forward<T>(t) > core::forward<U>(u)
+  ) { return core::forward<T>(t) > core::forward<U>(u); }
 };
 
 template <> struct less<void> {
@@ -517,8 +372,8 @@ template <> struct less<void> {
 
   template <class T, class U>
   constexpr auto operator () (T&& t, U&& u) const -> decltype(
-    forward<T>(t) < forward<U>(u)
-  ) { return forward<T>(t) < forward<U>(u); }
+    core::forward<T>(t) < core::forward<U>(u)
+  ) { return core::forward<T>(t) < core::forward<U>(u); }
 };
 
 /* function objects -- logical specializations */
@@ -527,8 +382,8 @@ template <> struct logical_and<void> {
 
   template <class T, class U>
   constexpr auto operator () (T&& t, U&& u) const -> decltype(
-    forward<T>(t) and forward<U>(u)
-  ) { return forward<T>(t) and forward<U>(u); }
+    core::forward<T>(t) and core::forward<U>(u)
+  ) { return core::forward<T>(t) and core::forward<U>(u); }
 };
 
 template <> struct logical_or<void> {
@@ -536,17 +391,17 @@ template <> struct logical_or<void> {
 
   template <class T, class U>
   constexpr auto operator () (T&& t, U&& u) const -> decltype(
-    forward<T>(t) or forward<U>(u)
-  ) { return forward<T>(t) or forward<U>(u); }
+    core::forward<T>(t) or core::forward<U>(u)
+  ) { return core::forward<T>(t) or core::forward<U>(u); }
 };
 
 template <> struct logical_not<void> {
   using is_transparent = void;
 
   template <class T>
-  constexpr auto operator () (T&& t) const -> decltype(not forward<T>(t)) {
-    return not forward<T>(t);
-  }
+  constexpr auto operator () (T&& t) const -> decltype(
+    not core::forward<T>(t)
+  ) { return not core::forward<T>(t); }
 };
 
 /* function objects -- bitwise specializations */
@@ -555,8 +410,8 @@ template <> struct bit_and<void> {
 
   template <class T, class U>
   constexpr auto operator () (T&& t, U&& u) const -> decltype(
-    forward<T>(t) & forward<U>(u)
-  ) { return forward<T>(t) & forward<U>(u); }
+    core::forward<T>(t) & core::forward<U>(u)
+  ) { return core::forward<T>(t) & core::forward<U>(u); }
 };
 
 template <> struct bit_or<void> {
@@ -564,8 +419,8 @@ template <> struct bit_or<void> {
 
   template <class T, class U>
   constexpr auto operator () (T&& t, U&& u) const -> decltype(
-    forward<T>(t) | forward<U>(u)
-  ) { return forward<T>(t) | forward<U>(u); }
+    core::forward<T>(t) | core::forward<U>(u)
+  ) { return core::forward<T>(t) | core::forward<U>(u); }
 };
 
 template <> struct bit_xor<void> {
@@ -573,16 +428,16 @@ template <> struct bit_xor<void> {
 
   template <class T, class U>
   constexpr auto operator () (T&& t, U&& u) const -> decltype(
-    forward<T>(t) ^ forward<U>(u)
-  ) { return forward<T>(t) ^ forward<U>(u); }
+    core::forward<T>(t) ^ core::forward<U>(u)
+  ) { return core::forward<T>(t) ^ core::forward<U>(u); }
 };
 
 template <> struct bit_not<void> {
   using is_transparent = void;
 
   template <class T, class U>
-  constexpr auto operator () (T&& t) const -> decltype(~forward<T>(t)) {
-    return ~forward<T>(t);
+  constexpr auto operator () (T&& t) const -> decltype(~core::forward<T>(t)) {
+    return ~core::forward<T>(t);
   }
 };
 

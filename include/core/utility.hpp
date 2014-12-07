@@ -9,51 +9,6 @@
 
 namespace core {
 inline namespace v1 {
-namespace impl {
-
-template <class T, T... I> struct integer_sequence {
-  static_assert(
-    ::std::is_integral<T>::value,
-    "integer_sequence must use an integral type"
-  );
-
-  template <T N> using append = integer_sequence<T, I..., N>;
-  static constexpr ::std::size_t size () noexcept { return sizeof...(I); }
-  using next = append<size()>;
-  using type = T;
-};
-
-template <class T, T Index, ::std::size_t N>
-struct sequence_generator : identity<
-  typename sequence_generator<T, Index - 1, N - 1>::type::next
-> { static_assert(Index >= 0, "Index cannot be negative"); };
-
-template <class T, T Index>
-struct sequence_generator<T, Index, 0ul> : identity<integer_sequence<T>> { };
-
-template <::std::size_t Index, class T, class U, class... Types>
-struct typelist_index :
-  identity<typename typelist_index<Index + 1, T, Types...>::type>
-{ static constexpr ::std::size_t value = Index; };
-
-template <::std::size_t Index, class T, class... Types>
-struct typelist_index<Index, T, T, Types...> : identity<
-  typelist_index<Index, T, T, Types...>
-> { static constexpr ::std::size_t value = Index; };
-
-template <::std::size_t N, class... Types> struct typelist_count;
-
-template <::std::size_t N, class T>
-struct typelist_count<N, T> : meta::size<N> { };
-
-template <::std::size_t N, class T, class Head, class... Types>
-struct typelist_count<N, T, Head, Types...> : ::std::conditional<
-  ::std::is_same<T, Head>::value,
-  typelist_count<N + 1, T, Types...>,
-  typelist_count<N, T, Types...>
->::type { };
-
-} /* namespace impl */
 
 template <class T>
 constexpr T&& forward (remove_reference_t<T>& t) noexcept {
@@ -72,13 +27,13 @@ constexpr auto move (T&& t) noexcept -> decltype(
 
 
 template <class T, T... I>
-using integer_sequence = impl::integer_sequence<T, I...>;
+using integer_sequence = meta::integer_sequence<T, I...>;
 
 template <::std::size_t... I>
 using index_sequence = integer_sequence<::std::size_t, I...>;
 
 template <class T, T N>
-using make_integer_sequence = typename impl::sequence_generator<T, N, N>::type;
+using make_integer_sequence = typename meta::iota<T, N, N>::type;
 
 template <::std::size_t N>
 using make_index_sequence = make_integer_sequence<::std::size_t, N>;
@@ -87,19 +42,14 @@ template <class... Ts>
 using index_sequence_for = make_index_sequence<sizeof...(Ts)>;
 
 template <class T, class... Ts>
-using typelist_index = meta::size<
-  impl::typelist_index<0ul, T, Ts...>::type::value
->;
+using typelist_index = meta::index<T, meta::pack<Ts...>>;
 
 template <class T, class... Ts>
-using typelist_count = meta::size<impl::typelist_count<0ul, T, Ts...>::value>;
+using typelist_count = meta::count<T, meta::make_pack_t<Ts...>>;
 
 /* N3761 (with some additions) */
-template <::std::size_t N, class T, class... Ts>
-struct type_at : identity<typename type_at<N - 1, Ts...>::type> { };
-
-template <class T, class... Ts>
-struct type_at<0ul, T, Ts...> : identity<T> { };
+template <::std::size_t N, class... Ts>
+struct type_at : meta::element<N, meta::pack<Ts...>> { };
 
 template <::std::size_t N, class... Ts>
 using type_at_t = typename type_at<N, Ts...>::type;
@@ -168,7 +118,6 @@ constexpr auto to_integral(E e) -> enable_if_t<
   std::is_enum<E>::value,
   underlying_type_t<E>
 > { return static_cast<underlying_type_t<E>>(e); }
-
 
 }} /* namespace core::v1 */
 

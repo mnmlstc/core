@@ -15,23 +15,15 @@ namespace core {
 inline namespace v1 {
 namespace impl {
 
-template <class... Ts> union discriminate;
-template <> union discriminate<> { };
-template <class T, class... Ts>
-union discriminate<T, Ts...> {
-  T value;
-  discriminate<Ts...> rest;
-};
-
 /* This is used to get around GCC's inability to expand lambdas in variadic
  * template functions. You make me so sad sometimes, GCC.
  */
 template <class Visitor, class Type, class Data, class Result, class... Args>
 auto visitor_gen () -> Result {
-  return [](Visitor&& visitor, Data& data, Args&&... args) {
+  return [](Visitor&& visitor, Data* data, Args&&... args) {
     return invoke(
       ::core::forward<Visitor>(visitor),
-      reinterpret_cast<Type&>(data),
+      *static_cast<Type*>(data),
       ::core::forward<Args>(args)...
     );
   };
@@ -101,38 +93,35 @@ class variant final {
   };
 
   struct swapper final {
-    using data_type = ::std::reference_wrapper<storage_type>;
+    using data_type = add_pointer_t<void>;
     data_type data;
+
+    template <class T> void operator () (T const&) = delete;
+
     template <class T>
-    void operator ()(T&& value) noexcept(is_nothrow_swappable<T>::value) {
+    void operator ()(T& value) noexcept(is_nothrow_swappable<T>::value) {
       using ::std::swap;
-      swap(reinterpret_cast<decay_t<T>&>(this->data.get()), value);
+      swap(*static_cast<T*>(this->data), value);
     }
   };
 
   struct equality final {
-    using data_type = ::std::reference_wrapper<storage_type const>;
+    using data_type = add_pointer_t<add_const_t<void>>;
     data_type data;
 
     template <class T>
     bool operator ()(T const& value) {
-      return ::std::equal_to<T> { }(
-        reinterpret_cast<T const&>(this->data.get()),
-        value
-      );
+      return equal_to<> { }(*static_cast<T const*>(this->data), value);
     }
   };
 
   struct less_than final {
-    using data_type = ::std::reference_wrapper<storage_type const>;
+    using data_type = add_pointer_t<add_const_t<void>>;
     data_type data;
 
     template <class T>
     bool operator ()(T const& value) noexcept {
-      return ::std::less<T> { }(
-        reinterpret_cast<T const&>(this->data.get()),
-        value
-      );
+      return less<> { }(*static_cast<T const*>(this->data), value);
     }
   };
 
@@ -217,19 +206,19 @@ public:
    */
   bool operator == (variant const& that) const noexcept {
     if (this->tag != that.tag) { return false; }
-    return that.visit(equality { ::std::cref(this->data) });
+    return that.visit(equality { this->pointer() });
   }
 
   bool operator < (variant const& that) const noexcept {
     if (this->tag != that.tag) { return this->tag < that.tag; }
-    return that.visit(less_than { ::std::cref(this->data) });
+    return that.visit(less_than { this->pointer() });
   }
 
   void swap (variant& that) noexcept(
     all_traits<is_nothrow_swappable<Ts>...>::value
   ) {
     if (this->which() == that.which()) {
-      that.visit(swapper { ::std::ref(this->data) });
+      that.visit(swapper { this->pointer() });
       return;
     }
     variant temp { ::core::move(*this) };
@@ -248,16 +237,16 @@ public:
         Args...
       >...
     >;
-    using function = return_type(*)(Visitor&&, storage_type&, Args&&...);
+    using function = return_type(*)(Visitor&&, void*, Args&&...);
     constexpr ::std::size_t size = ::std::tuple_size<tuple_type>::value;
 
     static function const callers[size] {
-      impl::visitor_gen<Visitor, Ts, storage_type, function, Args...>()...
+      impl::visitor_gen<Visitor, Ts, void, function, Args...>()...
     };
 
     return callers[this->tag](
       ::core::forward<Visitor>(visitor),
-      this->data,
+      this->pointer(),
       ::core::forward<Args>(args)...
     );
   }
@@ -273,14 +262,14 @@ public:
         Args...
       >...
     >;
-    using function = return_type(*)(Visitor&&, storage_type const&, Args&&...);
+    using function = return_type(*)(Visitor&&, void const*, Args&&...);
     constexpr ::std::size_t size = ::std::tuple_size<tuple_type>::value;
 
     static function const callers[size] = {
       impl::visitor_gen<
         Visitor,
         add_const_t<Ts>,
-        add_const_t<storage_type>,
+        void const,
         function,
         Args...
       >()...
@@ -288,7 +277,7 @@ public:
 
     return callers[this->tag](
       ::core::forward<Visitor>(visitor),
-      this->data,
+      this->pointer(),
       ::core::forward<Args>(args)...
     );
   }
@@ -314,19 +303,19 @@ public:
   template <::std::size_t N>
   auto get () const& noexcept(false) -> element<N> const& {
     if (this->tag != N) { throw bad_variant_get { "incorrect type" }; }
-    return reinterpret_cast<element<N> const&>(this->data);
+    return *static_cast<element<N> const*>(this->pointer());
   }
 
   template <::std::size_t N>
   auto get () && noexcept(false) -> element<N>&& {
     if (this->tag != N) { throw bad_variant_get { "incorrect type" }; }
-    return ::core::move(reinterpret_cast<element<N>&>(this->data));
+    return ::core::move(*static_cast<element<N>*>(this->pointer()));
   }
 
   template <::std::size_t N>
   auto get () & noexcept(false) -> element<N>& {
     if (this->tag != N) { throw bad_variant_get { "incorrect type" }; }
-    return reinterpret_cast<element<N>&>(this->data);
+    return *static_cast<element<N>*>(this->pointer());
   }
 
   ::std::type_info const& type () const noexcept {
@@ -337,6 +326,9 @@ public:
   bool empty () const noexcept { return false; }
 
 private:
+  void const* pointer () const noexcept { return ::std::addressof(this->data); }
+  void* pointer () noexcept { return ::std::addressof(this->data); }
+
   storage_type data;
   ::std::uint8_t tag;
 };
