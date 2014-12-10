@@ -105,7 +105,7 @@ template <class T, class U=T>
 T exchange (T& obj, U&& value) noexcept(
   meta::all<
     ::std::is_nothrow_move_constructible<T>,
-    ::std::is_nothrow_assignable<T, U>
+    ::std::is_nothrow_assignable<add_lvalue_reference_t<T>, U>
   >::value
 ) {
   T old = ::core::move(obj);

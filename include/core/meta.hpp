@@ -2,6 +2,7 @@
 #define CORE_META_HPP
 
 #include <type_traits>
+#include <limits>
 #include <tuple>
 
 #include <cstdint>
@@ -190,7 +191,13 @@ struct push_back<pack<Ts...>, Us...> : identity<
 > { };
 
 template <class T> struct is {
+  template <class U> using convertible = ::std::is_convertible<T, U>;
+  template <class U> using assignable = ::std::is_assignable<T, U>;
+  template <class U> using base_of = ::std::is_base_of<T, U>;
   template <class U> using same = ::std::is_same<T, U>;
+
+  template <class U>
+  using nothrow_assignable = ::std::is_nothrow_assignable<T, U>;
 };
 
 template <class T, class... Ts>
@@ -199,9 +206,11 @@ struct count<T, pack<Ts...>> :
 { };
 
 template <class T, class... Ts>
-struct index<T, pack<Ts...>> : meta::size<
-  pack<Ts...>::size() - find_t<T, pack<Ts...>>::size()
-> { };
+struct index<T, pack<Ts...>> : ::std::conditional<
+  find_t<T, pack<Ts...>>::empty(),
+  meta::size<::std::numeric_limits<::std::size_t>::max()>,
+  meta::size<pack<Ts...>::size() - find_t<T, pack<Ts...>>::size()>
+>::type { };
 
 template <class T, class... Ts>
 struct find<T, pack<Ts...>> :

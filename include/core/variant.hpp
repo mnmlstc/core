@@ -50,41 +50,46 @@ struct bad_variant_get final : ::std::logic_error {
  */
 template <class... Ts>
 class variant final {
+  using pack_type = meta::pack<Ts...>;
+
+  static_assert(
+    pack_type::size() < ::std::numeric_limits<::std::uint8_t>::max(),
+    "Cannot have more elements than variant can containe");
+
+  static_assert(
+    meta::all<
+      meta::boolean<meta::count<Ts, meta::pack<Ts...>>::value == 1>...
+    >::value,
+    "Cannot have duplicate types in variant");
+
   static_assert(
     sizeof...(Ts) < ::std::numeric_limits<uint8_t>::max(),
     "Cannot have more elements than variant can contain"
   );
 
-  using tuple_type = ::std::tuple<Ts...>;
   using storage_type = aligned_storage_t<
     sizeof(impl::discriminate<Ts...>),
     ::std::alignment_of<impl::discriminate<Ts...>>::value
   >;
 
-  template <::std::size_t N>
-  using element = typename ::std::tuple_element<N, tuple_type>::type;
-
+  template <::std::size_t N> using element = meta::element_t<N, pack_type>;
   template <::std::size_t N> using index = meta::size<N>;
 
   struct copier final {
-    using data_type = ::std::reference_wrapper<storage_type>;
+    using data_type = add_pointer_t<void>;
     data_type data;
 
     template <class T>
-    void operator ()(T const& value) const {
-      new (::std::addressof(this->data.get())) T(value);
-    }
+    void operator ()(T const& value) const { ::new (this->data) T(value); }
   };
 
   struct mover final {
-    using data_type = ::std::reference_wrapper<storage_type>;
+    using data_type = add_pointer_t<void>;
     data_type data;
 
     template <class T>
     void operator () (T&& value) {
-      ::new (::std::addressof(this->data.get())) decay_t<T>(
-        ::core::move(value)
-      );
+      ::new (this->data) decay_t<T>(::core::move(value));
     }
   };
 
@@ -150,11 +155,7 @@ class variant final {
     class T
   > explicit variant (index<N>&&, ::std::true_type&&, T&& value) :
     data { }, tag { N }
-  {
-    new (::std::addressof(this->data)) type_at_t<N, Ts...> (
-      ::core::forward<T>(value)
-    );
-  }
+  { ::new (this->pointer()) type_at_t<N, Ts...> (::core::forward<T>(value)); }
 
 public:
 
@@ -171,11 +172,11 @@ public:
 
   variant (variant const& that) :
     data { }, tag { that.tag }
-  { that.visit(copier { ::std::ref(this->data) }); }
+  { that.visit(copier { this->pointer() }); }
 
   variant (variant&& that) noexcept :
     data { }, tag { that.tag }
-  { that.visit(mover { ::std::ref(this->data) }); }
+  { that.visit(mover { this->pointer() }); }
 
   variant () : variant { type_at_t<0, Ts...> { } } { }
 
@@ -197,7 +198,7 @@ public:
   variant& operator = (variant&& that) noexcept {
     this->visit(destroyer { });
     this->tag = that.tag;
-    that.visit(mover { ::std::ref(this->data) });
+    that.visit(mover { this->pointer() });
     return *this;
   }
 
@@ -238,7 +239,7 @@ public:
       >...
     >;
     using function = return_type(*)(Visitor&&, void*, Args&&...);
-    constexpr ::std::size_t size = ::std::tuple_size<tuple_type>::value;
+    constexpr ::std::size_t size = pack_type::size();
 
     static function const callers[size] {
       impl::visitor_gen<Visitor, Ts, void, function, Args...>()...
@@ -263,7 +264,7 @@ public:
       >...
     >;
     using function = return_type(*)(Visitor&&, void const*, Args&&...);
-    constexpr ::std::size_t size = ::std::tuple_size<tuple_type>::value;
+    constexpr ::std::size_t size = pack_type::size();
 
     static function const callers[size] = {
       impl::visitor_gen<
@@ -355,21 +356,21 @@ auto get (variant<Ts...>& v) noexcept(false) -> decltype(
 
 template <class T, class... Ts>
 auto get (variant<Ts...> const& v) noexcept(false) -> enable_if_t<
-  typelist_count<T, Ts...>::value == 1,
-  decltype(::core::get<typelist_index<T, Ts...>::value>(v))
-> { return ::core::get<typelist_index<T, Ts...>::value>(v); }
+  not meta::find_t<T, meta::pack<Ts...>>::empty(),
+  decltype(::core::get<meta::index<T, meta::pack<Ts...>>::value>(v))
+> { return ::core::get<meta::index<T, meta::pack<Ts...>>::value>(v); }
 
 template <class T, class... Ts>
 auto get (variant<Ts...>&& v) noexcept(false) -> enable_if_t<
-  typelist_count<T, Ts...>::value == 1,
-  decltype(::core::move(::core::get<typelist_index<T, Ts...>::value>(v)))
-> { return ::core::move(::core::get<typelist_index<T, Ts...>::value>(v)); }
+  not meta::find_t<T, meta::pack<Ts...>>::empty(),
+  decltype(core::move(get<meta::index<T, meta::pack<Ts...>>::value>(v)))
+> { return core::move(get<meta::index<T, meta::pack<Ts...>>::value>(v)); }
 
 template <class T, class... Ts>
 auto get (variant<Ts...>& v) noexcept(false) -> enable_if_t<
-  typelist_count<T, Ts...>::value == 1,
-  decltype(::core::get<typelist_index<T, Ts...>::value>(v))
-> { return ::core::get<typelist_index<T, Ts...>::value>(v); }
+  not meta::find_t<T, meta::pack<Ts...>>::empty(),
+  decltype(::core::get<meta::index<T, meta::pack<Ts...>>::value>(v))
+> { return ::core::get<meta::index<T, meta::pack<Ts...>>::value>(v); }
 
 }} /* namespace core::v1 */
 

@@ -20,6 +20,27 @@ constexpr auto mem_fn(R(T::* pmf)(Args...)) noexcept -> impl::pmf<
   R(T::*)(Args...)
 > { return impl::pmf<R(T::*)(Args...)> { pmf }; }
 
+template <class T> struct is_reference_wrapper : ::std::false_type { };
+template <class T>
+struct is_reference_wrapper<::std::reference_wrapper<T>> :
+  ::std::true_type
+{ };
+
+template <class T>
+struct is_reference_wrapper<::std::reference_wrapper<T> const> :
+  ::std::true_type
+{ };
+
+template <class T>
+struct is_reference_wrapper<::std::reference_wrapper<T> volatile> :
+  ::std::true_type
+{ };
+
+template <class T>
+struct is_reference_wrapper<::std::reference_wrapper<T> const volatile> :
+  ::std::true_type
+{ };
+
 template <class F> struct function_traits;
 
 template <class R, class... Args>
@@ -435,7 +456,7 @@ template <> struct bit_xor<void> {
 template <> struct bit_not<void> {
   using is_transparent = void;
 
-  template <class T, class U>
+  template <class T>
   constexpr auto operator () (T&& t) const -> decltype(~core::forward<T>(t)) {
     return ~core::forward<T>(t);
   }
