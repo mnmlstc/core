@@ -119,6 +119,41 @@ constexpr auto to_integral(E e) -> enable_if_t<
   underlying_type_t<E>
 > { return static_cast<underlying_type_t<E>>(e); }
 
+template <class T>
+struct capture final {
+  static_assert(::std::is_move_constructible<T>::value, "T must be movable");
+  using value_type = T;
+  using reference = add_lvalue_reference_t<value_type>;
+  using pointer = add_pointer_t<value_type>;
+
+  capture (capture&&) = default;
+  capture (capture& that) : data { core::move(that.data) } { }
+  capture () = delete;
+
+  capture& operator = (capture const&) = delete;
+  capture& operator = (capture&&) = delete;
+
+  operator reference () const noexcept { return this->get(); }
+  pointer operator -> () const noexcept {
+    return ::std::addressof(this->get());
+  }
+
+  reference get () const noexcept { return this->data; }
+
+private:
+  value_type data;
+};
+
+template <class T>
+auto make_capture (remove_reference_t<T>& ref) -> capture<T> {
+  return capture<T> { core::move(ref) };
+}
+
+template <class T>
+auto make_capture (remove_reference_t<T>&& ref) -> capture<T> {
+  return capture<T> { core::move(ref) };
+}
+
 }} /* namespace core::v1 */
 
 #endif /* CORE_UTILITY_HPP */

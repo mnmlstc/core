@@ -43,8 +43,10 @@ struct is_unpackable<T, deduce_t<tuple_size_t<T>>> :
  */
 template <class T, class=void> struct is_runpackable : ::std::false_type { };
 template <class T>
-struct is_runpackable<T, deduce_t<decltype(::std::declval<T>().at(0ul))>> :
-  ::std::true_type
+struct is_runpackable<
+  T,
+  deduce_t<decltype(::std::declval<T>().at(::std::declval<::std::size_t>()))>
+> : ::std::true_type
 { };
 
 /* forward declaration */
