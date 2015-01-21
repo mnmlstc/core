@@ -69,7 +69,6 @@ template <class, template <class> class> struct count_if;
 template <class, template <class> class> struct find_if;
 template <class, template <class> class> struct filter;
 template <::std::size_t, class> struct element;
-template <::std::size_t, class> struct split;
 
 template <class, class...> struct push_front;
 template <class, class...> struct push_back;
@@ -101,8 +100,6 @@ using filter_t = typename filter<T, F>::type;
 
 template <::std::size_t N, class T>
 using element_t = typename element<N, T>::type;
-
-template <::std::size_t I, class T> using split_t = typename split<I, T>::type;
 
 template <class T, class... Us>
 using push_front_t = typename push_front<T, Us...>::type;
