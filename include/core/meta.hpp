@@ -77,7 +77,6 @@ template <class, class> struct index;
 template <class, class> struct count;
 template <class, class> struct find;
 
-template <class...> struct make_pack;
 template <class...> struct merge;
 
 template <class> struct index_sequence_from;
@@ -113,7 +112,6 @@ using push_back_t = typename push_back<T, Us...>::type;
 
 template <class T, class V> using find_t = typename find<T, V>::type;
 
-template <class... Ts> using make_pack_t = typename make_pack<Ts...>::type;
 template <class... Ts> using merge_t = typename merge<Ts...>::type;
 
 template <class T> using pop_front_t = typename pop_front<T>::type;
@@ -217,7 +215,6 @@ struct find<T, pack<Ts...>> :
   find_if<pack<Ts...>, is<T>::template same>
 { };
 
-template <class... Ts> struct make_pack : identity<pack<Ts...>> { };
 template <class... Ts>
 struct merge<pack<Ts...>> : identity<pack<Ts...>> { };
 

@@ -45,7 +45,7 @@ template <class T, class... Ts>
 using typelist_index = meta::index<T, meta::pack<Ts...>>;
 
 template <class T, class... Ts>
-using typelist_count = meta::count<T, meta::make_pack_t<Ts...>>;
+using typelist_count = meta::count<T, meta::pack<Ts...>>;
 
 /* N3761 (with some additions) */
 template <::std::size_t N, class... Ts>
