@@ -1,13 +1,8 @@
-list(APPEND GENERATORS "TGZ" "ZIP")
+list(APPEND GENERATORS "TGZ;TXZ;ZIP;LZMA")
 
 if (BUILD_PACKAGE_MSI)
   list(APPEND GENERATORS "WIX")
 endif ()
-
-# disabled until CPack can generate PKGs on modern OS X
-#if (BUILD_PACKAGE_PKG)
-#  list(APPEND GENERATORS "PackageMaker")
-#endif ()
 
 if (BUILD_PACKAGE_RPM)
   list(APPEND GENERATORS "RPM")
