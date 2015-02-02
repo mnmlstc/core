@@ -36,7 +36,7 @@ There are several requirements to fully use MNMLSTC Core:
 
  * A C++11 compliant compiler (GCC 4.8.2 or Clang 3.3 meet the minimum feature
    set required to build and use MNMLSTC Core)
- * `CMake 3.0.0 <http://cmake.org>`_
+ * `CMake 3.1.0 <http://cmake.org>`_
 
 Additionally, to actively develop MNMLSTC Core, the following are required:
  * `Sphinx Documentation Generator <http://sphinx-doc.org>`_
