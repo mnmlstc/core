@@ -162,6 +162,24 @@ struct bad_result_condition final : ::std::logic_error {
 }
 #endif /* CORE_NO_EXCEPTIONS */
 
+template <class> struct optional;
+template <class> struct expected;
+template <class> struct result;
+
+template <class> struct is_optional : ::std::false_type { };
+template <class> struct is_expected : ::std::false_type { };
+template <class> struct is_result : ::std::false_type { };
+
+template <class T> struct is_optional<optional<T>> : ::std::true_type { };
+template <class T> struct is_expected<expected<T>> : ::std::true_type { };
+template <class T> struct is_result<result<T>> : ::std::true_type { };
+
+template <class T> using is_monadic = meta::any<
+  is_optional<T>,
+  is_expected<T>,
+  is_result<T>
+>;
+
 template <class Type>
 struct optional final : private impl::storage<Type> {
   using base = impl::storage<Type>;
@@ -414,6 +432,32 @@ struct optional final : private impl::storage<Type> {
   ) {
     return this->visit(
       impl::make_overload(::core::forward<Visitors>(visitors)...));
+  }
+
+  template <
+    class F,
+    class=enable_if_t<is_optional<invoke_of_t<F, value_type&>>::value>
+  > auto then (F&& f) -> invoke_of_t<F, value_type&> {
+    if (*this) { return ::core::invoke(::core::forward<F>(f), **this); }
+    return nullopt;
+  }
+
+  template <
+    class F,
+    class=enable_if_t<is_optional<invoke_of_t<F, value_type const&>>::value>
+  > auto then (F&& f) const -> invoke_of_t<F, value_type const&> {
+    if (*this) { return ::core::invoke(::core::forward<F>(f), **this); }
+    return nullopt;
+  }
+
+  template <class F>
+  auto operator >>= (F&& f) -> decltype(then(::core::forward<F>(f))) {
+    return this->then(::core::forward<F>(f));
+  }
+
+  template <class F>
+  auto operator >>= (F&& f) const -> decltype(then(::core::forward<F>(f))) {
+    return this->then(::core::forward<F>(f));
   }
 
 private:
@@ -742,6 +786,22 @@ struct expected final {
   ) {
     return this->visit(
       impl::make_overload(::core::forward<Visitors>(visitors)...));
+  }
+
+  template <
+    class F,
+    class=enable_if_t<is_expected<result_of_t<F(value_type&)>>::value>
+  > auto operator >>= (F&& f) -> result_of_t<F(value_type&)> {
+    if (*this) { return ::core::invoke(::core::forward<F>(f), **this); }
+    return this->ptr;
+  }
+
+  template <
+    class F,
+    class=enable_if_t<is_expected<result_of_t<F(value_type const&)>>::value>
+  > auto operator >>= (F&& f) const -> result_of_t<F(value_type const&)> {
+    if (*this) { return ::core::invoke(::core::forward<F>(f), **this); }
+    return this->ptr;
   }
 
 private:
@@ -1099,7 +1159,21 @@ struct result final {
       impl::make_overload(::core::forward<Visitors>(visitors)...));
   }
 
+  template <
+    class F,
+    class=enable_if_t<is_result<result_of_t<F(value_type&)>>::value>
+  > auto operator >>= (F&& f) -> result_of_t<F(value_type&)> {
+    if (*this) { return ::core::invoke(::core::forward<F>(f), **this); }
+    return this->cnd;
+  }
 
+  template <
+    class F,
+    class=enable_if_t<is_result<result_of_t<F(value_type const&)>>::value>
+  > auto operator >>= (F&& f) const -> result_of_t<F(value_type const&)> {
+    if (*this) { return ::core::invoke(::core::forward<F>(f), **this); }
+    return this->cnd;
+  }
 
 private:
   void reset () {
@@ -1162,6 +1236,22 @@ struct expected<void> final {
     return this->pointer();
   }
 
+  template <
+    class F,
+    class=enable_if_t<is_expected<result_of_t<F()>>::value>
+  > auto operator >>= (F&& f) -> result_of_t<F()> {
+    if (*this) { return ::core::invoke(::core::forward<F>(f)); }
+    return this->ptr;
+  }
+
+  template <
+    class F,
+    class=enable_if_t<is_expected<result_of_t<F()>>::value>
+  > auto operator >>= (F&& f) const -> result_of_t<F()> {
+    if (*this) { return ::core::invoke(::core::forward<F>(f)); }
+    return this->ptr;
+  }
+
 private:
   ::std::exception_ptr ptr;
 };
@@ -1217,6 +1307,22 @@ struct result<void> final {
 
   ::std::error_condition const& condition () const noexcept(false) {
     if (*this) { throw_bad_void_result_condition(); }
+    return this->cnd;
+  }
+
+  template <
+    class F,
+    class=enable_if_t<is_result<result_of_t<F()>>::value>
+  > auto operator >>= (F&& f) -> result_of_t<F()> {
+    if (*this) { return ::core::invoke(::core::forward<F>(f)); }
+    return this->cnd;
+  }
+
+  template <
+    class F,
+    class=enable_if_t<is_result<result_of_t<F()>>::value>
+  > auto operator >>= (F&& f) const -> result_of_t<F()> {
+    if (*this) { return ::core::invoke(::core::forward<F>(f)); }
     return this->cnd;
   }
 

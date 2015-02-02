@@ -214,6 +214,22 @@ TEST_CASE("optional-methods", "[optional][methods]") {
       [] (std::string const&) { return 'm'; },
       [] (core::nullopt_t) { return '\0'; }));
   }
+
+  SECTION("then-nullopt-result") {
+    core::optional<std::string> engaged { "bind-operator" };
+    auto const func = [] (std::string const&) -> core::optional<int> {
+      return core::nullopt;
+    };
+    CHECK_FALSE(engaged.then(func));
+  }
+
+  SECTION("then-result-chain") {
+    core::optional<std::string> engaged { "bind" };
+    auto const one = [] (std::string&) -> core::optional<int> { return 42; };
+    auto const two = [] (int f) -> core::optional<double> { return f; };
+    CHECK(engaged.then(one).then(two));
+    CHECK(engaged.then(one).then(two) == 42.0);
+  }
 }
 
 TEST_CASE("optional-functions", "[optional][functions]") {
