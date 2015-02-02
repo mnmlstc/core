@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0.0)
+cmake_minimum_required(VERSION 3.1.0)
 project(core VERSION 1.2.0.0 LANGUAGES CXX)
 
 #------------------------------------------------------------------------------
@@ -6,8 +6,6 @@ project(core VERSION 1.2.0.0 LANGUAGES CXX)
 #------------------------------------------------------------------------------
 include(CMakePackageConfigHelpers)
 include(CMakeDependentOption)
-include(CheckCXXCompilerFlag)
-include(CheckIncludeFileCXX)
 include(CTest)
 
 set(INCLUDE_INSTALL_DIR "include" CACHE INTERNAL "Header Files")
@@ -28,14 +26,17 @@ list(APPEND RPM_DEP "UNIX" "NOT APPLE" "BUILD_PACKAGE")
 list(APPEND PKG_DEP "APPLE" "BUILD_PACKAGE")
 list(APPEND MSI_DEP "WIN32" "BUILD_PACKAGE")
 
-# This is overridden on the next line as it gets turned into a cache variable
-option(BUILD_WITH_LIBCXX "Use libc++ as stdlib" OFF)
+option(BUILD_WITH_LIBCXX "Use libc++ as stdlib (affects unittests)" OFF)
 option(BUILD_PACKAGE "Build package with CPack" OFF)
-option(BUILD_DOCS "Build documentation with Sphinx Documentation Generator")
+option(BUILD_DOCS "Build documentation with Sphinx Documentation Generator" OFF)
+
+option(DISABLE_EXCEPTIONS "Configures Core to not use exceptions" OFF)
+option(DISABLE_RTTI "Configures Core to not use RTTI" OFF)
 
 cmake_dependent_option(BUILD_PACKAGE_MSI "Create an MSI" ON "${MSI_DEP}" OFF)
 cmake_dependent_option(BUILD_PACKAGE_RPM "Create an RPM" ON "${RPM_DEP}" OFF)
 cmake_dependent_option(BUILD_PACKAGE_PKG "Create a PKG" ON "${PKG_DEP}" OFF)
+cmake_dependent_option(BUILD_WITH_LIBCXX "Use libc++" OFF "BUILD_TESTING" OFF)
 
 #------------------------------------------------------------------------------
 # Configuration
@@ -54,6 +55,9 @@ add_library(core INTERFACE)
 target_include_directories(core INTERFACE
   $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>)
+target_compile_definitions(core INTERFACE
+  $<$<BOOL:${DISABLE_EXCEPTIONS}>:CORE_NO_EXCEPTIONS>
+  $<$<BOOL:${DISABLE_RTTI}>:CORE_NO_RTTI>)
 
 export(TARGETS core NAMESPACE mnmlstc:: FILE core-export.cmake)
 export(PACKAGE core)
