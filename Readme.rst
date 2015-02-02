@@ -40,10 +40,10 @@ There are several requirements to fully use MNMLSTC Core:
 
 Additionally, to actively develop MNMLSTC Core, the following are required:
  * `Sphinx Documentation Generator <http://sphinx-doc.org>`_
- * `Sphinx RTD Theme <https://pypi.python.org/pypi/sphinx_rtd_theme>`_
+ * `Alabaster Sphinx Theme <https://github.com/bitprophet/alabaster>`_
  * `WiX Toolset <http://wixtoolset.org>`_
 
-Sphinx and the Sphinx RTD Theme are only necessary if generating
+Sphinx and the Alabaster Sphinx Theme are only necessary if generating
 documentation manually.
 
 WiX Toolset is only required if building packages for Windows.

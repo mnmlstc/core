@@ -1,23 +1,27 @@
-import sphinx_rtd_theme as theme
+import alabaster as theme
 import os
 
 project = 'MNMLSTC Core'
-copyright = '2013 - 2014, MNMLSTC'
+copyright = 'MNMLSTC'
 
-version = '1.1'
-release = '1.1'
+version = '1.2'
+release = '1.2'
 
 highlight_language = 'cpp'
 
 html_static_path = ['static']
-html_theme_path = [theme.get_html_theme_path()]
-html_theme = 'sphinx_rtd_theme'
+html_theme_path = [theme.get_path()]
+html_theme = 'alabaster'
+html_theme_options = { 'show_powered_by' : False }
+html_style = 'theme.css'
+html_sidebars = { '**' : ['navigation.html'] }
+pygments_style = 'manni'
 
 exclude_patterns = ['_build']
 templates_path = ['_templates']
 source_suffix = '.rst'
 master_doc = 'index'
 
-extensions = ['sphinx.ext.todo']
+extensions = ['sphinx.ext.todo', 'alabaster']
 
 todo_include_todos = True
