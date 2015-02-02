@@ -22,6 +22,7 @@ rather than by feature.
    Numeric Algorithms <numeric>
    Variant Type <variant>
    Uncategorized Utilities <utility>
+   Metatemplate Programming <meta>
    Memory <memory>
    String Utilities <string>
    Range Type <range>
