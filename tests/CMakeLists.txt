@@ -27,14 +27,19 @@ function(add_unit_test name file)
   add_test(${name} test-${name})
   add_dependencies(check test-${name})
   add_dependencies(test-${name} catch) # Always make sure catch is downloaded
+  target_compile_definitions(test-${name}
+    PRIVATE
+      $<TARGET_PROPERTY:core,INTERFACE_COMPILE_DEFINITIONS>)
   target_compile_options(test-${name}
     PRIVATE
       $<$<AND:${LIBCXX}>:${USE_STDLIB_LIBCXX}>
       $<$<BOOL:${CAN_USE_STD_CXX11}>:${USE_STD_CXX11}>
-      $<$<BOOL:${CAN_USE_PEDANTIC}>:${USE_PEDANTIC}>
+
+      $<$<BOOL:${CAN_USE_NO_RTTI}>:${USE_NO_RTTI}>
 
       $<$<BOOL:${CAN_WARN_EVERYTHING}>:${WARN_EVERYTHING}>
       $<$<BOOL:${CAN_WARN_NOEXCEPT}>:${WARN_NOEXCEPT}>
+      $<$<BOOL:${CAN_WARN_PEDANTIC}>:${WARN_PEDANTIC}>
       $<$<BOOL:${CAN_WARN_EXTRA}>:${WARN_EXTRA}>
       $<$<BOOL:${CAN_WARN_ALL}>:${WARN_ALL}>
 
@@ -60,10 +65,12 @@ endfunction ()
 set(USE_STDLIB_LIBCXX "-stdlib=libc++")
 set(USE_STD_CXX11 "-std=c++11")
 
-set(USE_PEDANTIC "-pedantic")
+set(USE_NO_EXCEPTIONS "-fno-exceptions")
+set(USE_NO_RTTI "-fno-rtti")
 
 set(WARN_EVERYTHING "-Weverything")
 set(WARN_NOEXCEPT "-Wnoexcept")
+set(WARN_PEDANTIC "-Wpedantic")
 set(WARN_ONE_LINE "-WL")
 set(WARN_ERROR "-Werror")
 set(WARN_EXTRA "-Wextra")
@@ -90,10 +97,9 @@ endif ()
 check_cxx_compiler_flag(${USE_STDLIB_LIBCXX} CAN_USE_STDLIB_LIBCXX)
 check_cxx_compiler_flag(${USE_STD_CXX11} CAN_USE_STD_CXX11)
 
-check_cxx_compiler_flag(${USE_PEDANTIC} CAN_USE_PEDANTIC)
-
 check_cxx_compiler_flag(${WARN_EVERYTHING} CAN_WARN_EVERYTHING)
 check_cxx_compiler_flag(${WARN_NOEXCEPT} CAN_WARN_NOEXCEPT)
+check_cxx_compiler_flag(${WARN_PEDANTIC} CAN_WARN_PEDANTIC)
 check_cxx_compiler_flag(${WARN_ONE_LINE} CAN_WARN_ONE_LINE)
 check_cxx_compiler_flag(${WARN_ERROR} CAN_WARN_ERROR)
 check_cxx_compiler_flag(${WARN_EXTRA} CAN_WARN_EXTRA)
@@ -109,7 +115,6 @@ check_cxx_compiler_flag(${WARN_NO_DEPRECATED} CAN_WARN_NO_DEPRECATED)
 check_cxx_compiler_flag(${WARN_NO_EXIT_TIME} CAN_WARN_NO_EXIT_TIME)
 check_cxx_compiler_flag(${WARN_NO_SHADOW} CAN_WARN_NO_SHADOW)
 check_cxx_compiler_flag(${WARN_NO_PADDED} CAN_WARN_NO_PADDED)
-
 
 require_cxx_include_file(initializer_list)
 require_cxx_include_file(type_traits)

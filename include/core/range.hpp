@@ -1,7 +1,6 @@
 #ifndef CORE_RANGE_HPP
 #define CORE_RANGE_HPP
 
-#include <iterator>
 #include <istream>
 #include <utility>
 #include <memory>
@@ -9,29 +8,33 @@
 #include <cstdlib>
 
 #include <core/type_traits.hpp>
+#include <core/iterator.hpp>
 
 namespace core {
 inline namespace v1 {
 namespace impl {
 
-template <class T, class=void> struct begin : ::std::false_type { };
-template <class T>
-struct begin<T, deduce_t<decltype(::std::begin(::std::declval<T>()))>> :
-  ::std::true_type
-{ using type = decltype(::std::begin(::std::declval<T>())); };
+using ::std::begin;
+using ::std::end;
 
-template <class T, class=void> struct end : ::std::false_type { };
+template <class T, class=void> struct adl_begin : ::std::false_type { };
 template <class T>
-struct end<T, deduce_t<decltype(::std::end(::std::declval<T>()))>> :
+struct adl_begin<T, deduce_t<decltype(begin(::std::declval<T>()))>> :
   ::std::true_type
-{ using type = decltype(::std::end(::std::declval<T>())); };
+{ using type = decltype(begin(::std::declval<T>())); };
 
-template <class T> using begin_t = typename begin<T>::type;
+template <class T, class=void> struct adl_end : ::std::false_type { };
+template <class T>
+struct adl_end<T, deduce_t<decltype(end(::std::declval<T>()))>> :
+  ::std::true_type
+{ using type = decltype(end(::std::declval<T>())); };
+
+template <class T> using begin_t = typename adl_begin<T>::type;
 
 } /* namespace impl */
 
 template <class R>
-struct is_range : meta::all<impl::begin<R>, impl::end<R>> { };
+struct is_range : meta::all<impl::adl_begin<R>, impl::adl_end<R>> { };
 
 template <class Iterator>
 struct range {
@@ -295,6 +298,11 @@ auto make_range (::std::basic_streambuf<CharT, Traits>* buffer) -> range<
 > {
   using iterator = ::std::istreambuf_iterator<CharT, Traits>;
   return make_range(iterator { buffer }, iterator { });
+}
+
+template <class T>
+auto make_number_range (T start, T stop) -> range<number_iterator<T>> {
+  return make_range(make_number_iterator(start), make_number_iterator(stop));
 }
 
 template <class Iterator>

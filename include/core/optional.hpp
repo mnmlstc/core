@@ -4,15 +4,19 @@
 #include <initializer_list>
 #include <system_error>
 #include <functional>
-#include <exception>
-#include <stdexcept>
 #include <memory>
 
+#include <cstdlib>
 #include <cstdint>
 
 #include <core/type_traits.hpp>
 #include <core/functional.hpp>
 #include <core/utility.hpp>
+
+#ifndef CORE_NO_EXCEPTIONS
+#include <exception>
+#include <stdexcept>
+#endif /* CORE_NO_EXCEPTIONS */
 
 namespace core {
 inline namespace v1 {
@@ -121,6 +125,7 @@ struct nullopt_t { constexpr explicit nullopt_t (int) noexcept { } };
 constexpr in_place_t in_place { };
 constexpr nullopt_t nullopt { 0 };
 
+#ifndef CORE_NO_EXCEPTIONS
 struct bad_optional_access final : ::std::logic_error {
   using ::std::logic_error::logic_error;
 };
@@ -129,9 +134,33 @@ struct bad_expected_type : ::std::logic_error {
   using ::std::logic_error::logic_error;
 };
 
-struct bad_result_condition : ::std::logic_error {
+struct bad_result_condition final : ::std::logic_error {
   using ::std::logic_error::logic_error;
 };
+
+[[noreturn]] inline void throw_bad_optional_access () {
+  throw bad_optional_access { "optional is disengaged" };
+}
+
+[[noreturn]] inline void throw_bad_result_condition () {
+  throw bad_result_condition { "result<T> is valid" };
+}
+
+[[noreturn]] inline void throw_bad_void_result_condition () {
+  throw bad_result_condition { "result<void> is valid" };
+}
+
+[[noreturn]] inline void throw_system_error (::std::error_condition e) {
+  throw ::std::system_error { e.value(), e.category() };
+}
+#else /* CORE_NO_EXCEPTIONS */
+[[noreturn]] inline void throw_bad_optional_access () { ::std::abort(); }
+[[noreturn]] inline void throw_bad_result_condition () { ::std::abort(); }
+[[noreturn]] inline void throw_bad_void_result_condition () { ::std::abort(); }
+[[noreturn]] inline void throw_system_error (::std::error_condition) {
+  ::std::abort();
+}
+#endif /* CORE_NO_EXCEPTIONS */
 
 template <class Type>
 struct optional final : private impl::storage<Type> {
@@ -304,12 +333,12 @@ struct optional final : private impl::storage<Type> {
   constexpr value_type const& value () const noexcept(false) {
     return *this
       ? **this
-      : (throw bad_optional_access { "optional is disengaged" }, **this);
+      : (throw_bad_optional_access(), **this);
   }
 
   value_type& value () noexcept(false) {
     if (*this) { return **this; }
-    throw bad_optional_access { "optional is disengaged" };
+    throw_bad_optional_access();
   }
 
   template <
@@ -397,6 +426,7 @@ private:
   }
 };
 
+#ifndef CORE_NO_EXCEPTIONS
 template <class Type>
 struct expected final {
   using value_type = Type;
@@ -726,6 +756,8 @@ private:
   };
   bool valid { false };
 };
+#endif /* CORE_NO_EXCEPTIONS */
+
 
 template <class Type>
 struct result final {
@@ -980,12 +1012,12 @@ struct result final {
 
   value_type const& value () const noexcept(false) {
     if (*this) { return **this; }
-    throw ::std::system_error { this->cnd.value(), this->cnd.category() };
+    throw_system_error(this->cnd);
   }
 
   value_type& value () noexcept(false) {
     if (*this) { return **this; }
-   throw ::std::system_error { this->cnd.value(), this->cnd.category() };
+   throw_system_error(this->cnd);
   }
 
   template <
@@ -1015,7 +1047,7 @@ struct result final {
   }
 
   ::std::error_condition const& condition () const noexcept(false) {
-    if (*this) { throw bad_result_condition { "result<T> is valid" }; }
+    if (*this) { throw_bad_result_condition(); }
     return this->cnd;
   }
 
@@ -1081,6 +1113,7 @@ private:
   bool valid { false };
 };
 
+#ifndef CORE_NO_EXCEPTIONS
 template <>
 struct expected<void> final {
   using value_type = void;
@@ -1132,6 +1165,7 @@ struct expected<void> final {
 private:
   ::std::exception_ptr ptr;
 };
+#endif /* CORE_NO_EXCEPTIONS */
 
 template <>
 struct result<void> final {
@@ -1182,7 +1216,7 @@ struct result<void> final {
   explicit operator bool () const noexcept { return not this->cnd; }
 
   ::std::error_condition const& condition () const noexcept(false) {
-    if (*this) { throw bad_result_condition { "result<void> is valid" }; }
+    if (*this) { throw_bad_void_result_condition(); }
     return this->cnd;
   }
 
@@ -1221,6 +1255,7 @@ constexpr bool operator == (T const& value, optional<T> const& opt) noexcept {
   return opt and value == *opt;
 }
 
+#ifndef CORE_NO_EXCEPTIONS
 template <class T>
 bool operator == (expected<T> const& lhs, expected<T> const& rhs) noexcept {
   if (lhs and rhs) { return *lhs == *rhs; }
@@ -1246,6 +1281,7 @@ template <class T>
 bool operator == (T const& lhs, expected<T> const& rhs) noexcept {
   return rhs and lhs == *rhs;
 }
+#endif /* CORE_NO_EXCEPTIONS */
 
 template <class T>
 bool operator == (result<T> const& lhs, result<T> const& rhs) noexcept {
@@ -1288,6 +1324,7 @@ bool operator == (T const& value, result<T> const& res) noexcept {
   return res and value == *res;
 }
 
+#ifndef CORE_NO_EXCEPTIONS
 /* void specializations */
 template <>
 inline bool operator == <void> (
@@ -1297,6 +1334,7 @@ inline bool operator == <void> (
   if (not lhs and not rhs) { return lhs.pointer() == rhs.pointer(); }
   return lhs and rhs;
 }
+#endif /* CORE_NO_EXCEPTIONS */
 
 template <>
 inline bool operator == <void> (
@@ -1336,6 +1374,7 @@ constexpr bool operator < (T const& value, optional<T> const& opt) noexcept {
   return opt and value < *opt;
 }
 
+#ifndef CORE_NO_EXCEPTIONS
 template <class T>
 bool operator < (expected<T> const& lhs, expected<T> const& rhs) noexcept {
   if (not rhs) { return false; }
@@ -1361,6 +1400,7 @@ template <class T>
 bool operator < (T const& value, expected<T> const& exp) noexcept {
   return exp and value < *exp;
 }
+#endif /* CORE_NO_EXCEPTIONS */
 
 template <class T>
 bool operator < (result<T> const& lhs, result<T> const& rhs) noexcept {
@@ -1427,6 +1467,7 @@ constexpr bool operator != (T const& value, optional<T> const& opt) noexcept {
   return not (value == opt);
 }
 
+#ifndef CORE_NO_EXCEPTIONS
 template <class T>
 bool operator != (expected<T> const& lhs, expected<T> const& rhs) noexcept {
   return not (lhs == rhs);
@@ -1451,6 +1492,7 @@ template <class T>
 bool operator != (T const& value, expected<T> const& exp) noexcept {
   return not (value == exp);
 }
+#endif /* CORE_NO_EXCEPTIONS */
 
 template <class T>
 bool operator != (result<T> const& lhs, result<T> const& rhs) noexcept {
@@ -1491,11 +1533,13 @@ bool operator != (T const& value, result<T> const& res) noexcept {
   return not (value == res);
 }
 
+#ifndef CORE_NO_EXCEPTIONS
 template <>
 inline bool operator != <void> (
   expected<void> const& lhs,
   expected<void> const& rhs
 ) noexcept { return not (lhs == rhs); }
+#endif /* CORE_NO_EXCEPTIONS */
 
 template <>
 inline bool operator != <void> (
@@ -1530,6 +1574,7 @@ constexpr bool operator >= (T const& value, optional<T> const& opt) noexcept {
   return not (value < opt);
 }
 
+#ifndef CORE_NO_EXCEPTIONS
 template <class T>
 bool operator >= (expected<T> const& lhs, expected<T> const& rhs) noexcept {
   return not (lhs < rhs);
@@ -1554,6 +1599,7 @@ template <class T>
 bool operator >= (T const& value, expected<T> const& exp) noexcept {
   return not (value < exp);
 }
+#endif /* CORE_NO_EXCEPTIONS */
 
 template <class T>
 bool operator >= (result<T> const& lhs, result<T> const& rhs) noexcept {
@@ -1615,6 +1661,7 @@ constexpr bool operator <= (T const& value, optional<T> const& opt) noexcept {
   return not (value > opt);
 }
 
+#ifndef CORE_NO_EXCEPTIONS
 template <class T>
 bool operator <= (expected<T> const& lhs, expected<T> const& rhs) noexcept {
   return not (rhs < lhs);
@@ -1639,6 +1686,7 @@ template <class T>
 bool operator <= (T const& value, expected<T> const& exp) noexcept {
   return not (exp < value);
 }
+#endif /* CORE_NO_EXCEPTIONS */
 
 template <class T>
 bool operator <= (result<T> const& lhs, result<T> const& rhs) noexcept {
@@ -1694,6 +1742,7 @@ constexpr bool operator > (T const& value, optional<T> const& opt) noexcept {
   return opt < value;
 }
 
+#ifndef CORE_NO_EXCEPTIONS
 template <class T>
 bool operator > (expected<T> const& lhs, expected<T> const& rhs) noexcept {
   return rhs < lhs;
@@ -1708,6 +1757,7 @@ template <class T>
 bool operator > (T const& value, expected<T> const& exp) noexcept {
   return exp < value;
 }
+#endif /* CORE_NO_EXCEPTIONS */
 
 template <class T>
 bool operator > (result<T> const& lhs, result<T> const& rhs) noexcept {
@@ -1742,6 +1792,7 @@ auto make_optional (Type&& value) -> optional<decay_t<Type>> {
   return optional<decay_t<Type>> { ::core::forward<Type>(value) };
 }
 
+#ifndef CORE_NO_EXCEPTIONS
 template <class T>
 auto make_expected (::std::exception_ptr error) -> expected<T> {
   return expected<T> { error };
@@ -1762,6 +1813,7 @@ auto make_expected (U&& value) -> enable_if_t<
     ::std::make_exception_ptr(::core::forward<U>(value))
   );
 }
+#endif /* CORE_NO_EXCEPTIONS */
 
 template <class T>
 auto make_result (::std::error_condition const& e) -> result<T> {
@@ -1792,10 +1844,12 @@ void swap (optional<T>& lhs, optional<T>& rhs) noexcept(
   noexcept(lhs.swap(rhs))
 ) { lhs.swap(rhs); }
 
+#ifndef CORE_NO_EXCEPTIONS
 template <class T>
 void swap (expected<T>& lhs, expected<T>& rhs) noexcept(
   noexcept(lhs.swap(rhs))
 ) { lhs.swap(rhs); }
+#endif /* CORE_NO_EXCEPTIONS */
 
 template <class T>
 void swap (result<T>& lhs, result<T>& rhs) noexcept (
@@ -1807,7 +1861,7 @@ void swap (result<T>& lhs, result<T>& rhs) noexcept (
 namespace std {
 
 template <class Type>
-struct hash< ::core::v1::optional<Type>> {
+struct hash<::core::v1::optional<Type>> {
   using result_type = typename hash<Type>::result_type;
   using argument_type = ::core::v1::optional<Type>;
 
@@ -1816,8 +1870,9 @@ struct hash< ::core::v1::optional<Type>> {
   }
 };
 
+#ifndef CORE_NO_EXCEPTIONS
 template <class Type>
-struct hash< ::core::v1::expected<Type>> {
+struct hash<::core::v1::expected<Type>> {
   using result_type = typename hash<Type>::result_type;
   using argument_type = ::core::v1::expected<Type>;
 
@@ -1825,9 +1880,10 @@ struct hash< ::core::v1::expected<Type>> {
     return value ? hash<Type> { }(*value) : result_type { };
   }
 };
+#endif /* CORE_NO_EXCEPTIONS */
 
 template <class Type>
-struct hash< ::core::v1::result<Type>> {
+struct hash<::core::v1::result<Type>> {
   using result_type = typename hash<Type>::result_type;
   using argument_type = ::core::v1::result<Type>;
 

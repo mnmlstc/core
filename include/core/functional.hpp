@@ -1,11 +1,12 @@
 #ifndef CORE_FUNCTIONAL_HPP
 #define CORE_FUNCTIONAL_HPP
 
-#include <core/type_traits.hpp>
-#include <core/utility.hpp>
 #include <functional>
 #include <tuple>
 #include <array>
+
+#include <core/type_traits.hpp>
+#include <core/utility.hpp>
 
 namespace core {
 inline namespace v1 {
@@ -242,9 +243,7 @@ struct greater : impl::binary<T, T, bool> {
   constexpr bool operator () (T const& l, T const& r) const { return l > r; }
 };
 
-template <class T=void> struct less;
-
-template <class T>
+template <class T=void>
 struct less : impl::binary<T, T, bool> {
   constexpr bool operator () (T const& l, T const& r) const { return l < r; }
 };

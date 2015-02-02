@@ -1,14 +1,22 @@
 #ifndef CORE_ANY_HPP
 #define CORE_ANY_HPP
 
-#include <stdexcept>
+#ifdef CORE_NO_RTTI
+  #error "core::any requires RTTI"
+#endif /* CORE_NO_RTTI */
+
 #include <typeinfo>
 #include <memory>
 
+#include <cstdlib>
 #include <cstring>
 
 #include <core/type_traits.hpp>
 #include <core/utility.hpp>
+
+#ifndef CORE_NO_EXCEPTIONS
+#include <stdexcept>
+#endif /* CORE_NO_EXCEPTIONS */
 
 namespace core {
 inline namespace v1 {
@@ -105,12 +113,19 @@ inline any_dispatch const* get_any_dispatch<void> () {
 
 } /* namespace impl */
 
+/* Forgive the ugly preprocessor macro in the middle of this file */
+#ifndef CORE_NO_EXCEPTIONS
 class bad_any_cast final : public ::std::bad_cast {
 public:
   virtual char const* what () const noexcept override {
     return "bad any cast";
   }
 };
+
+[[noreturn]] inline void throw_bad_any_cast () { throw bad_any_cast { }; }
+#else /* CORE_NO_EXCEPTIONS */
+[[noreturn]] inline void throw_bad_any_cast () { ::std::abort(); }
+#endif /* CORE_NO_EXCEPTIONS */
 
 class any final {
   template <class ValueType>
@@ -264,7 +279,7 @@ template <
 > ValueType any_cast (any const& operand) {
   using type = remove_reference_t<ValueType>;
   auto pointer = any_cast<add_const_t<type>>(::std::addressof(operand));
-  if (not pointer) { throw bad_any_cast { }; }
+  if (not pointer) { throw_bad_any_cast(); }
   return *pointer;
 }
 
@@ -279,7 +294,7 @@ template <
 > ValueType any_cast (any&& operand) {
   using type = remove_reference_t<ValueType>;
   auto pointer = any_cast<type>(::std::addressof(operand));
-  if (not pointer) { throw bad_any_cast { }; }
+  if (not pointer) { throw_bad_any_cast(); }
   return *pointer;
 }
 
@@ -294,7 +309,7 @@ template <
 > ValueType any_cast (any& operand) {
   using type = remove_reference_t<ValueType>;
   auto pointer = any_cast<type>(::std::addressof(operand));
-  if (not pointer) { throw bad_any_cast { }; }
+  if (not pointer) { throw_bad_any_cast(); }
   return *pointer;
 }
 

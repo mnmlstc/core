@@ -193,6 +193,8 @@ TEST_CASE("variant-methods", "[variant][methods]") {
 }
 
 TEST_CASE("variant-functions", "[variant][functions]") {
+
+#ifndef CORE_NO_EXCEPTIONS
   SECTION("get") {
     using variant_type = core::variant<
       std::uint64_t,
@@ -211,6 +213,7 @@ TEST_CASE("variant-functions", "[variant][functions]") {
     CHECK(core::get<2>(vector)[1] == std::string { "2" });
     CHECK(core::get<2>(vector)[2] == std::string { "3" });
   }
+#endif /* CORE_NO_EXCEPTIONS */
 
   SECTION("swap") {
     using std::swap;

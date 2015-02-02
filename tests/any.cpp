@@ -121,6 +121,8 @@ TEST_CASE("type", "[modifiers]") {
 }
 
 TEST_CASE("any-cast", "[any-cast]") {
+
+#ifndef CORE_NO_EXCEPTIONS
   SECTION("const-reference") {
     std::uint64_t integer = 42;
     core::any const value { integer };
@@ -129,6 +131,7 @@ TEST_CASE("any-cast", "[any-cast]") {
     CHECK(integer_value == integer);
     CHECK_THROWS_AS(core::any_cast<double>(value), core::bad_any_cast);
   }
+#endif /* CORE_NO_EXCEPTIONS */
 
   SECTION("const-pointer") {
     std::uint64_t integer = 42;
@@ -142,6 +145,7 @@ TEST_CASE("any-cast", "[any-cast]") {
     CHECK(std::is_pointer<decltype(integer_ptr)>::value);
   }
 
+#ifndef CORE_NO_EXCEPTIONS
   SECTION("reference") {
     std::uint64_t integer = 42;
     core::any value { integer };
@@ -150,6 +154,7 @@ TEST_CASE("any-cast", "[any-cast]") {
     CHECK(integer_value == integer);
     CHECK_THROWS_AS(core::any_cast<double>(value), core::bad_any_cast);
   }
+#endif /* CORE_NO_EXCEPTIONS */
 
   SECTION("pointer") {
     std::uint64_t integer = 42;

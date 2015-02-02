@@ -197,6 +197,7 @@ TEST_CASE("poly-methods", "[poly][methods]") {
     CHECK_FALSE(poly);
   }
 
+#ifndef CORE_NO_EXCEPTIONS
   SECTION("reset") {
     struct second_derived : poly::base { };
     core::poly_ptr<poly::base> poly { new poly::derived { } };
@@ -210,6 +211,7 @@ TEST_CASE("poly-methods", "[poly][methods]") {
     poly.reset();
     CHECK_FALSE(poly);
   }
+#endif /* CORE_NO_EXCEPTIONS */
 
   SECTION("get") {
     core::poly_ptr<poly::base> const poly { new poly::derived { } };

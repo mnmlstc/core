@@ -1,14 +1,21 @@
 #ifndef CORE_MEMORY_HPP
 #define CORE_MEMORY_HPP
 
-#include <stdexcept>
-#include <typeinfo>
 #include <memory>
 #include <tuple>
 
 #include <cstddef>
+#include <cstdlib>
 
 #include <core/type_traits.hpp>
+
+#ifndef CORE_NO_EXCEPTIONS
+#include <stdexcept>
+#endif /* CORE_NO_EXCEPTIONS */
+
+#ifndef CORE_NO_RTTI
+#include <typeinfo>
+#endif /* CORE_NO_RTTI */
 
 namespace core {
 inline namespace v1 {
@@ -19,21 +26,21 @@ using deep_lvalue = conditional_t<
   ::std::is_reference<T>::value, T, T const&
 >;
 
+template <class T, class D, class=void> struct pointer :
+  identity<add_pointer_t<T>>
+{ };
+
 template <class T, class D>
-class pointer {
-  template <class U>
-  static auto check (typename U::pointer*) noexcept -> typename U::pointer;
-  template <class> static auto check (...) noexcept(false) -> T*;
+struct pointer<T, D, deduce_t<typename D::pointer>> :
+  identity<typename D::pointer>
+{ };
 
-  using deleter_type = remove_reference_t<D>;
-
-public:
-  static constexpr bool value = noexcept(check<deleter_type>(nullptr));
-  using type = decltype(check<deleter_type>(nullptr));
-};
+template <class T, class D> using pointer_t = typename pointer<T, D>::type;
 
 } /* namespace impl */
 
+/* poly-ptr related definitions */
+#ifndef CORE_NO_RTTI
 /* poly_ptr copier */
 template <class T, class D, class U>
 ::std::unique_ptr<T, D> default_poly_copy (
@@ -49,6 +56,19 @@ template <class T, class D>
 ::std::unique_ptr<T, D> null_poly_copy (
   ::std::unique_ptr<T, D> const&
 ) noexcept { return ::std::unique_ptr<T, D> { }; }
+#endif /* CORE_NO_RTTI */
+
+#ifndef CORE_NO_EXCEPTIONS
+struct bad_polymorphic_reset : ::std::logic_error {
+  using ::std::logic_error::logic_error;
+};
+
+[[noreturn]] inline void throw_bad_poly_reset (char const* msg) {
+  throw bad_polymorphic_reset { msg };
+}
+#else /* CORE_NO_EXCEPTIONS */
+[[noreturn]] inline void throw_bad_poly_reset (char const*) { ::std::abort(); }
+#endif /* CORE_NO_EXCEPTIONS */
 
 /* deep_ptr copier */
 template <class T>
@@ -61,10 +81,7 @@ struct default_copy {
   pointer operator ()(pointer const ptr) const { return new T { *ptr }; }
 };
 
-struct bad_polymorphic_reset : ::std::logic_error {
-  using ::std::logic_error::logic_error;
-};
-
+#ifndef CORE_NO_RTTI
 template <class T, class Deleter=::std::default_delete<T>>
 struct poly_ptr final {
   using unique_type = ::std::unique_ptr<T, Deleter>;
@@ -175,9 +192,9 @@ struct poly_ptr final {
     constexpr auto invalid = "cannot reset null poly_ptr with valid pointer";
     constexpr auto type = "cannot reset poly_ptr with different type";
 
-    if (ptr and not this->ptr) { throw bad_polymorphic_reset { invalid }; }
+    if (ptr and not this->ptr) { throw_bad_poly_reset(invalid); }
     if (ptr and typeid(*this->ptr) != typeid(*ptr)) {
-      throw bad_polymorphic_reset { type };
+      throw_bad_poly_reset(type);
     }
 
     this->ptr.reset(ptr);
@@ -199,6 +216,7 @@ private:
   copier_type copier { null_poly_copy<element_type, deleter_type> };
   unique_type ptr;
 };
+#endif /* CORE_NO_RTTI */
 
 template <
   class T,
@@ -209,7 +227,7 @@ template <
   using element_type = T;
   using deleter_type = Deleter;
   using copier_type = Copier;
-  using pointer = typename impl::pointer<element_type, deleter_type>::type;
+  using pointer = impl::pointer_t<element_type, deleter_type>;
 
   static_assert(
     ::std::is_same<result_of_t<copier_type(pointer)>, pointer>::value,
@@ -347,14 +365,14 @@ struct observer_ptr final {
 
   template <
     class T,
-    class=enable_if_t< ::std::is_convertible<pointer, add_pointer_t<T>>::value>
+    class=enable_if_t<::std::is_convertible<pointer, add_pointer_t<T>>::value>
   > explicit observer_ptr (add_pointer_t<T> ptr) noexcept :
     ptr { dynamic_cast<pointer>(ptr) }
   { }
 
   template <
     class T,
-    class=enable_if_t< ::std::is_convertible<pointer, add_pointer_t<T>>::value>
+    class=enable_if_t<::std::is_convertible<pointer, add_pointer_t<T>>::value>
   > observer_ptr (observer_ptr<T> const& that) noexcept :
     observer_ptr { that.get() }
   { }
@@ -364,7 +382,7 @@ struct observer_ptr final {
 
   template <
     class T,
-    class=enable_if_t< ::std::is_convertible<pointer, add_pointer_t<T>>::value>
+    class=enable_if_t<::std::is_convertible<pointer, add_pointer_t<T>>::value>
   > observer_ptr& operator = (add_pointer_t<T> ptr) noexcept {
     observer_ptr { ptr }.swap(*this);
     return *this;
@@ -374,7 +392,7 @@ struct observer_ptr final {
 
   template <
     class T,
-    class=enable_if_t< ::std::is_convertible<pointer, add_pointer_t<T>>::value>
+    class=enable_if_t<::std::is_convertible<pointer, add_pointer_t<T>>::value>
   > observer_ptr& operator = (observer_ptr<T> const& that) noexcept {
     observer_ptr { that }.swap(*this);
     return *this;
@@ -410,9 +428,8 @@ private:
   pointer ptr;
 };
 
-/* poly_ptr convention for type and deleter is:
- * T, D : U, E
- */
+#ifndef CORE_NO_RTTI
+/* poly_ptr convention for type and deleter is: T, D : U, E */
 template <class T, class D, class U, class E>
 bool operator == (
   poly_ptr<T, D> const& lhs,
@@ -454,6 +471,7 @@ bool operator < (
   >::type;
   return ::std::less<common_type> { }(lhs.get(), rhs.get());
 }
+#endif /* CORE_NO_RTTI */
 
 /* deep_ptr convention for type, deleter, copier is
  * T, D, C : U, E, K
@@ -500,6 +518,7 @@ bool operator < (
   return ::std::less<common_type> { }(lhs.get(), rhs.get());
 }
 
+#ifndef CORE_NO_RTTI
 /* poly_ptr nullptr operator overloads */
 template <class T, class D>
 bool operator == (poly_ptr<T, D> const& lhs, ::std::nullptr_t) noexcept {
@@ -562,6 +581,7 @@ bool operator < (::std::nullptr_t, poly_ptr<T, D> const& rhs) noexcept {
   using pointer = typename poly_ptr<T, D>::pointer;
   return ::std::less<pointer> { }(nullptr, rhs.get());
 }
+#endif /* CORE_NO_RTTI */
 
 /* deep_ptr nullptr operator overloads */
 template <class T, class D, class C>
@@ -709,11 +729,14 @@ observer_ptr<W> make_observer (deep_ptr<W, C, D> const& ptr) noexcept {
   return observer_ptr<W> { ptr.get() };
 }
 
+#ifndef CORE_NO_RTTI
 template <class W, class D>
 observer_ptr<W> make_observer (poly_ptr<W, D> const& ptr) noexcept {
   return observer_ptr<W> { ptr.get() };
 }
+#endif /* CORE_NO_RTTI */
 
+#ifndef CORE_NO_RTTI
 /* make_poly */
 template <
   class T,
@@ -724,6 +747,7 @@ template <
 > auto make_poly (U&& value) -> poly_ptr<T> {
   return poly_ptr<T> { new U { ::std::forward<U>(value) } };
 }
+#endif /* CORE_NO_RTTI */
 
 /* make_deep */
 template <
@@ -760,10 +784,12 @@ template <
   class... Args
 > auto make_unique(Args&&...) -> void = delete;
 
+#ifndef CORE_NO_RTTI
 template <class T, class D>
 void swap (poly_ptr<T, D>& lhs, poly_ptr<T, D>& rhs) noexcept(
   noexcept(lhs.swap(rhs))
 ) { lhs.swap(rhs); }
+#endif /* CORE_NO_RTTI */
 
 template <class T, class D, class C>
 void swap (deep_ptr<T, D, C>& lhs, deep_ptr<T, D, C>& rhs) noexcept(
@@ -779,6 +805,7 @@ void swap (observer_ptr<W>& lhs, observer_ptr<W>& rhs) noexcept(
 
 namespace std {
 
+#ifndef CORE_NO_RTTI
 template <class T, class D>
 struct hash<core::v1::poly_ptr<T, D>> {
   using value_type = core::v1::poly_ptr<T, D>;
@@ -786,6 +813,7 @@ struct hash<core::v1::poly_ptr<T, D>> {
     return hash<typename value_type::pointer>{ }(value.get());
   }
 };
+#endif /* CORE_NO_RTTI */
 
 template <class T, class Deleter, class Copier>
 struct hash<core::v1::deep_ptr<T, Deleter, Copier>> {

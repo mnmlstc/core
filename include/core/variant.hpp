@@ -9,6 +9,7 @@
 #include <typeinfo>
 #include <limits>
 
+#include <cstdlib>
 #include <cstdint>
 
 namespace core {
@@ -31,9 +32,16 @@ auto visitor_gen () -> Result {
 
 } /* namespace impl */
 
+#ifndef CORE_NO_EXCEPTIONS
 struct bad_variant_get final : ::std::logic_error {
   using ::std::logic_error::logic_error;
 };
+[[noreturn]] inline void throw_bad_variant_get () {
+  throw bad_variant_get { "incorrect type" };
+}
+#else /* CORE_NO_EXCEPTIONS */
+[[noreturn]] inline void throw_bad_variant_get () { ::std::abort(); }
+#endif /* CORE_NO_EXCEPTIONS */
 
 /* visitation semantics require that, given a callable type C, and variadic
  * arguments Args... that the return type of the visit will be SFINAE-ified
@@ -130,12 +138,14 @@ class variant final {
     }
   };
 
+#ifndef CORE_NO_RTTI
   struct type_info final {
     template <class T>
     ::std::type_info const* operator ()(T&&) const noexcept {
       return ::std::addressof(typeid(decay_t<T>));
     }
   };
+#endif /* CORE_NO_RTTI */
 
   template <
     ::std::size_t N,
@@ -303,25 +313,27 @@ public:
 
   template <::std::size_t N>
   auto get () const& noexcept(false) -> element<N> const& {
-    if (this->tag != N) { throw bad_variant_get { "incorrect type" }; }
+    if (this->tag != N) { throw_bad_variant_get(); }
     return *static_cast<element<N> const*>(this->pointer());
   }
 
   template <::std::size_t N>
   auto get () && noexcept(false) -> element<N>&& {
-    if (this->tag != N) { throw bad_variant_get { "incorrect type" }; }
+    if (this->tag != N) { throw_bad_variant_get(); }
     return ::core::move(*static_cast<element<N>*>(this->pointer()));
   }
 
   template <::std::size_t N>
   auto get () & noexcept(false) -> element<N>& {
-    if (this->tag != N) { throw bad_variant_get { "incorrect type" }; }
+    if (this->tag != N) { throw_bad_variant_get(); }
     return *static_cast<element<N>*>(this->pointer());
   }
 
+#ifndef CORE_NO_RTTI
   ::std::type_info const& type () const noexcept {
     return *this->visit(type_info { });
   }
+#endif /* CORE_NO_RTTI */
 
   ::std::uint32_t which () const noexcept { return this->tag; }
   bool empty () const noexcept { return false; }

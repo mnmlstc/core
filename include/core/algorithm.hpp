@@ -9,6 +9,50 @@
 namespace core {
 inline namespace v1 {
 
+/* non-range based algorithms */
+template <class T>
+constexpr T const& min (T const& lhs, T const& rhs) {
+  return (rhs < lhs) ? rhs : lhs;
+}
+
+template <class T, class Compare>
+constexpr T const& min (T const& lhs, T const& rhs, Compare compare) {
+  return compare(rhs, lhs) ? rhs : lhs;
+}
+
+template <class T>
+constexpr T const& max (T const& lhs, T const& rhs) {
+  return (lhs < rhs) ? rhs : lhs;
+}
+
+template <class T, class Compare>
+constexpr T const& max (T const& lhs, T const& rhs, Compare compare) {
+  return compare(lhs, rhs) ? rhs : lhs;
+}
+
+template <class T>
+constexpr T const& clamp (T const& value, T const& low, T const& high) {
+  return value < low
+    ? low
+    : high < value
+      ? high
+      : value;
+}
+
+template <class T, class Compare>
+constexpr T const& clamp (
+  T const& value,
+  T const& low,
+  T const& high,
+  Compare compare
+) {
+  return compare(value, low)
+    ? low
+    : compare(high, value)
+      ? high
+      : value;
+}
+
 /* non-modifying sequence algorithms */
 template <class Range, class UnaryPredicate>
 auto all_of (Range&& rng, UnaryPredicate&& p) -> enable_if_t<

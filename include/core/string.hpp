@@ -9,8 +9,18 @@
 #include <string>
 #include <limits>
 
+#include <cstdlib>
+
 namespace core {
 inline namespace v1 {
+
+#ifndef CORE_NO_EXCEPTIONS
+[[noreturn]] inline void throw_out_of_range (char const* msg) {
+  throw ::std::out_of_range { msg };
+}
+#else /* CORE_NO_EXCEPTIONS */
+[[noreturn]] inline void throw_out_of_range (char const*) { ::std::abort(); }
+#endif /* CORE_NO_EXCEPTIONS */
 
 template <class CharT, class Traits=::std::char_traits<CharT>>
 struct basic_string_view {
@@ -133,7 +143,7 @@ struct basic_string_view {
 
   size_type copy (CharT* s, size_type n, size_type pos = 0) const {
     if (pos > this->size()) {
-      throw std::out_of_range { "position greater than size" };
+      throw_out_of_range("position greater than size");
     }
     auto const rlen = std::min(n, this->size() - pos);
     ::std::copy_n(this->begin() + pos, rlen, s);
@@ -142,9 +152,10 @@ struct basic_string_view {
 
   constexpr basic_string_view substr (
     size_type pos=0,
-    size_type n=npos) const noexcept {
+    size_type n=npos
+  ) const noexcept {
     return pos > this->size()
-      ? throw ::std::out_of_range { "start position out of range" }
+      ? (throw_out_of_range("start position out of range"), *this)
       : basic_string_view {
         this->data() + pos,
         n == npos or pos + n > this->size()
@@ -227,9 +238,8 @@ struct basic_string_view {
   }
 
   reference at (size_type idx) const {
-    if (idx >= this->size()) {
-      throw ::std::out_of_range { "requested index out of range" };
-    }
+    static constexpr auto error = "requested index out of range";
+    if (idx >= this->size()) { throw_out_of_range(error); }
     return this->str[idx];
   }
 

@@ -5,6 +5,8 @@
 #include <iterator>
 #include <ostream>
 
+#include <core/type_traits.hpp>
+
 namespace core {
 inline namespace v1 {
 
@@ -158,6 +160,64 @@ private:
   bool first;
 
 };
+
+template <class T>
+struct number_iterator final {
+  using iterator_category = ::std::bidirectional_iterator_tag;
+  using difference_type = T;
+  using value_type = T;
+  using reference = add_lvalue_reference_t<T>;
+  using pointer = add_pointer_t<T>;
+
+  static_assert(::std::is_integral<value_type>::value, "");
+
+  explicit number_iterator (value_type value) noexcept : value { value } { }
+
+  number_iterator (number_iterator const&) noexcept = default;
+  number_iterator () noexcept = default;
+  ~number_iterator () noexcept = default;
+
+  number_iterator& operator = (number_iterator const&) noexcept = default;
+
+  void swap (number_iterator& that) noexcept {
+    ::std::swap(this->value, that.value);
+  }
+
+  const reference operator * () const noexcept { return this->value; }
+  reference operator * () noexcept { return this->value; }
+
+  number_iterator& operator ++ () noexcept { ++this->value; return *this; }
+  number_iterator& operator -- () noexcept { --this->value; return *this; }
+
+  number_iterator operator ++ (int) const noexcept {
+    return number_iterator { this->value + 1 };
+  }
+
+  number_iterator operator -- (int) const noexcept {
+    return number_iterator { this->value - 1 };
+  }
+
+  bool operator == (number_iterator const& that) const noexcept {
+    return **this == *that;
+  }
+
+  bool operator != (number_iterator const& that) const noexcept {
+    return **this != *that;
+  }
+
+private:
+  T value { };
+};
+
+template <class T>
+void swap (number_iterator<T>& lhs, number_iterator<T>& rhs) noexcept {
+  lhs.swap(rhs);
+}
+
+template <class T>
+number_iterator<T> make_number_iterator (T value) noexcept {
+  return number_iterator<T> { value };
+}
 
 }} /* namespace core::v1 */
 

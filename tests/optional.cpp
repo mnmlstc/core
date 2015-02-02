@@ -165,10 +165,13 @@ TEST_CASE("optional-operators", "[optional][operators]") {
   }
 }
 TEST_CASE("optional-methods", "[optional][methods]") {
+
+#ifndef CORE_NO_EXCEPTIONS
   SECTION("value") {
     core::optional<int> opt { };
     CHECK_THROWS_AS(opt.value(), core::bad_optional_access);
   }
+#endif /* CORE_NO_EXCEPTIONS */
 
   SECTION("value-or") {
     core::optional<std::string> opt { };
@@ -469,6 +472,7 @@ TEST_CASE("constexpr-operators", "[constexpr][operators]") {
   }
 }
 
+#ifndef CORE_NO_EXCEPTIONS
 TEST_CASE("expected-constructors", "[expected][constructors]") {
   SECTION("copy-value") {
     auto value = 53;
@@ -775,6 +779,7 @@ TEST_CASE("expected-issue-23", "[expected][issues]") {
   CHECK(b);
   CHECK(c);
 }
+#endif /* CORE_NO_EXCEPTIONS */
 
 TEST_CASE("result-constructor-copy-value", "[result][constructors]") {
   std::string value { "copy" };
@@ -1096,6 +1101,7 @@ TEST_CASE("result-issue-23", "[result][issues]") {
   CHECK(c);
 }
 
+#ifndef CORE_NO_EXCEPTIONS
 TEST_CASE("expected-void-constructor", "[expected][void][constructor]") {
   core::expected<void> value { };
   CHECK(value);
@@ -1225,6 +1231,7 @@ TEST_CASE("expected-void-function-swap", "[expected][void][functions]") {
   CHECK(lhs.pointer() == rhs_ptr);
   CHECK(rhs.pointer() == lhs_ptr);
 }
+#endif /* CORE_NO_EXCDEPTIONS */
 
 TEST_CASE("result-void-constructor", "[result][void][constructors]") {
   core::result<void> value;
@@ -1298,7 +1305,8 @@ TEST_CASE("result-void-operator-equal", "[result][void][operators]") {
   CHECK(lhs_invalid == rhs_invalid);
 }
 
-TEST_CASE("result-void-method-condition", "[expected][void][functions]") {
+#ifndef CORE_NO_EXCEPTIONS
+TEST_CASE("result-void-method-condition", "[result][void][functions]") {
   auto const condition = make_error_condition(std::errc::permission_denied);
   core::result<void> valid { };
   core::result<void> invalid { condition };
@@ -1309,3 +1317,4 @@ TEST_CASE("result-void-method-condition", "[expected][void][functions]") {
   CHECK(invalid == condition);
   CHECK_THROWS_AS(valid.condition(), core::bad_result_condition);
 }
+#endif /* CORE_NO_EXCEPTIONS */
