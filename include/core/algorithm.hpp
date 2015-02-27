@@ -30,6 +30,7 @@ constexpr T const& max (T const& lhs, T const& rhs, Compare compare) {
   return compare(lhs, rhs) ? rhs : lhs;
 }
 
+/* extension */
 template <class T>
 constexpr T const& clamp (T const& value, T const& low, T const& high) {
   return value < low
@@ -51,6 +52,27 @@ constexpr T const& clamp (
     : compare(high, value)
       ? high
       : value;
+}
+
+/* N4318 */
+template <class T>
+constexpr auto abs_diff (T const& a, T const& b) -> decltype(
+  (a < b) ? b - a : a - b
+) { return (a < b) ? b - a : a - b; }
+
+template <class T, class Compare>
+constexpr auto abs_diff (T const& a, T const& b, Compare compare) -> decltype(
+  compare(a, b) ? b - a : a - b
+) { return compare(a, b) ? b - a : a - b; }
+
+template <class T, class Compare, class Difference>
+constexpr auto abs_diff (
+  T const& a,
+  T const& b,
+  Compare compare,
+  Difference diff
+) -> decltype(compare(a, b) ? diff(b, a) : diff(a, b)) {
+  return compare(a, b) ? diff(b, a) : diff(a, b);
 }
 
 /* non-modifying sequence algorithms */

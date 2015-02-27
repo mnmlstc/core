@@ -3,15 +3,14 @@
 Algorithm Component
 ===================
 
-.. default-domain:: cpp
-.. highlight:: cpp
-
 The algorithm component can be seen as a competitor to the Boost.Range
 algorithm headers. There are a few small differences (namely that this
 component relies on the :ref:`core-range-component`), however these differences
 are discussed below.
 
 The algorithm component can be found in the ``<core/algorithm.hpp>`` header.
+
+.. namespace:: core
 
 .. note:: All of the functions in this component that take a range take
    universal references in most cases. The reasons for this are:
@@ -22,9 +21,66 @@ The algorithm component can be found in the ``<core/algorithm.hpp>`` header.
 
    In the author's opinion, causing additional parameters to be passed to the
    underlying functions by value is an unnecessary cost. The only cost that
-   should be incurred is the one to :func:`make_range`.
+   should be incurred is the one to :func:`make_range <core::make_range>`.
 
 .. _core-algorithm-component-non-modifying-sequence-operations:
+
+Non-Range Based Operations
+--------------------------
+
+.. function:: constexpr T const& min (T const& lhs, T const& rhs, Compare comp)
+              constexpr T const& min (T const& lhs, T const& rhs)
+
+   .. versionadded:: 1.2
+
+   :returns: The smaller of *lhs* and *rhs*. Uses ``operator <`` to compare by
+             default.
+
+.. function:: constexpr T const& max (T const& lhs, T const& rhs, Compare comp)
+              constexpr T const& max (T const& lhs, T const& rhs)
+
+   .. versionadded:: 1.2
+
+   :returns: The larger of *lhs* and *rhs*. Uses ``operator <`` to compare by
+             default.
+
+.. function:: constexpr T const& clamp (\
+                T const& value,         \
+                T const& low,           \
+                T const& high,          \
+                Compare comp)
+              constexpr T const& clamp (\
+              T const& value,           \
+              T const& low,             \
+              T const& high)
+
+   .. versionadded:: 1.2
+
+   :returns: *value* if it is within the value boundaries of *low* and *high*.
+             Otherwise it returns the :func:`max` of *low* and *value* or the
+             *min* of *high* and *value*.
+
+   Clamps *value* to either *low* or *high* if *comp* returns false for
+   its comparison operation. Uses ``operator <`` by default.
+
+.. function:: constexpr auto abs_diff (\
+                T const& a,            \
+                T const& b,            \
+                Compare compare,       \
+                Difference diff)
+              constexpr auto abs_diff (T const& a, T const& b, Compare compare)
+              constexpr auto abs_diff (T const& a, T const& b)
+
+   An implementation of N4318_.
+
+   This fixes an issue regarding the :cxx:`std::abs` function, where a call
+   to :cxx:`std::abs(3u, 5u)` can result in a return value of 4294967294.
+   This function insures that the correct value (2) is returned instead.
+
+   The default *Compare* and *Difference* functions are :cxx:`operator <`
+   and :cxx:`operator -` respectively
+
+   .. versionadded:: 1.2
 
 Non-Modifying Sequence Operations
 ---------------------------------
@@ -44,7 +100,9 @@ Non-Modifying Sequence Operations
    :returns: ``true`` if *up* returns ``false`` for **all** elements in *range*.
    :requires: *range* must provide InputIterators.
 
-.. function:: decay_t<UnaryFunction> for_each (Range&& range, UnaryFunction&& f)
+.. function:: decay_t<UnaryFunction> for_each (\
+                Range&& range,                 \
+                UnaryFunction&& f)
 
    :returns: *f* by value.
    :requires: *range* must provide InputIterators.
@@ -104,8 +162,9 @@ Non-Modifying Sequence Operations
                 BinaryPredicate&& bp\
               )
 
-   :returns: Iterator to the first element in *irange* that is also in *frange*.
-             If no such element is found, the end of *irange* is returned.
+   :returns: Iterator to the first element in *irange* that is also in
+             *frange*. If no such element is found, the end of *irange* is
+             returned.
    :requires: *irange* must provide InputIterators, *frange* must provide
               ForwardIterators.
 
@@ -176,7 +235,6 @@ Modifying Sequence Operations
 
    :returns: Iterator to the last element copied.
    :requires: *range* must provide BidirectionalIterators.
-
 
 .. function:: decay_t<OutputIt> move (Range&& range, OutputIt&& it)
 
@@ -507,8 +565,8 @@ Sorting Operations
 .. function:: void stable_sort (Range&& range)
               void stable_sort (Range&& range, Compare&& cmp)
 
-   Sorts elements in *range* in the same way as :func:`sort`, with the exception
-   that the order of equal elements is guaranteed to be preserved.
+   Sorts elements in *range* in the same way as :func:`sort`, with the
+   exception that the order of equal elements is guaranteed to be preserved.
 
    :requires: *range* must provide RandomAccessIterators.
 
@@ -841,3 +899,5 @@ Min/Max Operations
              into the first permutation and returns ``false``.
 
    :requires: *range* must provide BidirectionalIterators.
+
+.. _N4318: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n4318.pdf
