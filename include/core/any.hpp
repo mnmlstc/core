@@ -31,12 +31,14 @@ using is_small = meta::boolean<
 >;
 
 struct any_dispatch {
-  using destroy_function = void (*)(data_type&);
-  using clone_function = void(*)(data_type const&, data_type&);
-  using type_function = ::std::type_info const& (*)();
+  using destroy_function = add_pointer_t<void(data_type&)>;
+  using clone_function = add_pointer_t<void(data_type const&, data_type&)>;
+  using move_function = add_pointer_t<void(data_type&, data_type&)>;
+  using type_function = add_pointer_t<::std::type_info const&()>;
 
   destroy_function const destroy;
   clone_function const clone;
+  move_function const move;
   type_function const type;
 };
 
@@ -45,16 +47,23 @@ template <class Type, bool=is_small<Type>::value> struct any_dispatch_select;
 template <class Type>
 struct any_dispatch_select<Type, true> {
   using value_type = Type;
+  using const_pointer = add_pointer_t<add_const_t<value_type>>;
   using pointer = add_pointer_t<value_type>;
   using allocator_type = ::std::allocator<value_type>;
   using allocator_traits = ::std::allocator_traits<allocator_type>;
 
   static void clone (data_type const& source, data_type& data) {
     allocator_type alloc { };
-    value_type val { };
-    ::std::memcpy(::std::addressof(val), ::std::addressof(source), sizeof(val));
+    auto val = reinterpret_cast<const_pointer const>(::std::addressof(source));
     auto ptr = reinterpret_cast<pointer>(::std::addressof(data));
-    allocator_traits::construct(alloc, ptr, val);
+    allocator_traits::construct(alloc, ptr, *val);
+  }
+
+  static void move (data_type& source, data_type& data) {
+    allocator_type alloc { };
+    auto val = reinterpret_cast<pointer>(::std::addressof(source));
+    auto ptr = reinterpret_cast<pointer>(::std::addressof(data));
+    allocator_traits::construct(alloc, ptr, ::core::move(*val));
   }
 
   static void destroy (data_type& data) {
@@ -83,6 +92,18 @@ struct any_dispatch_select<Type, false> {
     data = pointer;
   }
 
+  static void move (data_type& source, data_type& data) {
+    allocator_type alloc { };
+    auto& value = *static_cast<pointer>(source);
+    auto pointer = allocator_traits::allocate(alloc, 1);
+    auto scope = make_scope_guard([&alloc, pointer] {
+      allocator_traits::deallocate(alloc, pointer, 1);
+    });
+    allocator_traits::construct(alloc, pointer, ::core::move(value));
+    scope.dismiss();
+    data = pointer;
+  }
+
   static void destroy (data_type& data) {
     allocator_type alloc { };
     auto value = static_cast<pointer>(data);
@@ -96,6 +117,7 @@ any_dispatch const* get_any_dispatch () {
   static any_dispatch const instance = {
     any_dispatch_select<Type>::destroy,
     any_dispatch_select<Type>::clone,
+    any_dispatch_select<Type>::move,
     [] () -> ::std::type_info const& { return typeid(Type); }
   };
   return ::std::addressof(instance);
@@ -106,6 +128,7 @@ inline any_dispatch const* get_any_dispatch<void> () {
   static any_dispatch const instance = {
     [] (data_type&) { },
     [] (data_type const&, data_type&) { },
+    [] (data_type&, data_type&) { },
     [] () -> ::std::type_info const& { return typeid(void); }
   };
   return ::std::addressof(instance);
@@ -192,11 +215,8 @@ public:
 
   any (any&& that) noexcept :
     table { that.table },
-    data { that.data }
-  {
-    that.table = impl::get_any_dispatch<void>();
-    that.data = nullptr;
-  }
+    data { nullptr }
+  { this->table->move(that.data, this->data); }
 
   any () noexcept :
     table { impl::get_any_dispatch<void>() },

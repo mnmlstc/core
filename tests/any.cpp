@@ -44,7 +44,6 @@ TEST_CASE("constructor-move", "[constructors]") {
   core::any ctor { std::move(value) };
 
   CHECK_FALSE(ctor.empty());
-  CHECK(value.empty());
   CHECK(ctor.type() == typeid(std::string));
 }
 
@@ -82,7 +81,6 @@ TEST_CASE("assignment", "[assignment]") {
     core::any value { integer };
     core::any assigned;
     assigned = std::move(value);
-    CHECK(value.empty());
     CHECK_FALSE(assigned.empty());
     CHECK(typeid(integer) == assigned.type());
   }
