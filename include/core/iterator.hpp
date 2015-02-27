@@ -158,7 +158,6 @@ private:
   ::std::reference_wrapper<ostream_type> os;
   char_type const* delimiter;
   bool first;
-
 };
 
 template <class T>

@@ -451,14 +451,14 @@ struct optional final : private impl::storage<Type> {
   }
 
   template <class F>
-  auto operator >>= (F&& f) -> decltype(then(::core::forward<F>(f))) {
-    return this->then(::core::forward<F>(f));
-  }
+  auto operator >>= (F&& f) -> decltype(
+    ::std::declval<optional>().then(::core::forward<F>(f))
+  ) { return this->then(::core::forward<F>(f)); }
 
   template <class F>
-  auto operator >>= (F&& f) const -> decltype(then(::core::forward<F>(f))) {
-    return this->then(::core::forward<F>(f));
-  }
+  auto operator >>= (F&& f) const -> decltype(
+    ::std::declval<add_const_t<optional>>().then(::core::forward<F>(f))
+  ) { return this->then(::core::forward<F>(f)); }
 
 private:
   constexpr value_type const* ptr (::std::false_type) const noexcept {
@@ -740,6 +740,7 @@ struct expected final {
     return this->pointer();
   }
 
+  /* member function 'extensions' */
   template <class Visitor, class... Args>
   constexpr auto visit (Visitor&& visitor, Args&&... args) const -> common_type_t<
     invoke_of_t<Visitor, value_type const&, Args...>,
@@ -790,19 +791,29 @@ struct expected final {
 
   template <
     class F,
-    class=enable_if_t<is_expected<result_of_t<F(value_type&)>>::value>
-  > auto operator >>= (F&& f) -> result_of_t<F(value_type&)> {
+    class=enable_if_t<is_expected<invoke_of_t<F, value_type&>>::value>
+  > auto then (F&& f) -> invoke_of_t<F, value_type&> {
     if (*this) { return ::core::invoke(::core::forward<F>(f), **this); }
     return this->ptr;
   }
 
   template <
     class F,
-    class=enable_if_t<is_expected<result_of_t<F(value_type const&)>>::value>
-  > auto operator >>= (F&& f) const -> result_of_t<F(value_type const&)> {
+    class=enable_if_t<is_expected<invoke_of_t<F, value_type const&>>::value>
+  > auto then (F&& f) const -> invoke_of_t<F, value_type const&> {
     if (*this) { return ::core::invoke(::core::forward<F>(f), **this); }
     return this->ptr;
   }
+
+  template <class F>
+  auto operator >>= (F&& f) -> decltype(
+    ::std::declval<expected>().then(::core::forward<F>(f))
+  ) { return this->then(::core::forward<F>(f)); }
+
+  template <class F>
+  auto operator >>= (F&& f) const -> decltype(
+    ::std::declval<add_const_t<expected>>().then(::core::forward<F>(f))
+  ) { return this->then(::core::forward<F>(f)); }
 
 private:
 
@@ -821,6 +832,8 @@ private:
 
 template <class Type>
 struct result final {
+  template <class U> friend struct result;
+
   using value_type = Type;
 
   static constexpr bool nothrow = ::std::is_nothrow_move_constructible<
@@ -877,7 +890,7 @@ struct result final {
       ::std::is_error_condition_enum<ErrorConditionEnum>::value
     >
   > result (ErrorConditionEnum e) noexcept :
-    valid { static_cast<core::underlying_type_t<ErrorConditionEnum>>(e) == 0 }
+    valid { core::to_integral(e) == 0 }
   {
     if (*this) { ::new (::std::addressof(this->val)) value_type(); }
     else { ::new (::std::addressof(this->cnd)) ::std::error_condition(e); }
@@ -901,8 +914,47 @@ struct result final {
   { }
 
   template <
+    class T,
+    class=enable_if_t<
+      meta::all<
+        meta::none<::std::is_same<result, result<T>>>,
+        ::std::is_constructible<
+          value_type,
+          add_lvalue_reference_t<add_const_t<T>>
+        >
+      >::value
+    >
+  > result (result<T> const& that) :
+    valid { that.valid }
+  {
+    if (*this) { ::new (::std::addressof(this->val)) value_type(that.val); }
+    else {
+      ::new (::std::addressof(this->cnd)) ::std::error_condition(that.cnd);
+    }
+  }
+
+
+  template <
+    class T,
+    class=enable_if_t<
+      meta::all<
+        meta::none<::std::is_same<result, result<T>>>,
+        ::std::is_constructible<value_type, add_rvalue_reference_t<T>>
+      >::value
+    >
+  > result (result<T>&& that) :
+    valid { that.valid }
+  {
+    if (*this) {
+      ::new (::std::addressof(this->val)) value_type(::core::move(that.val));
+    } else {
+      ::new (::std::addressof(this->cnd)) ::std::error_condition(that.cnd);
+    }
+  }
+
+  template <
     class... Args,
-    class=enable_if_t< ::std::is_constructible<value_type, Args...>::value>
+    class=enable_if_t<::std::is_constructible<value_type, Args...>::value>
   > explicit result (in_place_t, Args&&... args) :
     val(::core::forward<Args>(args)...),
     valid { true }
@@ -1111,6 +1163,7 @@ struct result final {
     return this->cnd;
   }
 
+  /* member function extensions */
   template <class Visitor, class... Args>
   constexpr auto visit (Visitor&& visitor, Args&&... args) const -> common_type_t<
     invoke_of_t<Visitor, value_type const&, Args...>,
@@ -1161,19 +1214,29 @@ struct result final {
 
   template <
     class F,
-    class=enable_if_t<is_result<result_of_t<F(value_type&)>>::value>
-  > auto operator >>= (F&& f) -> result_of_t<F(value_type&)> {
+    class=enable_if_t<is_result<invoke_of_t<F, value_type&>>::value>
+  > auto then (F&& f) -> invoke_of_t<F, value_type&> {
     if (*this) { return ::core::invoke(::core::forward<F>(f), **this); }
     return this->cnd;
   }
 
   template <
     class F,
-    class=enable_if_t<is_result<result_of_t<F(value_type const&)>>::value>
-  > auto operator >>= (F&& f) const -> result_of_t<F(value_type const&)> {
+    class=enable_if_t<is_result<invoke_of_t<F, value_type const&>>::value>
+  > auto then (F&& f) const -> invoke_of_t<F, value_type const&> {
     if (*this) { return ::core::invoke(::core::forward<F>(f), **this); }
     return this->cnd;
   }
+
+  template <class F>
+  auto operator >>= (F&& f) -> decltype(
+    ::std::declval<result>().then(::core::forward<F>(f))
+  ) { return this->then(::core::forward<F>(f)); }
+
+  template <class F>
+  auto operator >>= (F&& f) const -> decltype(
+    ::std::declval<add_const_t<result>>().then(::core::forward<F>(f))
+  ) { return this->then(::core::forward<F>(f)); }
 
 private:
   void reset () {
