@@ -2,12 +2,15 @@
 #define CORE_MEMORY_HPP
 
 #include <memory>
+#include <bitset>
 #include <tuple>
 
 #include <cstddef>
 #include <cstdlib>
 
 #include <core/type_traits.hpp>
+#include <core/algorithm.hpp>
+#include <core/range.hpp>
 
 #ifndef CORE_NO_EXCEPTIONS
 #include <stdexcept>
@@ -38,6 +41,123 @@ struct pointer<T, D, deduce_t<typename D::pointer>> :
 template <class T, class D> using pointer_t = typename pointer<T, D>::type;
 
 } /* namespace impl */
+
+namespace memory {
+
+template <::std::size_t N>
+struct arena final {
+  static_assert(N != 0, "N may not be 0");
+
+  using size_type = ::std::size_t;
+
+  arena () noexcept : current { } { }
+  ~arena () noexcept = default;
+
+  arena (arena const&) noexcept = delete;
+  arena& operator = (arena const&) noexcept = delete;
+
+  static constexpr size_type alignment () noexcept {
+    return alignof(::std::max_align_t);
+  }
+  static constexpr size_type size () noexcept { return N; }
+  size_type max_size () const noexcept { return N; }
+  size_type used () const noexcept { return this->current; }
+  void reset () noexcept { this->current = 0; }
+
+  void* allocate (size_type n) {
+    if (not this->inside(n)) { return nullptr; }
+    auto ptr = this->pointer() + this->current;
+    this->current += n;
+    return ptr;
+  }
+
+  void deallocate (void* p, size_type n) {
+    auto incoming = static_cast<uint8_t*>(p) + n;
+    auto ptr = this->pointer() + this->current;
+    if (ptr != incoming) { return; }
+    this->current -= n;
+  }
+
+  /* used by arena_allocator to permit default construction */
+  static arena& ref () noexcept {
+    static arena instance;
+    return instance;
+  }
+
+private:
+  bool inside (size_type n) const noexcept { return (this->current + n) > N; }
+  ::std::uint8_t* pointer () noexcept {
+    return reinterpret_cast<uint8_t>(::std::addressof(this->data));
+  }
+
+  aligned_storage_t<N, alignof(::std::max_align_t)> data;
+  size_type current; // byte index
+};
+
+} /* namespace memory */
+
+template <class T, ::std::size_t N>
+struct arena_allocator {
+  using difference_type = ::std::ptrdiff_t;
+  using value_type = T;
+  using size_type = ::std::size_t;
+
+  using const_reference = add_lvalue_reference_t<add_const_t<value_type>>;
+  using const_pointer = add_pointer_t<add_const_t<value_type>>;
+  using reference = add_lvalue_reference_t<value_type>;
+  using pointer = add_pointer_t<value_type>;
+
+  using const_void_pointer = add_pointer_t<add_const_t<void>>;
+  using void_pointer = add_pointer_t<void>;
+
+  using propagate_on_container_copy_assignment = ::std::true_type;
+  using propagate_on_container_move_assignment = ::std::true_type;
+  using propagate_on_container_swap = ::std::true_type;
+
+  using is_always_equal = ::std::false_type;
+
+  template <class U> struct rebind { using other = arena_allocator<U, N>; };
+
+  explicit arena_allocator (memory::arena<N>& ref) noexcept : ref { ref } { }
+  arena_allocator () noexcept : arena_allocator { memory::arena<N>::ref() } { }
+
+  template <class U>
+  arena_allocator (arena_allocator<U, N> const& that) noexcept :
+    ref { that.ref }
+  { }
+
+  arena_allocator (arena_allocator const& that) noexcept :
+    ref { that.ref }
+  { }
+
+  template <class U>
+  arena_allocator& operator = (arena_allocator<U, N> const& that) noexcept {
+    arena_allocator { that }.swap(*this);
+    return *this;
+  }
+
+  arena_allocator& operator = (arena_allocator const& that) noexcept = default;
+
+  void swap (arena_allocator& that) noexcept {
+    ::std::swap(this->ref, that.ref);
+  }
+
+  pointer allocate (size_type n, const_void_pointer=nullptr) noexcept {
+    return static_cast<pointer>(this->arena().allocate(n * sizeof(value_type)));
+  }
+
+  void deallocate (pointer ptr, size_type n) noexcept {
+    this->arena().deallocate(ptr, n * sizeof(value_type));
+  }
+
+  size_type max_size () const noexcept { return N / sizeof(value_type); }
+
+  memory::arena<N> const& arena () const noexcept { return this->ref; }
+  memory::arena<N>& arena () noexcept { return this->ref; }
+
+private:
+  ::std::reference_wrapper<memory::arena<N>> ref;
+};
 
 /* poly-ptr related definitions */
 #ifndef CORE_NO_RTTI
@@ -428,6 +548,23 @@ private:
   pointer ptr;
 };
 
+template <class T, ::std::size_t N, class U, ::std::size_t M>
+bool operator == (
+  arena_allocator<T, N> const& lhs,
+  arena_allocator<U, M> const& rhs
+) noexcept {
+  return N == M and
+    ::std::addressof(lhs.arena()) == ::std::addressof(rhs.arena());
+}
+
+template <class T, ::std::size_t N, class U, ::std::size_t M>
+bool operator != (
+  arena_allocator<T, N> const& lhs,
+  arena_allocator<U, M> const& rhs
+) noexcept { return N != M or
+  ::std::addressof(lhs.arena()) != ::std::addressof(rhs.arena());
+}
+
 #ifndef CORE_NO_RTTI
 /* poly_ptr convention for type and deleter is: T, D : U, E */
 template <class T, class D, class U, class E>
@@ -783,6 +920,11 @@ template <
   class=enable_if_t< ::std::extent<Type>::value>,
   class... Args
 > auto make_unique(Args&&...) -> void = delete;
+
+template <class T, ::std::size_t N>
+void swap (arena_allocator<T, N>& lhs, arena_allocator<T, N>& rhs) noexcept {
+  lhs.swap(rhs);
+}
 
 #ifndef CORE_NO_RTTI
 template <class T, class D>
