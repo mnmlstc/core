@@ -85,7 +85,7 @@ struct arena final {
   }
 
 private:
-  bool inside (size_type n) const noexcept { return (this->current + n) > N; }
+  bool inside (size_type n) const noexcept { return (this->current + n) < N; }
   ::std::uint8_t* pointer () noexcept {
     return reinterpret_cast<::std::uint8_t*>(::std::addressof(this->data));
   }
