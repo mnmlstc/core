@@ -182,7 +182,6 @@ struct number_iterator final {
     ::std::swap(this->value, that.value);
   }
 
-  const reference operator * () const noexcept { return this->value; }
   reference operator * () noexcept { return this->value; }
 
   number_iterator& operator ++ () noexcept { ++this->value; return *this; }
@@ -197,11 +196,11 @@ struct number_iterator final {
   }
 
   bool operator == (number_iterator const& that) const noexcept {
-    return **this == *that;
+    return this->value == that.value;
   }
 
   bool operator != (number_iterator const& that) const noexcept {
-    return **this != *that;
+    return this->value != that.value;
   }
 
 private:
