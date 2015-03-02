@@ -72,7 +72,7 @@ struct arena final {
   }
 
   void deallocate (void* p, size_type n) {
-    auto incoming = static_cast<uint8_t*>(p) + n;
+    auto incoming = static_cast<::std::uint8_t*>(p) + n;
     auto ptr = this->pointer() + this->current;
     if (ptr != incoming) { return; }
     this->current -= n;
@@ -87,7 +87,7 @@ struct arena final {
 private:
   bool inside (size_type n) const noexcept { return (this->current + n) > N; }
   ::std::uint8_t* pointer () noexcept {
-    return reinterpret_cast<uint8_t>(::std::addressof(this->data));
+    return reinterpret_cast<::std::uint8_t*>(::std::addressof(this->data));
   }
 
   aligned_storage_t<N, alignof(::std::max_align_t)> data;
@@ -116,6 +116,7 @@ struct arena_allocator {
 
   using is_always_equal = ::std::false_type;
 
+  template <class, ::std::size_t> friend struct arena_allocator;
   template <class U> struct rebind { using other = arena_allocator<U, N>; };
 
   explicit arena_allocator (memory::arena<N>& ref) noexcept : ref { ref } { }
