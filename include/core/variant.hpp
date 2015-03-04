@@ -167,15 +167,33 @@ class variant final {
     data { }, tag { N }
   { ::new (this->pointer()) type_at_t<N, Ts...> (::core::forward<T>(value)); }
 
+  template <class T>
+  using select_index = conditional_t<
+    meta::count<decay_t<T>, pack_type>::value,
+    meta::index<decay_t<T>, pack_type>,
+    index<0>
+  >;
+
 public:
 
+  /* The conditional_t used here allows us to first check if a given type
+   * is declared in the variant and if it is, we will try to find its
+   * constructor and immediately jump there, otherwise, we go the slower
+   * route of trying to construct something from the value given.
+   *
+   * While this route is 'slower' this is a compile time performance issue and
+   * will not impact runtime performance.
+   *
+   * Unfortunately we *do* instantiate templates several times, but there's
+   * not much we can do about it.
+   */
   template <
     class T,
     class=enable_if_t<not ::std::is_same<decay_t<T>, variant>::value>
   > variant (T&& value) :
     variant {
-      index<0> { },
-      ::std::is_constructible<type_at_t<0, Ts...>, T> { },
+      select_index<T> { },
+      ::std::is_constructible<type_at_t<select_index<T>::value, Ts...>, T> { },
       ::core::forward<T>(value)
     }
   { }
