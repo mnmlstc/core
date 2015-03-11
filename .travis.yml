@@ -1,0 +1,57 @@
+# Matrix Build Declaration
+language: cpp
+
+compiler:
+  - clang
+  - gcc
+
+env:
+  - BUILD_TYPE=Release PACKAGE=3.3 USE_LIBCXX=OFF
+  - BUILD_TYPE=Release PACKAGE=3.4 USE_LIBCXX=OFF
+  - BUILD_TYPE=Release PACKAGE=3.5 USE_LIBCXX=OFF
+  - BUILD_TYPE=Release PACKAGE=3.6 USE_LIBCXX=OFF
+  - BUILD_TYPE=Release PACKAGE=4.8 USE_LIBCXX=OFF
+  - BUILD_TYPE=Release PACKAGE=4.9 USE_LIBCXX=OFF
+  - BUILD_TYPE=Release PACKAGE=3.3 USE_LIBCXX=ON
+  - BUILD_TYPE=Release PACKAGE=3.4 USE_LIBCXX=ON
+  - BUILD_TYPE=Release PACKAGE=3.5 USE_LIBCXX=ON
+  - BUILD_TYPE=Release PACKAGE=3.6 USE_LIBCXX=ON
+  - BUILD_TYPE=Debug PACKAGE=3.3 USE_LIBCXX=OFF
+  - BUILD_TYPE=Debug PACKAGE=3.4 USE_LIBCXX=OFF
+  - BUILD_TYPE=Debug PACKAGE=3.5 USE_LIBCXX=OFF
+  - BUILD_TYPE=Debug PACKAGE=3.6 USE_LIBCXX=OFF
+  - BUILD_TYPE=Debug PACKAGE=4.8 USE_LIBCXX=OFF
+  - BUILD_TYPE=Debug PACKAGE=4.9 USE_LIBCXX=OFF
+  - BUILD_TYPE=Debug PACKAGE=3.3 USE_LIBCXX=ON
+  - BUILD_TYPE=Debug PACKAGE=3.4 USE_LIBCXX=ON
+  - BUILD_TYPE=Debug PACKAGE=3.5 USE_LIBCXX=ON
+  - BUILD_TYPE=Debug PACKAGE=3.6 USE_LIBCXX=ON
+
+# We don't want a version mismatch between gcc and clang
+matrix:
+  exclude:
+    - compiler: clang
+      env: PACKAGE=4.8
+    - compiler: clang
+      env: PACKAGE=4.9
+    - compiler: gcc
+      env: PACKAGE=3.3
+    - compiler: gcc
+      env: PACKAGE=3.4
+    - compiler: gcc
+      env: PACKAGE=3.5
+    - compiler: gcc
+      env: PACKAGE=3.6
+
+branches:
+  only: master
+
+# Environment Setup (Fixing Travis-CI, effectively)
+before_install: python ./scripts/python/travis-before-install.py
+install: python ./scripts/python/travis-install.py
+
+# Configure, Build, Test Steps
+before_script: python ./scripts/python/travis-configure.py
+script: python ./scripts/python/travis-build.py
+
+after_failure: python ./scripts/python/travis-failure.py
