@@ -416,19 +416,19 @@ struct hash<core::v1::variant<Ts...>> {
 };
 
 template <size_t I, class... Ts>
-[[gnu::deprecated, deprecated]]
+[[gnu::deprecated]]
 auto get (::core::v1::variant<Ts...> const& v) noexcept(false) -> decltype(
   ::core::v1::get<I>(v)
 ) { return ::core::v1::get<I>(v); }
 
 template <size_t I, class... Ts>
-[[gnu::deprecated, deprecated]]
+[[gnu::deprecated]]
 auto get (::core::v1::variant<Ts...>&& v) noexcept(false) -> decltype(
   ::core::v1::get<I>(v)
 ) { return ::core::v1::get<I>(v); }
 
 template <size_t I, class... Ts>
-[[gnu::deprecated, deprecated]]
+[[gnu::deprecated]]
 auto get (::core::v1::variant<Ts...>& v) noexcept (false) -> decltype(
   ::core::v1::get<I>(v)
 ) { return ::core::v1::get<I>(v); }

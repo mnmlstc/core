@@ -20,6 +20,13 @@
 #include <typeinfo>
 #endif /* CORE_NO_RTTI */
 
+/* Small hack just for GCC 4.8. Just trust me, it's needed */
+#if defined(__GNUC__) && defined(__GNUC_MINOR__)
+  #if __GNUC__ == 4 && __GNUC_MINOR__ == 8
+  namespace std { using ::max_align_t; } /* namespace std */
+  #endif
+#endif /* defined(__GNUC__) */
+
 namespace core {
 inline namespace v1 {
 namespace impl {

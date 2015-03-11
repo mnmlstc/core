@@ -28,7 +28,7 @@ if __name__ == '__main__':
         '-DBUILD_WITH_LIBCXX:BOOL={}'.format(use_libcxx),
         '-DBUILD_TESTING:BOOL=ON'
     ]
-    try: arguments.prepend(which('cmake'))
+    try: arguments.insert(0, which('cmake'))
     except LocateError as e: exit(e)
     try: mkdir('build')
     except OSError as e: exit(e)

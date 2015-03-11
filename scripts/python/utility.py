@@ -3,8 +3,11 @@
 # Many imitate common unix utilities.
 
 from __future__ import print_function
-from subprocess import PIPE, STDOUT, Popen as popen
+from subprocess import Popen as process
+from subprocess import STDOUT
+from subprocess import PIPE
 from contextlib import contextmanager
+from stat import S_IEXEC
 import sys
 import os
 
@@ -40,9 +43,9 @@ def pushd (directory):
     os.chdir(old)
 
 def make_executable (path):
-    if os.access(path, os.X_OK): return
+    if is_executable(path): return
     stat = os.stat(path)
-    os.chmod(path, stat.st_mode | stat.S_IEXEC)
+    os.chmod(path, stat.st_mode | S_IEXEC)
 
 def is_executable (path): return os.access(path, os.X_OK)
 

@@ -7,8 +7,9 @@ from utility import execute
 from utility import getenv
 from utility import which
 from utility import exit
-from os.path import getcwd
+from os.path import join
 from os import pathsep
+from os import listdir
 
 if __name__ == '__main__':
     print('Checking environment variables...')
@@ -21,17 +22,24 @@ if __name__ == '__main__':
 
     libcxx = use_libcxx == 'ON'
     clang = 'clang' in cxx
-    current = getcwd()
 
     print('Installing CMake...')
-    execute('sudo', 'cmake-amd64.sh', '--skip-license')
+    execute('sudo', './cmake-amd64.sh', '--skip-license', '--prefix=/usr')
 
     if clang:
+        # Needed, so that we can insure
         print('Installing Compiler Dependencies...')
         execute('sudo', 'apt-get', 'install', '-qq', 'g++-4.9')
 
     print('Installing Compiler...')
-    execute('sudo', 'apt-get', 'install', '-qq', '{}-{}'.format(cxx, version))
+    arguments = [
+        'sudo',
+        'apt-get',
+        'install',
+        '-qq',
+        '{}-{}'.format(cxx, version)
+    ]
+    execute(*arguments)
 
 
     if libcxx:
@@ -40,7 +48,7 @@ if __name__ == '__main__':
             '/usr/include/c++/4.9/x86_64-linux-gnu/'
         ]
         arguments = [
-            join(current, 'libcxx'), # directory
+            'libcxx', # directory
             '-DCMAKE_INSTALL_PREFIX', '/usr',
             '-DLIBCXX_CXX_ABI=libsupc++',
             '-DCMAKE_BUILD_TYPE={}'.format(build_type),
@@ -52,7 +60,7 @@ if __name__ == '__main__':
         print('Building libc++')
         try: cmake = which('cmake')
         except LocateError as e: exit(e)
-        arguments.prepend(cmake)
+        arguments.insert(0, cmake)
         execute(*arguments, cwd='libcxx-build')
         execute(cmake, '--build', 'libcxx-build', '--', '-j8')
         execute('sudo', cmake, '--build', 'libcxx-build', '--target', 'install')
