@@ -51,7 +51,7 @@ if __name__ == '__main__':
         ]
         arguments = [
             join(current, 'libcxx'), # directory
-            '-DCMAKE_INSTALL_PREFIX', '/usr',
+            '-DCMAKE_INSTALL_PREFIX=/usr',
             '-DLIBCXX_CXX_ABI=libsupc++',
             '-DCMAKE_BUILD_TYPE={}'.format(build_type),
             '-DLIBCXX_LIBSUPCXX_INCLUDE_PATHS={}'.format(pathsep.join(paths)),
