@@ -11,16 +11,6 @@
 namespace core {
 inline namespace v1 {
 
-template <class R, class T>
-constexpr auto mem_fn (R T::* pdm) noexcept -> impl::pdm<R T::*> {
-  return impl::pdm<R T::*> { pdm };
-}
-
-template <class R, class T, class... Args>
-constexpr auto mem_fn(R(T::* pmf)(Args...)) noexcept -> impl::pmf<
-  R(T::*)(Args...)
-> { return impl::pmf<R(T::*)(Args...)> { pmf }; }
-
 template <class T> struct is_reference_wrapper : ::std::false_type { };
 template <class T>
 struct is_reference_wrapper<::std::reference_wrapper<T>> :
@@ -93,10 +83,10 @@ template <class F> struct function_traits {
 
 /* N3727 */
 template <class Functor, class... Args>
-constexpr auto invoke (Functor&& f, Args&&... args) -> enable_if_t<
+auto invoke (Functor&& f, Args&&... args) -> enable_if_t<
   ::std::is_member_pointer<decay_t<Functor>>::value,
   result_of_t<Functor&&(Args&&...)>
-> { return mem_fn(f)(core::forward<Args>(args)...); }
+> { return ::std::mem_fn(f)(core::forward<Args>(args)...); }
 
 template <class Functor, class... Args>
 constexpr auto invoke (Functor&& f, Args&&... args) -> enable_if_t<
