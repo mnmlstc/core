@@ -8,6 +8,7 @@ from utility import getenv
 from utility import which
 from utility import exit
 from os.path import join
+from os import getcwd
 from os import pathsep
 from os import listdir
 
@@ -43,12 +44,13 @@ if __name__ == '__main__':
 
 
     if libcxx:
+        current = getcwd()
         paths = [
             '/usr/include/c++/4.9/',
             '/usr/include/c++/4.9/x86_64-linux-gnu/'
         ]
         arguments = [
-            'libcxx', # directory
+            join(current, 'libcxx'), # directory
             '-DCMAKE_INSTALL_PREFIX', '/usr',
             '-DLIBCXX_CXX_ABI=libsupc++',
             '-DCMAKE_BUILD_TYPE={}'.format(build_type),
