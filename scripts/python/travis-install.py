@@ -2,15 +2,31 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function
+from subprocess import Popen as process
+from subprocess import PIPE
 from utility import LocateError
 from utility import execute
 from utility import getenv
 from utility import which
 from utility import exit
+from os.path import normcase as normalize
+from os.path import isdir
 from os.path import join
 from os import getcwd
 from os import pathsep
 from os import listdir
+
+def paths ():
+    args = ['g++', '-Wp,-v', '-x', 'c++', '-', '-fsyntax-only']
+    proc = process(*args, stdout=PIPE, stderr=PIPE, universal_newlines=True)
+    out, err = proc.communicate()
+    paths = []
+    for line in out:
+        if not isdir(line): continue
+        paths.append(normalize(line))
+    # we only want the first two
+    return paths[:2]
+
 
 if __name__ == '__main__':
     print('Checking environment variables...')
@@ -27,11 +43,6 @@ if __name__ == '__main__':
     print('Installing CMake...')
     execute('sudo', './cmake-amd64.sh', '--skip-license', '--prefix=/usr')
 
-    if clang:
-        # Needed, so that we can insure
-        print('Installing Compiler Dependencies...')
-        execute('sudo', 'apt-get', 'install', '-qq', 'g++-4.9')
-
     print('Installing Compiler...')
     arguments = [
         'sudo',
@@ -45,16 +56,12 @@ if __name__ == '__main__':
 
     if libcxx:
         current = getcwd()
-        paths = [
-            '/usr/include/c++/4.9/',
-            '/usr/include/c++/4.9/x86_64-linux-gnu/'
-        ]
         arguments = [
             join(current, 'libcxx'), # directory
             '-DCMAKE_INSTALL_PREFIX=/usr',
             '-DLIBCXX_CXX_ABI=libsupc++',
             '-DCMAKE_BUILD_TYPE={}'.format(build_type),
-            '-DLIBCXX_LIBSUPCXX_INCLUDE_PATHS={}'.format(pathsep.join(paths)),
+            '-DLIBCXX_LIBSUPCXX_INCLUDE_PATHS={}'.format(';'.join(paths())),
             '-DCMAKE_CXX_COMPILER={}'.format(which('clang++')),
             '-DCMAKE_C_COMPILER={}'.format(which('clang'))
         ]
