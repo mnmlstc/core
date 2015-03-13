@@ -53,6 +53,11 @@ if __name__ == '__main__':
     ]
     execute(*arguments)
 
+    if clang and not libcxx:
+        # Needed, so that we can insure
+        print('Installing Compiler Dependencies...')
+        execute('sudo', 'apt-get', 'install', '-qq', 'g++-4.9')
+
 
     if libcxx:
         current = getcwd()
