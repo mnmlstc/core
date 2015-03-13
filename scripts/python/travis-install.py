@@ -18,7 +18,7 @@ from os import listdir
 
 def paths ():
     args = ['g++', '-Wp,-v', '-x', 'c++', '-', '-fsyntax-only']
-    proc = process(*args, stdout=PIPE, stderr=PIPE, universal_newlines=True)
+    proc = process(args, stdout=PIPE, stderr=PIPE, universal_newlines=True)
     out, err = proc.communicate()
     paths = []
     for line in out:
