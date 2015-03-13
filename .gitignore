@@ -6,3 +6,6 @@
 build-clang/
 build-gcc/
 build/
+
+bii/
+bin/
