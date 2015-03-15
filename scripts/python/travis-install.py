@@ -1,6 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+# travis-install.py - build script
+# Written in 2015 by MNMLSTC
+# To the extent possible under law, the author(s) have dedicated all copyright
+# and related and neighboring rights to this software to the public domain
+# worldwide. This software is distributed without any warranty. You should have
+# received a copy of the CC0 Public Domain Dedication along with this software.
+# If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
+
 from __future__ import print_function
 from subprocess import Popen as process
 from subprocess import PIPE
@@ -27,7 +35,6 @@ def paths ():
     # we only want the first two
     return paths[:2]
 
-
 if __name__ == '__main__':
     print('Checking environment variables...')
     try:
@@ -53,11 +60,10 @@ if __name__ == '__main__':
     ]
     execute(*arguments)
 
-    if clang and not libcxx:
+    if clang:
         # Needed, so that we can insure
         print('Installing Compiler Dependencies...')
         execute('sudo', 'apt-get', 'install', '-qq', 'g++-4.9')
-
 
     if libcxx:
         current = getcwd()

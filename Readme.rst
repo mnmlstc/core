@@ -9,6 +9,8 @@ Information on installing and using MNMLSTC Core can be found in its
 `documentation <http://mnmlstc.github.io/core/>`_.
 
 MNMLSTC Core is released under the Apache 2.0 License.
+Build scripts provided by MNMLSTC Core are released under the CC0 1.0 Universal
+License.
 
 .. image:: https://travis-ci.org/mnmlstc/core.svg
     :target: https://travis-ci.org/mnmlstc/core
@@ -39,7 +41,7 @@ There are several requirements to fully use MNMLSTC Core:
 
  * A C++11 compliant compiler (GCC 4.8.1 or Clang 3.4 meet the minimum feature
    set required to build and use MNMLSTC Core)
- * `CMake 3.1.0 <http://cmake.org>`_
+ * `CMake 3.0.0 <http://cmake.org>`_
 
 Additionally, to actively develop MNMLSTC Core, the following are required:
  * `Sphinx Documentation Generator <http://sphinx-doc.org>`_

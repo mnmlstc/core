@@ -1,6 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+# travis-before-install.py - build script
+# Written in 2015 by MNMLSTC
+# To the extent possible under law, the author(s) have dedicated all copyright
+# and related and neighboring rights to this software to the public domain
+# worldwide. This software is distributed without any warranty. You should have
+# received a copy of the CC0 Public Domain Dedication along with this software.
+# If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
+
 from __future__ import print_function
 from utility import make_executable
 from utility import DownloadError
@@ -73,7 +81,10 @@ if __name__ == '__main__':
             except OSError as e: exit(e)
 
     print('Removing system provided cmake...')
-    execute('sudo', 'apt-get', 'purge', 'cmake')
+    execute('sudo', 'apt-get', '-qq', 'purge', 'cmake')
+
+    print('Removing unnecessary packages')
+    execute('sudo', 'apt-get', '-qq', 'autoremove')
 
     print('Updating APT...')
-    execute('sudo', 'apt-get', 'update')
+    execute('sudo', 'apt-get', '-qq', 'update')
