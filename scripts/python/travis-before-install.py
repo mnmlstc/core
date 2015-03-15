@@ -76,7 +76,7 @@ if __name__ == '__main__':
         if libcxx:
             # checkout libcxx if use_libcxx is set to ON
             print('Checking out libcxx...')
-            execute('svn', 'co', libcxx_svn[version], 'libcxx')
+            execute('svn', 'co', '-q', libcxx_svn[version], 'libcxx')
             try: mkdir('libcxx-build')
             except OSError as e: exit(e)
 

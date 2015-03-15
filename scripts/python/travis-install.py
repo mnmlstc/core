@@ -50,7 +50,7 @@ if __name__ == '__main__':
     print('Installing CMake...')
     execute('sudo', './cmake-amd64.sh', '--skip-license', '--prefix=/usr')
 
-    if clang:
+    if clang and not libcxx:
         # Needed, so that we can insure
         print('Installing Compiler Dependencies...')
         execute('sudo', 'apt-get', 'install', '-qq', 'g++-4.9')
