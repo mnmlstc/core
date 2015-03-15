@@ -70,14 +70,12 @@ def which (name):
     raise LocateError(name)
 
 def execute(*command, **kwargs):
-    kwargs.update(stdout=PIPE, stderr=STDOUT, universal_newlines=True)
+    kwargs.update(universal_newlines=True)
     proc = process(command, **kwargs)
-    iterator = iter(proc.stdout.readline, b'')
-    while proc.poll() is None:
-        for line in iterator: print(line, end='')
+    _, _ = proc.communicate()
     code = proc.returncode
     if not code: return code
-    exit(code)
+    sys.exit(code)
 
 def getenv (var):
     value = os.environ.get(var, None)
