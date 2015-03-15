@@ -29,24 +29,15 @@ repository = {
     '3.6': 'deb http://llvm.org/apt/precise llvm-toolchain-precise-3.6 main',
 }
 
-# Used to build libcxx when USE_LIBCXX=ON
-libcxx_svn = {
-    '3.4': 'http://llvm.org/svn/llvm-project/libcxx/tags/RELEASE_342/final/',
-    '3.5': 'http://llvm.org/svn/llvm-project/libcxx/tags/RELEASE_350/final/',
-    '3.6': 'http://llvm.org/svn/llvm-project/libcxx/tags/RELEASE_360/final/'
-}
-
 backport = 'ppa:ubuntu-toolchain-r/test'
 
 if __name__ == '__main__':
     print('Checking environment variables...')
     try:
-        use_libcxx = getenv('USE_LIBCXX')
         version = getenv('PACKAGE')
         cxx = getenv('CXX')
     except EnvironError as e: exit(e)
 
-    libcxx = use_libcxx == 'ON'
     clang = 'clang' in cxx
 
     # download the cmake install script, mark executable
@@ -72,13 +63,6 @@ if __name__ == '__main__':
         # add the appropriate 'PPA'
         print('Adding Clang APT Repository...')
         execute('sudo', 'add-apt-repository', '--yes', repository[version])
-
-        if libcxx:
-            # checkout libcxx if use_libcxx is set to ON
-            print('Checking out libcxx...')
-            execute('svn', 'co', '-q', libcxx_svn[version], 'libcxx')
-            try: mkdir('libcxx-build')
-            except OSError as e: exit(e)
 
     print('Removing system provided cmake...')
     execute('sudo', 'apt-get', '-qq', 'purge', 'cmake')

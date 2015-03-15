@@ -23,7 +23,6 @@ from os import mkdir
 if __name__ == '__main__':
     try:
         build_type = getenv('BUILD_TYPE')
-        use_libcxx = getenv('USE_LIBCXX')
         version = getenv('PACKAGE')
         cxx = getenv('CXX')
     except EnvironError as e: exit(e)
@@ -33,7 +32,7 @@ if __name__ == '__main__':
         current,
         '-DCMAKE_CXX_COMPILER:STRING={}-{}'.format(cxx, version),
         '-DCMAKE_BUILD_TYPE:STRING={}'.format(build_type),
-        '-DBUILD_WITH_LIBCXX:BOOL={}'.format(use_libcxx),
+        '-DBUILD_WITH_LIBCXX:BOOL=OFF',
         '-DBUILD_TESTING:BOOL=ON'
     ]
     try: arguments.insert(0, which('cmake'))
