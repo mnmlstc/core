@@ -5,7 +5,7 @@
 #include <sstream>
 #include <cstring>
 
-#include <catch.hpp>
+#include "catch.hpp"
 
 TEST_CASE("string-view-constructors", "[string-view][constructors]") {
   SECTION("default") {

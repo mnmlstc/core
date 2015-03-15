@@ -1,3 +1,4 @@
+#define CATCH_CONFIG_MAIN
 #include <core/variant.hpp>
 
 #include <unordered_map>
@@ -6,8 +7,7 @@
 
 #include <cstdint>
 
-#define CATCH_CONFIG_MAIN
-#include <catch.hpp>
+#include "catch.hpp"
 
 TEST_CASE("variant-constructors", "[variant][constructors]") {
   SECTION("default") {

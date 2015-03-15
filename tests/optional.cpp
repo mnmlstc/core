@@ -8,7 +8,7 @@
 
 #include <cstdint>
 
-#include <catch.hpp>
+#include "catch.hpp"
 
 struct variadic {
   template <class... Args> constexpr variadic (Args&&...) { }

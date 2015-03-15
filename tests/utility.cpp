@@ -1,6 +1,7 @@
 #define CATCH_CONFIG_MAIN
 #include <core/utility.hpp>
-#include <catch.hpp>
+
+#include "catch.hpp"
 
 TEST_CASE("scope-guard", "[scope-guard]") {
   SECTION("value-constructor") {

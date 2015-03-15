@@ -1,7 +1,7 @@
 #define CATCH_CONFIG_MAIN
 #include <core/array.hpp>
 
-#include <catch.hpp>
+#include "catch.hpp"
 
 TEST_CASE("array-make-array") {
   auto const number = 420l;

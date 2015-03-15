@@ -8,7 +8,7 @@
 
 #include <sstream>
 
-#include <catch.hpp>
+#include "catch.hpp"
 
 TEST_CASE("range-constructors", "[range][constructors]") {
   SECTION("iterator") {

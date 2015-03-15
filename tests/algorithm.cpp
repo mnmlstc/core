@@ -1,11 +1,11 @@
+#define CATCH_CONFIG_MAIN
 #include <core/algorithm.hpp>
 #include <initializer_list>
 #include <random>
 #include <vector>
 #include <set>
 
-#define CATCH_CONFIG_MAIN
-#include <catch.hpp>
+#include "catch.hpp"
 
 TEST_CASE("predicates", "[non-modifying-sequence]") {
   SECTION("all-of") {

@@ -1,7 +1,7 @@
 #define CATCH_CONFIG_MAIN
 #include <core/type_traits.hpp>
 
-#include <catch.hpp>
+#include "catch.hpp"
 
 namespace {
 

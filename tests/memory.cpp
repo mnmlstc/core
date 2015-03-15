@@ -1,6 +1,7 @@
 #define CATCH_CONFIG_MAIN
 #include <core/memory.hpp>
-#include <catch.hpp>
+
+#include "catch.hpp"
 
 namespace poly {
 

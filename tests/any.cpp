@@ -6,7 +6,7 @@
 
 #include <cstdint>
 
-#include <catch.hpp>
+#include "catch.hpp"
 
 TEST_CASE("constructor", "[constructors]") {
   core::any value;

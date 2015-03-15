@@ -10,7 +10,7 @@
 
 #include <sstream>
 
-#include <catch.hpp>
+#include "catch.hpp"
 
 TEST_CASE("functional") {
   SECTION("invoke-runtime-unpack-unordered-map") {

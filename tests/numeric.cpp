@@ -4,7 +4,7 @@
 #include <functional>
 #include <vector>
 
-#include <catch.hpp>
+#include "catch.hpp"
 
 TEST_CASE("numeric") {
   SECTION("iota") {

@@ -3,7 +3,6 @@
 #------------------------------------------------------------------------------
 include(CheckCXXCompilerFlag)
 include(CheckIncludeFileCXX)
-include(ExternalProject)
 
 #------------------------------------------------------------------------------
 # Macros and Functions
@@ -26,7 +25,6 @@ function(add_unit_test name file)
   add_executable(test-${name} ${file})
   add_test(${name} test-${name})
   add_dependencies(check test-${name})
-  add_dependencies(test-${name} catch) # Always make sure catch is downloaded
   target_compile_definitions(test-${name}
     PRIVATE
       $<TARGET_PROPERTY:core,INTERFACE_COMPILE_DEFINITIONS>)
@@ -53,7 +51,7 @@ function(add_unit_test name file)
       $<$<BOOL:${CAN_WARN_NO_EXIT_TIME}>:${WARN_NO_EXIT_TIME}>
       $<$<BOOL:${CAN_WARN_NO_SHADOW}>:${WARN_NO_SHADOW}>
       $<$<BOOL:${CAN_WARN_NO_PADDED}>:${WARN_NO_PADDED}>)
-  target_include_directories(test-${name} SYSTEM PRIVATE ${CATCH_INCLUDE_DIR})
+  target_include_directories(test-${name} SYSTEM PRIVATE ${TEST_SOURCE_DIR})
   target_include_directories(test-${name}
     PRIVATE
       $<TARGET_PROPERTY:core,INTERFACE_INCLUDE_DIRECTORIES>)
@@ -126,20 +124,7 @@ require_cxx_include_file(cstddef)
 #------------------------------------------------------------------------------
 # Configuration
 #------------------------------------------------------------------------------
-ExternalProject_Add(catch
-  PREFIX ${PROJECT_BINARY_DIR}/catch
-  GIT_REPOSITORY git://github.com/philsquared/Catch.git
-  GIT_TAG d4e5f184369ce34592bb6f89e793bdb22d1d011a
-  TIMEOUT 10
-  CONFIGURE_COMMAND ""
-  INSTALL_COMMAND ""
-  UPDATE_COMMAND ""
-  BUILD_COMMAND "")
-
-ExternalProject_Get_Property(catch source_dir)
-set(CATCH_INCLUDE_DIR "${source_dir}/include" CACHE INTERNAL "Catch Framework")
-
-add_custom_target(check COMMAND ${CMAKE_TEST_COMMAND} DEPENDS catch)
+add_custom_target(check COMMAND ${CMAKE_TEST_COMMAND})
 
 add_unit_test(type-traits "${TEST_SOURCE_DIR}/type-traits.cpp")
 add_unit_test(functional "${TEST_SOURCE_DIR}/functional.cpp")

@@ -1,3 +1,4 @@
+#define CATCH_CONFIG_MAIN
 #include <core/iterator.hpp>
 #include <algorithm>
 #include <ostream>
@@ -6,8 +7,7 @@
 
 #include <cstdint>
 
-#define CATCH_CONFIG_MAIN
-#include <catch.hpp>
+#include "catch.hpp"
 
 template <class T>
 std::ostream& operator << (std::ostream& os, std::vector<T> const& vec) {
