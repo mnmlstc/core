@@ -1,7 +1,7 @@
 .. |copy| unicode:: U+000A9
 .. _License: http://www.apache.org/licenses/LICENSE-2.0
 
-Copyright |copy| 2013 - 2014 MNMLSTC
+Copyright |copy| 2013 - 2015 MNMLSTC
 
 Licensed under the Apache License_, Version 2.0 (the "License"); you may not
 use this software except in compliance with the License_. You may obtain a
