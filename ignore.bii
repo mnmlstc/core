@@ -1,8 +1,8 @@
 build-clang/*
 build-gcc/*
+configure/*
 package/*
 scripts/*
 build/*
 docs/*
-appveyor.yml
 .travis.yml
