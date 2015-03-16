@@ -42,7 +42,7 @@ if (BIICODE)
   add_biicode_targets()
   include(biicode/cmake/tools)
   activate_cpp11(INTERFACE ${BII_BLOCK_TARGET})
-  return ()
+  return()
 endif ()
 
 #------------------------------------------------------------------------------

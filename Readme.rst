@@ -44,6 +44,7 @@ There are several requirements to fully use MNMLSTC Core:
  * `CMake 3.0.0 <http://cmake.org>`_
 
 Additionally, to actively develop MNMLSTC Core, the following are required:
+
  * `Sphinx Documentation Generator <http://sphinx-doc.org>`_
  * `Alabaster Sphinx Theme <https://github.com/bitprophet/alabaster>`_
  * `WiX Toolset <http://wixtoolset.org>`_

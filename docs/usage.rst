@@ -6,7 +6,7 @@
 Using MNMLSTC Core
 ==================
 
-This section of the documentation goes ito detail on how to use the MNMLSTC
+This section of the documentation goes into detail on how to use the MNMLSTC
 Core library. Specifically, it discusses how the library is laid out, and how
 features will be added and or deprecated.
 
@@ -39,6 +39,25 @@ effectively two projects within them. The first being the actual library, tool,
 or framework, and the other being the build system used to build, test, and
 package it.
 
+Biicode
+-------
+
+`Biicode <http://biicode.com>`_ is a C and C++ package manager. MNMLSTC Core
+now supports Biicode as of version 1.2. Using MNMLSTC Core with Biicode is
+quite simple. Within your :code:`biicode.conf` file, place the following:
+
+.. code-block:: ini
+
+   [requirements]
+     mnmlstc/core @1.2.0
+
+   [includes]
+     core/*.hpp : mnmlstc/core/include
+
+And then run the :code:`bii find` command. This will pull the latest tagged
+version of MNMLSTC Core 1.2.0, as well as the License file. To use the headers,
+simply include :code:`<code/<header>.hpp>`.
+
 CMake
 -----
 
@@ -54,8 +73,7 @@ an example of using MNMLSTC Core with CMake:
 
 .. code-block:: cmake
 
-  find_package(core 1.2.0 REQUIRED) # find_package(CORE ...) will also work
-
+  find_package(core 1.2.0 REQUIRED)
   add_library(my_library ${MY_SOURCE_FILES})
   target_include_directories(my_library
     PUBLIC

@@ -6,32 +6,32 @@ compiler:
   - gcc
 
 env:
-  - BUILD_TYPE=Release PACKAGE=3.4 USE_LIBCXX=OFF
-  - BUILD_TYPE=Release PACKAGE=3.5 USE_LIBCXX=OFF
-  - BUILD_TYPE=Release PACKAGE=3.6 USE_LIBCXX=OFF
-  - BUILD_TYPE=Release PACKAGE=4.8 USE_LIBCXX=OFF
-  - BUILD_TYPE=Release PACKAGE=4.9 USE_LIBCXX=OFF
-  - BUILD_TYPE=Debug PACKAGE=3.4 USE_LIBCXX=OFF
-  - BUILD_TYPE=Debug PACKAGE=3.5 USE_LIBCXX=OFF
-  - BUILD_TYPE=Debug PACKAGE=3.6 USE_LIBCXX=OFF
-  - BUILD_TYPE=Debug PACKAGE=4.8 USE_LIBCXX=OFF
-  - BUILD_TYPE=Debug PACKAGE=4.9 USE_LIBCXX=OFF
+  - BUILD_TYPE=Release PACKAGE=3.4
+  - BUILD_TYPE=Release PACKAGE=3.5
+  - BUILD_TYPE=Release PACKAGE=3.6
+  - BUILD_TYPE=Release PACKAGE=4.8
+  - BUILD_TYPE=Release PACKAGE=4.9
+  - BUILD_TYPE=Debug PACKAGE=3.4
+  - BUILD_TYPE=Debug PACKAGE=3.5
+  - BUILD_TYPE=Debug PACKAGE=3.6
+  - BUILD_TYPE=Debug PACKAGE=4.8
+  - BUILD_TYPE=Debug PACKAGE=4.9
 
 # We don't want a version mismatch between gcc and clang
 matrix:
   # temporary, to be removed when scripts are building correctly
   fast_finish: true
   exclude:
-    - { compiler: clang, env: BUILD_TYPE=Release PACKAGE=4.8 USE_LIBCXX=OFF }
-    - { compiler: clang, env: BUILD_TYPE=Release PACKAGE=4.9 USE_LIBCXX=OFF }
-    - { compiler: clang, env: BUILD_TYPE=Debug PACKAGE=4.8 USE_LIBCXX=OFF }
-    - { compiler: clang, env: BUILD_TYPE=Debug PACKAGE=4.9 USE_LIBCXX=OFF }
-    - { compiler: gcc, env: BUILD_TYPE=Release PACKAGE=3.4 USE_LIBCXX=OFF }
-    - { compiler: gcc, env: BUILD_TYPE=Release PACKAGE=3.5 USE_LIBCXX=OFF }
-    - { compiler: gcc, env: BUILD_TYPE=Release PACKAGE=3.6 USE_LIBCXX=OFF }
-    - { compiler: gcc, env: BUILD_TYPE=Debug PACKAGE=3.4 USE_LIBCXX=OFF }
-    - { compiler: gcc, env: BUILD_TYPE=Debug PACKAGE=3.5 USE_LIBCXX=OFF }
-    - { compiler: gcc, env: BUILD_TYPE=Debug PACKAGE=3.6 USE_LIBCXX=OFF }
+    - { compiler: clang, env: BUILD_TYPE=Release PACKAGE=4.8 }
+    - { compiler: clang, env: BUILD_TYPE=Release PACKAGE=4.9 }
+    - { compiler: clang, env: BUILD_TYPE=Debug PACKAGE=4.8 }
+    - { compiler: clang, env: BUILD_TYPE=Debug PACKAGE=4.9 }
+    - { compiler: gcc, env: BUILD_TYPE=Release PACKAGE=3.4 }
+    - { compiler: gcc, env: BUILD_TYPE=Release PACKAGE=3.5 }
+    - { compiler: gcc, env: BUILD_TYPE=Release PACKAGE=3.6 }
+    - { compiler: gcc, env: BUILD_TYPE=Debug PACKAGE=3.4 }
+    - { compiler: gcc, env: BUILD_TYPE=Debug PACKAGE=3.5 }
+    - { compiler: gcc, env: BUILD_TYPE=Debug PACKAGE=3.6 }
 
 branches:
   only: master
