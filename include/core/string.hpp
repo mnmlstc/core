@@ -233,7 +233,7 @@ struct basic_string_view {
     size_type n1,
     pointer s,
     size_type n2
-  ) {
+  ) const noexcept {
     return this->substr(pos, n1).compare(basic_string_view { s, n2 });
   }
 
