@@ -56,7 +56,7 @@ quite simple. Within your :code:`biicode.conf` file, place the following:
 
 And then run the :code:`bii find` command. This will pull the latest tagged
 version of MNMLSTC Core 1.2.0, as well as the License file. To use the headers,
-simply include :code:`<code/<header>.hpp>`.
+simply include :code:`<core/<header>.hpp>`.
 
 CMake
 -----
