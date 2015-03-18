@@ -31,6 +31,8 @@ template <class... Ts> using deduce_t = impl::deduce_t<Ts...>;
 
 /* tuple_size is used by unpack, so we expect it to be available.
  * We also expect ::std::get<N> to be available for the give type T
+ *
+ * This type trait is deprecated
  */
 template <class T, class=void> struct is_unpackable : ::std::false_type { };
 template <class T>
@@ -183,11 +185,13 @@ using is_swappable = impl::is_swappable<T, U>;
 template <class T, class U=T>
 using is_nothrow_swappable = impl::is_nothrow_swappable<T, U>;
 
+template <class T, ::std::size_t N>
+using is_sizeof = meta::boolean<sizeof(T) == N>;
+
 /* These are now deprecated. Use what they alias to instead */
 template <class... Args> using all_traits = meta::all<Args...>;
 template <class... Args> using any_traits = meta::any<Args...>;
 template <class... Args> using no_traits = meta::none<Args...>;
-
 
 namespace trait {
 namespace impl {
