@@ -53,7 +53,7 @@ write_basic_package_version_file(
   COMPATIBILITY SameMajorVersion)
 
 configure_package_config_file(
-  "${PROJECT_SOURCE_DIR}/configure/${PROJECT_NAME}-config.cmake.in"
+  "${PACK_SOURCE_DIR}/${PROJECT_NAME}-config.cmake.in"
   "${PROJECT_BINARY_DIR}/${PROJECT_NAME}-config.cmake"
   INSTALL_DESTINATION "${CMAKE_INSTALL_DIR}")
 

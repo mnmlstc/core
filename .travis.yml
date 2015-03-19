@@ -19,8 +19,6 @@ env:
 
 # We don't want a version mismatch between gcc and clang
 matrix:
-  # temporary, to be removed when scripts are building correctly
-  fast_finish: true
   exclude:
     - { compiler: clang, env: BUILD_TYPE=Release PACKAGE=4.8 }
     - { compiler: clang, env: BUILD_TYPE=Release PACKAGE=4.9 }
@@ -37,11 +35,11 @@ branches:
   only: master
 
 # Environment Setup (Fixing Travis-CI, effectively)
-before_install: python ./scripts/python/travis-before-install.py
-install: python ./scripts/python/travis-install.py
+before_install: python ./scripts/travis/before-install.py
+install: python ./scripts/travis/install.py
 
 # Configure, Build, Test Steps
-before_script: python ./scripts/python/travis-configure.py
-script: python ./scripts/python/travis-build.py
+before_script: python ./scripts/travis/configure.py
+script: python ./scripts/travis/build.py
 
-after_failure: python ./scripts/python/travis-failure.py
+after_failure: python ./scripts/travis/failure.py

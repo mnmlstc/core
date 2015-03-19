@@ -8,6 +8,8 @@ if (BUILD_PACKAGE_RPM)
   list(APPEND GENERATORS "RPM")
 endif ()
 
+set(WIX_SOURCE_DIR "${PACK_SOURCE_DIR}/wix")
+
 #------------------------------------------------------------------------------
 # Generic Package
 #------------------------------------------------------------------------------
@@ -35,10 +37,10 @@ set(CPACK_PACKAGE_INSTALL_DIRECTORY "mnmlstc/${PROJECT_NAME}")
 set(CPACK_WIX_CMAKE_PACKAGE_REGISTRY ${PROJECT_NAME})
 set(CPACK_WIX_UPGRADE_GUID "AE6C6986-200F-464C-83EF-C3A94C6C9995")
 set(CPACK_WIX_PRODUCT_GUID "*")
-set(CPACK_WIX_PRODUCT_ICON "${PROJECT_SOURCE_DIR}/package/mnmlstc.ico")
-set(CPACK_WIX_LICENSE_RTF "${PROJECT_SOURCE_DIR}/package/License.rtf")
-set(CPACK_WIX_UI_BANNER "${PROJECT_SOURCE_DIR}/package/banner.bmp")
-set(CPACK_WIX_UI_DIALOG "${PROJECT_SOURCE_DIR}/package/dialog.bmp")
+set(CPACK_WIX_PRODUCT_ICON "${WIX_SOURCE_DIR}/mnmlstc.ico")
+set(CPACK_WIX_LICENSE_RTF "${WIX_SOURCE_DIR}/License.rtf")
+set(CPACK_WIX_UI_BANNER "${WIX_SOURCE_DIR}/banner.bmp")
+set(CPACK_WIX_UI_DIALOG "${WIX_SOURCE_DIR}/dialog.bmp")
 
 #------------------------------------------------------------------------------
 # RPM Configuration
