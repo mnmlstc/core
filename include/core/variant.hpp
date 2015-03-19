@@ -329,22 +329,15 @@ public:
     );
   }
 
+  /* These functions are undocumented and should not be used outside of core */
   template <::std::size_t N>
-  auto get () const& noexcept(false) -> element<N> const& {
-    if (this->tag != N) { throw_bad_variant_get(); }
-    return *static_cast<element<N> const*>(this->pointer());
+  add_pointer_t<add_const_t<element<N>>> cast () const noexcept {
+    return static_cast<add_pointer_t<add_const_t<element<N>>>>(this->pointer());
   }
 
   template <::std::size_t N>
-  auto get () && noexcept(false) -> element<N>&& {
-    if (this->tag != N) { throw_bad_variant_get(); }
-    return ::core::move(*static_cast<element<N>*>(this->pointer()));
-  }
-
-  template <::std::size_t N>
-  auto get () & noexcept(false) -> element<N>& {
-    if (this->tag != N) { throw_bad_variant_get(); }
-    return *static_cast<element<N>*>(this->pointer());
+  add_pointer_t<element<N>> cast () noexcept {
+    return static_cast<add_pointer_t<element<N>>>(this->pointer());
   }
 
 #ifndef CORE_NO_RTTI
@@ -369,26 +362,72 @@ void swap (variant<Ts...>& lhs, variant<Ts...>& rhs) noexcept(
   noexcept(lhs.swap(rhs))
 ) { lhs.swap(rhs); }
 
-template < ::std::size_t I, class... Ts>
-auto get (variant<Ts...> const& v) noexcept(false) -> decltype(
-  v.template get<I>()
-) { return v.template get<I>(); }
+template <::std::size_t I, class... Ts>
+auto get (variant<Ts...> const* v) noexcept -> enable_if_t<
+  I < sizeof...(Ts),
+  add_pointer_t<add_const_t<meta::element_t<I, meta::pack<Ts...>>>>
+> {
+  using t = add_pointer_t<add_const_t<meta::element_t<I, meta::pack<Ts...>>>>;
+  return v and v->which() == I
+    ? static_cast<t>(v->template cast<I>())
+    : nullptr;
+}
 
-template < ::std::size_t I, class... Ts>
-auto get (variant<Ts...>&& v) noexcept(false) -> decltype(
-  ::core::move(v.template get<I>())
-) { return ::core::move(v.template get<I>()); }
+template <::std::size_t I, class... Ts>
+auto get (variant<Ts...>* v) noexcept -> enable_if_t<
+  I < sizeof...(Ts),
+  add_pointer_t<meta::element_t<I, meta::pack<Ts...>>>
+> {
+  using t = add_pointer_t<meta::element_t<I, meta::pack<Ts...>>>;
+  return v and v->which() == I
+    ? static_cast<t>(v->template cast<I>())
+    : nullptr;
+}
 
-template < ::std::size_t I, class... Ts>
-auto get (variant<Ts...>& v) noexcept(false) -> decltype(
-  v.template get<I>()
-) { return v.template get<I>(); }
+template <::std::size_t I, class... Ts>
+auto get (variant<Ts...> const& v) noexcept(false) -> enable_if_t<
+  I < sizeof...(Ts),
+  add_lvalue_reference_t<add_const_t<meta::element_t<I, meta::pack<Ts...>>>>
+> {
+  if (auto ptr = get<I>(::std::addressof(v))) { return *ptr; }
+  throw_bad_variant_get();
+}
+
+template <::std::size_t I, class... Ts>
+auto get (variant<Ts...>&& v) noexcept(false) -> enable_if_t<
+  I < sizeof...(Ts),
+  add_rvalue_reference_t<meta::element_t<I, meta::pack<Ts...>>>
+> {
+  if (auto p = get<I>(::std::addressof(v))) { return ::core::move(*p); }
+  throw_bad_variant_get();
+}
+
+template <::std::size_t I, class... Ts>
+auto get (variant<Ts...>& v) noexcept(false) -> enable_if_t<
+  I < sizeof...(Ts),
+  add_lvalue_reference_t<meta::element_t<I, meta::pack<Ts...>>>
+> {
+  if (auto ptr = get<I>(::std::addressof(v))) { return *ptr; }
+  throw_bad_variant_get();
+}
+
+template <class T, class... Ts>
+auto get (variant<Ts...> const* v) noexcept(false) -> enable_if_t<
+  not meta::find_t<T, meta::pack<Ts...>>::empty(),
+  decltype(get<meta::index<T, meta::pack<Ts...>>::value>(v))
+> { return get<meta::index<T, meta::pack<Ts...>>::value>(v); }
+
+template <class T, class... Ts>
+auto get (variant<Ts...>* v) noexcept(false) -> enable_if_t<
+  not meta::find_t<T, meta::pack<Ts...>>::empty(),
+  decltype(get<meta::index<T, meta::pack<Ts...>>::value>(v))
+> { return get<meta::index<T, meta::pack<Ts...>>::value>(v); }
 
 template <class T, class... Ts>
 auto get (variant<Ts...> const& v) noexcept(false) -> enable_if_t<
   not meta::find_t<T, meta::pack<Ts...>>::empty(),
-  decltype(::core::get<meta::index<T, meta::pack<Ts...>>::value>(v))
-> { return ::core::get<meta::index<T, meta::pack<Ts...>>::value>(v); }
+  decltype(get<meta::index<T, meta::pack<Ts...>>::value>(v))
+> { return get<meta::index<T, meta::pack<Ts...>>::value>(v); }
 
 template <class T, class... Ts>
 auto get (variant<Ts...>&& v) noexcept(false) -> enable_if_t<
@@ -399,8 +438,8 @@ auto get (variant<Ts...>&& v) noexcept(false) -> enable_if_t<
 template <class T, class... Ts>
 auto get (variant<Ts...>& v) noexcept(false) -> enable_if_t<
   not meta::find_t<T, meta::pack<Ts...>>::empty(),
-  decltype(::core::get<meta::index<T, meta::pack<Ts...>>::value>(v))
-> { return ::core::get<meta::index<T, meta::pack<Ts...>>::value>(v); }
+  decltype(get<meta::index<T, meta::pack<Ts...>>::value>(v))
+> { return get<meta::index<T, meta::pack<Ts...>>::value>(v); }
 
 }} /* namespace core::v1 */
 
