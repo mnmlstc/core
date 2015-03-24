@@ -170,7 +170,10 @@ struct number_iterator final {
 
   static_assert(::std::is_integral<value_type>::value, "");
 
-  explicit number_iterator (value_type value) noexcept : value { value } { }
+  explicit number_iterator (value_type value, value_type step=1) noexcept :
+    value { value },
+    step { step }
+  { }
 
   number_iterator (number_iterator const&) noexcept = default;
   number_iterator () noexcept = default;
@@ -184,15 +187,22 @@ struct number_iterator final {
 
   reference operator * () noexcept { return this->value; }
 
-  number_iterator& operator ++ () noexcept { ++this->value; return *this; }
-  number_iterator& operator -- () noexcept { --this->value; return *this; }
+  number_iterator& operator ++ () noexcept {
+    this->value += this->step;
+    return *this;
+  }
+
+  number_iterator& operator -- () noexcept {
+    this->value -= this->step;
+    return *this;
+  }
 
   number_iterator operator ++ (int) const noexcept {
-    return number_iterator { this->value + 1 };
+    return number_iterator { this->value + this->step };
   }
 
   number_iterator operator -- (int) const noexcept {
-    return number_iterator { this->value - 1 };
+    return number_iterator { this->value - this->step };
   }
 
   bool operator == (number_iterator const& that) const noexcept {
@@ -204,12 +214,18 @@ struct number_iterator final {
   }
 
 private:
-  T value { };
+  value_type value { };
+  value_type const step { };
 };
 
 template <class T>
 void swap (number_iterator<T>& lhs, number_iterator<T>& rhs) noexcept {
   lhs.swap(rhs);
+}
+
+template <class T>
+number_iterator<T> make_number_iterator (T value, T step) noexcept {
+  return number_iterator<T> { value, step };
 }
 
 template <class T>
