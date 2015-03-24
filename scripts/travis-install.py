@@ -13,9 +13,9 @@ from __future__ import print_function
 from subprocess import Popen as process
 from subprocess import PIPE
 from utility import LocateError
-from utility import execute
 from utility import getenv
 from utility import which
+from utility import sudo
 from utility import exit
 from os.path import normcase as normalize
 from os.path import isdir
@@ -35,18 +35,11 @@ if __name__ == '__main__':
     clang = 'clang' in cxx
 
     print('Installing CMake...')
-    execute('sudo', './cmake-amd64.sh', '--skip-license', '--prefix=/usr')
+    sudo('./cmake-amd64.sh', '--skip-license', '--prefix=/usr')
 
     if clang:
         print('Installing Compiler Dependencies...')
-        execute('sudo', 'apt-get', 'install', '-qq', 'g++-4.9')
+        sudo('apt-get', 'install', '-qq', 'g++-4.9')
 
     print('Installing Compiler...')
-    arguments = [
-        'sudo',
-        'apt-get',
-        'install',
-        '-qq',
-        '{}-{}'.format(cxx, version)
-    ]
-    execute(*arguments)
+    sudo('apt-get', 'install', '-qq', '{}-{}'.format(cxx, version))

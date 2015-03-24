@@ -35,11 +35,11 @@ branches:
   only: master
 
 # Environment Setup (Fixing Travis-CI, effectively)
-before_install: python ./scripts/travis/before-install.py
-install: python ./scripts/travis/install.py
+before_install: python ./scripts/travis-before-install.py
+install: python ./scripts/travis-install.py
 
 # Configure, Build, Test Steps
-before_script: python ./scripts/travis/configure.py
-script: python ./scripts/travis/build.py
+before_script: python ./scripts/travis-configure.py
+script: python ./scripts/travis-build.py
 
-after_failure: python ./scripts/travis/failure.py
+after_failure: python ./scripts/travis-failure.py

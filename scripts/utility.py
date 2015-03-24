@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-
-# utility.py - utility scrupt
+# utility.py - utility module 
 # Written in 2015 by MNMLSTC
 # To the extent possible under law, the author(s) have dedicated all copyright
 # and related and neighboring rights to this software to the public domain
@@ -9,7 +8,7 @@
 # If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
 # Utilities used by other scripts here.
-# Many imitate common unix utilities.
+# Many imitate common unix utilities, or reduce copy paste errors.
 
 from __future__ import print_function
 from subprocess import Popen as process
@@ -76,6 +75,10 @@ def execute(*command, **kwargs):
     code = proc.returncode
     if not code: return code
     sys.exit(code)
+
+def sudo(*args, **kwargs):
+    args.insert(0, 'sudo')
+    return execute(*args, **kwargs)
 
 def getenv (var):
     value = os.environ.get(var, None)

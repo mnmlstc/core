@@ -14,9 +14,9 @@ from utility import make_executable
 from utility import DownloadError
 from utility import EnvironError
 from utility import download
-from utility import execute
 from utility import getenv
 from utility import which
+from utility import sudo
 from utility import exit
 from os import mkdir
 
@@ -48,7 +48,7 @@ if __name__ == '__main__':
 
     # add gcc to repos
     print('Adding GCC Repository...')
-    execute('sudo', 'add-apt-repository', '--yes', backport)
+    sudo('add-apt-repository', '--yes', backport)
 
     if clang:
         # download the llvm package key for the repositories
@@ -58,17 +58,17 @@ if __name__ == '__main__':
 
         # add llvm key to apt
         print('Adding LLVM Key to APT...')
-        execute('sudo', 'apt-key', 'add', 'llvm.key')
+        sudo('apt-key', 'add', 'llvm.key')
 
         # add the appropriate 'PPA'
         print('Adding Clang APT Repository...')
-        execute('sudo', 'add-apt-repository', '--yes', repository[version])
+        sudo('add-apt-repository', '--yes', repository[version])
 
     print('Removing system provided cmake...')
-    execute('sudo', 'apt-get', '-qq', 'purge', 'cmake')
+    sudo('apt-get', '-qq', 'purge', 'cmake')
 
     print('Removing unnecessary packages')
-    execute('sudo', 'apt-get', '-qq', 'autoremove')
+    sudo('apt-get', '-qq', 'autoremove')
 
     print('Updating APT...')
-    execute('sudo', 'apt-get', '-qq', 'update')
+    sudo('apt-get', '-qq', 'update')
