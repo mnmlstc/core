@@ -265,6 +265,11 @@ private:
   iterator end_;
 };
 
+template <class T>
+auto make_range (T* ptr, ::std::size_t n) -> range<T*> {
+  return range<T*> { ptr, ptr + n };
+}
+
 template <class Iterator>
 auto make_range (Iterator begin, Iterator end) -> range<Iterator> {
   return range<Iterator> { begin, end };
@@ -274,11 +279,6 @@ template <class Range>
 auto make_range (Range&& value) -> range<decltype(::std::begin(value))> {
   return make_range(::std::begin(value), ::std::end(value));
 }
-
-template <class Range>
-auto make_ptr_range (Range&& value) -> range<
-  decltype(::std::addressof(*::std::begin(value)))
->;
 
 /* Used like: core::make_range<char>(::std::cin) */
 template <
@@ -301,7 +301,14 @@ auto make_range (::std::basic_streambuf<CharT, Traits>* buffer) -> range<
 }
 
 template <class T>
-auto make_number_range (T start, T stop) -> range<number_iterator<T>> {
+range<number_iterator<T>> make_number_range(T start, T stop, T step) {
+  auto begin = make_number_iterator(start, step);
+  auto end = make_number_iterator(stop);
+  return make_range(begin, end);
+}
+
+template <class T>
+range<number_iterator<T>> make_number_range (T start, T stop) {
   return make_range(make_number_iterator(start), make_number_iterator(stop));
 }
 
