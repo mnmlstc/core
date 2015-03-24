@@ -77,6 +77,7 @@ def execute(*command, **kwargs):
     sys.exit(code)
 
 def sudo(*args, **kwargs):
+    args = list(args)
     args.insert(0, 'sudo')
     return execute(*args, **kwargs)
 
