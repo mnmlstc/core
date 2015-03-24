@@ -178,13 +178,26 @@ auto for_each (Range&& rng, UnaryFunction&& f) -> enable_if_t<
 template <class Range, class UnaryFunction, class UnaryPredicate>
 UnaryFunction for_each_if (Range&& r, UnaryFunction uf, UnaryPredicate up) {
   auto range = make_range(::std::forward<Range>(r));
-  constexpr auto is_input = decltype(range)::is_input;
+  static constexpr auto is_input = decltype(range)::is_input;
   static_assert(is_input, "for_each_if requires InputIterators");
-  while (range.begin() != range.end()) {
+  while (not range.empty()) {
     if (up(range.front())) { uf(range.front()); }
     range.pop_front();
   }
   return uf;
+}
+
+template <class Range, class UnaryFunction, class UnaryPredicate>
+UnaryFunction for_each_while (Range&& r, UnaryFunction f, UnaryPredicate p) {
+  auto range = make_range(::std::forward<Range>(r));
+  static constexpr auto is_input = decltype(range)::is_input;
+  static_assert(is_input, "for_each_while requires InputIterators");
+  while (not range.empty()) {
+    if (not p(range.front())) { break; }
+    f(range.front());
+    range.pop_front();
+  }
+  return f;
 }
 
 template <class Range, class UnaryFunction, class T>
@@ -192,7 +205,7 @@ UnaryFunction for_each_until (Range&& r, UnaryFunction f, T const& value) {
   auto range = make_range(::std::forward<Range>(r));
   static constexpr auto is_input = decltype(range)::is_input;
   static_assert(is_input, "for_each_until requires InputIterators");
-  while (range.begin() != range.end()) {
+  while (not range.empty()) {
     if (range.front() == value) { return; }
     f(range.front());
     range.pop_front();
