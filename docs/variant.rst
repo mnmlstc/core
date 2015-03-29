@@ -1,125 +1,132 @@
-.. _core-variant-component:
-
 Variant Component
 =================
 
-.. default-domain:: cpp
+.. namespace:: core
 
-.. |variant| replace:: :class:`variant <variant\<Ts>>`
-
-The |variant| component is a generic type-safe implementation of a
+The :any:`variant` component is a generic type-safe implementation of a
 discriminate union. It is equivalent to the Boost.Variant library, with several
 small exceptions.
 
-Specifically, the |variant| does not allow for recursive variants,
+Specifically, the :any:`variant` does not allow for recursive variants,
 and makes no attempt to support them in any capacity. It is the author's
-opinion that a |variant| should be stack allocated only, and not
+opinion that a :any:`variant` should be stack allocated only, and not
 have to handle or deal with allocating memory.
 
-Additionally, the |variant| has the ability to perform type-based
+Additionally, the :any:`variant` has the ability to perform type-based
 pattern matching via lambdas. This allows a user to define the different code
 paths that are desired without requiring a user to implement a visitor functor
 separately. *This means that a variant is capable of performing a type-based
 switch statement*
 
-The variant component resides in ``<core/variant.hpp>``.
-
-.. namespace:: core
+The variant component resides in :file:`<core/variant.hpp>`.
 
 .. class:: bad_variant_get
 
-   :inherits: ``std::logic_error``
+   :inherits: :cxx:`std::logic_error`
 
-   Used when the call to get the value out of a |variant| uses the incorrect
-   index of the type list.
+   Used when the call to :any:`get` the value out of a :any:`variant` uses the
+   incorrect index of the type list.
 
-.. class:: variant<Ts>
+   This type is unavailable if :c:macro:`CORE_NO_EXCEPTIONS` is defined.
 
-   The |variant| type represents a type-safe discriminate union. Much like
-   the Boost.Variant, a |variant| is never in an uninitialized state. When
-   default constructing a |variant|, the first type in the |variant|'s typelist
-   is initialized.
+.. class:: variant<Ts...>
+
+   The :any:`variant` type represents a type-safe discriminate union. Much like
+   the Boost.Variant, a :any:`variant` is never in an uninitialized state. When
+   default constructing a :any:`variant`, the first type in the
+   :any:`variant`'s typelist is initialized.
 
    .. function:: variant (T&& value)
 
-      :requires: *T* be of a type from which any type in *Ts* is constructible.
+      :requires: :samp:`{T}` be of a type from which any type in :samp:`{Ts}`
+                 is constructible.
 
-      Constructs the first type in *Ts* which can be constructed from *T*. The
-      way in which this construction takes place is a first come first serve
-      construction. The reason for this is simply due to how the constructor
-      delegation occurs internally. As such, it is recommended that a |variant|
-      contain types that cannot be constructed from each other.
+      Constructs the first type in :samp`{Ts...} which can be constructed from
+      :samp:`{T}`. The way in which this construction takes place is a first
+      come first serve construction. The reason for this is simply due to how
+      the constructor delegation occurs internally. 
+
+      .. versionadded:: 1.2
+
+         If a :any:`variant` contains types that are constructible from each
+         other, and a :samp:`{T}` is passed that is :samp:`{exactly}` the same
+         type of one of the :any:`variant`'s possible states, it will
+         immediately construct that one, instead of trying to find the first
+         type that can be constructed from the given :samp:`{T}`.
+
+      .. note:: Before 1.2, it was recommended that a :any:`variant` contain
+         types that cannot be constructed from each other. This is no longer
+         required.
+
 
    .. function:: variant (variant const& that)
 
-      Constructs a |variant| with the same type that is initialized in *that*.
-      The object is initialized with the type's copy constructor.
+      Constructs a :any:`variant` with the same type that is initialized in
+      :samp:`{that}`. The object is initialized with the type's copy
+      constructor.
 
    .. function:: variant (variant&& that)
 
-      Constructs a |variant| with the same type that is initialized in *that*.
-      The object is initialized with the type's move constructor.
+      Constructs a :any:`variant` with the same type that is initialized in 
+      :samp:`{that}`. The object is initialized with the type's move
+      constructor.
 
    .. function:: variant ()
 
-      Constructs a |variant| by initializing the first type in its type list.
+      Constructs a :any:`variant` by initializing the first type in its type
+      list.
 
    .. function:: variant& operator = (variant const&)
                  variant& operator = (variant&&)
 
-      Assigns the contents of the other |variant| to ``*this``. The object
-      contained within ``*this`` is destructed first.
+      Assigns the contents of the other :any:`variant` to :cxx:`*this`. The
+      object contained within :cxx:`*this` is destructed first.
 
    .. function:: bool operator == (variant const& that) const noexcept
 
-      If both |variant|'s :func:`which` is the same value, the values contained
-      within are compared.
+      If both :any:`variant`'s :any:`which` is the same value, the values
+      contained within are compared via :cxx:`operator ==`. Otherwise, the
+      result of comparing any:`which` is returned.
 
    .. function:: bool operator < (variant const& that) const noexcept
 
-      If both |variant|'s :func:`which` are equal, the values contained are
-      compared. Otherwise, the result of comparing :func:`which` is returned.
+      If both :any:`variant`'s :any:`which` are equal, the values contained are
+      compared. Otherwise, the result of comparing :any:`which` is returned.
 
    .. function:: void swap (variant&)
 
       Swaps the contents of both variants.
 
-   .. function:: visit (Visitor&&, args) const
-                 visit (Visitor&&, args)
+   .. function:: visit (Visitor&&, Args&&... args) const
+                 visit (Visitor&&, Args&&... args)
 
-     Visiting a |variant| follows the following semantics. These semantics
-     require that, when given a callable type ``Visitor``, and variadic
-     arguments ``Args...``, that the return type of the visit will be
-     a result of ``common_type_t<invoke_of_t<Visitor, Ts, Args...>...>``.
+     Visiting a :any:`variant` follows the following semantics. These semantics
+     require that, when given a callable type :samp:`{Visitor}`, and variadic
+     arguments :samp:`{args}...``, that the return type of the visit will be
+     a result of
+     :samp:`common_type_t<invoke_of_t<{Visitor}, {Ts}, {Args}...>...>`.
 
      If a common type cannot be found, then the visitation function will
      fail to compile properly. This means that a visitor *must* be capable of
-     being invoked with all types in the |variant|'s typelist and the arguments
-     given. The visitor is executed with the *INVOKE* psuedo expression.
+     being invoked with all types in the :any:`variant`'s typelist and the
+     arguments given. The visitor is executed with the *INVOKE* psuedo
+     expression.
 
-     These same semantics are required for :func:`match`.
+     These same semantics are required for :any:`match`.
 
-     :returns: ``common_type_t<invoke_of_t<Visitor, Ts, Args...>...>``
+     :returns: :samp:`common_type_t<invoke_of_t<{Visitor}, {Ts}, {Args}...>...>`
 
    .. function:: match (Visitors&&) const
                  match (Visitors&&)
 
       Takes a variadic number of arguments that are all callable objects. These
       objects are combined into a single visitor and then executed on the
-      |variant|.
-
-   .. function:: auto get<N> () noexcept
-
-      Depending on the value of ``*this`` (reference, const reference, rvalue)
-      the type of the value returned will be affected as well.
-
-      :noexcept: false
-      :returns: The element located at N in the type list.
-      :throws: :class:`bad_variant_get` if N != :func:`which`.
+      :any:`variant`.
 
    .. function:: std::type_info const& type () const noexcept
 
-      :returns: The typeid of the value currently managed by the |variant|.
+      :returns: The :cxx:`::std::type_info` of the value currently managed by
+                the :any:`variant`.
 
    .. function:: std::uint32_t which () const noexcept
 
@@ -133,24 +140,67 @@ The variant component resides in ``<core/variant.hpp>``.
 
       :returns: false
 
+.. function:: auto const& get<N> (variant const& v)
+              auto&& get<N> (variant&& v)
+              auto& get<N> (variant& v)
+
+   Given an index :samp:`{N}`, which is within the range
+   :samp:`[0, sizeof...({Ts}))`, returns :samp:`{T}` if :any:`which` is
+   equal to :samp:`{N}`. Throws an exception otherwise.
+
+   :noexcept: :cxx:`false`
+   :throws: :any:`bad_variant_get`
+
+.. function:: T const* get<N> (variant const* v)
+              T* get<N> (variant* v)
+
+   A pointer form of :any:`get\<N>`. Given an index :samp:`{N}`, which is
+   within the range :samp:`[0, sizeof...({Ts}))`, returns :samp:`{T}` if
+   :any:`which` is equal to :samp:`{N}`. Otherwise a :cxx:`nullptr` is
+   returned.
+
+.. function:: T const& get<T> (variant const& v)
+              T&& get<T> (variant&& v)
+              T& get<T> (variant& v)
+
+   Given a type :samp:`{T}`, where :samp:`{T}` is one of the types that 
+   :samp:`{v}` can contain, return it if the :any:`variant` contains it.
+   Throws an exception otherwise.
+
+   :noexcept: :cxx:`false`
+   :throws: :any:`bad_variant_get`
+
+.. function:: T const* get<T> (variant const* v)
+              T* get<T> (variant* v)
+
+   A pointer form of :any:`get\<T>`. Given a type :samp:`{T}`, where
+   :samp:`{T}` is within the parameter pack of :samp:`{v}`, return a pointer to
+   the element of type :samp:`{T}` if :samp:`{v}` currently contains one.
+   Otherwise a :cxx:`nullptr` is returned.
+
+.. function:: void swap (variant& lhs, variant& rhs)
+
+   Calls :any:`variant\<Ts...>::swap`
 
 Specializations
 ---------------
 
-.. class:: hash<variant<Ts>>
+These are specializations placed in the :cxx:`std` namespace.
+
+.. namespace:: std
+
+.. class:: hash<variant<Ts...>>
 
    A specialization of ``std::hash<T>`` for variants. Requires that all
-   *Ts* in a |variant| be specialized for ``std::hash``.
-
-.. function:: void swap (variant& lhs, variant& rhs)
-
-   Calls :func:`variant\<Ts>::swap`
+   :samp:`{Ts}...` in a :any:`variant` be specialized for :cxx:`std::hash`.
 
 .. function:: auto const& get<N>(variant const&)
               auto&& get<N>(variant&&)
               auto& get<N>(variant&)
 
-   Calls :func:`variant\<Ts>::get`, and returns the value. This specialization
-   is provided to interact with ``std::tuple`` and to provide *some* semblance
-   of boost interoperability. However it does not support using the type
-   to get the value from the variant.
+   .. deprecated:: 1.2 Please use :any:`core::get\<N>`
+
+   Calls :any:`core::get`, and returns the value. This specialization is
+   provided to interact with ``std::tuple`` and to provide *some* semblance of
+   boost interoperability. However it does not support using the type to get
+   the value from the variant.
