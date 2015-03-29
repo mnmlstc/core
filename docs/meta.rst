@@ -1,46 +1,40 @@
-.. _core-meta-component:
-
 Metatemplate Component
 ======================
 
-.. default-domain:: cpp
-
-.. |pack| replace::
-   :class:`pack\<Args...>`
+.. namespace:: core::meta
 
 The metatemplate component contains several utilities that will aid anyone
 who has to do metatemplate programming. A majority of MNMLSTC Core's internals
 use this component, and others may receive some use from it as a result.
 
 This module works primarily on parameter packs. Several metafunctions are
-implementations of :ref:`algorithms <core-algorithm-component>`.
-A parameter pack wrapper type to use these metafunctions on is provided.
-Additionally, each metafunction has an alias available, in the same way
-that each :ref:`type trait <core-type-traits-component>` has an ``_t`` alias
-available. e.g., :class:`transform\<T, F\<U>>` has an alias
-:type:`transform_t\<T, F\<U>>`.
+mimic names and behavior as found in :doc:`algorithm`. A parameter pack
+wrapper type to use these metafunctions on is provided. Additionally, each
+metafunction has an alias available, in the same way that each
+:doc:`type-traits` has an ``_t`` alias available. e.g.,
+:any:`transform` has an alias :any:`transform_t`.
 
-The metatemplate component can be found in the ``<core/meta.hpp>`` header.
+The metatemplate component can be found in the :file:`<core/{meta}.hpp>` header.
 Additionally, all types declared in this component are located inside the
-``core::meta`` namespace.
+:cxx:`core::meta` namespace.
 
 .. type:: size<N>
 
    .. versionadded:: 1.2
 
-   An alias for ``std::integral_constant<std::size_t, N>``
+   An alias for :samp:`std::integral_constant<std::size_t, {N}>`
 
 .. type:: boolean<B>
 
    .. versionadded:: 1.2
 
-   An alias for ``std::integral_constant<bool, B>``
+   An alias for :samp:`std::integral_constant<bool, {B}>`
 
 .. type:: integer<I>
 
    .. versionadded:: 1.2
 
-   An alias for ``std::integral_constant<int, I>``
+   An alias for :samp:`std::integral_constant<int, {I}>`
 
 .. type:: all<Args...>
 
@@ -48,12 +42,12 @@ Additionally, all types declared in this component are located inside the
 
    :complexity: O(n)
 
-   Takes a parameter pack *Args...*, where each type in *Args...* is a type
-   trait property that contains a boolean member *value*. If all *Args...*
-   *value* members are true, the result is equivalent to ``std::true_type``.
-   Otherwise, it will be equivalent to ``std::false_type``. The arguments
-   are evaluated lazily, which allows for short circuit evaluation of
-   each type given.
+   Takes a parameter pack :samp:`{Args}...`, where each type in
+   :samp:`{Args}...` is a type trait property that contains a boolean member
+   :samp:`{value}. If all :samp:`{Args}...` :samp:`{value} members are true,
+   the result is equivalent to :cxx:`std::true_type`. Otherwise, it will be
+   equivalent to :cxx:`std::false_type`. The arguments are evaluated lazily,
+   which allows for short circuit evaluation of each type given.
 
    :example:
 
@@ -73,12 +67,12 @@ Additionally, all types declared in this component are located inside the
 
    :complexity: O(n)
 
-   Takes a parameter pack *Args...*, where each type in *Args...* is a type
-   trait property that contains a boolean member *value*. If all *Args...*
-   *value* members are true, the result is equivalent to ``std::true_type``.
-   Otherwise, the result will be equivalent to ``std::false_type``. The
-   arguments are evaluated lazily, which allows for short circuit evaluation of
-   each type given.
+   Takes a parameter pack :samp:`{Args}...`, where each type in
+   :samp:`{Args}...` is a type trait property that contains a boolean member 
+   :samp:`{value}`. If any :samp:`{Args}...` :samp:`{value} members are true,
+   the result is equivalent to :cxx:`std::true_type`. Otherwise, the result
+   will be equivalent to :cxx:`std::false_type`. The arguments are evaluated
+   lazily, which allows for short circuit evaluation of each type given.
 
    :example:
 
@@ -96,18 +90,17 @@ Additionally, all types declared in this component are located inside the
 
    :complexity: O(n)
 
-   Takes a parameter pack *Args...*, where each type in *Args...* is a type
-   trait property that contains a boolean member named *value*. This
-   metafunction is the inverse of :type:`all\<Args>`. The arguments are
-   evaluated lazily, which allows for short circuit evaluation of each type
-   given. It can also be used as a negate metafunction.
+   Takes a parameter pack :samp:`{Args}...`, where each type in
+   :samp:`{Args}...` is a type trait property that contains a boolean member
+   named :samp:`{value}`. This metafunction is the inverse of :any:`all`. The
+   arguments are evaluated lazily, which allows for short circuit evaluation of
+   each type given. It can also be used as a negate metafunction.
 
    :example:
 
    .. code-block:: cpp
 
       using result = meta::none<is_void<T>>;
-        
 
 .. class:: pack<Args...>
 
@@ -118,22 +111,21 @@ Additionally, all types declared in this component are located inside the
 
    .. function:: static constexpr size_t size () noexcept
 
-      :returns: ``sizeof...(Args)``
+      :returns: :samp:`sizeof...({Args})`
 
    .. function:: static constexpr bool empty () noexcept
 
-      :returns: ``sizeof...(Args) == 0``
+      :returns: :samp:`sizeof...(Args) == 0`
 
    .. type:: front
 
-      If :func:`pack\<Args...>::empty` is false, this is an alias for the first
-      type in *Args...*. Otherwise, this alias does not exist.
+      If :any:`empty` is false, this is an alias for the first type in
+      :samp:`{Args}...`. Otherwise, this alias does not exist.
 
    .. type:: back
 
-      If :func:`pack\<Args...>::empty` is false, this is an alias for the last
-      type in *Args...*. Otherwise, this alias does not exist.
-
+      If :any:`empty` is false, this is an alias for the last type in
+      :samp:`{Args}...`. Otherwise, this alias does not exist.
 
 .. class:: transform<T, F<U>>
 
@@ -141,11 +133,12 @@ Additionally, all types declared in this component are located inside the
 
    :complexity: O(1)
 
-   Takes a |pack| *T*, and a template class *F*. When the underlying dependent
-   alias :type:`transform\<T, F\<U>>::type` is instantiated, *F* will be
-   applied to each element in *T*, to create a new |pack|.
+   Takes a :any:`pack` :samp:`{T}`, and a template class :samp:`{F}`. When the
+   underlying dependent alias :any:`type` is instantiated, :samp:`{F}` will
+   be applied to each element in :samp:`{T}`, to create a new :any:`pack`.
 
-   *F* is a simple metafunction. It does not require a type alias member.
+   :samp:`{F}` is a simple metafunction. It does not require a type alias
+   member.
 
    :example:
 
@@ -165,10 +158,11 @@ Additionally, all types declared in this component are located inside the
 
    :complexity: O(1)
 
-   Takes a |pack| *T*, and a predicate template class *F*. The result of this
-   operation will be of type :type:`size\<N>`, with its *value* member
-   equal to the number of elements in *T* for which the predicate *F* returned
-   true. There is no ``_t`` alias provided for this metafunction.
+   Takes a :any:`pack` :samp:`{T}`, and a predicate template class :samp:`{F}`.
+   The result of this operation will be of type :any:`size`, with its
+   :samp:`{value}` member equal to the number of elements in :samp:`{T}` for
+   which the predicate :samp:`{F}` returned true. There is no ``_t`` alias
+   provided for this metafunction.
 
    :example:
 
@@ -184,13 +178,14 @@ Additionally, all types declared in this component are located inside the
 
    :complexity: O(n)
 
-   Takes a |pack| *T*, and a template class predicate *F*. *F* must contain a
-   static boolean member named *value* when given a type *U*. When the
-   underlying dependent alias :type:`find_if\<T, F\<U>>::type` is instantiated,
-   *F* will be applied to each member in *T* sequentially. If any element will
-   result in *F*'s *value* returning true, a |pack| starting from that *U*
-   until the end of the original pack. If no element in the parameter pack
-   satisfies the predicate *F* then an empty |pack| is returned.
+   Takes a :any:`pack` :samp:`{T}`, and a template class predicate :samp:`{F}`.
+   :samp:`{F}` must contain a static boolean member named :samp:`{value}` when
+   given a type :samp:`{U}`. When the underlying dependent alias :any:`type` is
+   instantiated, :samp:`{F}` will be applied to each member in :samp:`{T}`
+   sequentially. If any element will result in :samp:`{F}`'s :samp:`{value}`
+   returning true, a :any:`pack` starting from that element  until the end of
+   the original pack is returned. If no element in the parameter pack satisfies
+   the predicate :samp:`{F}` then an empty :any:`pack` is returned.
 
    :example:
 
@@ -207,13 +202,13 @@ Additionally, all types declared in this component are located inside the
 
    :complexity: O(1)
 
-   Takes a |pack| *T*, and a predicate template class *F*. Any elements within
-   *T* that do not satisfy the predicate *F*, will be removed from the
-   resulting |pack|.
+   Takes a :any:`pack` :samp:`{T}`, and a predicate template class :samp:`{F}`.
+   Any elements within :samp:`{T}` that do not satisfy the predicate
+   :samp:`{F}`, will be removed from the resulting :any:`pack`.
 
    While this metafunction may *appear* to require sequentially require
-   evaluation for each element in *T*, it occurs all at once, giving us a
-   decent compile time operation complexity.
+   evaluation for each element in :samp:`{T}`, it occurs all at once, giving us
+   a decent compile time operation complexity.
 
    :example:
 
@@ -231,8 +226,9 @@ Additionally, all types declared in this component are located inside the
 
    :complexity: O(?)
 
-   Takes a ``size_t`` *N* and a |pack| *T*. The result of this metafunction
-   will be equal to the element that resides at index *N* in *T*.
+   Takes a :cxx:`size_t` :samp:`{N}` and a :any:`pack` :samp:`{T}`. The result
+   of this metafunction will be equal to the element that resides at index
+   :samp:`{N}` in :samp:`{T}`.
 
    :example:
 
@@ -248,8 +244,9 @@ Additionally, all types declared in this component are located inside the
 
    :complexity: O(1)
 
-   Takes a |pack| *T* and a parameter pack *Args...*. This metafunction will
-   return a |pack| with the elements *Args...* followed by the elements of *T*.
+   Takes a :any:`pack` :samp:`{T}` and a parameter pack :samp:`{Args}...`. This
+   metafunction will return a :any:`pack` with the elements :samp:`{Args}...`
+   followed by the elements of :samp:`{T}`.
 
    :example:
   
@@ -266,8 +263,9 @@ Additionally, all types declared in this component are located inside the
 
    :complexity: O(1)
 
-   Takes a |pack| *T* and a parameter pack *Args...*. This metafunction will
-   return a |pack| with the elements of *T* followed by *Args...*.
+   Takes a :any:`pack` :samp:`{T}` and a parameter pack :samp:`{Args}...`. This
+   metafunction will return a :any:`pack` with the elements of :samp:`{T}`
+   followed by :samp:`{Args}...`.
 
    :example:
 
@@ -284,12 +282,12 @@ Additionally, all types declared in this component are located inside the
 
    :complexity: O(n)
 
-   Takes a |pack| *T*, and a type *U*. This metafunction will be equal to
-   the index of the first instance of *U* found in *T* as a :class:`size\<N>`.
-   If *T* does not contain any elements of *U*, the maximum value for a
-   :class:`size\<N>` is returned instead (i.e.,
-   ``std::numeric_limits<std::size_t>::max()``). There is not ``_t`` alias
-   provided for this metafunction.
+   Takes a :any:`pack` :samp:`{T}`, and a type :samp:`{U}`. This metafunction
+   will be equal to the index of the first instance of :samp:`{U}` found in
+   :samp:`{T}` as a :any:`size`. If :samp:`{T}` does not contain any elements
+   of :samp:`{U}`, the maximum value for a :any:`size` is returned instead
+   (i.e., :cxx:`std::numeric_limits<std::size_t>::max()`). There is no ``_t``
+   alias provided for this metafunction.
 
    :example:
 
@@ -305,9 +303,9 @@ Additionally, all types declared in this component are located inside the
 
    :complexity: O(n)
 
-   Takes a |pack| *T*, and a type *U*. This metafunction will be equal to the
-   number of elements in *T* that are the same as *U*. The result is a
-   :class:`size\<N>`.
+   Takes a :any:`pack` :samp:`{T}`, and a type :samp:`{U}`. This metafunction
+   will be equal to the number of elements in :samp:`{T}` that are the same as
+   :samp:`{U}`. The result is a :any:`size`.
 
    :example:
 
@@ -323,13 +321,13 @@ Additionally, all types declared in this component are located inside the
 
    :complexity: O(n)
 
-   Takes a |pack| *T* and some type *U*. Upon finding the first instance of *U*
-   in *T*, a |pack| starting at *U* until the end of *T* is returned. Otherwise
-   an empty |pack| is returned.
+   Takes a :any:`pack` :samp:`{T}` and some type :samp:`{U}`. Upon finding the
+   first instance of :samp:`{U}` in :samp:`{T}`, a :any:`pack` starting at
+   :samp:`{U}` until the end of :samp:`{T}` is returned. Otherwise an empty
+   :any:`pack` is returned.
 
-   This metafunction uses :class:`find_if\<T, F\<U>>` under the hood, with a
-   bound version of ``std::is_same`` (so that ``std::is_same`` can take one
-   parameter)
+   This metafunction uses :any:`find_if` under the hood, with a bound version
+   of :cxx:`std::is_same` (so that :cxx:`std::is_same` can take one parameter)
 
    :example:
 
@@ -346,8 +344,9 @@ Additionally, all types declared in this component are located inside the
 
    :complexity: O(1)
 
-   Takes a variable number of |pack| in *Args...*. This metafunction will
-   return a new |pack| with each element in each |pack| in *Args...*.
+   Takes a variable number of :any:`pack` in :samp:`{Args}...`. This
+   metafunction will return a new :any:`pack` with each element in each
+   :any:`pack` in :samp:`{Args}...`.
 
    :example:
 
@@ -366,9 +365,9 @@ Additionally, all types declared in this component are located inside the
 
    :complexity: O(1)
 
-   Takes a |pack| *T*. This will generate a :class:`index_sequence\<Is...>`
-   such that each element in *T* will have a corresponding *I* in the
-   returned sequence.
+   Takes a :any:`pack` :samp:`{T}`. This will generate an :any:`index_sequence`
+   such that each element in :samp:`{T}` will have a corresponding :samp:`{I}`
+   in the returned sequence.
 
    :example:
 
@@ -385,9 +384,9 @@ Additionally, all types declared in this component are located inside the
 
    :complexity: O(1)
 
-   Takes a |pack| *T*. This metafunction will return a new |pack| with the
-   first element in *T* removed. This metafunction will result in an error
-   if *T* has no elements.
+   Takes a :any:`pack` :samp:`{T}`. This metafunction will return a new
+   :any:`pack` with the first element in :samp:`{T}` removed. This metafunction
+   will result in an error if :samp:`{T}` has no elements.
 
    :example:
 
@@ -404,9 +403,9 @@ Additionally, all types declared in this component are located inside the
 
    :complexity: O(1)
 
-   Takes a |pack| *T*. This metafunction will return a new |pack| with the
-   last element in *T* removed. This metafunction will result in an error
-   if *T* has no elements.
+   Takes a :any:`pack` :samp:`{T}`. This metafunction will return a new
+   :any:`pack` with the last element in :samp:`{T}` removed. This metafunction
+   will result in an error if :samp:`{T}` has no elements.
 
    :example:
 
@@ -423,9 +422,9 @@ Additionally, all types declared in this component are located inside the
 
    :complexity: O(1)
 
-   Takes a |pack| *T*. This metafunction will return a new |pack| with each
-   element in *T* in its reversed position, such that *T*'s first element will
-   be its last, and vice versa.
+   Takes a :any:`pack` :samp:`{T}`. This metafunction will return a new
+   :any:`pack` with each element in :samp:`{T}` in its reversed position, such
+   that :samp:`{T}`'s first element will be its last, and vice versa.
 
    :example:
 
@@ -442,8 +441,8 @@ Additionally, all types declared in this component are located inside the
 
    :complexity: O(1)
 
-   Takes any variadic template class *T*. This metafunction will then return
-   a |pack| whose elements correspond to those in *T*.
+   Takes any variadic template class :samp:`{T}`. This metafunction will then
+   return a :any:`pack` whose elements correspond to those in :samp:`{T}`.
 
    :example:
 
@@ -460,9 +459,10 @@ Additionally, all types declared in this component are located inside the
 
    :complexity: O(1)
 
-   Takes a |pack| *T*, and any variadic tempate class *U*. This metafunction
-   will return an instantiation of *U* whose elements correspond to those
-   in *T*. This metafunction acts as the inverse of :class:`to_pack\<T>`.
+   Takes a :any:`pack` :samp:`{T}`, and any variadic tempate class :samp:`{U}`.
+   This metafunction will return an instantiation of :samp:`{U}` whose elements
+   correspond to those in :samp:`{T}`. This metafunction acts as the inverse of
+   :any:`to_pack`.
 
    :example:
 
