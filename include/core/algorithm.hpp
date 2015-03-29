@@ -188,7 +188,11 @@ UnaryFunction for_each_if (Range&& r, UnaryFunction uf, UnaryPredicate up) {
 }
 
 template <class Range, class UnaryFunction, class UnaryPredicate>
-UnaryFunction for_each_while (Range&& r, UnaryFunction f, UnaryPredicate p) {
+auto for_each_while (
+  Range&& r,
+  UnaryFunction f,
+  UnaryPredicate p
+) -> decltype(begin(make_range(::std::forward<Range>(r)))) {
   auto range = make_range(::std::forward<Range>(r));
   static constexpr auto is_input = decltype(range)::is_input;
   static_assert(is_input, "for_each_while requires InputIterators");
@@ -197,20 +201,24 @@ UnaryFunction for_each_while (Range&& r, UnaryFunction f, UnaryPredicate p) {
     f(range.front());
     range.pop_front();
   }
-  return f;
+  return range.begin();
 }
 
 template <class Range, class UnaryFunction, class T>
-UnaryFunction for_each_until (Range&& r, UnaryFunction f, T const& value) {
+auto for_each_until (
+  Range&& r,
+  UnaryFunction f,
+  T const& value
+) -> decltype(begin(make_range(::std::forward<Range>(r)))) {
   auto range = make_range(::std::forward<Range>(r));
   static constexpr auto is_input = decltype(range)::is_input;
   static_assert(is_input, "for_each_until requires InputIterators");
   while (not range.empty()) {
-    if (range.front() == value) { return; }
+    if (range.front() == value) { break; }
     f(range.front());
     range.pop_front();
   }
-  return f;
+  return range.begin();
 }
 
 template <class Range, class T>
@@ -645,6 +653,19 @@ auto copy_if (Range&& rng, OutputIt&& it, UnaryPredicate&& up) -> enable_if_t<
   );
 }
 
+template <class Range, class OutputIt, class T>
+OutputIt copy_until (Range&& r, OutputIt it, T const& value) {
+  auto range = make_range(::std::forward<Range>(r));
+  static constexpr auto is_input = decltype(range)::is_input;
+  static_assert(is_input, "copy_until requires InputIterators");
+  while (not range.empty()) {
+    if (range.front() == value) { break; }
+    *it++ = range.front();
+    range.pop_front();
+  }
+  return it;
+}
+
 template <class Range, class BidirIt>
 auto copy_backward (Range&& rng, BidirIt&& it) -> enable_if_t<
   is_range<Range>::value,
@@ -733,7 +754,7 @@ auto transform_if (
   auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_forward = decltype(range)::is_forward;
   static_assert(is_forward, "transform_if requires ForwardIterators");
-  while (range.begin() != range.end()) {
+  while (not range.empty()) {
     if (up(range.front())) {
       *it = op(range.front());
       ++it;
@@ -790,7 +811,7 @@ template <
   static constexpr auto is_forward2 = decltype(range2)::is_forward;
   static_assert(is_forward1, "transform_if requires ForwardIterators");
   static_assert(is_forward2, "transform_if requires ForwardIterators");
-  while (range1.begin() != range1.end()) {
+  while (not range1.empty()) {
     if (bp(range1.front(), range2.front())) {
       *it = op(range1.front(), range2.front());
       ++it;

@@ -18,16 +18,19 @@ template <class T> using identity = meta::identity<T>;
 template <class T> using class_of_t = impl::class_of_t<T>;
 template <class T> using class_of = impl::class_of<T>;
 
-/* This is equivalent to the Boost.TypeTraits dont_care type */
 template <::std::size_t I, class T>
 using tuple_element_t = typename ::std::tuple_element<I, T>::type;
 template <class T> using tuple_size_t = typename ::std::tuple_size<T>::type;
+
+/* This is equivalent to the Boost.TypeTraits dont_care type */
 using ignore_t = decltype(::std::ignore);
 
 /* a 'better named' (personal opinion!) form of the void_t type transformation
- * alias trait by Walter E. Brown.
+ * alias trait by Walter E. Brown. We provide the void_t form for interop
+ * with other folks code
  */
 template <class... Ts> using deduce_t = impl::deduce_t<Ts...>;
+template <class... Ts> using void_t = deduce_t<Ts...>;
 
 /* tuple_size is used by unpack, so we expect it to be available.
  * We also expect ::std::get<N> to be available for the give type T
@@ -217,10 +220,12 @@ template <class, class, class, class=void> struct bxor : ::std::false_type { };
 template <class, class, class, class=void> struct bor : ::std::false_type { };
 template <class, class, class, class=void> struct bsl : ::std::false_type { };
 template <class, class, class, class=void> struct bsr : ::std::false_type { };
+template <class, class, class=void> struct bnot : ::std::false_type { };
 
 /* logical */
 template <class, class, class, class=void> struct land : ::std::false_type { };
 template <class, class, class, class=void> struct lor : ::std::false_type { };
+template <class, class, class=void> struct lnot : ::std::false_type { };
 
 /* disgusting */
 template <class, class, class, class=void> struct comma : ::std::false_type { };
@@ -232,12 +237,23 @@ template <class, class, class=void> struct plus : ::std::false_type { };
 template <class, class, class=void> struct inc : ::std::false_type { };
 template <class, class, class=void> struct dec : ::std::false_type { };
 
-template <class, class, class=void> struct lnot : ::std::false_type { };
-template <class, class, class=void> struct bnot : ::std::false_type { };
-
 /* postfix */
 template <class, class, class=void> struct postinc : ::std::false_type { };
 template <class, class, class=void> struct postdec : ::std::false_type { };
+
+/* arithmetic assign */
+template <class, class, class, class=void> struct imul : ::std::false_type { };
+template <class, class, class, class=void> struct idiv : ::std::false_type { };
+template <class, class, class, class=void> struct imod : ::std::false_type { };
+template <class, class, class, class=void> struct iadd : ::std::false_type { };
+template <class, class, class, class=void> struct isub : ::std::false_type { };
+
+/* bitwise assign */
+template <class, class, class, class=void> struct iand : ::std::false_type { };
+template <class, class, class, class=void> struct ixor : ::std::false_type { };
+template <class, class, class, class=void> struct ior : ::std::false_type { };
+template <class, class, class, class=void> struct isl : ::std::false_type { };
+template <class, class, class, class=void> struct isr : ::std::false_type { };
 
 /* special operator overloads */
 template <class, class, class, class=void> struct subscript :
@@ -365,10 +381,106 @@ struct lor<
   deduce_t<decltype(::std::declval<T>() or ::std::declval<U>())>
 > : ::std::true_type { };
 
+
 template <class T>
 struct lnot<T, ignore_t, deduce_t<decltype(not ::std::declval<T>())>> :
   ::std::true_type
 { };
+
+/* prefix - ignore */
+template <class T>
+struct negate<T, ignore_t, deduce_t<decltype(-::std::declval<T>())>> :
+  ::std::true_type
+{ };
+
+template <class T>
+struct plus<T, ignore_t, deduce_t<decltype(+::std::declval<T>())>> :
+  ::std::true_type
+{ };
+
+template <class T>
+struct inc<T, ignore_t, deduce_t<decltype(++::std::declval<T>())>> :
+  ::std::true_type
+{ };
+
+template <class T>
+struct dec<T, ignore_t, deduce_t<decltype(--::std::declval<T>())>> :
+  ::std::true_type
+{ };
+
+
+/* postfix - ignore */
+template <class T>
+struct postinc<T, ignore_t, deduce_t<decltype(::std::declval<T>()++)>> :
+  ::std::true_type
+{ };
+
+template <class T>
+struct postdec<T, ignore_t, deduce_t<decltype(::std::declval<T>()--)>> :
+  ::std::true_type
+{ };
+
+/* arithmetic assign operators - ignore */
+template <class T, class U>
+struct imul<
+  T, U, ignore_t,
+  deduce_t<decltype(::std::declval<T>() *= ::std::declval<U>())>
+> : ::std::true_type { };
+
+template <class T, class U>
+struct idiv<
+  T, U, ignore_t,
+  deduce_t<decltype(::std::declval<T>() /= ::std::declval<U>())>
+> : ::std::true_type { };
+
+template <class T, class U>
+struct imod<
+  T, U, ignore_t,
+  deduce_t<decltype(::std::declval<T>() %= ::std::declval<U>())>
+> : ::std::true_type { };
+
+template <class T, class U>
+struct iadd<
+  T, U, ignore_t,
+  deduce_t<decltype(::std::declval<T>() += ::std::declval<U>())>
+> : ::std::true_type { };
+
+template <class T, class U>
+struct isub<
+  T, U, ignore_t,
+  deduce_t<decltype(::std::declval<T>() -= ::std::declval<U>())>
+> : ::std::true_type { };
+
+/* bitwise assign operators - ignore */
+template <class T, class U>
+struct iand<
+  T, U, ignore_t,
+  deduce_t<decltype(::std::declval<T>() &= ::std::declval<U>())>
+> : ::std::true_type { };
+
+template <class T, class U>
+struct ixor<
+  T, U, ignore_t,
+  deduce_t<decltype(::std::declval<T>() ^= ::std::declval<U>())>
+> : ::std::true_type { };
+
+template <class T, class U>
+struct ior<
+  T, U, ignore_t,
+  deduce_t<decltype(::std::declval<T>() |= ::std::declval<U>())>
+> : ::std::true_type { };
+
+template <class T, class U>
+struct isl<
+  T, U, ignore_t,
+  deduce_t<decltype(::std::declval<T>() <<= ::std::declval<U>())>
+> : ::std::true_type { };
+
+template <class T, class U>
+struct isr<
+  T, U, ignore_t,
+  deduce_t<decltype(::std::declval<T>() >>= ::std::declval<U>())>
+> : ::std::true_type { };
 
 /* special operators - ignore */
 template <class T, class I>
@@ -581,7 +693,7 @@ struct comma<
   R
 > { };
 
-/* unary */
+/* prefix */
 template <class T, class R>
 struct negate<
   T, R, deduce_t<decltype(-::std::declval<T>())>
@@ -602,6 +714,7 @@ struct dec<
   T, R, deduce_t<decltype(--::std::declval<T>())>
 > : ::std::is_convertible<decltype(--::std::declval<T>()), R> { };
 
+/* postfix */
 template <class T, class R>
 struct postinc<
   T, R, deduce_t<decltype(::std::declval<T>()++)>
@@ -611,6 +724,98 @@ template <class T, class R>
 struct postdec<
   T, R, deduce_t<decltype(::std::declval<T>()--)>
 > : ::std::is_convertible<decltype(::std::declval<T>()--), R> { };
+
+/* arithmetic assign */
+template <class T, class U, class R>
+struct imul<
+  T, U, R,
+  deduce_t<decltype(::std::declval<T>() *= ::std::declval<U>())>
+> : ::std::is_convertible<
+  decltype(::std::declval<T>() *= ::std::declval<U>()),
+  R
+> { };
+
+template <class T, class U, class R>
+struct idiv<
+  T, U, R,
+  deduce_t<decltype(::std::declval<T>() /= ::std::declval<U>())>
+> : ::std::is_convertible<
+  decltype(::std::declval<T>() /= ::std::declval<U>()),
+  R
+> { };
+
+template <class T, class U, class R>
+struct imod<
+  T, U, R,
+  deduce_t<decltype(::std::declval<T>() %= ::std::declval<U>())>
+> : ::std::is_convertible<
+  decltype(::std::declval<T>() %= ::std::declval<U>()),
+  R
+> { };
+
+template <class T, class U, class R>
+struct iadd<
+  T, U, R,
+  deduce_t<decltype(::std::declval<T>() += ::std::declval<U>())>
+> : ::std::is_convertible<
+  decltype(::std::declval<T>() += ::std::declval<U>()),
+  R
+> { };
+
+template <class T, class U, class R>
+struct isub<
+  T, U, R,
+  deduce_t<decltype(::std::declval<T>() -= ::std::declval<U>())>
+> : ::std::is_convertible<
+  decltype(::std::declval<T>() -= ::std::declval<U>()),
+  R
+> { };
+
+/* bitwise assign */
+template <class T, class U, class R>
+struct iand<
+  T, U, R,
+  deduce_t<decltype(::std::declval<T>() &= ::std::declval<U>())>
+> : ::std::is_convertible<
+  decltype(::std::declval<T>() &= ::std::declval<U>()),
+  R
+> { };
+
+template <class T, class U, class R>
+struct ixor<
+  T, U, R,
+  deduce_t<decltype(::std::declval<T>() ^= ::std::declval<U>())>
+> : ::std::is_convertible<
+  decltype(::std::declval<T>() ^= ::std::declval<U>()),
+  R
+> { };
+
+template <class T, class U, class R>
+struct ior<
+  T, U, R,
+  deduce_t<decltype(::std::declval<T>() |= ::std::declval<U>())>
+> : ::std::is_convertible<
+  decltype(::std::declval<T>() |= ::std::declval<U>()),
+  R
+> { };
+
+template <class T, class U, class R>
+struct isl<
+  T, U, R,
+  deduce_t<decltype(::std::declval<T>() <<= ::std::declval<U>())>
+> : ::std::is_convertible<
+  decltype(::std::declval<T>() <<= ::std::declval<U>()),
+  R
+> { };
+
+template <class T, class U, class R>
+struct isr<
+  T, U, R,
+  deduce_t<decltype(::std::declval<T>() >>= ::std::declval<U>())>
+> : ::std::is_convertible<
+  decltype(::std::declval<T>() >>= ::std::declval<U>()),
+  R
+> { };
 
 /* special operator overloads */
 template <class T, class I, class R>
@@ -671,14 +876,14 @@ template <class T, class R=ignore_t> using lnot = impl::lnot<T, R>;
 /* disgusting (we do not allow ignoring the return type) */
 template <class T, class U, class R> using comma = impl::comma<T, U, R>;
 
-/* unary (prefix) */
+/* prefix */
 template <class T, class R=ignore_t> using negate = impl::negate<T, R>;
 template <class T, class R=ignore_t> using plus = impl::plus<T, R>;
 
 template <class T, class R=ignore_t> using inc = impl::inc<T, R>;
 template <class T, class R=ignore_t> using dec = impl::dec<T, R>;
 
-/* unary (postfix) */
+/* postfix */
 template <class T, class R=ignore_t> using postinc = impl::postinc<T, R>;
 template <class T, class R=ignore_t> using postdec = impl::postdec<T, R>;
 

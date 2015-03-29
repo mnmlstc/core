@@ -1,8 +1,3 @@
-.. role:: cmake(code)
-   :language: cmake
-
-.. _using-mnmlstc-core:
-
 Using MNMLSTC Core
 ==================
 
@@ -15,36 +10,80 @@ Library Layout
 
 MNMLSTC Core follows the same header layout as the C++ standard library. Each
 library component is located in its own header. For instance, the
-:ref:`memory component <core-memory-component>` is located in
-``<core/memory.hpp>``, and the
-:ref:`optional component <core-optional-component>` is located in
-``<core/optional.hpp>``. Several components may have a sub-namespace within
-the :code:`core::` namespace. Each component's documentation will inform
+:doc:`memory component <memory>` is located in :file:`<core/memory.hpp>`, and
+the :doc:`optional component <optional>` is located in
+:file:`<core/optional.hpp>`. Several components may have a sub-namespace within
+the :cxx:`core::` namespace. Each component's documentation will inform
 the user if this is the case.
 
-Feature Addition and Deprecation
---------------------------------
+Project Layout
+--------------
 
-MNMLSTC Core follows `Semantic Versioning 2.0
-<http://semver.org/spec/v2.0.0.html>`_. Additionally, starting with version
-1.2, a 4th version number will be used within the CMakeLists.txt file to
-represent the *build revision* of the library. In many linux distributions,
-this is usually appended as a hyphen followed by a number, to distinguish the
-changes made between build versions and release versions. This 4th number
-(known as :cmake:`PROJECT_VERSION_TWEAK` within CMake) will be appended to *all
-packages* moving forward. There is no mention of this approach in SemVer, and
-as such this can be considered an extension of it. While SemVer does take some
-criticism, the issue at hand for C and C++ projects is that there are
-effectively two projects within them. The first being the actual library, tool,
-or framework, and the other being the build system used to build, test, and
-package it.
+MNMLSTC Core's source tree has the following layout from the root:
 
-Biicode
--------
+ * docs - Contains all the documentation source files (reStructuredText)
+ * include/core - Contains the headers necessary to use MNMLSTC Core
+ * package - Contains files and resources for packaging
+ * scripts - Contains various utility scripts
+ * tests - Contains the unit test files
+ * License.rst - A license and copyright notice concerning MNMLSTC Core
 
-`Biicode <http://biicode.com>`_ is a C and C++ package manager. MNMLSTC Core
+Building and Installing
+-----------------------
+
+MNMLSTC Core provides several prebuilt packages for various operating systems.
+However, if no package is provided for a given platform, it may be necessary
+to 'build' MNMLSTC Core from source. This requires the `CMake`_ build
+generation tool. MNMLSTC Core requires a C++11 compliant compiler.
+
+If on a Unix-like system, run the following commands (options to be selected
+are placed within ``[]``):
+
+.. code-block:: bash
+
+   mkdir build
+   cd build
+   cmake ../ \
+    -DCMAKE_BUILD_TYPE=[Debug|Release|RelWithDebInfo] \
+    -DBUILD_WITH_LIBCXX=[ON|OFF] \
+    -DBUILD_DOCS=[ON|OFF]
+    -DDISABLE_EXCEPTIONS=[ON|OFF]
+    -DDISABLE_RTTI=[ON|OFF]
+   make && make check && make install
+
+Users on Windows should use the provided MSI package. At the time of this
+writing, MNMLSTC Core does not work with Visual Studio, and requires either
+GCC or Clang.
+
+The option :cmake:`BUILD_WITH_LIBCXX` is provided for when building the
+tests provided with MNMLSTC Core.
+
+The option :cmake:`BUILD_DOCS` will require `Sphinx`_ 1.3 or later.
+
+The option :cmake:`DISABLE_EXCEPTIONS` allows a user to export the
+:c:macro:`CORE_NO_EXCEPTIONS`
+
+The option :cmake:`DISABLE_RTTI` allows a user to export the
+:c:macro:`CORE_NO_RTTI`
+
+Additionally, one can define the following macros when using MNMLSTC Core with
+other libraries to configure MNMLSTC Core's available features.
+
+.. c:macro:: CORE_NO_EXCEPTIONS
+
+   Disables all features within MNMLSTC Core that require exceptions. In cases
+   where an exception *would* be thrown, :cxx:`std::abort` is called instead.
+
+.. c:macro:: CORE_NO_RTTI
+
+   Disables all features within MNMLSTC Core that rely on RTTI
+
+Using with Biicode
+------------------
+
+`Biicode`_ is a C and C++ package manager. MNMLSTC Core
 now supports Biicode as of version 1.2. Using MNMLSTC Core with Biicode is
-quite simple. Within your :code:`biicode.conf` file, place the following:
+quite simple. Within your :file:`biicode.conf` file, place the following:
 
 .. code-block:: ini
 
@@ -56,20 +95,20 @@ quite simple. Within your :code:`biicode.conf` file, place the following:
 
 And then run the :code:`bii find` command. This will pull the latest tagged
 version of MNMLSTC Core 1.2.0, as well as the License file. To use the headers,
-simply include :code:`<core/<header>.hpp>`.
+simply include :file:`<core/{header}.hpp>`.
 
-CMake
------
+Using with CMake
+----------------
 
-MNMLSTC Core is designed to be used with the `CMake <http://cmake.org>`_ build
-system. Until version 1.2, MNMLSTC Core followed a tradition of how
-:cmake:`FindXXX.cmake` scripts would perform. Namely, it would define a
-variable :cmake:`CORE_INCLUDE_DIR` and :cmake:`CORE_INCLUDE_DIRS`. Later on it
-provided a :cmake:`core_INCLUDE_DIRS` variable. While these are still
-provided, MNMLSTC Core now follows a new paradigm. Starting with version 1.2,
-MNMLSTC Core will now supply an *imported* cmake target. This target allows the
-use of cmake generator expressions for the target specific build files. Here is
-an example of using MNMLSTC Core with CMake:
+MNMLSTC Core is also designed to be used with the `CMake`_ build system. Until
+version 1.2, MNMLSTC Core followed a tradition of how :file:`Find{XXX}.cmake`
+scripts would perform. Namely, it would define a variable
+:cmake:`CORE_INCLUDE_DIR` and :cmake:`CORE_INCLUDE_DIRS`. Later on it provided
+a :cmake:`core_INCLUDE_DIRS` variable. While these are still provided, MNMLSTC
+Core now follows a new paradigm. Starting with version 1.2, MNMLSTC Core will
+now supply an *imported* cmake target. This target allows the use of cmake
+generator expressions for the target specific build files. Here is an example
+of using MNMLSTC Core with CMake:
 
 .. code-block:: cmake
 
@@ -78,6 +117,9 @@ an example of using MNMLSTC Core with CMake:
   target_include_directories(my_library
     PUBLIC
       $<TARGET_PROPERTY:mnmlstc::core,INTERFACE_INCLUDE_DIRECTORIES>)
+  target_compile_definitions(my_library
+    PUBLIC
+      $<TARGET_PROPERTY:mnmlstc::core,INTERFACE_COMPILE_DEFINITIONS>)
 
 While this is more verbose than a simple :cmake:`include_directories` call in
 CMake, it allows libraries that may use MNMLSTC Core to propagate their include
@@ -107,8 +149,77 @@ The following variables are available but deprecated for use:
    CORE_INCLUDE_DIRS
    core_INCLUDE_DIRS
 
-The following target is exported:
+The targets exported by the MNMLSTC Core CMake package and the properties they
+provides are:
 
-.. code-block:: cmake
+ * :cmake:`mnmlstc::core`
 
-   mnmlstc::core
+   * :cmake:`INTERFACE_INCLUDE_DIRECTORIES`
+   * :cmake:`INTERFACE_COMPILE_DEFINITIONS`
+
+Feature Addition and Deprecation
+--------------------------------
+
+MNMLSTC Core follows the `Semantic Versioning`_ specification. When a feature
+is deprecated, it will be marked with an attribute (e.g.,
+:cxx:`[[gnu::deprecated]]``). Because this type of attribute was not added
+until C++14, it will unfortunately be compiler specific. Additionally, some
+compiler versions understand multiple "deprecated" attributes and will error
+when more than one of these attributes is applied to something. However, the
+documentation for a specific feature or component will be marked as deprecated,
+along with a link to the newer functionality.
+
+In accordance with `Semantic Versioning`_, new features will be made available
+in minor version releaes. Any API rewrites will be in major releases. It should
+also be noted that MNMLSTC Database uses inline namespaces to keep major
+versions as well as keep a stable ABI.
+
+.. note:: While MNMLSTC Core has stated before version 1.2 that it follows
+   Semantic Versioning, it has not done so in practice. Starting with 1.2,
+   MNMLSTC Core will make a more concerted effort to properly follow
+   the Semantic Versioning specification.
+
+Distribution
+------------
+
+In addition to installing MNMLSTC Core from source, or using `Biicode`_,
+MNMLSTC Core is released with several packages for various platforms. The
+naming convention of these packages is as follows:
+
+.. code:: 
+
+   core-<major>.<minor>.<patch>+<os>.<platform>.<extension>
+
+For example, a 64-bit Windows MSI for 1.2.0 would be
+:code:`core-1.2.0+windows.x64.msi`.
+
+As of right now, the following binary package formats are provided:
+
+ * Windows MSI x64
+ * Linux RPM noarch
+ * FreeBSD BIN any
+ * Linux BIN any
+ * Linux DEB any
+ * OS X PKG any
+
+ * Windows MSI x86
+
+The :code:`BIN` format is a self-extracting tarball. A separate one is provided
+for FreeBSD to keep in line with other MNMLSTC projects that may provide
+platform specific packages (e.g., x64 and x86)
+
+.. note:: Only the Linux RPM package is signed.
+
+MNMLSTC Core provides source packages in the following formats:
+
+ * .tar.bz2
+ * .tar.gz
+ * .tar.xz
+ * .tar.Z
+ * .zip
+ * .7z
+
+.. _Semantic Versioning: http://semver.org/spec/v2.0.0
+.. _Biicode: http://biicode.com
+.. _Sphinx: http://sphinx-doc.org
+.. _CMake: http://cmake.org

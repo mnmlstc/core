@@ -11,6 +11,8 @@
 
 #include <cstdlib>
 
+#include <core/internal.hpp>
+
 namespace core {
 inline namespace v1 {
 
@@ -633,8 +635,10 @@ struct hash<core::v1::basic_string_view<CharT, Traits>> {
   using argument_type = core::v1::basic_string_view<CharT, Traits>;
   using result_type = size_t;
 
+
   result_type operator ()(argument_type const& ref) const noexcept {
-    return hash<typename argument_type::pointer> { }(ref.data());
+    static constexpr core::impl::murmur<sizeof(size_t)> hasher { };
+    return hasher(ref.data(), ref.size());
   }
 };
 

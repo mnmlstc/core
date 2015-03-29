@@ -6,9 +6,8 @@ be included in C++14 and beyond. A majority of the components of MNMLSTC Core
 can also be found in Boost. However, there are distinct behaviorial differences
 that are outlined and discussed in this documentation.
 
-It is recommended that new users read the section on :ref:`using-mnmlstc-core`.
-The documentation is ordered according to the augmented library components,
-rather than by feature.
+It is recommended that new users read :doc:`usage`. The documentation is
+ordered according to the augmented library components, rather than by feature.
 
 .. toctree::
    :maxdepth: 1
@@ -17,6 +16,7 @@ rather than by feature.
    Type Traits <type-traits>
    Functional Utilities <functional>
    Algorithms <algorithm>
+   Arrays <array>
    Iterator Utilities <iterator>
    Optional Types <optional>
    Numeric Algorithms <numeric>

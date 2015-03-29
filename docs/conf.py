@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import alabaster as theme
 import os
 
@@ -6,6 +7,8 @@ copyright = 'MNMLSTC'
 
 version = '1.2'
 release = '1.2'
+
+needs_sphinx = '1.3'
 
 html_static_path = ['static']
 html_theme_path = [theme.get_path()]
@@ -27,6 +30,10 @@ master_doc = 'index'
 rst_prolog = '''
 .. role:: cxx(code)
    :language: cpp
+
+.. role:: cmake(code)
+   :language: cmake
+
 '''
 
 extensions = ['sphinx.ext.todo', 'alabaster']
