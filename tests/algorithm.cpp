@@ -28,9 +28,28 @@ TEST_CASE("predicates", "[non-modifying-sequence]") {
 }
 
 TEST_CASE("for-each", "[non-modifying-sequence]") {
-  std::vector<int> values { 1, 2, 3, 4, 5 };
-  core::for_each(values, [](int v) { CHECK(v > 0); });
+  SECTION("for-each") {
+    std::vector<int> values { 1, 2, 3, 4, 5 };
+    core::for_each(values, [](int v) { CHECK(v > 0); });
+  }
+
+  SECTION("for-each-while") {
+    std::vector<int> values { 1, 2, 3, 4, 5, 6 };
+    auto const function = [] (int v) { CHECK(v < 6); };
+    auto const predicate = [] (int v) { return v != 6; };
+    auto it = core::for_each_while(values, function, predicate);
+    CHECK(it != end(values));
+  }
+
+  SECTION("for-each-until") {
+    std::vector<int> values { 1, 2, 3, 4, 5, 6 };
+    auto const function = [] (int v) { CHECK(v < 6); };
+    auto it = core::for_each_until(values, function, 6);
+    CHECK(it != end(values));
+  }
+
 }
+
 
 TEST_CASE("count", "[non-modifying-sequence]") {
   SECTION("count") {

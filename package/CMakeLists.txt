@@ -46,6 +46,8 @@ list(APPEND CPACK_SOURCE_IGNORE_FILES "/.git/")
 list(APPEND CPACK_SOURCE_IGNORE_FILES "/bii/")
 list(APPEND CPACK_SOURCE_IGNORE_FILES "/bin/")
 
+list(APPEND CPACK_SOURCE_IGNORE_FILES "biicode.conf")
+list(APPEND CPACK_SOURCE_IGNORE_FILES "ignore.bii")
 list(APPEND CPACK_SOURCE_IGNORE_FILES ".DS_Store")
 
 #------------------------------------------------------------------------------

@@ -48,6 +48,8 @@ endif ()
 #------------------------------------------------------------------------------
 # Configuration
 #------------------------------------------------------------------------------
+add_library(core INTERFACE)
+
 write_basic_package_version_file(
   "${PROJECT_BINARY_DIR}/${PROJECT_NAME}-config-version.cmake"
   COMPATIBILITY SameMajorVersion)
@@ -56,8 +58,6 @@ configure_package_config_file(
   "${PACK_SOURCE_DIR}/${PROJECT_NAME}-config.cmake.in"
   "${PROJECT_BINARY_DIR}/${PROJECT_NAME}-config.cmake"
   INSTALL_DESTINATION "${CMAKE_INSTALL_DIR}")
-
-add_library(core INTERFACE)
 
 target_include_directories(core INTERFACE
   $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>

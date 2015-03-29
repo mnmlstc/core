@@ -41,6 +41,7 @@ function(add_unit_test name file)
       $<$<BOOL:${CAN_WARN_EXTRA}>:${WARN_EXTRA}>
       $<$<BOOL:${CAN_WARN_ALL}>:${WARN_ALL}>
 
+      $<$<BOOL:${CAN_WARN_NO_CXX98_PEDANTIC}>:${WARN_NO_CXX98_PEDANTIC}>
       $<$<BOOL:${CAN_WARN_NO_INTERNAL_DECL}>:${WARN_NO_INTERNAL_DECL}>
       $<$<BOOL:${CAN_WARN_NO_CXX98_COMPAT}>:${WARN_NO_CXX98_COMPAT}>
       $<$<BOOL:${CAN_WARN_NO_WEAK_VTABLES}>:${WARN_NO_WEAK_VTABLES}>
@@ -48,6 +49,7 @@ function(add_unit_test name file)
       $<$<BOOL:${CAN_WARN_NO_UNUSED_FUNC}>:${WARN_NO_UNUSED_FUNC}>
       $<$<BOOL:${CAN_WARN_NO_FLOAT_EQUAL}>:${WARN_NO_FLOAT_EQUAL}>
       $<$<BOOL:${CAN_WARN_NO_DEPRECATED}>:${WARN_NO_DEPRECATED}>
+      $<$<BOOL:${CAN_WARN_NO_ATTRIBUTES}>:${WARN_NO_ATTRIBUTES}>
       $<$<BOOL:${CAN_WARN_NO_EXIT_TIME}>:${WARN_NO_EXIT_TIME}>
       $<$<BOOL:${CAN_WARN_NO_SHADOW}>:${WARN_NO_SHADOW}>
       $<$<BOOL:${CAN_WARN_NO_PADDED}>:${WARN_NO_PADDED}>)
@@ -75,12 +77,14 @@ set(WARN_EXTRA "-Wextra")
 set(WARN_ALL "-Wall")
 
 set(WARN_NO_INTERNAL_DECL "-Wno-unneeded-internal-declaration")
+set(WARN_NO_CXX98_PEDANTIC "-Wno-c++98-compat-pedantic")
 set(WARN_NO_CXX98_COMPAT "-Wno-c++98-compat")
 set(WARN_NO_WEAK_VTABLES "-Wno-weak-vtables")
 set(WARN_NO_UNUSED_MEMFN "-Wno-unused-member-function")
 set(WARN_NO_UNUSED_FUNC "-Wno-unused-function")
 set(WARN_NO_FLOAT_EQUAL "-Wno-float-equal")
 set(WARN_NO_DEPRECATED "-Wno-deprecated-declarations")
+set(WARN_NO_ATTRIBUTES "-Wno-attributes")
 set(WARN_NO_EXIT_TIME "-Wno-exit-time-destructors")
 set(WARN_NO_SHADOW "-Wno-shadow")
 set(WARN_NO_PADDED "-Wno-padded")
@@ -103,6 +107,7 @@ check_cxx_compiler_flag(${WARN_ERROR} CAN_WARN_ERROR)
 check_cxx_compiler_flag(${WARN_EXTRA} CAN_WARN_EXTRA)
 check_cxx_compiler_flag(${WARN_ALL} CAN_WARN_ALL)
 
+check_cxx_compiler_flag(${WARN_NO_CXX98_PEDANTIC} CAN_WARN_NO_CXX98_PEDANTIC)
 check_cxx_compiler_flag(${WARN_NO_INTERNAL_DECL} CAN_WARN_NO_INTERNAL_DECL)
 check_cxx_compiler_flag(${WARN_NO_CXX98_COMPAT} CAN_WARN_NO_CXX98_COMPAT)
 check_cxx_compiler_flag(${WARN_NO_WEAK_VTABLES} CAN_WARN_NO_WEAK_VTABLES)
@@ -110,6 +115,7 @@ check_cxx_compiler_flag(${WARN_NO_UNUSED_MEMFN} CAN_WARN_NO_UNUSED_MEMFN)
 check_cxx_compiler_flag(${WARN_NO_UNUSED_FUNC} CAN_WARN_NO_UNUSED_FUNC)
 check_cxx_compiler_flag(${WARN_NO_FLOAT_EQUAL} CAN_WARN_NO_FLOAT_EQUAL)
 check_cxx_compiler_flag(${WARN_NO_DEPRECATED} CAN_WARN_NO_DEPRECATED)
+check_cxx_compiler_flag(${WARN_NO_ATTRIBUTES} CAN_WARN_NO_ATTRIBUTES)
 check_cxx_compiler_flag(${WARN_NO_EXIT_TIME} CAN_WARN_NO_EXIT_TIME)
 check_cxx_compiler_flag(${WARN_NO_SHADOW} CAN_WARN_NO_SHADOW)
 check_cxx_compiler_flag(${WARN_NO_PADDED} CAN_WARN_NO_PADDED)
