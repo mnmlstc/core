@@ -41,12 +41,6 @@ using make_index_sequence = make_integer_sequence<::std::size_t, N>;
 template <class... Ts>
 using index_sequence_for = make_index_sequence<sizeof...(Ts)>;
 
-template <class T, class... Ts>
-using typelist_index = meta::index<T, meta::pack<Ts...>>;
-
-template <class T, class... Ts>
-using typelist_count = meta::count<T, meta::pack<Ts...>>;
-
 /* N3761 (with some additions) */
 template <::std::size_t N, class... Ts>
 struct type_at : meta::element<N, meta::pack<Ts...>> { };
