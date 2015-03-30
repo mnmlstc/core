@@ -183,6 +183,7 @@ struct number_iterator final {
 
   void swap (number_iterator& that) noexcept {
     ::std::swap(this->value, that.value);
+    ::std::swap(this->value, that.value);
   }
 
   reference operator * () noexcept { return this->value; }
@@ -206,16 +207,16 @@ struct number_iterator final {
   }
 
   bool operator == (number_iterator const& that) const noexcept {
-    return this->value == that.value;
+    return this->value == that.value and this->step == that.value;
   }
 
   bool operator != (number_iterator const& that) const noexcept {
-    return this->value != that.value;
+    return this->value != that.value and this->step == that.value;
   }
 
 private:
   value_type value { };
-  value_type const step { };
+  value_type step { static_cast<value_type>(1) };
 };
 
 template <class T>

@@ -303,7 +303,7 @@ auto make_range (::std::basic_streambuf<CharT, Traits>* buffer) -> range<
 template <class T>
 range<number_iterator<T>> make_number_range(T start, T stop, T step) {
   auto begin = make_number_iterator(start, step);
-  auto end = make_number_iterator(stop);
+  auto end = make_number_iterator(stop, step);
   return make_range(begin, end);
 }
 
