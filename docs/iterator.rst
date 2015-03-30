@@ -90,7 +90,9 @@ The iterator component can be found in ``<core/iterator.hpp>``.
 .. class:: number_iterator<T>
 
    This is an iterator that allows one to iterate over numbers when working
-   with functions found in :doc:`algorithms <algorithm>`.
+   with functions found in :doc:`algorithms <algorithm>`. It is a bidirectional
+   iterator. The reason for this is to avoid some functions which may assume
+   a :any:`number_iterator` can represent a contiguous block of memory.
 
    :requires: :samp:`{T}` must satisfy :cxx:`std::is_integral`.
 
@@ -139,11 +141,19 @@ The iterator component can be found in ``<core/iterator.hpp>``.
    .. function:: number_iterator& operator ++ () noexcept
                  number_iterator operator ++ (int) const noexcept
 
+      Increments a :any:`number_iterator` by its step.
+
    .. function:: number_iterator& operator -- () noexcept
                  number_iterator operator -- () const noexcept
 
+      Decrements the :any:`number_iterator` by its step
+
    .. function:: bool operator == (number_iterator const& that) const noexcept
                  bool operator != (number_iterator const& that) const noexcept
+
+      Compares :samp:`{that}` with :any:`number_iterator`. A
+      :any:`number_iterator` is equal *only* if both its value and its step
+      are equal.
 
 .. function:: void swap (number_iterator<T>& l, nunber_iterator<T>& r) noexcept
 
