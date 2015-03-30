@@ -108,7 +108,7 @@ T exchange (T& obj, U&& value) noexcept(
 }
 
 template <class E>
-constexpr auto to_integral(E e) -> enable_if_t<
+constexpr auto to_integral(E e) noexcept -> enable_if_t<
   std::is_enum<E>::value,
   underlying_type_t<E>
 > { return static_cast<underlying_type_t<E>>(e); }
@@ -120,6 +120,8 @@ struct capture final {
   using reference = add_lvalue_reference_t<value_type>;
   using pointer = add_pointer_t<value_type>;
 
+  capture (T&& data) : data { core::move(data) } { }
+
   capture (capture&&) = default;
   capture (capture& that) : data { core::move(that.data) } { }
   capture () = delete;
@@ -128,6 +130,7 @@ struct capture final {
   capture& operator = (capture&&) = delete;
 
   operator reference () const noexcept { return this->get(); }
+  reference operator * () const noexcept { return this->get(); }
   pointer operator -> () const noexcept {
     return ::std::addressof(this->get());
   }
