@@ -103,10 +103,13 @@ auto apply (F&& f, T&& t, index_sequence<I...>) -> decltype(
 
 } /* namespace impl */
 
-template <class Functor, class T>
-auto apply (Functor&& f, T&& t) -> decltype(
-  impl::apply(core::forward<Functor>(f), core::forward<T>(t))
-) { return impl::apply(core::forward<Functor>(f), core::forward<T>(t)); }
+template <
+  class Functor,
+  class T,
+  class I = make_index_sequence<::std::tuple_size<decay_t<T>>::value>
+> auto apply (Functor&& f, T&& t) -> decltype(
+  impl::apply(core::forward<Functor>(f), core::forward<T>(t), I())
+) { return impl::apply(core::forward<Functor>(f), core::forward<T>(t), I()); }
 
 
 namespace impl {
