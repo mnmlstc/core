@@ -12,6 +12,30 @@
 
 #include "catch.hpp"
 
+TEST_CASE("apply", "[functional]") {
+  SECTION("tuple") {
+    auto result = core::apply(
+      [] (int x, std::string const& y) { return std::to_string(x) + y; },
+      std::forward_as_tuple(4, "apply"));
+    CHECK(result == "4apply");
+  }
+
+  SECTION("array") {
+    std::array<int, 3> values {{ 1, 2, 3 }};
+    auto result = core::apply(
+      [] (int x, int y, int z) { return x + y + z; },
+      values);
+    CHECK(result == 6);
+  }
+
+  SECTION("pair") {
+    auto result = core::apply(
+      [] (int x, std::string y) { return std::to_string(x) + y; },
+      std::make_pair(7, "apply"));
+    CHECK(result == "7apply");
+  }
+}
+
 TEST_CASE("functional") {
   SECTION("invoke-runtime-unpack-unordered-map") {
     std::unordered_map<int, std::string> values = {
@@ -131,7 +155,9 @@ TEST_CASE("functional") {
     );
 
     CHECK(result == "7unpack");
+  }
 
+  SECTION("invoke-constexpr") {
     struct type {
       constexpr type () noexcept { }
       constexpr int operator ()() const noexcept { return 5; }
