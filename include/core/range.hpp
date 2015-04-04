@@ -301,14 +301,14 @@ auto make_range (::std::basic_streambuf<CharT, Traits>* buffer) -> range<
 }
 
 template <class T>
-range<number_iterator<T>> make_number_range(T start, T stop, T step) {
+range<number_iterator<T>> make_number_range(T start, T stop, T step) noexcept {
   auto begin = make_number_iterator(start, step);
   auto end = make_number_iterator(stop, step);
   return make_range(begin, end);
 }
 
 template <class T>
-range<number_iterator<T>> make_number_range (T start, T stop) {
+range<number_iterator<T>> make_number_range (T start, T stop) noexcept {
   return make_range(make_number_iterator(start), make_number_iterator(stop));
 }
 
