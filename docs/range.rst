@@ -241,7 +241,7 @@ Component Interface
                 T start, T stop, T step) noexcept
               range<number_iterator<T>> make_number_range(T start, T stop)
 
-   Creates a :any:`range` with :any`number_iterator` as its :any:`iterator`.
+   Creates a :any:`range` with :any:`number_iterator` as its :any:`iterator`.
 
 .. function:: range<T> make_range (T begin, T end)
 
