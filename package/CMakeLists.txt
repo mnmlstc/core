@@ -46,7 +46,10 @@ list(APPEND CPACK_SOURCE_IGNORE_FILES "/.git/")
 list(APPEND CPACK_SOURCE_IGNORE_FILES "/bii/")
 list(APPEND CPACK_SOURCE_IGNORE_FILES "/bin/")
 
+list(APPEND CPACK_SOURCE_IGNORE_FILES ".gitattributes")
 list(APPEND CPACK_SOURCE_IGNORE_FILES "biicode.conf")
+list(APPEND CPACK_SOURCE_IGNORE_FILES ".travis.yml")
+list(APPEND CPACK_SOURCE_IGNORE_FILES ".gitignore")
 list(APPEND CPACK_SOURCE_IGNORE_FILES "ignore.bii")
 list(APPEND CPACK_SOURCE_IGNORE_FILES ".DS_Store")
 
@@ -77,3 +80,28 @@ list(APPEND CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION "/usr/share/cmake")
 # Finalize
 #------------------------------------------------------------------------------
 include(CPack)
+
+# Create some custom commands to piggy back off of CPack
+if (APPLE)
+  find_package(PythonInterp REQUIRED)
+  add_custom_target(pkgbuild
+  COMMAND ${PYTHON_EXECUTABLE}
+    ${PROJECT_SOURCE_DIR}/scripts/pkgbuild.py
+    -b ${CMAKE_BINARY_DIR}
+    -r ${PACK_SOURCE_DIR}
+  COMMENT "Run pkgbuild.py packaging script"
+  VERBATIM)
+else ()
+  # An "empty" command for 'dist'
+  add_custom_target(pkgbuild COMMAND ${CMAKE_COMMAND} -E sleep 0 VERBATIM)
+endif ()
+
+# A 'nice' 
+add_custom_target(source
+  COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target package_source
+  VERBATIM)
+add_custom_target(dist
+  COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target package
+  COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target source
+  COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target pkgbuild
+  VERBATIM)
