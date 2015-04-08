@@ -781,8 +781,8 @@ auto transform (
   static_assert(is_input1, "transform requires InputIterators");
   static_assert(is_input2, "transform requires InputIterators");
   return ::std::transform(
-    ::std::begin(range2),
-    ::std::end(range2),
+    ::std::begin(range1),
+    ::std::end(range1),
     ::std::begin(range2),
     ::std::forward<OutputIt>(it),
     ::std::forward<BinaryOperation>(op)

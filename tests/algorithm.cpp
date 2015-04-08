@@ -8,20 +8,19 @@
 #include "catch.hpp"
 
 TEST_CASE("predicates", "[non-modifying-sequence]") {
+  std::vector<int> values { 1, 2, 3, 4, 5 };
+
   SECTION("all-of") {
-    std::vector<int> values { 1, 2, 3, 4, 5 };
     auto result = core::all_of(values, [](int v) { return v > 0; });
     CHECK(result);
   }
 
   SECTION("any-of") {
-    std::vector<int> values { 1, 2, 3, 4, 5 };
     auto result = core::any_of(values, [](int v) { return v % 2 == 0; });
     CHECK(result);
   }
 
   SECTION("none-of") {
-    std::vector<int> values { 1, 2, 3, 4, 5 };
     auto result = core::none_of(values, [](int v) { return v <= 0; });
     CHECK(result);
   }
@@ -218,7 +217,7 @@ TEST_CASE("fill", "[modifying-sequence]") {
 }
 
 TEST_CASE("transform", "[modifying-sequence]") {
-  SECTION("transform") {
+  SECTION("transform-unary") {
     std::vector<int> value { 1, 2, 3 };
     std::vector<std::string> output { 3 };
     core::transform(value, ::std::begin(output), [] (int v) -> std::string {
@@ -227,6 +226,22 @@ TEST_CASE("transform", "[modifying-sequence]") {
     CHECK(output[0] == "1");
     CHECK(output[1] == "2");
     CHECK(output[2] == "3");
+  }
+
+  SECTION("transform-binary") {
+    std::vector<int> keys { 1, 2, 3 };
+    std::vector<std::string> values { "1", "2", "3" };
+    std::vector<std::pair<int, std::string>> output;
+    auto const converter = [] (int l, std::string& s) {
+      return std::make_pair(l, s);
+    };
+    core::transform(keys, values, std::back_inserter(output), converter);
+    CHECK(output[0].second == "1");
+    CHECK(output[1].second == "2");
+    CHECK(output[2].second == "3");
+    CHECK(output[0].first == 1);
+    CHECK(output[1].first == 2);
+    CHECK(output[2].first == 3);
   }
 
   SECTION("transform-if") {

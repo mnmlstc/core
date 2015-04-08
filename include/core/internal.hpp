@@ -195,8 +195,8 @@ union discriminate<T, Ts...> {
   discriminate<Ts...> rest;
 };
 
-/* implementations of MurmurHash2 Endian Neutral */
-template <::std::size_t> struct murmur;
+/* implementations of MurmurHash2 *Endian Neutral* (but not alignment!) */
+template <::std::size_t=sizeof(::std::size_t)> struct murmur;
 template <> struct murmur<4> {
   constexpr murmur () = default;
 
@@ -216,7 +216,7 @@ template <> struct murmur<4> {
       mix *= magic;
       mix ^= mix >> shift;
       mix *= magic;
-      
+
       hash *= magic;
       hash ^= mix;
 
