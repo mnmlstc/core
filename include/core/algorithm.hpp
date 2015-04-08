@@ -330,7 +330,7 @@ template <
   static constexpr auto is_input2 = decltype(r2)::is_input;
   static_assert(is_input1, "equal requires InputIterators");
   static_assert(is_input2, "equal requires InputIterators");
-  return equal(begin(r1), end(r1), begin(r2), end(r2));
+  return equal(r1.begin(), r1.end(), r2.begin(), r2.end);
 }
 
 template <
@@ -349,10 +349,10 @@ template <
   static_assert(is_input1, "equal requires InputIterators");
   static_assert(is_input2, "equal requires InputIterators");
   return equal(
-    begin(r1),
-    end(r1),
-    begin(r2),
-    end(r2),
+    r1.begin(),
+    r1.end(),
+    r2.begin(),
+    r2.end(),
     ::std::forward<BinaryPredicate>(bp)
   );
 }
@@ -764,16 +764,47 @@ auto transform_if (
   return it;
 }
 
-template <class Range1, class Range2, class OutputIt, class BinaryOperation>
-auto transform (
+template <
+  class Range,
+  class InputIt,
+  class OutputIt,
+  class BinaryOperation,
+  enable_if_t<
+    meta::all<is_range<Range>, meta::none<is_range<InputIt>>>::value,
+    ::std::size_t
+  > = __LINE__
+> decay_t<OutputIt> transform (
+  Range&& r,
+  InputIt&& in,
+  OutputIt&& out,
+  BinaryOperation&& op
+) {
+  auto range = make_range(::std::forward<Range>(r));
+  static constexpr auto is_input = decltype(range)::is_input;
+  static_assert(is_input, "transform requires InputIterators");
+  return ::std::transform(
+    range.begin(),
+    range.end(),
+    ::std::forward<InputIt>(in),
+    ::std::forward<OutputIt>(out),
+    ::std::forward<BinaryOperation>(op));
+}
+
+template <
+  class Range1,
+  class Range2,
+  class OutputIt,
+  class BinaryOperation,
+  enable_if_t<
+    meta::all<is_range<Range1>, is_range<Range2>>::value,
+    ::std::size_t
+  > = __LINE__
+> decay_t<OutputIt> transform (
   Range1&& rng1,
   Range2&& rng2,
   OutputIt&& it,
   BinaryOperation&& op
-) -> enable_if_t<
-  all_traits<is_range<Range1>, is_range<Range2>>::value,
-  decay_t<OutputIt>
-> {
+) {
   auto range1 = make_range(::std::forward<Range1>(rng1));
   auto range2 = make_range(::std::forward<Range2>(rng2));
   static constexpr auto is_input1 = decltype(range1)::is_input;

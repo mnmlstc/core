@@ -414,34 +414,40 @@ Modifying Sequence Operations
    :requires: :samp:`{range}` must provide ForwardIterators.
 
 .. function:: OutputIt transform (\
-                Range&& range,\
-                OutputIt&& it,\
+                Range&& range,    \
+                OutputIt&& it,    \
                 UnaryOperation&& op)
               OutputIt transform (\
-                Range1&& range1,\
-                Range2&& range2,\
-                OutputIt&& it,\
+                Range1&& range1,  \
+                Range2&& range2,  \
+                OutputIt&& it,    \
+                BinaryOperation&& op)
+              OutputIt transform (\
+                Range&& range,    \
+                InputIt in,       \
+                OutputIt it,      \
                 BinaryOperation&& op)
               OutputIt transform_if (\
-                Range&& range,\
-                OutputIt it,\
-                UnaryOperation op,\
+                Range&& range,       \
+                OutputIt it,         \
+                UnaryOperation op,   \
                 UnaryPredicate up)
               OutputIt transform_if (\
-                Range1&& range1,\
-                Range2&& range2,\
-                OutputIt it,\
-                BinaryOperation op,\
+                Range1&& range1,     \
+                Range2&& range2,     \
+                OutputIt it,         \
+                BinaryOperation op,  \
                 BinaryPredicate bp)
 
    Applies the given function to :samp:`{range}` and stores the result in
    another range, beginning at :samp:`{it}`. The first version applies the
    unary operation :samp:`{op}` to the elements in :samp:`{range}`. The second
    version applies the binary operation :samp:`{op}` to pairs of elements from
-   :samp:`{range1}` and :samp:`{range2}`. The conditional versions do not
-   perfectly forward their arguments as the algorithm is performed in situ.
-   :any:`transform_if` can be considered a merging of :any:`copy_if` and
-   :any:`transform`.
+   :samp:`{range1}` and :samp:`{range2}`. The third version works in the same
+   way as the second, but is for cases where the second sequence is simply an
+   input iterator. The conditional versions do not perfectly forward their
+   arguments as the algorithm is performed in situ. :any:`transform_if` can be
+   considered a merging of :any:`copy_if` and :any:`transform`.
 
    :returns: Iterator to one past the last element transformed.
    :requires: :any:`transform` uses InputIterators. :any:`transform_if` uses
