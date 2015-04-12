@@ -9,9 +9,14 @@ Specification to the letter, and even performs the *small object optimization*.
 This means that for types whose size are less than (or equal to) a
 :cxx:`void*`, no allocation will take place.
 
-The any component resides in :file:`<core/any.hpp>`.
+The any component resides in :file:`<core/{any}.hpp>`.
 
 This component is unavailable if :c:macro:`CORE_NO_RTTI` is defined.
+
+.. index::
+   single: any; bad_any_cast
+   single: exceptions; bad_any_cast
+
 
 .. class:: bad_any_cast
 
@@ -27,7 +32,11 @@ This component is unavailable if :c:macro:`CORE_NO_RTTI` is defined.
       Returns the string "bad any cast". If :cxx:`typeid(T).name()` was
       standardized, this would be added to the error message
 
+.. index:: any
+
 .. class:: any
+
+   .. index:: any; constructors
 
    .. function:: any (any const&)
                  any (any&&) noexcept
@@ -81,6 +90,8 @@ This component is unavailable if :c:macro:`CORE_NO_RTTI` is defined.
          a *state* change results in calling swap on the internal storage
          type used by :any:`any`.
 
+   .. index:: any; observers
+
    .. function:: std::type_info const& type () const noexcept
    
       Returns the :cxx:`std::type_info` for the type contained within. If the
@@ -91,11 +102,15 @@ This component is unavailable if :c:macro:`CORE_NO_RTTI` is defined.
       If the :any:`any` does not contain any data (i.e. :any:`type` returns
       :cxx:`typeid(void)`), it will return :cxx:`true`.
 
+   .. index:: any; operations
+
    .. function:: void clear () noexcept
    
       :postcondition: :any:`empty` == true
    
       Destroys the object contained within the :any:`any`.
+
+.. index:: any; functions
 
 .. function:: ValueType any_cast (any const& operand)
               ValueType any_cast (any&& operand)
