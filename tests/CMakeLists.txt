@@ -25,9 +25,6 @@ function(add_unit_test name file)
   add_executable(test-${name} ${file})
   add_test(${name} test-${name})
   add_dependencies(check test-${name})
-  target_compile_definitions(test-${name}
-    PRIVATE
-      $<TARGET_PROPERTY:core,INTERFACE_COMPILE_DEFINITIONS>)
   target_compile_options(test-${name}
     PRIVATE
       $<$<AND:${LIBCXX}>:${USE_STDLIB_LIBCXX}>
@@ -54,9 +51,7 @@ function(add_unit_test name file)
       $<$<BOOL:${CAN_WARN_NO_SHADOW}>:${WARN_NO_SHADOW}>
       $<$<BOOL:${CAN_WARN_NO_PADDED}>:${WARN_NO_PADDED}>)
   target_include_directories(test-${name} SYSTEM PRIVATE ${TEST_SOURCE_DIR})
-  target_include_directories(test-${name}
-    PRIVATE
-      $<TARGET_PROPERTY:core,INTERFACE_INCLUDE_DIRECTORIES>)
+  target_link_libraries(test-${name} PUBLIC core)
 endfunction ()
 
 #------------------------------------------------------------------------------

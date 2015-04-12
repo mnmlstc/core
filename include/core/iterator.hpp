@@ -118,6 +118,11 @@ auto crend (Container const& container) -> decltype(rend(container)) {
   return rend(container);
 }
 
+template <class Iterator>
+::std::reverse_iterator<Iterator> make_reverse_iterator (Iterator iter) {
+  return ::std::reverse_iterator<Iterator>(iter);
+}
+
 template <
   class T,
   class CharT=char,
