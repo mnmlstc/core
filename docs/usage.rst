@@ -10,10 +10,10 @@ Library Layout
 
 MNMLSTC Core follows the same header layout as the C++ standard library. Each
 library component is located in its own header. For instance, the
-:doc:`memory component <memory>` is located in :file:`<core/memory.hpp>`, and
+:doc:`memory component <memory>` is located in :file:`<core/{memory}.hpp>`, and
 the :doc:`optional component <optional>` is located in
-:file:`<core/optional.hpp>`. Several components may have a sub-namespace within
-the :cxx:`core::` namespace. Each component's documentation will inform
+:file:`<core/{optional}.hpp>`. Several components may have a sub-namespace
+within the :cxx:`core::` namespace. Each component's documentation will inform
 the user if this is the case.
 
 Project Layout
@@ -46,8 +46,8 @@ are placed within ``[]``):
    cmake ../ \
     -DCMAKE_BUILD_TYPE=[Debug|Release|RelWithDebInfo] \
     -DBUILD_WITH_LIBCXX=[ON|OFF] \
-    -DBUILD_DOCS=[ON|OFF]
-    -DDISABLE_EXCEPTIONS=[ON|OFF]
+    -DBUILD_DOCS=[ON|OFF] \
+    -DDISABLE_EXCEPTIONS=[ON|OFF] \
     -DDISABLE_RTTI=[ON|OFF]
    make && make check && make install
 
@@ -112,6 +112,17 @@ of using MNMLSTC Core with CMake:
 
 .. code-block:: cmake
 
+   find_package(core 1.2.0 REQUIRED)
+   add_library(my_library STATIC ${MY_SOURCE_FILES})
+   target_link_libraries(my_library PUBLIC mnmlstc::core)
+
+Because :cmake:`mnmlstc::core` is an :cmake:`INTERFACE` library, it uses
+transitive linking by default, which means it will pass on its
+*usage requirements* when used with :cmake:`target_link_libraries`. Regardless,
+one can also use the less transitive form as well:
+
+.. code-block:: cmake
+
   find_package(core 1.2.0 REQUIRED)
   add_library(my_library ${MY_SOURCE_FILES})
   target_include_directories(my_library
@@ -121,15 +132,22 @@ of using MNMLSTC Core with CMake:
     PUBLIC
       $<TARGET_PROPERTY:mnmlstc::core,INTERFACE_COMPILE_DEFINITIONS>)
 
-While this is more verbose than a simple :cmake:`include_directories` call in
-CMake, it allows libraries that may use MNMLSTC Core to propagate their include
-directories without requiring that additional packages find both the library
-that depends on MNMLSTC Core *and* MNMLSTC Core itself.
+Both of these approaches allow a user to now use MNMLSTC Core without having to
+install it directly on a machine, and instead use it as a build tree export.
+Before 1.2, this approach was not available, and an installation of MNMLSTC
+Core was required.
 
-Additionally, this approach allows a user to now use MNMLSTC Core without
-having to install it directly on a machine, and instead use it as a build tree
-export. Before 1.2, this approach was not available, and an installation of
-MNMLSTC Core was required.
+Because :cmake:`mnmlstc::core` is an :cmake:`INTERFACE` library, it will also
+permit *transitive linking* which means it will pass on its
+*usage requirements* when used with :cmake:`target_link_libraries`:
+
+.. code-block:: cmake
+
+   find_package(core 1.2.0 REQUIRED)
+   add_library(my_library ${MY_SOURCE_FILES})
+   target_link_libraries(my_library INTERFACE mnmlstc::core)
+
+This has the same result as the previous example.
 
 The following variables are available for use after finding MNMLSTC Core:
 
@@ -162,12 +180,12 @@ Feature Addition and Deprecation
 
 MNMLSTC Core follows the `Semantic Versioning`_ specification. When a feature
 is deprecated, it will be marked with an attribute (e.g.,
-:cxx:`[[gnu::deprecated]]``). Because this type of attribute was not added
+:cxx:`[[gnu::deprecated]]`). Because this type of attribute was not added
 until C++14, it will unfortunately be compiler specific. Additionally, some
-compiler versions understand multiple "deprecated" attributes and will error
-when more than one of these attributes is applied to something. However, the
-documentation for a specific feature or component will be marked as deprecated,
-along with a link to the newer functionality.
+compiler versions don't understand multiple "deprecated" attributes and will
+error when more than one of these attributes is applied to something. However,
+the documentation for a specific feature or component will be marked as
+deprecated, along with a link to the newer functionality.
 
 In accordance with `Semantic Versioning`_, new features will be made available
 in minor version releaes. Any API rewrites will be in major releases. It should
@@ -215,7 +233,6 @@ MNMLSTC Core provides source packages in the following formats:
  * .tar.bz2
  * .tar.gz
  * .tar.xz
- * .tar.Z
  * .zip
  * .7z
 
