@@ -212,11 +212,11 @@ struct number_iterator final {
   }
 
   bool operator == (number_iterator const& that) const noexcept {
-    return this->value == that.value and this->step == that.value;
+    return this->value == that.value and this->step == that.step;
   }
 
   bool operator != (number_iterator const& that) const noexcept {
-    return this->value != that.value and this->step == that.value;
+    return this->value != that.value and this->step == that.step;
   }
 
 private:

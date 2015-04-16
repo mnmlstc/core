@@ -22,6 +22,9 @@ template <::std::size_t I, class T>
 using tuple_element_t = typename ::std::tuple_element<I, T>::type;
 template <class T> using tuple_size_t = typename ::std::tuple_size<T>::type;
 
+/* Implementation of N4389 */
+template <bool B> using bool_constant = ::std::integral_constant<bool, B>;
+
 /* This is equivalent to the Boost.TypeTraits dont_care type */
 using ignore_t = decltype(::std::ignore);
 
@@ -184,7 +187,7 @@ struct is_null_pointer<::std::nullptr_t> : ::std::true_type { };
 template <class T, class U=T>
 using is_swappable = impl::is_swappable<T, U>;
 
-/* is_nothrow_swappable */
+/* is_nothrow_swappable - N4426 (implemented before paper was proposed) */
 template <class T, class U=T>
 using is_nothrow_swappable = impl::is_nothrow_swappable<T, U>;
 

@@ -300,6 +300,18 @@ auto make_range (::std::basic_streambuf<CharT, Traits>* buffer) -> range<
   return make_range(iterator { buffer }, iterator { });
 }
 
+template <class Iter>
+range<::std::move_iterator<Iter>> make_move_range (Iter start, Iter stop) {
+  return make_range(
+    ::std::make_move_iterator(start),
+    ::std::make_move_iterator(stop));
+}
+
+template <class T>
+range<::std::move_iterator<T*>> make_move_range (T* ptr, ::std::size_t n) {
+  return make_move_range(ptr, ptr + n);
+}
+
 template <class T>
 range<number_iterator<T>> make_number_range(T start, T stop, T step) noexcept {
   auto begin = make_number_iterator(start, step);
