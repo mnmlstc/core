@@ -79,14 +79,7 @@ struct unary {
   using result_type = R;
 };
 
-/* constexpr mem_fn plumbing
- * names here are kept short because we *have* to give some of these types a
- * name, but the name doesn't really matter (nor are the attempts I've made
- * at giving them proper names truly descriptive). Comments are placed above
- * each one so that anyone reading won't wonder why the member function pointer
- * trait base is named the onomatopoeia for giving someone a raspberry :P and
- * so on and so forth.
- *
+/*
  * If I can't amuse myself when working with C++ templates, then life isn't
  * worth living. Bury me with my chevrons.
  */
@@ -100,26 +93,9 @@ constexpr T&& pass (remove_reference_t<T>&& t) noexcept {
   return static_cast<T&&>(t);
 }
 
-/* mfptb == member function pointer trait base
- * No, I don't feel like typing that out. I am mad that I have to do all
- * this in the first place.
+/* INVOKE pseudo-expression plumbing, *much* more simplified than previous
+ * versions of core
  */
-template <class R, class... Args> struct mfptb {
-  constexpr mfptb () noexcept = default;
-};
-template <class R, class T, class U> struct mfptb<R, T, U> :
-  binary<T, U, R>
-{ };
-template <class R, class T> struct mfptb<R, T> :
-  unary<T, R>
-{ };
-
-template <class T> using ptr = typename ::std::add_pointer<T>::type;
-template <class T> using cptr = ptr<typename ::std::add_const<T>::type>;
-template <class T> using vptr = ptr<typename ::std::add_volatile<T>::type>;
-template <class T> using cvptr = ptr<typename ::std::add_cv<T>::type>;
-
-/* INVOKE pseudo-expression plumbing, *much* more simplified. */
 struct undefined { constexpr undefined (...) noexcept { } };
 
 /* We get some weird warnings under clang, so we actually give these functions

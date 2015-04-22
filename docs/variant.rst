@@ -3,6 +3,8 @@ Variant Component
 
 .. namespace:: core
 
+.. index:: variant
+
 The :any:`variant` component is a generic type-safe implementation of a
 discriminate union. It is equivalent to the Boost.Variant library, with several
 small exceptions.
@@ -20,6 +22,8 @@ switch statement*
 
 The variant component resides in :file:`<core/{variant}.hpp>`.
 
+.. index:: variant; exceptions
+
 .. class:: bad_variant_get
 
    :inherits: :cxx:`std::logic_error`
@@ -35,6 +39,8 @@ The variant component resides in :file:`<core/{variant}.hpp>`.
    the Boost.Variant, a :any:`variant` is never in an uninitialized state. When
    default constructing a :any:`variant`, the first type in the
    :any:`variant`'s typelist is initialized.
+
+   .. index:: variant; constructors
 
    .. function:: variant (T&& value)
 
@@ -82,23 +88,14 @@ The variant component resides in :file:`<core/{variant}.hpp>`.
       Assigns the contents of the other :any:`variant` to :cxx:`*this`. The
       object contained within :cxx:`*this` is destructed first.
 
-   .. function:: bool operator == (variant const& that) const noexcept
-
-      If both :any:`variant`'s :any:`which` is the same value, the values
-      contained within are compared via :cxx:`operator ==`. Otherwise, the
-      result of comparing any:`which` is returned.
-
-   .. function:: bool operator < (variant const& that) const noexcept
-
-      If both :any:`variant`'s :any:`which` are equal, the values contained are
-      compared. Otherwise, the result of comparing :any:`which` is returned.
-
    .. function:: void swap (variant&)
 
       Swaps the contents of both variants.
 
-   .. function:: visit (Visitor&&, Args&&... args) const
-                 visit (Visitor&&, Args&&... args)
+   .. index:: variant; operations
+
+   .. function:: auto visit (Visitor&&, Args&&... args) const
+                 auto visit (Visitor&&, Args&&... args)
 
      Visiting a :any:`variant` follows the following semantics. These semantics
      require that, when given a callable type :samp:`{Visitor}`, and variadic
@@ -116,12 +113,23 @@ The variant component resides in :file:`<core/{variant}.hpp>`.
 
      :returns: :samp:`common_type_t<invoke_of_t<{Visitor}, {Ts}, {Args}...>...>`
 
-   .. function:: match (Visitors&&) const
-                 match (Visitors&&)
+   .. function:: auto match (Visitors&&... visitors) const
+                 auto match (Visitors&&... visitors)
 
-      Takes a variadic number of arguments that are all callable objects. These
-      objects are combined into a single visitor and then executed on the
-      :any:`variant`.
+      Takes a variadic number of :samp:`{visitors}` that are all callable
+      objects. These objects are combined into a single visitor and then
+      executed on the :any:`variant`.
+
+      :example:
+
+      .. code-block:: cpp
+
+         variant<int, std::string> item { };
+         item.match(
+           [] (int v) { std::cout << v << std::endl; },
+           [] (std::string const& s) { std::cout << s << std::endl; });
+
+   .. index:: variant; observers
 
    .. function:: std::type_info const& type () const noexcept
 
@@ -139,6 +147,22 @@ The variant component resides in :file:`<core/{variant}.hpp>`.
       the other 'object containers' contained within this library.
 
       :returns: false
+
+   .. index:: variant; operators
+
+   .. function:: bool operator == (variant const& that) const noexcept
+
+      If both :any:`variant`'s :any:`which` is the same value, the values
+      contained within are compared via :cxx:`operator ==`. Otherwise, the
+      result of comparing any:`which` is returned.
+
+   .. function:: bool operator < (variant const& that) const noexcept
+
+      If both :any:`variant`'s :any:`which` are equal, the values contained are
+      compared. Otherwise, the result of comparing :any:`which` is returned.
+
+
+.. index:: variant; functions
 
 .. function:: auto const& get<N> (variant const& v)
               auto&& get<N> (variant&& v)
@@ -180,7 +204,7 @@ The variant component resides in :file:`<core/{variant}.hpp>`.
 
 .. function:: void swap (variant& lhs, variant& rhs)
 
-   Calls :any:`variant\<Ts...>::swap`
+   Calls :any:`variant\<Ts...>::swap`. Equivalent to :samp:`{lhs}.swap({rhs})`
 
 Specializations
 ---------------
@@ -191,7 +215,7 @@ These are specializations placed in the :cxx:`std` namespace.
 
 .. class:: hash<variant<Ts...>>
 
-   A specialization of ``std::hash<T>`` for variants. Requires that all
+   A specialization of :cxx:`std::hash<T>` for variants. Requires that all
    :samp:`{Ts}...` in a :any:`variant` be specialized for :cxx:`std::hash`.
 
 .. function:: auto const& get<N>(variant const&)
@@ -201,6 +225,6 @@ These are specializations placed in the :cxx:`std` namespace.
    .. deprecated:: 1.2 Please use :any:`core::get\<N>`
 
    Calls :any:`core::get`, and returns the value. This specialization is
-   provided to interact with ``std::tuple`` and to provide *some* semblance of
-   boost interoperability. However it does not support using the type to get
+   provided to interact with :cxx:`std::tuple` and to provide *some* semblance
+   of boost interoperability. However it does not support using the type to get
    the value from the variant.
