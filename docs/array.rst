@@ -3,17 +3,22 @@ Array Component
 
 .. namespace:: core
 
+.. index:: array
+
 The array component currently provides two helper functions for working with
 :cxx:`std::array` in the C++ standard library. Specifically, this component
 provides an implementation of `N4315`_. This component can be found in the
-``<core/array.hpp>`` header.
+:file:`<core/{array}.hpp>` header.
+
+.. index:: array; functions
 
 .. function:: constexpr std::array<T, N> make_array (Args&&... args)
 
-   Given a parameter pack *args*, return a :cxx:`std::array` with the
-   :cxx:`common_type_t<Args...>`. Additionally, a type can be given explicitly.
-   This function is *does not* participate in overload resolution if any of the
-   elements in *args* are a :cxx:`std::reference_wrapper`.
+   Given a parameter pack :samp:`{args}`, return a :cxx:`std::array` with the
+   :samp:`common_type_t<{Args}...>`. Additionally, a type can be given
+   explicitly. This function is *does not* participate in overload resolution
+   if any of the elements in :samp:`{args}` are a
+   :cxx:`std::reference_wrapper`.
 
    :example:
 
@@ -29,9 +34,9 @@ provides an implementation of `N4315`_. This component can be found in the
 
 .. function:: constexpr std::array<T, N> to_array (T (&array)[N])
 
-   Given a C array of type *T* with a defined length of *N*, creates a
-   :cxx:`std::array` with the same length and size.
+   Given a C array of type :samp:`{T}` with a defined length of :samp:`{N}`,
+   creates a :cxx:`std::array` with the same length and size.
 
-   .. note:: This function will copy initialize each *T*
+   This function will copy initialize each :samp:`{T}`
 
 .. _N4315: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n4315.html

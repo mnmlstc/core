@@ -3,39 +3,43 @@ Iterator Component
 
 .. namespace:: core
 
+.. index:: iterator
+
 The iterator component provides the additional functions provided in C++14 with
 respect to iterators. Specifically the free form functions that work like
 :cxx:`std::begin` and :cxx:`std::end`.
 
-The iterator component can be found in ``<core/iterator.hpp>``.
+The iterator component can be found in :file:`<core/{iterator}.hpp>`.
 
+.. index:: iterator; functions
 
 .. function:: constexpr auto size (Container const& container) noexcept
 
-   :returns: :samp:`{container}.size()` or :cxx:`N` if *container* is an array.
+   :returns: :samp:`{container}.size()` or :cxx:`N` if :samp:`{container}` is
+             an array.
 
 .. function:: constexpr auto empty (Container const& container) noexcept
 
-   :returns: :samp:`{container}.empty()` or :cxx:`false` if *container* is an
-             array.
+   :returns: :samp:`{container}.empty()` or :cxx:`false` if
+             :samp:`{container}` is an array.
 
 .. function:: constexpr auto front (Container const& container)
               constexpr auto front (Container& container)
 
    :returns: :samp:`{container}.front()` or :samp:`{container}[0]` if
-             *container* is an array.
+             :samp:`{container}` is an array.
 
 .. function:: constexpr auto back (Container const& container)
               constexpr auto back (Container&)
 
    :returns: :samp:`{container}.back()` or :samp:`{container}[N - 1]` if
-             *container* is an array.
+             :samp:`{container}` is an array.
 
 .. function:: constexpr auto data (Container const& container) noexcept
               constexpr auto data (Container& container) noexcept
 
-   :returns: :samp:`{container}.data()` or :samp:`{container}` if *container*
-             is an array.
+   :returns: :samp:`{container}.data()` or :samp:`{container}` if
+             :samp:`{container}` is an array.
 
 .. function:: cbegin (Container const& container)
 
@@ -48,8 +52,9 @@ The iterator component can be found in ``<core/iterator.hpp>``.
 .. function:: rbegin (Container const& container)
               rbegin (Container& container)
 
-   Requires that the given *container* have a member function named ``rbegin``.
-   If no such member function exists, the function will fail to compile.
+   Requires that the given :samp:`{container}` have a member function named
+   :cxx:`rbegin`. If no such member function exists, the function will fail to
+   compile.
 
    :returns: :samp:`{container}.rbegin()`
 
@@ -60,14 +65,17 @@ The iterator component can be found in ``<core/iterator.hpp>``.
 .. function:: rend (Container const& container)
               rend (Container& container)
 
-   Requires that the given *container* have a member function named ``rend``.
-   If no such member function exists, the function will fail to compile.
+   Requires that the given :samp:`{container}` have a member function named
+   :cxx:`rend`. If no such member function exists, the function will fail to
+   compile.
 
    :returns: :samp:`{container}.rend()`
 
 .. function:: crend (Container const& container)
 
    :returns: :samp:`rend({container})`
+
+.. index:: iterator; types
 
 .. class:: infix_ostream_iterator<T>
 

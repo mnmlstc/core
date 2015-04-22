@@ -9,6 +9,11 @@ that are outlined and discussed in this documentation.
 It is recommended that new users read :doc:`usage`. The documentation is
 ordered according to the augmented library components, rather than by feature.
 
+For those who are looking for a specific section in the documentation, having a
+glance at the :ref:`Generated Index<genindex>` might be of assistance.
+
+A :ref:`search<search>` feature is also available.
+
 .. toctree::
    :maxdepth: 1
 
@@ -27,3 +32,4 @@ ordered according to the augmented library components, rather than by feature.
    String Utilities <string>
    Range Type <range>
    Any Type <any>
+
