@@ -22,23 +22,31 @@ endfunction ()
 
 function(add_unit_test name file)
   set(LIBCXX $<BOOL:${CAN_USE_STDLIB_LIBCXX}>,$<BOOL:${BUILD_WITH_LIBCXX}>)
+  set(NO_RTTI $<BOOL:${CAN_USE_NO_RTTI}>,$<BOOL:${DISABLE_RTTI}>)
   add_executable(test-${name} ${file})
   add_test(${name} test-${name})
   add_dependencies(check test-${name})
   target_compile_options(test-${name}
     PRIVATE
+      $<$<BOOL:${BUILD_WITH_COVERAGE}>:${USE_COVERAGE}>
       $<$<AND:${LIBCXX}>:${USE_STDLIB_LIBCXX}>
       $<$<BOOL:${CAN_USE_STD_CXX11}>:${USE_STD_CXX11}>
+      $<$<AND:${NO_RTTI}>:${USE_NO_RTTI}>
 
-      $<$<BOOL:${CAN_USE_NO_RTTI}>:${USE_NO_RTTI}>
+      $<$<BOOL:${CAN_SANITIZE_UNDEFINED}>:${SANITIZE_UNDEFINED}>
+      $<$<BOOL:${CAN_SANITIZE_ADDRESS}>:${SANITIZE_ADDRESS}>
+      $<$<BOOL:${CAN_SANITIZE_MEMORY}>:${SANITIZE_MEMORY}>
 
+      $<$<BOOL:${CAN_WARN_MAYBE_UNINIT}>:${WARN_MAYBE_UNINIT}>
       $<$<BOOL:${CAN_WARN_EVERYTHING}>:${WARN_EVERYTHING}>
       $<$<BOOL:${CAN_WARN_NOEXCEPT}>:${WARN_NOEXCEPT}>
       $<$<BOOL:${CAN_WARN_PEDANTIC}>:${WARN_PEDANTIC}>
       $<$<BOOL:${CAN_WARN_EXTRA}>:${WARN_EXTRA}>
+      $<$<BOOL:${CAN_WARN_ODR}>:${WARN_ODR}>
       $<$<BOOL:${CAN_WARN_ALL}>:${WARN_ALL}>
 
       $<$<BOOL:${CAN_WARN_NO_CXX98_PEDANTIC}>:${WARN_NO_CXX98_PEDANTIC}>
+      $<$<BOOL:${CAN_WARN_NO_POTENTIAL_EXPR}>:${WARN_NO_POTENTIAL_EXPR}>
       $<$<BOOL:${CAN_WARN_NO_INTERNAL_DECL}>:${WARN_NO_INTERNAL_DECL}>
       $<$<BOOL:${CAN_WARN_NO_CXX98_COMPAT}>:${WARN_NO_CXX98_COMPAT}>
       $<$<BOOL:${CAN_WARN_NO_WEAK_VTABLES}>:${WARN_NO_WEAK_VTABLES}>
@@ -50,8 +58,14 @@ function(add_unit_test name file)
       $<$<BOOL:${CAN_WARN_NO_EXIT_TIME}>:${WARN_NO_EXIT_TIME}>
       $<$<BOOL:${CAN_WARN_NO_SHADOW}>:${WARN_NO_SHADOW}>
       $<$<BOOL:${CAN_WARN_NO_PADDED}>:${WARN_NO_PADDED}>)
+
   target_include_directories(test-${name} SYSTEM PRIVATE ${TEST_SOURCE_DIR})
   target_link_libraries(test-${name} PUBLIC core)
+  target_link_libraries(test-${name} PRIVATE
+    $<$<BOOL:${CAN_SANITIZE_UNDEFINED}>:${SANITIZE_UNDEFINED}>
+    $<$<BOOL:${CAN_SANITIZE_ADDRESS}>:${SANITIZE_ADDRESS}>
+    $<$<BOOL:${CAN_SANITIZE_MEMORY}>:${SANITIZE_MEMORY}>
+    $<$<BOOL:${BUILD_WITH_COVERAGE}>:${USE_COVERAGE}>)
 endfunction ()
 
 #------------------------------------------------------------------------------
@@ -59,18 +73,26 @@ endfunction ()
 #------------------------------------------------------------------------------
 set(USE_STDLIB_LIBCXX "-stdlib=libc++")
 set(USE_STD_CXX11 "-std=c++11")
+set(USE_COVERAGE "--coverage")
 
 set(USE_NO_EXCEPTIONS "-fno-exceptions")
 set(USE_NO_RTTI "-fno-rtti")
 
+set(SANITIZE_UNDEFINED "-fsanitize=undefined")
+set(SANITIZE_ADDRESS "-fsanitize=address")
+set(SANITIZE_MEMORY "-fsanitize=memory")
+
+set(WARN_MAYBE_UNINIT "-Wmaybe-unintialized")
 set(WARN_EVERYTHING "-Weverything")
 set(WARN_NOEXCEPT "-Wnoexcept")
 set(WARN_PEDANTIC "-Wpedantic")
 set(WARN_ONE_LINE "-WL")
 set(WARN_ERROR "-Werror")
 set(WARN_EXTRA "-Wextra")
+set(WARN_ODR "-Wodr")
 set(WARN_ALL "-Wall")
 
+set(WARN_NO_POTENTIAL_EXPR "-Wno-potentially-evaluated-expression")
 set(WARN_NO_INTERNAL_DECL "-Wno-unneeded-internal-declaration")
 set(WARN_NO_CXX98_PEDANTIC "-Wno-c++98-compat-pedantic")
 set(WARN_NO_CXX98_COMPAT "-Wno-c++98-compat")
@@ -93,15 +115,23 @@ endif ()
 
 check_cxx_compiler_flag(${USE_STDLIB_LIBCXX} CAN_USE_STDLIB_LIBCXX)
 check_cxx_compiler_flag(${USE_STD_CXX11} CAN_USE_STD_CXX11)
+check_cxx_compiler_flag(${USE_NO_RTTI} CAN_USE_NO_RTTI)
 
+check_cxx_compiler_flag(${SANITIZE_UNDEFINED} CAN_SANITIZE_UNDEFINED)
+check_cxx_compiler_flag(${SANITIZE_ADDRESS} CAN_SANITIZE_ADDRESS)
+check_cxx_compiler_flag(${SANITIZE_MEMORY} CAN_SANITIZE_MEMORY)
+
+check_cxx_compiler_flag(${WARN_MAYBE_UNINIT} CAN_WARN_MAYBE_UNINIT)
 check_cxx_compiler_flag(${WARN_EVERYTHING} CAN_WARN_EVERYTHING)
 check_cxx_compiler_flag(${WARN_NOEXCEPT} CAN_WARN_NOEXCEPT)
 check_cxx_compiler_flag(${WARN_PEDANTIC} CAN_WARN_PEDANTIC)
 check_cxx_compiler_flag(${WARN_ONE_LINE} CAN_WARN_ONE_LINE)
 check_cxx_compiler_flag(${WARN_ERROR} CAN_WARN_ERROR)
 check_cxx_compiler_flag(${WARN_EXTRA} CAN_WARN_EXTRA)
+check_cxx_compiler_flag(${WARN_ODR} CAN_WARN_ODR)
 check_cxx_compiler_flag(${WARN_ALL} CAN_WARN_ALL)
 
+check_cxx_compiler_flag(${WARN_NO_POTENTIAL_EXPR} CAN_WARN_NO_POTENTIAL_EXPR)
 check_cxx_compiler_flag(${WARN_NO_CXX98_PEDANTIC} CAN_WARN_NO_CXX98_PEDANTIC)
 check_cxx_compiler_flag(${WARN_NO_INTERNAL_DECL} CAN_WARN_NO_INTERNAL_DECL)
 check_cxx_compiler_flag(${WARN_NO_CXX98_COMPAT} CAN_WARN_NO_CXX98_COMPAT)
@@ -127,6 +157,8 @@ require_cxx_include_file(cstddef)
 #------------------------------------------------------------------------------
 add_custom_target(check COMMAND ${CMAKE_TEST_COMMAND})
 
+add_unit_test(propagate-const "${TEST_SOURCE_DIR}/propagate-const.cpp")
+add_unit_test(memory-resource "${TEST_SOURCE_DIR}/memory-resource.cpp")
 add_unit_test(type-traits "${TEST_SOURCE_DIR}/type-traits.cpp")
 add_unit_test(functional "${TEST_SOURCE_DIR}/functional.cpp")
 add_unit_test(algorithm "${TEST_SOURCE_DIR}/algorithm.cpp")

@@ -26,6 +26,7 @@ MNMLSTC Core's source tree has the following layout from the root:
  * package - Contains files and resources for packaging
  * scripts - Contains various utility scripts
  * tests - Contains the unit test files
+ * tools - Contains various plugins for different tools
  * License.rst - A license and copyright notice concerning MNMLSTC Core
 
 Building and Installing
@@ -175,6 +176,41 @@ provides are:
    * :cmake:`INTERFACE_INCLUDE_DIRECTORIES`
    * :cmake:`INTERFACE_COMPILE_DEFINITIONS`
 
+Debugging
+---------
+
+Starting with version 1.2, MNMLSTC Core provides a set of pretty printers for
+the type it provides for use with both `GDB`_ and `LLDB`_. Because Visual
+Studio is not supported, no pretty printing is available.
+
+GDB
+^^^
+
+To enable the GDB pretty printers, add the following to your :file:`.gdbinit`::
+
+  python
+  import sys
+  sys.path.insert(0, '/install-prefix/share/mnmlstc/formatter')
+  import core
+  core.__gdb_init_module(None)
+  end
+
+The :samp:`{install-prefix}` is typically :file:`/usr/local` on POSIX systems.
+However, check with your system administrator for the installation location to
+make sure it is accurate.
+
+LLDB
+^^^^
+
+To enable LLDB pretty printers, colloquially known as data formatters, add
+the following to your :file:`.lldbinit`::
+
+  command script import /install-prefix/share/mnmlstc/core/llvm.py
+
+The :samp:`{install-prefix}` is typically :file:`/usr/local` on POSIX systems.
+However, check with your system administrator for the installation location to
+make sure it is accurate.
+
 Feature Addition and Deprecation
 --------------------------------
 
@@ -193,7 +229,10 @@ also be noted that MNMLSTC Database uses inline namespaces to keep major
 versions as well as keep a stable ABI.
 
 .. note:: While MNMLSTC Core has stated before version 1.2 that it follows
-   Semantic Versioning, it has not done so in practice. Starting with 1.2,
+   Semantic Versioning, it has not done so in practice. C++ has the additional
+   concern of internal ABI changes. for example, the difference between a user
+   defined copy constructor and a defaulted copy constructor can, in some
+   cases, cause obscure bugs and even segmentation faults. Starting with 1.2,
    MNMLSTC Core will make a more concerted effort to properly follow
    the Semantic Versioning specification.
 
@@ -240,3 +279,5 @@ MNMLSTC Core provides source packages in the following formats:
 .. _Biicode: http://biicode.com
 .. _Sphinx: http://sphinx-doc.org
 .. _CMake: http://cmake.org
+.. _LLDB: http://lldb.llvm.org
+.. _GDB: http://www.gnu.org/software/gdb/

@@ -24,6 +24,7 @@ from utility import which
 from utility import pushd
 from utility import exit
 from os.path import abspath
+from os.path import exists
 from os.path import join
 from string import Template
 from shutil import copytree
@@ -102,7 +103,7 @@ if __name__ == '__main__':
     ]
 
     with pushd(build_dir):
-        rmtree(PKG_ROOT)
+        if exists(PKG_ROOT): rmtree(PKG_ROOT)
         makedirs(PKG_ROOT)
         makedirs(resources_dir)
         copytree(join(SRC_ROOT, pkg_name), join(PKG_ROOT, pkg_name))
@@ -111,4 +112,3 @@ if __name__ == '__main__':
             dist.write(distribution.safe_substitute(data))
         execute(*pkgbuild_args)
         execute(*productbuild_args)
-    #execute(*productbuild_args)

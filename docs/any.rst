@@ -17,7 +17,6 @@ This component is unavailable if :c:macro:`CORE_NO_RTTI` is defined.
    single: any; bad_any_cast
    single: exceptions; bad_any_cast
 
-
 .. class:: bad_any_cast
 
    :inherits: std::bad_cast
@@ -41,15 +40,6 @@ This component is unavailable if :c:macro:`CORE_NO_RTTI` is defined.
    .. function:: any (any const&)
                  any (any&&) noexcept
                  any () noexcept
-
-      .. versionadded:: 1.2
-
-         The behavior regarding the move constructor has changed to follow
-         the specification. It will now construct a value of the same type
-         as contained in the incoming :any:`any` and use the move constructor
-         of the type. If the incoming :any:`any` is empty, the newly
-         constructed :any:`any` will be as well. Before 1.2, the move
-         constructor would simply result in a state change.
 
       The default set of constructors work as one might imagine. The copy
       constructor is not marked as noexcept as the underlying type *may*
@@ -77,10 +67,6 @@ This component is unavailable if :c:macro:`CORE_NO_RTTI` is defined.
       Assigns *value* to :cxx:`*this`. If :cxx:`*this` already manages a
       contained object, it will be destroyed after *value* is assigned.
    
-      .. versionadded:: 1.1
-   
-         This function was unfortunately omitted from the 1.0 release.
-
    .. function:: void swap (any&) noexcept
    
       Performs a simple state change with the incoming :any:`any`.

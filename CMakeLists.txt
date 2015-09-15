@@ -8,6 +8,8 @@ include(CMakePackageConfigHelpers)
 include(CMakeDependentOption)
 include(CTest)
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 set(INCLUDE_INSTALL_DIR "include" CACHE INTERNAL "Header Files")
 set(CMAKE_INSTALL_DIR "share/cmake/core" CACHE INTERNAL "CMake Files")
 set(DOCS_INSTALL_DIR "share/doc/mnmlstc/core" CACHE INTERNAL "Documentation")
@@ -37,6 +39,7 @@ cmake_dependent_option(BUILD_PACKAGE_MSI "Create an MSI" ON "${MSI_DEP}" OFF)
 cmake_dependent_option(BUILD_PACKAGE_RPM "Create an RPM" ON "${RPM_DEP}" OFF)
 cmake_dependent_option(BUILD_PACKAGE_PKG "Create a PKG" ON "${PKG_DEP}" OFF)
 cmake_dependent_option(BUILD_WITH_LIBCXX "Use libc++" OFF "BUILD_TESTING" OFF)
+cmake_dependent_option(BUILD_WITH_COVERAGE "Use GCov" OFF "BUILD_TESTING" OFF)
 
 if (BIICODE)
   add_biicode_targets()

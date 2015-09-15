@@ -19,118 +19,115 @@
 #endif /* CORE_NO_EXCEPTIONS */
 
 namespace core {
-inline namespace v1 {
+inline namespace v2 {
 namespace impl {
 
 using data_type = add_pointer_t<void>;
 
-template <class Type>
-using is_small = meta::boolean<
-  sizeof(decay_t<Type>) <= sizeof(data_type) and
-  ::std::is_nothrow_copy_constructible<Type>::value
->;
+template <class T>
+struct is_small final : meta::boolean<
+  sizeof(decay_t<T>) <= sizeof(data_type) and
+  alignof(decay_t<T>) <= alignof(data_type) and
+  ::std::is_nothrow_copy_constructible<T>::value
+> { };
+template <> struct is_small<void> final : ::std::true_type { };
 
-struct any_dispatch {
-  using destroy_function = add_pointer_t<void(data_type&)>;
-  using clone_function = add_pointer_t<void(data_type const&, data_type&)>;
-  using move_function = add_pointer_t<void(data_type&, data_type&)>;
-  using type_function = add_pointer_t<::std::type_info const&()>;
+template <class T=void, bool=is_small<T>::value> struct dispatch;
+template <> struct dispatch<void, true> {
+  dispatch () noexcept = default;
+  virtual ~dispatch () noexcept = default;
 
-  destroy_function const destroy;
-  clone_function const clone;
-  move_function const move;
-  type_function const type;
+  virtual void clone (data_type const&, data_type&) const { }
+  virtual void move (data_type&, data_type&) const noexcept { }
+  virtual void destroy (data_type&) const noexcept { }
+  virtual ::std::type_info const& type () const noexcept {
+    return typeid(void);
+  }
 };
 
-template <class Type, bool=is_small<Type>::value> struct any_dispatch_select;
-
-template <class Type>
-struct any_dispatch_select<Type, true> {
-  using value_type = Type;
+template <class T>
+struct dispatch<T, true> final : dispatch<> {
+  using value_type = T;
   using const_pointer = add_pointer_t<add_const_t<value_type>>;
   using pointer = add_pointer_t<value_type>;
   using allocator_type = ::std::allocator<value_type>;
   using allocator_traits = ::std::allocator_traits<allocator_type>;
 
-  static void clone (data_type const& source, data_type& data) {
+  virtual void clone (data_type const& src, data_type& dst) const override {
     allocator_type alloc { };
-    auto val = reinterpret_cast<const_pointer const>(::std::addressof(source));
-    auto ptr = reinterpret_cast<pointer>(::std::addressof(data));
+    auto val = reinterpret_cast<add_const_t<const_pointer>>(&src);
+    auto ptr = reinterpret_cast<pointer>(&dst);
     allocator_traits::construct(alloc, ptr, *val);
   }
 
-  static void move (data_type& source, data_type& data) {
+  virtual void move (data_type& src, data_type& dst) const noexcept override {
     allocator_type alloc { };
-    auto val = reinterpret_cast<pointer>(::std::addressof(source));
-    auto ptr = reinterpret_cast<pointer>(::std::addressof(data));
+    auto val = reinterpret_cast<pointer>(&src);
+    auto ptr = reinterpret_cast<pointer>(&dst);
     allocator_traits::construct(alloc, ptr, ::core::move(*val));
   }
 
-  static void destroy (data_type& data) {
+  virtual void destroy (data_type& src) const noexcept override {
     allocator_type alloc { };
-    auto ptr = reinterpret_cast<pointer>(::std::addressof(data));
+    auto ptr = reinterpret_cast<pointer>(&src);
     allocator_traits::destroy(alloc, ptr);
+  }
+
+  virtual ::std::type_info const& type () const noexcept override {
+    return typeid(value_type);
   }
 };
 
-template <class Type>
-struct any_dispatch_select<Type, false> {
-  using value_type = Type;
+template <class T>
+struct dispatch<T, false> final : dispatch<> {
+  using value_type = T;
   using pointer = add_pointer_t<value_type>;
   using allocator_type = ::std::allocator<value_type>;
   using allocator_traits = ::std::allocator_traits<allocator_type>;
 
-  static void clone (data_type const& source, data_type& data) {
+  virtual void clone (data_type const& src, data_type& dst) const override {
     allocator_type alloc { };
-    auto const& value = *static_cast<pointer const>(source);
-    auto pointer = allocator_traits::allocate(alloc, 1);
-    auto scope = make_scope_guard([&alloc, pointer] {
-      allocator_traits::deallocate(alloc, pointer, 1);
+    auto const& value = *static_cast<add_const_t<pointer>>(src);
+    auto ptr = allocator_traits::allocate(alloc, 1);
+    auto scope = make_scope_guard([&alloc, ptr] {
+      allocator_traits::deallocate(alloc, ptr, 1);
     });
-    allocator_traits::construct(alloc, pointer, value);
+    allocator_traits::construct(alloc, ptr, value);
     scope.dismiss();
-    data = pointer;
+    dst = ptr;
   }
 
-  static void move (data_type& source, data_type& data) {
+  virtual void move (data_type& src, data_type& dst) const noexcept override {
     allocator_type alloc { };
-    auto& value = *static_cast<pointer>(source);
-    auto pointer = allocator_traits::allocate(alloc, 1);
-    auto scope = make_scope_guard([&alloc, pointer] {
-      allocator_traits::deallocate(alloc, pointer, 1);
+    auto& value = *static_cast<pointer>(src);
+    auto ptr = allocator_traits::allocate(alloc, 1);
+    auto scope = make_scope_guard([&alloc, ptr] {
+      allocator_traits::deallocate(alloc, ptr, 1);
     });
-    allocator_traits::construct(alloc, pointer, ::core::move(value));
+    allocator_traits::construct(alloc, ptr, ::core::move(value));
     scope.dismiss();
-    data = pointer;
+    dst = ptr;
   }
 
-  static void destroy (data_type& data) {
+  virtual void destroy (data_type& src) const noexcept override {
     allocator_type alloc { };
-    auto value = static_cast<pointer>(data);
-    allocator_traits::destroy(alloc, value);
-    allocator_traits::deallocate(alloc, value, 1);
+    auto ptr = static_cast<pointer>(src);
+    allocator_traits::destroy(alloc, ptr);
+    allocator_traits::deallocate(alloc, ptr, 1);
+  }
+
+  virtual ::std::type_info const& type () const noexcept override {
+    return typeid(value_type);
   }
 };
 
-template <class Type>
-any_dispatch const* get_any_dispatch () {
-  static any_dispatch const instance = {
-    any_dispatch_select<Type>::destroy,
-    any_dispatch_select<Type>::clone,
-    any_dispatch_select<Type>::move,
-    [] () -> ::std::type_info const& { return typeid(Type); }
-  };
+template <class T> dispatch<> const* lookup () noexcept {
+  static dispatch<T> instance;
   return ::std::addressof(instance);
 }
 
-template <>
-inline any_dispatch const* get_any_dispatch<void> () {
-  static any_dispatch const instance = {
-    [] (data_type&) { },
-    [] (data_type const&, data_type&) { },
-    [] (data_type&, data_type&) { },
-    [] () -> ::std::type_info const& { return typeid(void); }
-  };
+template <> inline dispatch<> const* lookup<void> () noexcept {
+  static dispatch<> instance;
   return ::std::addressof(instance);
 }
 
@@ -150,64 +147,11 @@ public:
 [[noreturn]] inline void throw_bad_any_cast () { ::std::abort(); }
 #endif /* CORE_NO_EXCEPTIONS */
 
-class any final {
-  template <class ValueType>
-  friend ValueType const* any_cast (any const*) noexcept;
-  template <class ValueType> friend ValueType* any_cast (any*) noexcept;
+struct any final {
 
-  impl::any_dispatch const* table;
-  impl::data_type data;
+  template <class T> friend T const* any_cast (any const*) noexcept;
+  template <class T> friend T* any_cast (any*) noexcept;
 
-  template <class ValueType>
-  any (ValueType&& value, ::std::true_type&&) :
-    table { impl::get_any_dispatch<decay_t<ValueType>>() },
-    data { nullptr }
-  {
-    using value_type = decay_t<ValueType>;
-    using allocator_type = ::std::allocator<value_type>;
-    allocator_type alloc { };
-    auto pointer = reinterpret_cast<value_type*>(::std::addressof(this->data));
-    ::std::allocator_traits<allocator_type>::construct(
-      alloc, pointer, ::std::forward<ValueType>(value)
-    );
-  }
-
-  template <class ValueType>
-  any (ValueType&& value, ::std::false_type&&) :
-    table { impl::get_any_dispatch<decay_t<ValueType>>() },
-    data { nullptr }
-  {
-    using value_type = decay_t<ValueType>;
-    using allocator_type = ::std::allocator<value_type>;
-    allocator_type alloc { };
-    auto pointer = ::std::allocator_traits<allocator_type>::allocate(alloc, 1);
-    ::std::allocator_traits<allocator_type>::construct(
-      alloc, pointer, ::std::forward<ValueType>(value)
-    );
-    this->data = pointer;
-  }
-
-  template <class ValueType>
-  ValueType const* cast (::std::true_type&&) const {
-    return reinterpret_cast<ValueType const*>(::std::addressof(this->data));
-  }
-
-  template <class ValueType>
-  ValueType* cast (::std::true_type&&) {
-    return reinterpret_cast<ValueType*>(::std::addressof(this->data));
-  }
-
-  template <class ValueType>
-  ValueType const* cast (::std::false_type&&) const {
-    return static_cast<ValueType const*>(this->data);
-  }
-
-  template <class ValueType>
-  ValueType* cast (::std::false_type&&) {
-    return static_cast<ValueType*>(this->data);
-  }
-
-public:
   any (any const& that) :
     table { that.table },
     data { nullptr }
@@ -219,15 +163,15 @@ public:
   { this->table->move(that.data, this->data); }
 
   any () noexcept :
-    table { impl::get_any_dispatch<void>() },
+    table { impl::lookup<void>() },
     data { nullptr }
   { }
 
   template <
-    class ValueType,
-    class=enable_if_t<not ::std::is_same<any, decay_t<ValueType>>::value>
-  > any (ValueType&& value) :
-    any { ::std::forward<ValueType>(value), impl::is_small<ValueType> { } }
+    class T,
+    class=enable_if_t<not ::std::is_same<any, decay_t<T>>::value>
+  > any (T&& value) :
+    any { ::std::forward<T>(value), impl::is_small<T> { } }
   { }
 
   ~any () noexcept { this->clear(); }
@@ -243,12 +187,12 @@ public:
   }
 
   template <
-    class ValueType,
-    class=enable_if_t<not ::std::is_same<any, decay_t<ValueType>>::value>
-  > any& operator = (ValueType&& value) {
+    class T,
+    class=enable_if_t<not ::std::is_same<any, decay_t<T>>::value>
+  > any& operator = (T&& value) {
     any {
-      ::std::forward<ValueType>(value),
-      impl::is_small<ValueType> { }
+      ::std::forward<T>(value),
+      impl::is_small<T> { }
     }.swap(*this);
     return *this;
   }
@@ -261,73 +205,121 @@ public:
 
   void clear () noexcept {
     this->table->destroy(this->data);
-    this->table = impl::get_any_dispatch<void>();
+    this->table = impl::lookup<void>();
   }
 
   ::std::type_info const& type () const noexcept {
     return this->table->type();
   }
 
-  bool empty () const noexcept {
-    return this->table == impl::get_any_dispatch<void>();
+  bool empty () const noexcept { return this->table == impl::lookup<void>(); }
+
+private:
+  impl::dispatch<> const* table;
+  impl::data_type data;
+
+  template <class T>
+  any (T&& value, ::std::true_type&&) :
+    table { impl::lookup<decay_t<T>>() },
+    data { nullptr }
+  {
+    using value_type = decay_t<T>;
+    using allocator_type = ::std::allocator<value_type>;
+    using allocator_traits = ::std::allocator_traits<allocator_type>;
+    allocator_type alloc { };
+    auto pointer = reinterpret_cast<value_type*>(::std::addressof(this->data));
+    allocator_traits::construct(alloc, pointer, ::core::forward<T>(value));
   }
 
+  template <class T>
+  any (T&& value, ::std::false_type&&) :
+    table { impl::lookup<decay_t<T>>() },
+    data { nullptr }
+  {
+    using value_type = decay_t<T>;
+    using allocator_type = ::std::allocator<value_type>;
+    using allocator_traits = ::std::allocator_traits<allocator_type>;
+    allocator_type alloc { };
+    auto pointer = allocator_traits::allocate(alloc, 1);
+    allocator_traits::construct(alloc, pointer, ::core::forward<T>(value));
+    this->data = pointer;
+  }
+
+  template <class T>
+  T const* cast (::std::true_type&&) const {
+    return reinterpret_cast<T const*>(::std::addressof(this->data));
+  }
+
+  template <class T>
+  T* cast (::std::true_type&&) {
+    return reinterpret_cast<T*>(::std::addressof(this->data));
+  }
+
+  template <class T>
+  T const* cast (::std::false_type&&) const {
+    return static_cast<T const*>(this->data);
+  }
+
+  template <class T>
+  T* cast (::std::false_type&&) {
+    return static_cast<T*>(this->data);
+  }
 };
 
-template <class ValueType>
-ValueType const* any_cast (any const* operand) noexcept {
-  return operand and operand->type() == typeid(ValueType)
-    ? operand->cast<ValueType>(impl::is_small<ValueType> { })
+template <class T>
+T const* any_cast (any const* operand) noexcept {
+  return operand and operand->type() == typeid(T)
+    ? operand->cast<T>(impl::is_small<T> { })
     : nullptr;
 }
 
-template <class ValueType>
-ValueType* any_cast (any* operand) noexcept {
-  return operand and operand->type() == typeid(ValueType)
-    ? operand->cast<ValueType>(impl::is_small<ValueType> { })
+template <class T>
+T* any_cast (any* operand) noexcept {
+  return operand and operand->type() == typeid(T)
+    ? operand->cast<T>(impl::is_small<T> { })
     : nullptr;
 }
 
 template <
-  class ValueType,
+  class T,
   class=enable_if_t<
     meta::any<
-      ::std::is_reference<ValueType>,
-      ::std::is_copy_constructible<ValueType>
+      ::std::is_reference<T>,
+      ::std::is_copy_constructible<T>
     >::value
   >
-> ValueType any_cast (any const& operand) {
-  using type = remove_reference_t<ValueType>;
+> T any_cast (any const& operand) {
+  using type = remove_reference_t<T>;
   auto pointer = any_cast<add_const_t<type>>(::std::addressof(operand));
   if (not pointer) { throw_bad_any_cast(); }
   return *pointer;
 }
 
 template <
-  class ValueType,
+  class T,
   class=enable_if_t<
     meta::any<
-      ::std::is_reference<ValueType>,
-      ::std::is_copy_constructible<ValueType>
+      ::std::is_reference<T>,
+      ::std::is_copy_constructible<T>
     >::value
   >
-> ValueType any_cast (any&& operand) {
-  using type = remove_reference_t<ValueType>;
+> T any_cast (any&& operand) {
+  using type = remove_reference_t<T>;
   auto pointer = any_cast<type>(::std::addressof(operand));
   if (not pointer) { throw_bad_any_cast(); }
   return *pointer;
 }
 
 template <
-  class ValueType,
+  class T,
   class=enable_if_t<
     meta::any<
-      ::std::is_reference<ValueType>,
-      ::std::is_copy_constructible<ValueType>
+      ::std::is_reference<T>,
+      ::std::is_copy_constructible<T>
     >::value
   >
-> ValueType any_cast (any& operand) {
-  using type = remove_reference_t<ValueType>;
+> T any_cast (any& operand) {
+  using type = remove_reference_t<T>;
   auto pointer = any_cast<type>(::std::addressof(operand));
   if (not pointer) { throw_bad_any_cast(); }
   return *pointer;
@@ -335,6 +327,6 @@ template <
 
 inline void swap (any& lhs, any& rhs) noexcept { lhs.swap(rhs); }
 
-}} /* namespace core::v1 */
+}} /* namespace core::v2 */
 
 #endif /* CORE_ANY_HPP */

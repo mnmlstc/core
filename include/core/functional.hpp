@@ -9,7 +9,7 @@
 #include <core/utility.hpp>
 
 namespace core {
-inline namespace v1 {
+inline namespace v2 {
 
 template <class T> struct is_reference_wrapper : ::std::false_type { };
 template <class T>
@@ -65,11 +65,8 @@ struct function_traits<R(Args...)> {
   using pointer = return_type(*)(Args...);
   static constexpr ::std::size_t arity = sizeof...(Args);
 
-  template < ::std::size_t N>
-  using argument = typename ::std::tuple_element<
-    N,
-    ::std::tuple<Args...>
-  >::type;
+  template <::std::size_t N>
+  using argument = tuple_element_t<N, ::std::tuple<Args...>>;
 };
 
 template <class F> struct function_traits {
@@ -94,77 +91,23 @@ constexpr auto invoke (Functor&& f, Args&&... args) -> enable_if_t<
   result_of_t<Functor&&(Args&&...)>
 > { return core::forward<Functor>(f)(core::forward<Args>(args)...); }
 
-namespace impl {
-
 template <class F, class T, ::std::size_t... I>
 auto apply (F&& f, T&& t, index_sequence<I...>) -> decltype(
   invoke(core::forward<F>(f), ::std::get<I>(core::forward<T>(t))...)
 ) { return invoke(core::forward<F>(f), ::std::get<I>(core::forward<T>(t))...); }
-
-} /* namespace impl */
 
 template <
   class Functor,
   class T,
   class I = make_index_sequence<::std::tuple_size<decay_t<T>>::value>
 > auto apply (Functor&& f, T&& t) -> decltype(
-  impl::apply(core::forward<Functor>(f), core::forward<T>(t), I())
-) { return impl::apply(core::forward<Functor>(f), core::forward<T>(t), I()); }
-
-
-namespace impl {
-
-template <class U, ::std::size_t... I>
-auto unpack (U&& u, index_sequence<I...>) -> decltype(
-  core::invoke(::std::get<I>(core::forward<U>(u))...)
-) { return core::invoke(::std::get<I>(core::forward<U>(u))...); }
-
-template <class F, class U, ::std::size_t... I>
-auto runpack (F&& f, U&& u, index_sequence<I...>) -> decltype(
-  core::invoke(core::forward<F>(f), core::forward<U>(u).at(I)...)
-) { return core::invoke(core::forward<F>(f), core::forward<U>(u).at(I)...); }
-
-} /* namespace impl */
-
-struct unpack_t final { };
-constexpr unpack_t unpack { };
-
-struct runpack_t final { };
-constexpr runpack_t runpack { };
-
-/* Use apply instead */
-template <
-  class F,
-  class U,
-  class I = make_index_sequence<::std::tuple_size<decay_t<U>>::value>
-> [[gnu::deprecated]] auto invoke (unpack_t, F&& f, U&& u) -> enable_if_t<
-  is_unpackable<decay_t<U>>::value,
-  decltype(impl::apply(core::forward<F>(f), core::forward<U>(u), I { }))
-> { return impl::apply(core::forward<F>(f), core::forward<U>(u), I { }); }
-
-template <
-  class U,
-  class I = make_index_sequence<::std::tuple_size<decay_t<U>>::value>
-> [[gnu::deprecated]] auto invoke (unpack_t, U&& u) -> enable_if_t<
-  is_unpackable<decay_t<U>>::value,
-  decltype(impl::unpack(core::forward<U>(u), I { }))
-> { return impl::unpack(core::forward<U>(u), I { }); }
-
-/* Modified to force clang to *not* select this function in a bizarre corner
- * case.
- */
-template <
-  class F,
-  class R,
-  class=enable_if_t<is_runpackable<decay_t<R>>::value>,
-  class I = make_index_sequence<function_traits<F>::arity>
-> auto invoke (runpack_t, F&& f, R&& r) -> decltype(
-  impl::runpack(core::forward<F>(f), core::forward<R>(r), I { })
-) { return impl::runpack(core::forward<F>(f), core::forward<R>(r), I { }); }
+  apply(core::forward<Functor>(f), core::forward<T>(t), I { })
+) { return apply(core::forward<Functor>(f), core::forward<T>(t), I { }); }
 
 template <class F>
 struct apply_functor {
-  explicit apply_functor (F&& f) : f(core::forward<F>(f)) { }
+  template <class G>
+  explicit apply_functor (G&& g) : f(core::forward<G>(g)) { }
 
   template <class Applicable>
   auto operator () (Applicable&& args) -> decltype(
@@ -178,6 +121,40 @@ template <class F>
 auto make_apply (F&& f) -> apply_functor<F> {
   return apply_functor<F> { core::forward<F>(f) };
 }
+
+template <class F>
+struct not_fn_functor {
+  template <class G>
+  explicit not_fn_functor (G&& g) : f(core::forward<G>(g)) { }
+
+  template <class... Args>
+  auto operator () (Args&&... args) const -> decltype(
+    not (invoke)(::std::declval<F>(), core::forward<Args>(args)...)
+  ) { return not (invoke)(f, core::forward<Args>(args)...); }
+
+  template <class... Args>
+  auto operator () (Args&&... args) -> decltype(
+    not (invoke)(::std::declval<F>(), core::forward<Args>(args)...)
+  ) { return not (invoke)(f, core::forward<Args>(args)...); }
+
+private:
+  F f;
+};
+
+/* Were this C++14, we could just use a lambda with a capture. Oh Well! */
+template <class F>
+not_fn_functor<decay_t<F>> not_fn (F&& f) {
+  return not_fn_functor<decay_t<F>> { core::forward<F>(f) };
+}
+
+/* converter function object */
+template <class T>
+struct converter {
+  template <class... Args>
+  constexpr T operator () (Args&&... args) const {
+    return T(core::forward<Args>(args)...);
+  }
+};
 
 /* function objects -- arithmetic */
 template <class T=void>
@@ -454,6 +431,6 @@ template <> struct bit_not<void> {
   }
 };
 
-}} /* namespace core::v1 */
+}} /* namespace core::v2 */
 
 #endif /* CORE_FUNCTIONAL_HPP */

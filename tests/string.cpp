@@ -368,12 +368,16 @@ TEST_CASE("string-view-functions", "[string-view][functions]") {
     std::unordered_map<core::string_view, int> values = {
       { "one", 1 },
       { "two", 2 },
-      { "thr", 3 }
+      { "three", 3 },
+      { "eleven", 11 },
+      { "fourteen", 14 }
     };
 
     CHECK(values["one"] == 1);
     CHECK(values["two"] == 2);
-    CHECK(values["thr"] == 3);
+    CHECK(values["three"] == 3);
+    CHECK(values["eleven"] == 11);
+    CHECK(values["fourteen"] == 14);
   }
 
   SECTION("swap") {

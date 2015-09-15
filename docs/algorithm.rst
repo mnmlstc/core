@@ -1,6 +1,8 @@
 Algorithm Component
 ===================
 
+.. index:: algorithm
+
 The algorithm component can be seen as a competitor to the Boost.Range
 algorithm headers. There are a few small differences (namely that this
 component relies on the :doc:`range`), however these differences are discussed
@@ -37,6 +39,8 @@ state of this component, and it cannot, unfortunately, be changed without
 breaking the current ABI.
 
 .. _core-algorithm-component-non-modifying-sequence-operations:
+
+.. index:: algorithm; non-range
 
 Non-Range Based Operations
 --------------------------
@@ -96,6 +100,8 @@ Non-Range Based Operations
 
    The default :samp:`{Compare}` and :samp:`{Difference}` functions are
    :cxx:`operator <` and :cxx:`operator -` respectively
+
+.. index:: algorithm; non-modifying
 
 Non-Modifying Sequence Operations
 ---------------------------------
@@ -190,7 +196,7 @@ Non-Modifying Sequence Operations
       int count = 3;
       auto function = [&] (int v) { count -= v; };
       auto predicate = [&] (int) { return count; };
-      for_each(numbers, function, predicate);
+      for_each_while(numbers, function, predicate);
 
 .. function:: InputIt for_each_until (      \
                 Range&& r,                  \
@@ -365,6 +371,8 @@ Non-Modifying Sequence Operations
    :requires: :samp:`{range}` must provide ForwardIterators
 
 .. _core-alglorithm-component-modifying-sequence-operations:
+
+.. index:: algorithm; modifying
 
 Modifying Sequence Operations
 -----------------------------
@@ -606,6 +614,8 @@ Modifying Sequence Operations
 
 .. _core-algorithm-component-partitioning-operations:
 
+.. index:: algorithm; partitioning
+
 Partitioning Operations
 -----------------------
 
@@ -658,6 +668,8 @@ Partitioning Operations
    :requires: :samp:`{range}` must provide ForwardIterators.
 
 .. _core-algorithm-component-sorting-operations:
+
+.. index:: algorithm; sorting
 
 Sorting Operations
 ------------------
@@ -741,6 +753,8 @@ Sorting Operations
 
 .. _core-algorithm-component-binary-search-operations:
 
+.. index:: algorithm; binary search
+
 Binary Search Operations
 ------------------------
 
@@ -797,6 +811,8 @@ Binary Search Operations
               partitioned.
 
 .. _core-algorithm-component-set-operations:
+
+.. index:: algorithm; set
 
 Set Operations
 --------------
@@ -940,6 +956,8 @@ Set Operations
 
 .. _core-algorithm-component-heap-operations:
 
+.. index:: algorithm; heap
+
 Heap Operations
 ---------------
 
@@ -995,6 +1013,8 @@ Heap Operations
    :requires: :samp:`{range}` must provide RandomAccessIterators.
 
 .. _core-algorithm-component-min-max-operations:
+
+.. index:: algorithm; min/max
 
 Min/Max Operations
 ------------------

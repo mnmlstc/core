@@ -8,7 +8,7 @@
 #include <core/range.hpp>
 
 namespace core {
-inline namespace v1 {
+inline namespace v2 {
 namespace impl {
 
 template <class InputIt1, class InputIt2, class Predicate>
@@ -24,7 +24,7 @@ bool equal (
     begin(r1),
     end(r1),
     begin(r2),
-    ::std::forward<Predicate>(p)
+    ::core::forward<Predicate>(p)
   );
 }
 
@@ -37,7 +37,7 @@ bool equal (
   ::std::input_iterator_tag
 ) {
   while (not r1.empty() and not r2.empty()) {
-    if (not ::std::forward<Predicate>(p)(r1.front(), r2.front())) {
+    if (not ::core::forward<Predicate>(p)(r1.front(), r2.front())) {
       return false;
     }
     r1.pop_front();
@@ -70,21 +70,12 @@ constexpr T const& max (T const& lhs, T const& rhs, Compare compare) {
 }
 
 /* extension */
-template <class T>
-constexpr T const& clamp (T const& value, T const& low, T const& high) {
-  return value < low
-    ? low
-    : high < value
-      ? high
-      : value;
-}
-
-template <class T, class Compare>
+template <class T, class Compare=less<>>
 constexpr T const& clamp (
   T const& value,
   T const& low,
   T const& high,
-  Compare compare
+  Compare compare = Compare { }
 ) {
   return compare(value, low)
     ? low
@@ -94,22 +85,15 @@ constexpr T const& clamp (
 }
 
 /* N4318 */
-template <class T>
-constexpr auto abs_diff (T const& a, T const& b) -> decltype(
-  (a < b) ? b - a : a - b
-) { return (a < b) ? b - a : a - b; }
-
-template <class T, class Compare>
-constexpr auto abs_diff (T const& a, T const& b, Compare compare) -> decltype(
-  compare(a, b) ? b - a : a - b
-) { return compare(a, b) ? b - a : a - b; }
-
-template <class T, class Compare, class Difference>
-constexpr auto abs_diff (
+template <
+  class T,
+  class Compare = ::core::less<>,
+  class Difference = ::core::minus<>
+> constexpr auto abs_diff (
   T const& a,
   T const& b,
-  Compare compare,
-  Difference diff
+  Compare compare = Compare { },
+  Difference diff = Difference { }
 ) -> decltype(compare(a, b) ? diff(b, a) : diff(a, b)) {
   return compare(a, b) ? diff(b, a) : diff(a, b);
 }
@@ -120,13 +104,13 @@ auto all_of (Range&& rng, UnaryPredicate&& p) -> enable_if_t<
   is_range<Range>::value,
   bool
 > {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_input = decltype(range)::is_input;
   static_assert(is_input, "all_of requires InputIterators");
   return ::std::all_of(
     ::std::begin(range),
     ::std::end(range),
-    ::std::forward<UnaryPredicate>(p)
+    ::core::forward<UnaryPredicate>(p)
   );
 }
 
@@ -135,13 +119,13 @@ auto any_of (Range&& rng, UnaryPredicate&& p) -> enable_if_t<
   is_range<Range>::value,
   bool
 > {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_input = decltype(range)::is_input;
   static_assert(is_input, "any_of requires InputIterators");
   return ::std::any_of(
     ::std::begin(range),
     ::std::end(range),
-    ::std::forward<UnaryPredicate>(p)
+    ::core::forward<UnaryPredicate>(p)
   );
 }
 
@@ -150,13 +134,13 @@ auto none_of (Range&& rng, UnaryPredicate&& p) -> enable_if_t<
   is_range<Range>::value,
   bool
 > {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_input = decltype(range)::is_input;
   static_assert(is_input, "none_of requires InputIterators");
   return ::std::none_of(
     ::std::begin(range),
     ::std::end(range),
-    ::std::forward<UnaryPredicate>(p)
+    ::core::forward<UnaryPredicate>(p)
   );
 }
 
@@ -165,19 +149,19 @@ auto for_each (Range&& rng, UnaryFunction&& f) -> enable_if_t<
   is_range<Range>::value,
   decay_t<UnaryFunction>
 > {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_input = decltype(range)::is_input;
   static_assert(is_input, "for_each requires InputIterators");
   return ::std::for_each(
     ::std::begin(range),
     ::std::end(range),
-    ::std::forward<UnaryFunction>(f)
+    ::core::forward<UnaryFunction>(f)
   );
 }
 
 template <class Range, class UnaryFunction, class UnaryPredicate>
 UnaryFunction for_each_if (Range&& r, UnaryFunction uf, UnaryPredicate up) {
-  auto range = make_range(::std::forward<Range>(r));
+  auto range = make_range(::core::forward<Range>(r));
   static constexpr auto is_input = decltype(range)::is_input;
   static_assert(is_input, "for_each_if requires InputIterators");
   while (not range.empty()) {
@@ -192,8 +176,8 @@ auto for_each_while (
   Range&& r,
   UnaryFunction f,
   UnaryPredicate p
-) -> decltype(begin(make_range(::std::forward<Range>(r)))) {
-  auto range = make_range(::std::forward<Range>(r));
+) -> decltype(begin(make_range(::core::forward<Range>(r)))) {
+  auto range = make_range(::core::forward<Range>(r));
   static constexpr auto is_input = decltype(range)::is_input;
   static_assert(is_input, "for_each_while requires InputIterators");
   while (not range.empty()) {
@@ -209,8 +193,8 @@ auto for_each_until (
   Range&& r,
   UnaryFunction f,
   T const& value
-) -> decltype(begin(make_range(::std::forward<Range>(r)))) {
-  auto range = make_range(::std::forward<Range>(r));
+) -> decltype(begin(make_range(::core::forward<Range>(r)))) {
+  auto range = make_range(::core::forward<Range>(r));
   static constexpr auto is_input = decltype(range)::is_input;
   static_assert(is_input, "for_each_until requires InputIterators");
   while (not range.empty()) {
@@ -226,13 +210,13 @@ auto count (Range&& rng, T const& value) -> enable_if_t<
   is_range<Range>::value,
   decltype(
     ::std::count(
-      ::std::begin(::std::forward<Range>(rng)),
-      ::std::end(::std::forward<Range>(rng)),
+      ::std::begin(::core::forward<Range>(rng)),
+      ::std::end(::core::forward<Range>(rng)),
       value
     )
   )
 > {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_input = decltype(range)::is_input;
   static_assert(is_input, "count requires InputIterators");
   return ::std::count(::std::begin(range), ::std::end(range), value);
@@ -243,56 +227,114 @@ auto count_if (Range&& rng, UnaryPredicate&& p) -> enable_if_t<
   is_range<Range>::value,
   decltype(
     ::std::count_if(
-      ::std::begin(::std::forward<Range>(rng)),
-      ::std::end(::std::forward<Range>(rng)),
-      ::std::forward<UnaryPredicate>(p)
+      ::std::begin(::core::forward<Range>(rng)),
+      ::std::end(::core::forward<Range>(rng)),
+      ::core::forward<UnaryPredicate>(p)
     )
   )
 > {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_input = decltype(range)::is_input;
   static_assert(is_input, "count_if requires InputIterators");
   return ::std::count_if(
     ::std::begin(range),
     ::std::end(range),
-    ::std::forward<UnaryPredicate>(p)
+    ::core::forward<UnaryPredicate>(p)
   );
 }
 
-template <class Range, class InputIt>
-auto mismatch(Range&& rng, InputIt&& it) -> enable_if_t<
-  is_range<Range>::value,
-  ::std::pair<
-    decltype(::std::begin(::std::forward<Range>(rng))),
-    decay_t<InputIt>
-  >
+template <class InputIt1, class InputIt2, class BinaryPredicate>
+::std::pair<InputIt1, InputIt2> mismatch (
+  InputIt1 first1,
+  InputIt1 last1,
+  InputIt2 first2,
+  InputIt2 last2,
+  BinaryPredicate predicate
+) {
+  auto r1 = make_range(first1, last1);
+  auto r2 = make_range(first2, last2);
+  while (not r1.empty() and not r2.empty()) {
+    if (not predicate(r1.front(), r2.front())) { break; }
+    r1.pop_front();
+    r2.pop_front();
+  }
+  return ::std::make_pair(r1.begin(), r2.begin());
+}
+
+template <class InputIt1, class InputIt2>
+::std::pair<InputIt1, InputIt2> mismatch (
+  InputIt1 first1,
+  InputIt1 last1,
+  InputIt2 first2,
+  InputIt2 last2
+) { return (mismatch)(first1, last1, first2, last2, equal_to<> { }); }
+
+template <
+  class Range1,
+  class Range2,
+  class BinaryPred,
+  enable_if_t<
+    meta::all<is_range<Range1>, is_range<Range2>>::value,
+    ::std::size_t
+  > = __LINE__
+> auto mismatch (Range1&& r1, Range2&& r2, BinaryPred&& bp) -> ::std::pair<
+  decltype(::std::begin(::core::forward<Range1>(r1))),
+  decltype(::std::begin(::core::forward<Range2>(r2)))
 > {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range1 = make_range(::core::forward<Range1>(r1));
+  auto range2 = make_range(::core::forward<Range2>(r2));
+  static constexpr auto is_input1 = decltype(range1)::is_input;
+  static constexpr auto is_input2 = decltype(range2)::is_input;
+  static_assert(is_input1 and is_input2, "mismatch requires InputIterators");
+  return (mismatch)(
+    range1.begin(),
+    range1.end(),
+    range2.begin(),
+    range2.end(),
+    ::core::forward<BinaryPred>(bp));
+}
+
+template <
+  class Range,
+  class InputIt,
+  enable_if_t<
+    meta::all<is_range<Range>, meta::none<is_range<InputIt>>>::value,
+    ::std::size_t
+  > = __LINE__
+> auto mismatch(Range&& rng, InputIt&& it) -> ::std::pair<
+  decltype(make_range(::core::forward<Range>(rng)).begin()),
+  decay_t<InputIt>
+> {
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_input = decltype(range)::is_input;
   static_assert(is_input, "mismatch requires InputIterators");
   return ::std::mismatch(
     ::std::begin(range),
     ::std::end(range),
-    ::std::forward<InputIt>(it)
+    ::core::forward<InputIt>(it)
   );
 }
 
-template <class Range, class InputIt, class BinaryPredicate>
-auto mismatch(Range&& rng, InputIt&& it, BinaryPredicate&& bp) -> enable_if_t<
-  is_range<Range>::value,
-  ::std::pair<
-    decltype(::std::begin(::std::forward<Range>(rng))),
-    decay_t<InputIt>
-  >
+template <
+  class Range,
+  class InputIt,
+  class BinaryPredicate,
+  enable_if_t<
+    meta::all<is_range<Range>, meta::none<is_range<InputIt>>>::value,
+    ::std::size_t
+  > = __LINE__
+> auto mismatch(Range&& r, InputIt&& it, BinaryPredicate&& bp) -> ::std::pair<
+  decltype(core::make_range(::core::forward<Range>(r).begin())),
+  decay_t<InputIt>
 > {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(r));
   static constexpr auto is_input = decltype(range)::is_input;
   static_assert(is_input, "mismatch requires InputIterators");
   return ::std::mismatch(
     ::std::begin(range),
     ::std::end(range),
-    ::std::forward<InputIt>(it),
-    ::std::forward<BinaryPredicate>(bp)
+    ::core::forward<InputIt>(it),
+    ::core::forward<BinaryPredicate>(bp)
   );
 }
 
@@ -313,7 +355,7 @@ bool equal (
 
 template <class InputIt1, class InputIt2>
 bool equal (InputIt1 first1, InputIt1 last1, InputIt2 first2, InputIt2 last2) {
-  return equal(first1, last1, first2, last2, core::equal_to<> { });
+  return equal(first1, last1, first2, last2, equal_to<> { });
 }
 
 template <
@@ -324,13 +366,13 @@ template <
     ::std::size_t
   > = __LINE__
 > bool equal (Range1&& range1, Range2&& range2) {
-  auto r1 = make_range(::std::forward<Range1>(range1));
-  auto r2 = make_range(::std::forward<Range2>(range2));
+  auto r1 = make_range(::core::forward<Range1>(range1));
+  auto r2 = make_range(::core::forward<Range2>(range2));
   static constexpr auto is_input1 = decltype(r1)::is_input;
   static constexpr auto is_input2 = decltype(r2)::is_input;
   static_assert(is_input1, "equal requires InputIterators");
   static_assert(is_input2, "equal requires InputIterators");
-  return equal(r1.begin(), r1.end(), r2.begin(), r2.end);
+  return (equal)(r1.begin(), r1.end(), r2.begin(), r2.end());
 }
 
 template <
@@ -342,8 +384,8 @@ template <
     ::std::size_t
   > = __LINE__
 > bool equal (Range1&& range1, Range2&& range2, BinaryPredicate&& bp) {
-  auto r1 = make_range(::std::forward<Range1>(range1));
-  auto r2 = make_range(::std::forward<Range2>(range2));
+  auto r1 = make_range(::core::forward<Range1>(range1));
+  auto r2 = make_range(::core::forward<Range2>(range2));
   static constexpr auto is_input1 = decltype(r1)::is_input;
   static constexpr auto is_input2 = decltype(r2)::is_input;
   static_assert(is_input1, "equal requires InputIterators");
@@ -353,7 +395,7 @@ template <
     r1.end(),
     r2.begin(),
     r2.end(),
-    ::std::forward<BinaryPredicate>(bp)
+    ::core::forward<BinaryPredicate>(bp)
   );
 }
 
@@ -365,13 +407,13 @@ template <
     ::std::size_t
   > = __LINE__
 > bool equal (Range&& rng, InputIt&& it) {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_input = decltype(range)::is_input;
   static_assert(is_input, "equal requires InputIterators");
   return ::std::equal(
     ::std::begin(range),
     ::std::end(range),
-    ::std::forward<InputIt>(it)
+    ::core::forward<InputIt>(it)
   );
 }
 
@@ -384,23 +426,23 @@ template <
     ::std::size_t
   > = __LINE__
 > bool equal (Range&& rng, InputIt&& it, BinaryPredicate&& bp) {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_input = decltype(range)::is_input;
   static_assert(is_input, "equal requires InputIterators");
   return ::std::equal(
     ::std::begin(range),
     ::std::end(range),
-    ::std::forward<InputIt>(it),
-    ::std::forward<BinaryPredicate>(bp)
+    ::core::forward<InputIt>(it),
+    ::core::forward<BinaryPredicate>(bp)
   );
 }
 
 template <class Range, class T>
 auto find (Range&& rng, T const& value) -> enable_if_t<
   is_range<Range>::value,
-  decltype(::std::begin(::std::forward<Range>(rng)))
+  decltype(::std::begin(::core::forward<Range>(rng)))
 > {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_input = decltype(range)::is_input;
   static_assert(is_input, "find requires InputIterators");
   return ::std::find(::std::begin(range), ::std::end(range), value);
@@ -409,40 +451,40 @@ auto find (Range&& rng, T const& value) -> enable_if_t<
 template <class Range, class UnaryPredicate>
 auto find_if (Range&& rng, UnaryPredicate&& p) -> enable_if_t<
   is_range<Range>::value,
-  decltype(::std::begin(::std::forward<Range>(rng)))
+  decltype(::std::begin(::core::forward<Range>(rng)))
 > {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_input = decltype(range)::is_input;
   static_assert(is_input, "find_if requires InputIterators");
   return ::std::find_if(
     ::std::begin(range),
     ::std::end(range),
-    ::std::forward<UnaryPredicate>(p)
+    ::core::forward<UnaryPredicate>(p)
   );
 }
 
 template <class Range, class UnaryPredicate>
 auto find_if_not (Range&& rng, UnaryPredicate&& p) -> enable_if_t<
   is_range<Range>::value,
-  decltype(::std::begin(::std::forward<Range>(rng)))
+  decltype(::std::begin(::core::forward<Range>(rng)))
 > {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_input = decltype(range)::is_input;
   static_assert(is_input, "find_if_not requires InputIterators");
   return ::std::find_if_not(
     ::std::begin(range),
     ::std::end(range),
-    ::std::forward<UnaryPredicate>(p)
+    ::core::forward<UnaryPredicate>(p)
   );
 }
 
 template <class Range1, class Range2>
 auto find_end (Range1&& rng1, Range2&& rng2) -> enable_if_t<
-  all_traits<is_range<Range1>, is_range<Range2>>::value,
-  decltype(::std::begin(::std::forward<Range1>(rng1)))
+  meta::all<is_range<Range1>, is_range<Range2>>::value,
+  decltype(::std::begin(::core::forward<Range1>(rng1)))
 > {
-  auto range1 = make_range(::std::forward<Range1>(rng1));
-  auto range2 = make_range(::std::forward<Range2>(rng2));
+  auto range1 = make_range(::core::forward<Range1>(rng1));
+  auto range2 = make_range(::core::forward<Range2>(rng2));
   static constexpr auto is_forward1 = decltype(range1)::is_forward;
   static constexpr auto is_forward2 = decltype(range2)::is_forward;
   static_assert(is_forward1, "find_end requires ForwardIterators");
@@ -457,11 +499,11 @@ auto find_end (Range1&& rng1, Range2&& rng2) -> enable_if_t<
 
 template <class Range1, class Range2, class BinaryPred>
 auto find_end (Range1&& rng1, Range2&& rng2, BinaryPred& bp) -> enable_if_t<
-  all_traits<is_range<Range1>, is_range<Range2>>::value,
-  decltype(::std::begin(::std::forward<Range1>(rng1)))
+  meta::all<is_range<Range1>, is_range<Range2>>::value,
+  decltype(::std::begin(::core::forward<Range1>(rng1)))
 > {
-  auto range1 = make_range(::std::forward<Range1>(rng1));
-  auto range2 = make_range(::std::forward<Range2>(rng2));
+  auto range1 = make_range(::core::forward<Range1>(rng1));
+  auto range2 = make_range(::core::forward<Range2>(rng2));
   static constexpr auto is_forward1 = decltype(range1)::is_forward;
   static constexpr auto is_forward2 = decltype(range2)::is_forward;
   static_assert(is_forward1, "find_end requires ForwardIterators");
@@ -471,17 +513,17 @@ auto find_end (Range1&& rng1, Range2&& rng2, BinaryPred& bp) -> enable_if_t<
     ::std::end(range1),
     ::std::begin(range2),
     ::std::end(range2),
-    ::std::forward<BinaryPred>(bp)
+    ::core::forward<BinaryPred>(bp)
   );
 }
 
 template <class IRange, class FRange>
 auto find_first_of (IRange&& irng, FRange&& frng) -> enable_if_t<
-  all_traits<is_range<IRange>, is_range<FRange>>::value,
-  decltype(::std::begin(::std::forward<IRange>(irng)))
+  meta::all<is_range<IRange>, is_range<FRange>>::value,
+  decltype(::std::begin(::core::forward<IRange>(irng)))
 > {
-  auto irange = make_range(::std::forward<IRange>(irng));
-  auto frange = make_range(::std::forward<FRange>(frng));
+  auto irange = make_range(::core::forward<IRange>(irng));
+  auto frange = make_range(::core::forward<FRange>(frng));
   static constexpr auto is_input = decltype(irange)::is_input;
   static constexpr auto is_forward = decltype(frange)::is_forward;
   static_assert(is_input, "find_first_of requires InputIterators");
@@ -500,11 +542,11 @@ auto find_first_of (
   FRange&& frng,
   BinaryPred&& bp
 ) -> enable_if_t<
-  all_traits<is_range<IRange>, is_range<FRange>>::value,
-  decltype(::std::begin(::std::forward<IRange>(irng)))
+  meta::all<is_range<IRange>, is_range<FRange>>::value,
+  decltype(::std::begin(::core::forward<IRange>(irng)))
 > {
-  auto irange = make_range(::std::forward<IRange>(irng));
-  auto frange = make_range(::std::forward<FRange>(frng));
+  auto irange = make_range(::core::forward<IRange>(irng));
+  auto frange = make_range(::core::forward<FRange>(frng));
   static constexpr auto is_input = decltype(irange)::is_input;
   static constexpr auto is_forward = decltype(frange)::is_forward;
   static_assert(is_input, "find_first_of requires InputIterators");
@@ -514,16 +556,16 @@ auto find_first_of (
     ::std::end(irange),
     ::std::begin(frange),
     ::std::end(frange),
-    ::std::forward<BinaryPred>(bp)
+    ::core::forward<BinaryPred>(bp)
   );
 }
 
 template <class Range>
 auto adjacent_find (Range&& rng) -> enable_if_t<
   is_range<Range>::value,
-  decltype(::std::begin(::std::forward<Range>(rng)))
+  decltype(::std::begin(::core::forward<Range>(rng)))
 > {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_forward = decltype(range)::is_forward;
   static_assert(is_forward, "adjacent_find requires ForwardIterators");
   return ::std::adjacent_find(::std::begin(range), ::std::end(range));
@@ -532,25 +574,25 @@ auto adjacent_find (Range&& rng) -> enable_if_t<
 template <class Range, class BinaryPredicate>
 auto adjacent_find (Range&& rng, BinaryPredicate&& bp) -> enable_if_t<
   is_range<Range>::value,
-  decltype(::std::begin(::std::forward<Range>(rng)))
+  decltype(::std::begin(::core::forward<Range>(rng)))
 > {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_forward = decltype(range)::is_forward;
   static_assert(is_forward, "adjacent_find requires ForwardIterators");
   return ::std::adjacent_find(
     ::std::begin(range),
     ::std::end(range),
-    ::std::forward<BinaryPredicate>(bp)
+    ::core::forward<BinaryPredicate>(bp)
   );
 }
 
 template <class Range1, class Range2>
 auto search (Range1&& rng1, Range2&& rng2) -> enable_if_t<
-  all_traits<is_range<Range1>, is_range<Range2>>::value,
-  decltype(::std::begin(::std::forward<Range1>(rng1)))
+  meta::all<is_range<Range1>, is_range<Range2>>::value,
+  decltype(::std::begin(::core::forward<Range1>(rng1)))
 > {
-  auto range1 = make_range(::std::forward<Range1>(rng1));
-  auto range2 = make_range(::std::forward<Range2>(rng2));
+  auto range1 = make_range(::core::forward<Range1>(rng1));
+  auto range2 = make_range(::core::forward<Range2>(rng2));
   static constexpr auto is_forward1 = decltype(range1)::is_forward;
   static constexpr auto is_forward2 = decltype(range2)::is_forward;
   static_assert(is_forward1, "search requires ForwardIterators");
@@ -565,11 +607,11 @@ auto search (Range1&& rng1, Range2&& rng2) -> enable_if_t<
 
 template <class Range1, class Range2, class BinaryPred>
 auto search (Range1&& rng1, Range2&& rng2, BinaryPred&& bp) -> enable_if_t<
-  all_traits<is_range<Range1>, is_range<Range2>>::value,
-  decltype(::std::begin(::std::forward<Range1>(rng1)))
+  meta::all<is_range<Range1>, is_range<Range2>>::value,
+  decltype(::std::begin(::core::forward<Range1>(rng1)))
 > {
-  auto range1 = make_range(::std::forward<Range1>(rng1));
-  auto range2 = make_range(::std::forward<Range2>(rng2));
+  auto range1 = make_range(::core::forward<Range1>(rng1));
+  auto range2 = make_range(::core::forward<Range2>(rng2));
   static constexpr auto is_forward1 = decltype(range1)::is_forward;
   static constexpr auto is_forward2 = decltype(range2)::is_forward;
   static_assert(is_forward1, "search requires ForwardIterators");
@@ -579,22 +621,22 @@ auto search (Range1&& rng1, Range2&& rng2, BinaryPred&& bp) -> enable_if_t<
     ::std::end(range1),
     ::std::begin(range2),
     ::std::end(range2),
-    ::std::forward<BinaryPred>(bp)
+    ::core::forward<BinaryPred>(bp)
   );
 }
 
 template <class Range, class Size, class T>
 auto search_n (Range&& rng, Size&& count, T const& value) -> enable_if_t<
   is_range<Range>::value,
-  decltype(::std::begin(::std::forward<Range>(rng)))
+  decltype(::std::begin(::core::forward<Range>(rng)))
 > {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_forward = decltype(range)::is_forward;
   static_assert(is_forward, "search_n requires ForwardIterators");
   return ::std::search_n(
     ::std::begin(range),
     ::std::end(range),
-    ::std::forward<Size>(count),
+    ::core::forward<Size>(count),
     value
   );
 }
@@ -607,17 +649,17 @@ auto search_n (
   BinaryPred&& bp
 ) -> enable_if_t<
   is_range<Range>::value,
-  decltype(::std::begin(::std::forward<Range>(rng)))
+  decltype(::std::begin(::core::forward<Range>(rng)))
 > {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_forward = decltype(range)::is_forward;
   static_assert(is_forward, "search_n requires ForwardIterators");
   return ::std::search_n(
     ::std::begin(range),
     ::std::end(range),
-    ::std::forward<Size>(count),
+    ::core::forward<Size>(count),
     value,
-    ::std::forward<BinaryPred>(bp)
+    ::core::forward<BinaryPred>(bp)
   );
 }
 
@@ -627,13 +669,13 @@ auto copy (Range&& rng, OutputIt&& it) -> enable_if_t<
   is_range<Range>::value,
   decay_t<OutputIt>
 > {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_input = decltype(range)::is_input;
   static_assert(is_input, "copy requires InputIterators");
   return ::std::copy(
     ::std::begin(range),
     ::std::end(range),
-    ::std::forward<OutputIt>(it)
+    ::core::forward<OutputIt>(it)
   );
 }
 
@@ -642,20 +684,20 @@ auto copy_if (Range&& rng, OutputIt&& it, UnaryPredicate&& up) -> enable_if_t<
   is_range<Range>::value,
   decay_t<OutputIt>
 > {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_input = decltype(range)::is_input;
   static_assert(is_input, "copy_if requires InputIterators");
   return ::std::copy_if(
     ::std::begin(range),
     ::std::end(range),
-    ::std::forward<OutputIt>(it),
-    ::std::forward<UnaryPredicate>(up)
+    ::core::forward<OutputIt>(it),
+    ::core::forward<UnaryPredicate>(up)
   );
 }
 
 template <class Range, class OutputIt, class T>
 OutputIt copy_until (Range&& r, OutputIt it, T const& value) {
-  auto range = make_range(::std::forward<Range>(r));
+  auto range = make_range(::core::forward<Range>(r));
   static constexpr auto is_input = decltype(range)::is_input;
   static_assert(is_input, "copy_until requires InputIterators");
   while (not range.empty()) {
@@ -671,13 +713,13 @@ auto copy_backward (Range&& rng, BidirIt&& it) -> enable_if_t<
   is_range<Range>::value,
   decay_t<BidirIt>
 > {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_bidir = decltype(range)::is_bidirectional;
   static_assert(is_bidir, "copy_backward requires BidirectionalIterators");
   return ::std::copy_backward(
     ::std::begin(range),
     ::std::end(range),
-    ::std::forward<BidirIt>(it)
+    ::core::forward<BidirIt>(it)
   );
 }
 
@@ -686,13 +728,13 @@ auto move (Range&& rng, OutputIt&& it) -> enable_if_t<
   is_range<Range>::value,
   decay_t<OutputIt>
 > {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_input = decltype(range)::is_input;
   static_assert(is_input, "move requires InputIterators");
   return ::std::move(
     ::std::begin(range),
     ::std::end(range),
-    ::std::forward<OutputIt>(it)
+    ::core::forward<OutputIt>(it)
   );
 }
 
@@ -701,13 +743,13 @@ auto move_backward (Range&& rng, BidirIt&& it) -> enable_if_t<
   is_range<Range>::value,
   decay_t<BidirIt>
 > {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_bidir = decltype(range)::is_bidirectional;
   static_assert(is_bidir, "move_backward requires BidirectionalIterators");
   return ::std::move_backward(
     ::std::begin(range),
     ::std::end(range),
-    ::std::forward<BidirIt>(it)
+    ::core::forward<BidirIt>(it)
   );
 }
 
@@ -715,7 +757,7 @@ template <class Range, class T>
 auto fill (Range&& rng, T const& value) -> enable_if_t<
   is_range<Range>::value
 > {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_forward = decltype(range)::is_forward;
   static_assert(is_forward, "fill requires ForwardIterators");
   return ::std::fill(::std::begin(range), ::std::end(range), value);
@@ -730,14 +772,14 @@ auto transform (
   is_range<Range>::value,
   decay_t<OutputIt>
 > {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_input = decltype(range)::is_input;
   static_assert(is_input, "transform requires InputIterators");
   return ::std::transform(
     ::std::begin(range),
     ::std::end(range),
-    ::std::forward<OutputIt>(it),
-    ::std::forward<UnaryOperation>(op)
+    ::core::forward<OutputIt>(it),
+    ::core::forward<UnaryOperation>(op)
   );
 }
 
@@ -779,15 +821,15 @@ template <
   OutputIt&& out,
   BinaryOperation&& op
 ) {
-  auto range = make_range(::std::forward<Range>(r));
+  auto range = make_range(::core::forward<Range>(r));
   static constexpr auto is_input = decltype(range)::is_input;
   static_assert(is_input, "transform requires InputIterators");
   return ::std::transform(
     range.begin(),
     range.end(),
-    ::std::forward<InputIt>(in),
-    ::std::forward<OutputIt>(out),
-    ::std::forward<BinaryOperation>(op));
+    ::core::forward<InputIt>(in),
+    ::core::forward<OutputIt>(out),
+    ::core::forward<BinaryOperation>(op));
 }
 
 template <
@@ -805,8 +847,8 @@ template <
   OutputIt&& it,
   BinaryOperation&& op
 ) {
-  auto range1 = make_range(::std::forward<Range1>(rng1));
-  auto range2 = make_range(::std::forward<Range2>(rng2));
+  auto range1 = make_range(::core::forward<Range1>(rng1));
+  auto range2 = make_range(::core::forward<Range2>(rng2));
   static constexpr auto is_input1 = decltype(range1)::is_input;
   static constexpr auto is_input2 = decltype(range2)::is_input;
   static_assert(is_input1, "transform requires InputIterators");
@@ -815,8 +857,8 @@ template <
     ::std::begin(range1),
     ::std::end(range1),
     ::std::begin(range2),
-    ::std::forward<OutputIt>(it),
-    ::std::forward<BinaryOperation>(op)
+    ::core::forward<OutputIt>(it),
+    ::core::forward<BinaryOperation>(op)
   );
 }
 
@@ -833,7 +875,7 @@ template <
   BinaryOperation op,
   BinaryPredicate bp
 ) -> enable_if_t<
-  all_traits<is_range<Range1>, is_range<Range2>>::value,
+  meta::all<is_range<Range1>, is_range<Range2>>::value,
   OutputIt
 > {
   auto range1 = make_range(::core::forward<Range1>(rng1));
@@ -856,9 +898,9 @@ template <
 template <class Range, class T>
 auto remove (Range&& rng, T const& value) -> enable_if_t<
   is_range<Range>::value,
-  decltype(::std::begin(::std::forward<Range>(rng)))
+  decltype(::std::begin(::core::forward<Range>(rng)))
 > {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_forward = decltype(range)::is_forward;
   static_assert(is_forward, "remove requires ForwardIterators");
   return ::std::remove(::std::begin(range), ::std::end(range), value);
@@ -867,15 +909,15 @@ auto remove (Range&& rng, T const& value) -> enable_if_t<
 template <class Range, class UnaryPredicate>
 auto remove_if (Range&& rng, UnaryPredicate&& up) -> enable_if_t<
   is_range<Range>::value,
-  decltype(::std::begin(::std::forward<Range>(rng)))
+  decltype(::std::begin(::core::forward<Range>(rng)))
 > {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_forward = decltype(range)::is_forward;
   static_assert(is_forward, "remove_if requires ForwardIterators");
   return ::std::remove_if(
     ::std::begin(range),
     ::std::end(range),
-    ::std::forward<UnaryPredicate>(up)
+    ::core::forward<UnaryPredicate>(up)
   );
 }
 
@@ -884,13 +926,13 @@ auto remove_copy (Range&& rng, OutputIt&& it, T const& value) -> enable_if_t<
   is_range<Range>::value,
   decay_t<OutputIt>
 > {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_input = decltype(range)::is_input;
   static_assert(is_input, "remove_copy requires InputIterators");
   return ::std::remove_copy(
     ::std::begin(range),
     ::std::end(range),
-    ::std::forward<OutputIt>(it),
+    ::core::forward<OutputIt>(it),
     value
   );
 }
@@ -900,14 +942,14 @@ auto remove_copy_if (Range&& rng, OutputIt&& it, UnaryPred&& up) -> enable_if_t<
   is_range<Range>::value,
   decay_t<OutputIt>
 > {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_input = decltype(range)::is_input;
   static_assert(is_input, "remove_copy_if requires InputIterators");
   return ::std::remove_copy_if(
     ::std::begin(range),
     ::std::end(range),
-    ::std::forward<OutputIt>(it),
-    ::std::forward<UnaryPred>(up)
+    ::core::forward<OutputIt>(it),
+    ::core::forward<UnaryPred>(up)
   );
 }
 
@@ -915,9 +957,9 @@ template <class Range, class T>
 auto remove_erase (Range&& rng, T const& val) -> enable_if_t<
   is_range<Range>::value
 > {
-  ::std::forward<Range>(rng).erase(
-    remove(::std::forward<Range>(rng), val),
-    ::std::end(::std::forward<Range>(rng))
+  ::core::forward<Range>(rng).erase(
+    remove(::core::forward<Range>(rng), val),
+    ::std::end(::core::forward<Range>(rng))
   );
 }
 
@@ -925,12 +967,12 @@ template <class Range, class UnaryPred>
 auto remove_erase_if (Range&& rng, UnaryPred&& up) -> enable_if_t<
   is_range<Range>::value
 > {
-  ::std::forward<Range>(rng).erase(
+  ::core::forward<Range>(rng).erase(
     remove_if(
-      ::std::forward<Range>(rng),
-      ::std::forward<UnaryPred>(up)
+      ::core::forward<Range>(rng),
+      ::core::forward<UnaryPred>(up)
     ),
-    ::std::end(::std::forward<Range>(rng))
+    ::std::end(::core::forward<Range>(rng))
   );
 }
 
@@ -938,7 +980,7 @@ template <class Range, class T>
 auto replace (Range&& rng, T const& old, T const& value) -> enable_if_t<
   is_range<Range>::value
 > {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_forward = decltype(range)::is_input;
   static_assert(is_forward, "replace requires ForwardIterators");
   return ::std::replace(
@@ -953,13 +995,13 @@ template <class Range, class UnaryPred, class T>
 auto replace_if (Range&& rng, UnaryPred&& up, T const& value) -> enable_if_t<
   is_range<Range>::value
 > {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_forward = decltype(range)::is_forward;
   static_assert(is_forward, "replace_if requires ForwardIterators");
   return ::std::replace_if(
     ::std::begin(range),
     ::std::end(range),
-    ::std::forward<UnaryPred>(up),
+    ::core::forward<UnaryPred>(up),
     value
   );
 }
@@ -974,13 +1016,13 @@ auto replace_copy (
   is_range<Range>::value,
   decay_t<OutputIt>
 > {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_input = decltype(range)::is_input;
   static_assert(is_input, "replace_copy requires InputIterators");
   return ::std::replace_copy(
     ::std::begin(range),
     ::std::end(range),
-    ::std::forward<OutputIt>(it),
+    ::core::forward<OutputIt>(it),
     old,
     value
   );
@@ -996,14 +1038,14 @@ auto replace_copy_if (
   is_range<Range>::value,
   decay_t<OutputIt>
 > {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_input = decltype(range)::is_input;
   static_assert(is_input, "replace_copy_if requires InputIterators");
   return ::std::replace_copy_if(
     ::std::begin(range),
     ::std::end(range),
-    ::std::forward<OutputIt>(it),
-    ::std::forward<UnaryPred>(up),
+    ::core::forward<OutputIt>(it),
+    ::core::forward<UnaryPred>(up),
     value
   );
 }
@@ -1013,19 +1055,19 @@ auto swap_ranges (Range&& rng, ForwardIt&& it) -> enable_if_t<
   is_range<Range>::value,
   decay_t<ForwardIt>
 > {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_forward = decltype(range)::is_forward;
   static_assert(is_forward, "swap_ranges requires ForwardIterators");
   return ::std::swap_ranges(
     ::std::begin(range),
     ::std::end(range),
-    ::std::forward<ForwardIt>(it)
+    ::core::forward<ForwardIt>(it)
   );
 }
 
 template <class Range>
 auto reverse (Range&& rng) -> enable_if_t<is_range<Range>::value> {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_bidir = decltype(range)::is_bidirectional;
   static_assert(is_bidir, "reverse requires BidirectionalIterators");
   return ::std::reverse(::std::begin(range), ::std::end(range));
@@ -1036,13 +1078,13 @@ auto reverse_copy (Range&& rng, OutputIt&& it) -> enable_if_t<
   is_range<Range>::value,
   decay_t<OutputIt>
 > {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_bidir = decltype(range)::is_bidirectional;
   static_assert(is_bidir, "reverse_copy requires BidirectionalIterators");
   return ::std::reverse_copy(
     ::std::begin(range),
     ::std::end(range),
-    ::std::forward<OutputIt>(it)
+    ::core::forward<OutputIt>(it)
   );
 }
 
@@ -1050,12 +1092,12 @@ template <class Range, class ForwardIt>
 auto rotate (Range&& rng, ForwardIt&& it) -> enable_if_t<
   is_range<Range>::value
 > {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_forward = decltype(range)::is_forward;
   static_assert(is_forward, "rotate requires ForwardIterators");
   ::std::rotate(
     ::std::begin(range),
-    ::std::forward<ForwardIt>(it),
+    ::core::forward<ForwardIt>(it),
     ::std::end(range)
   );
 }
@@ -1065,14 +1107,14 @@ auto rotate_copy (Range&& rng, ForwardIt&& it, OutputIt&& ot) -> enable_if_t<
   is_range<Range>::value,
   decay_t<OutputIt>
 > {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_forward = decltype(range)::is_forward;
   static_assert(is_forward, "rotate_copy requires ForwardIterators");
   return ::std::rotate_copy(
     ::std::begin(range),
-    ::std::forward<ForwardIt>(it),
+    ::core::forward<ForwardIt>(it),
     ::std::end(range),
-    ::std::forward<OutputIt>(ot)
+    ::core::forward<OutputIt>(ot)
   );
 }
 
@@ -1080,22 +1122,22 @@ template <class Range, class URNG>
 auto shuffle (Range&& rng, URNG&& g) -> enable_if_t<
   is_range<Range>::value
 > {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_random = decltype(range)::is_random_access;
   static_assert(is_random, "shuffle requires RandomAccessIterators");
   return ::std::shuffle(
     ::std::begin(range),
     ::std::end(range),
-    ::std::forward<URNG>(g)
+    ::core::forward<URNG>(g)
   );
 }
 
 template <class Range>
 auto unique (Range&& rng) -> enable_if_t<
   is_range<Range>::value,
-  decltype(::std::begin(::std::forward<Range>(rng)))
+  decltype(::std::begin(::core::forward<Range>(rng)))
 > {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_forward = decltype(range)::is_forward;
   static_assert(is_forward, "unique requires ForwardIterators");
   return ::std::unique(::std::begin(range), ::std::end(range));
@@ -1104,15 +1146,15 @@ auto unique (Range&& rng) -> enable_if_t<
 template <class Range, class BinaryPredicate>
 auto unique (Range&& rng, BinaryPredicate&& bp) -> enable_if_t<
   is_range<Range>::value,
-  decltype(::std::begin(::std::forward<Range>(rng)))
+  decltype(::std::begin(::core::forward<Range>(rng)))
 > {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_forward = decltype(range)::is_forward;
   static_assert(is_forward, "unique requires ForwardIterators");
   return ::std::unique(
     ::std::begin(range),
     ::std::end(range),
-    ::std::forward<BinaryPredicate>(bp)
+    ::core::forward<BinaryPredicate>(bp)
   );
 }
 
@@ -1121,13 +1163,13 @@ auto unique_copy (Range&& rng, OutputIt&& it) -> enable_if_t<
   is_range<Range>::value,
   decay_t<OutputIt>
 > {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_input = decltype(range)::is_input;
   static_assert(is_input, "unique_copy requires InputIterators");
   return ::std::unique_copy(
     ::std::begin(range),
     ::std::end(range),
-    ::std::forward<OutputIt>(it)
+    ::core::forward<OutputIt>(it)
   );
 }
 
@@ -1136,14 +1178,14 @@ auto unique_copy (Range&& rng, OutputIt&& it, BinaryPred&& bp) -> enable_if_t<
   is_range<Range>::value,
   decay_t<OutputIt>
 > {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_input = decltype(range)::is_input;
   static_assert(is_input, "unique_copy requires InputIterators");
   return ::std::unique_copy(
     ::std::begin(range),
     ::std::end(range),
-    ::std::forward<OutputIt>(it),
-    ::std::forward<BinaryPred>(bp)
+    ::core::forward<OutputIt>(it),
+    ::core::forward<BinaryPred>(bp)
   );
 }
 
@@ -1153,28 +1195,28 @@ auto is_partitioned (Range&& rng, UnaryPredicate&& up) -> enable_if_t<
   is_range<Range>::value,
   bool
 > {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_input = decltype(range)::is_input;
   static_assert(is_input, "is_partitioned requires InputIterators");
   return ::std::is_partitioned(
     ::std::begin(range),
     ::std::end(range),
-    ::std::forward<UnaryPredicate>(up)
+    ::core::forward<UnaryPredicate>(up)
   );
 }
 
 template <class Range, class UnaryPredicate>
 auto partition (Range&& rng, UnaryPredicate&& up) -> enable_if_t<
   is_range<Range>::value,
-  decltype(::std::begin(::std::forward<Range>(rng)))
+  decltype(::std::begin(::core::forward<Range>(rng)))
 > {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_forward = decltype(range)::is_forward;
   static_assert(is_forward, "partition requires ForwardIterators");
   return ::std::partition(
     ::std::begin(range),
     ::std::end(range),
-    ::std::forward<UnaryPredicate>(up)
+    ::core::forward<UnaryPredicate>(up)
   );
 }
 
@@ -1188,45 +1230,45 @@ auto partition_copy (
   is_range<Range>::value,
   ::std::pair<decay_t<OutputTrue>, decay_t<OutputFalse>>
 > {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_input = decltype(range)::is_input;
   static_assert(is_input, "partition_copy requires InputIterators");
   return ::std::partition_copy(
     ::std::begin(range),
     ::std::end(range),
-    ::std::forward<OutputTrue>(ot),
-    ::std::forward<OutputFalse>(of),
-    ::std::forward<UnaryPred>(up)
+    ::core::forward<OutputTrue>(ot),
+    ::core::forward<OutputFalse>(of),
+    ::core::forward<UnaryPred>(up)
   );
 }
 
 template <class Range, class UnaryPredicate>
 auto stable_partition (Range&& rng, UnaryPredicate&& up) -> enable_if_t<
   is_range<Range>::value,
-  decltype(::std::begin(::std::forward<Range>(rng)))
+  decltype(::std::begin(::core::forward<Range>(rng)))
 > {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_bidir = decltype(range)::is_bidirectional;
   static_assert(is_bidir, "stable_partition requires BidirectionalIterators");
   return ::std::stable_partition(
     ::std::begin(range),
     ::std::end(range),
-    ::std::forward<UnaryPredicate>(up)
+    ::core::forward<UnaryPredicate>(up)
   );
 }
 
 template <class Range, class UnaryPredicate>
 auto partition_point (Range&& rng, UnaryPredicate&& up) -> enable_if_t<
   is_range<Range>::value,
-  decltype(::std::begin(::std::forward<Range>(rng)))
+  decltype(::std::begin(::core::forward<Range>(rng)))
 > {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_forward = decltype(range)::is_forward;
   static_assert(is_forward, "partition_point requires ForwardIterators");
   return ::std::partition_point(
     ::std::begin(range),
     ::std::end(range),
-    ::std::forward<UnaryPredicate>(up)
+    ::core::forward<UnaryPredicate>(up)
   );
 }
 
@@ -1234,7 +1276,7 @@ auto partition_point (Range&& rng, UnaryPredicate&& up) -> enable_if_t<
 
 template <class Range>
 auto is_sorted (Range&& rng) -> enable_if_t<is_range<Range>::value, bool> {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_forward = decltype(range)::is_forward;
   static_assert(is_forward, "is_sorted requires ForwardIterators");
   return ::std::is_sorted(::std::begin(range), ::std::end(range));
@@ -1245,22 +1287,22 @@ auto is_sorted (Range&& rng, Compare&& compare) -> enable_if_t<
   is_range<Range>::value,
   bool
 > {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_forward = decltype(range)::is_forward;
   static_assert(is_forward, "is_sorted requires ForwardIterators");
   return ::std::is_sorted(
     ::std::begin(range),
     ::std::end(range),
-    ::std::forward<Compare>(compare)
+    ::core::forward<Compare>(compare)
   );
 }
 
 template <class Range>
 auto is_sorted_until (Range&& rng) -> enable_if_t<
   is_range<Range>::value,
-  decltype(::std::begin(::std::forward<Range>(rng)))
+  decltype(::std::begin(::core::forward<Range>(rng)))
 > {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_forward = decltype(range)::is_forward;
   static_assert(is_forward, "is_sorted_until requires ForwardIterators");
   return ::std::is_sorted_until(::std::begin(range), ::std::end(range));
@@ -1269,21 +1311,21 @@ auto is_sorted_until (Range&& rng) -> enable_if_t<
 template <class Range, class Compare>
 auto is_sorted_until (Range&& rng, Compare&& compare) -> enable_if_t<
   is_range<Range>::value,
-  decltype(::std::begin(::std::forward<Range>(rng)))
+  decltype(::std::begin(::core::forward<Range>(rng)))
 > {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_forward = decltype(range)::is_forward;
   static_assert(is_forward, "is_sorted_until requires ForwardIterators");
   return ::std::is_sorted_until(
     ::std::begin(range),
     ::std::end(range),
-    ::std::forward<Compare>(compare)
+    ::core::forward<Compare>(compare)
   );
 }
 
 template <class Range>
 auto sort (Range&& rng) -> enable_if_t<is_range<Range>::value> {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_random = decltype(range)::is_random_access;
   static_assert(is_random, "sort requires RandomAccessIterators");
   return ::std::sort(::std::begin(range), ::std::end(range));
@@ -1291,13 +1333,13 @@ auto sort (Range&& rng) -> enable_if_t<is_range<Range>::value> {
 
 template <class Range, class Compare>
 auto sort (Range&& rng, Compare&& cmp) -> enable_if_t<is_range<Range>::value> {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_random = decltype(range)::is_random_access;
   static_assert(is_random, "sort requires RandomAccessIterators");
   return ::std::sort(
     ::std::begin(range),
     ::std::end(range),
-    ::std::forward<Compare>(cmp)
+    ::core::forward<Compare>(cmp)
   );
 }
 
@@ -1305,12 +1347,12 @@ template <class Range, class RandomIt>
 auto partial_sort (Range&& rng, RandomIt&& it) -> enable_if_t<
   is_range<Range>::value
 > {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_random = decltype(range)::is_random_access;
   static_assert(is_random, "partial_sort requires RandomAccessIterators");
   return ::std::partial_sort(
     ::std::begin(range),
-    ::std::forward<RandomIt>(it),
+    ::core::forward<RandomIt>(it),
     ::std::end(range)
   );
 }
@@ -1319,24 +1361,24 @@ template <class Range, class RandomIt, class Compare>
 auto partial_sort (Range&& rng, RandomIt&& it, Compare&& cmp) -> enable_if_t<
   is_range<Range>::value
 > {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_random = decltype(range)::is_random_access;
   static_assert(is_random, "partial_sort requires RandomAccessIterators");
   return ::std::partial_sort(
     ::std::begin(range),
-    ::std::forward<RandomIt>(it),
+    ::core::forward<RandomIt>(it),
     ::std::end(range),
-    ::std::forward<Compare>(cmp)
+    ::core::forward<Compare>(cmp)
   );
 }
 
 template <class IRange, class RRange>
 auto partial_sort_copy (IRange&& irng, RRange&& rrng) -> enable_if_t<
-  all_traits<is_range<IRange>, is_range<RRange>>::value,
-  decltype(::std::begin(::std::forward<RRange>(rrng)))
+  meta::all<is_range<IRange>, is_range<RRange>>::value,
+  decltype(::std::begin(::core::forward<RRange>(rrng)))
 > {
-  auto irange = make_range(::std::forward<IRange>(irng));
-  auto rrange = make_range(::std::forward<RRange>(rrng));
+  auto irange = make_range(::core::forward<IRange>(irng));
+  auto rrange = make_range(::core::forward<RRange>(rrng));
   static constexpr auto is_input = decltype(irange)::is_input;
   static constexpr auto is_random = decltype(rrange)::is_random_access;
   static_assert(is_input, "partial_sort_copy requires InputIterators");
@@ -1355,11 +1397,11 @@ auto partial_sort_copy (
   RRange&& rrng,
   Compare&& cmp
 ) -> enable_if_t<
-  all_traits<is_range<IRange>, is_range<RRange>>::value,
-  decltype(::std::begin(::std::forward<RRange>(rrng)))
+  meta::all<is_range<IRange>, is_range<RRange>>::value,
+  decltype(::std::begin(::core::forward<RRange>(rrng)))
 > {
-  auto irange = make_range(::std::forward<IRange>(irng));
-  auto rrange = make_range(::std::forward<RRange>(rrng));
+  auto irange = make_range(::core::forward<IRange>(irng));
+  auto rrange = make_range(::core::forward<RRange>(rrng));
   static constexpr auto is_input = decltype(irange)::is_input;
   static constexpr auto is_random = decltype(rrange)::is_random_access;
   static_assert(is_input, "partial_sort_copy requires InputIterators");
@@ -1369,13 +1411,13 @@ auto partial_sort_copy (
     ::std::end(irange),
     ::std::begin(rrange),
     ::std::end(rrange),
-    ::std::forward<Compare>(cmp)
+    ::core::forward<Compare>(cmp)
   );
 }
 
 template <class Range>
 auto stable_sort (Range&& rng) -> enable_if_t<is_range<Range>::value> {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_random = decltype(range)::is_random_access;
   static_assert(is_random, "stable_sort requires RandomAccessIterators");
   return ::std::stable_sort(::std::begin(range), ::std::end(range));
@@ -1385,13 +1427,13 @@ template <class Range, class Compare>
 auto stable_sort (Range&& rng, Compare&& cmp) -> enable_if_t<
   is_range<Range>::value
 > {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_random = decltype(range)::is_random_access;
   static_assert(is_random, "stable_sort requires RandomAccessIterators");
   return ::std::stable_sort(
     ::std::begin(range),
     ::std::end(range),
-    ::std::forward<Compare>(cmp)
+    ::core::forward<Compare>(cmp)
   );
 }
 
@@ -1399,12 +1441,12 @@ template <class Range, class RandomIt>
 auto nth_element (Range&& rng, RandomIt&& it) -> enable_if_t<
   is_range<Range>::value
 > {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_random = decltype(range)::is_random_access;
   static_assert(is_random, "nth_element requires RandomAccessIterators");
   return ::std::nth_element(
     ::std::begin(range),
-    ::std::forward<RandomIt>(it),
+    ::core::forward<RandomIt>(it),
     ::std::end(range)
   );
 }
@@ -1413,14 +1455,14 @@ template <class Range, class RandomIt, class Compare>
 auto nth_element (Range&& rng, RandomIt&& it, Compare&& cmp) -> enable_if_t<
   is_range<Range>::value
 > {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_random = decltype(range)::is_random_access;
   static_assert(is_random, "nth_element requires RandomAccessIterators");
   return ::std::nth_element(
     ::std::begin(range),
-    ::std::forward<RandomIt>(it),
+    ::core::forward<RandomIt>(it),
     ::std::end(range),
-    ::std::forward<Compare>(cmp)
+    ::core::forward<Compare>(cmp)
   );
 }
 
@@ -1428,9 +1470,9 @@ auto nth_element (Range&& rng, RandomIt&& it, Compare&& cmp) -> enable_if_t<
 template <class Range, class T>
 auto lower_bound (Range&& rng, T const& value) -> enable_if_t<
   is_range<Range>::value,
-  decltype(::std::begin(::std::forward<Range>(rng)))
+  decltype(::std::begin(::core::forward<Range>(rng)))
 > {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_forward = decltype(range)::is_forward;
   static_assert(is_forward, "lower_bound requires ForwardIterators");
   return ::std::lower_bound(::std::begin(range), ::std::end(range), value);
@@ -1439,25 +1481,25 @@ auto lower_bound (Range&& rng, T const& value) -> enable_if_t<
 template <class Range, class T, class Compare>
 auto lower_bound (Range&& rng, T const& value, Compare&& cmp) -> enable_if_t<
   is_range<Range>::value,
-  decltype(::std::begin(::std::forward<Range>(rng)))
+  decltype(::std::begin(::core::forward<Range>(rng)))
 > {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_forward = decltype(range)::is_forward;
   static_assert(is_forward, "lower_bound requires ForwardIterators");
   return ::std::lower_bound(
     ::std::begin(range),
     ::std::end(range),
     value,
-    ::std::forward<Compare>(cmp)
+    ::core::forward<Compare>(cmp)
   );
 }
 
 template <class Range, class T>
 auto upper_bound (Range&& rng, T const& value) -> enable_if_t<
   is_range<Range>::value,
-  decltype(::std::begin(::std::forward<Range>(rng)))
+  decltype(::std::begin(::core::forward<Range>(rng)))
 > {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_forward = decltype(range)::is_forward;
   static_assert(is_forward, "upper_bound requires ForwardIterators");
   return ::std::upper_bound(::std::begin(range), ::std::end(range), value);
@@ -1466,16 +1508,16 @@ auto upper_bound (Range&& rng, T const& value) -> enable_if_t<
 template <class Range, class T, class Compare>
 auto upper_bound (Range&& rng, T const& value, Compare&& cmp) -> enable_if_t<
   is_range<Range>::value,
-  decltype(::std::begin(::std::forward<Range>(rng)))
+  decltype(::std::begin(::core::forward<Range>(rng)))
 > {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_forward = decltype(range)::is_forward;
   static_assert(is_forward, "upper_bound requires ForwardIterators");
   return ::std::upper_bound(
     ::std::begin(range),
     ::std::end(range),
     value,
-    ::std::forward<Compare>(cmp)
+    ::core::forward<Compare>(cmp)
   );
 }
 
@@ -1484,7 +1526,7 @@ auto binary_search (Range&& rng, T const& value) -> enable_if_t<
   is_range<Range>::value,
   bool
 > {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_forward = decltype(range)::is_forward;
   static_assert(is_forward, "binary_search requires ForwardIterators");
   return ::std::binary_search(::std::begin(range), ::std::end(range), value);
@@ -1495,23 +1537,23 @@ auto binary_search (Range&& rng, T const& value, Compare&& cmp) -> enable_if_t<
   is_range<Range>::value,
   bool
 > {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_forward = decltype(range)::is_forward;
   static_assert(is_forward, "binary_search requires ForwardIterators");
   return ::std::binary_search(
     ::std::begin(range),
     ::std::end(range),
     value,
-    ::std::forward<Compare>(cmp)
+    ::core::forward<Compare>(cmp)
   );
 }
 
 template <class Range, class T>
 auto equal_range (Range&& rng, T const& value) -> enable_if_t<
   is_range<Range>::value,
-  range<decltype(::std::begin(::std::forward<Range>(rng)))>
+  range<decltype(::std::begin(::core::forward<Range>(rng)))>
 > {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_forward = decltype(range)::is_forward;
   static_assert(is_forward, "equal_range requires ForwardIterators");
   return ::std::equal_range(::std::begin(range), ::std::end(range), value);
@@ -1520,27 +1562,27 @@ auto equal_range (Range&& rng, T const& value) -> enable_if_t<
 template <class Range, class T, class Compare>
 auto equal_range (Range&& rng, T const& value, Compare&& cmp) -> enable_if_t<
   is_range<Range>::value,
-  range<decltype(::std::begin(::std::forward<Range>(rng)))>
+  range<decltype(::std::begin(::core::forward<Range>(rng)))>
 > {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_forward = decltype(range)::is_forward;
   static_assert(is_forward, "equal_range requires ForwardIterators");
   return ::std::equal_range(
     ::std::begin(range),
     ::std::end(range),
     value,
-    ::std::forward<Compare>(cmp)
+    ::core::forward<Compare>(cmp)
   );
 }
 
 /* set operations (on sorted ranges) */
 template <class Range1, class Range2, class OutputIt>
 auto merge (Range1&& rng1, Range2&& rng2, OutputIt&& it) -> enable_if_t<
-  all_traits<is_range<Range1>, is_range<Range2>>::value,
+  meta::all<is_range<Range1>, is_range<Range2>>::value,
   decay_t<OutputIt>
 > {
-  auto range1 = make_range(::std::forward<Range1>(rng1));
-  auto range2 = make_range(::std::forward<Range2>(rng2));
+  auto range1 = make_range(::core::forward<Range1>(rng1));
+  auto range2 = make_range(::core::forward<Range2>(rng2));
   static constexpr auto is_input1 = decltype(range1)::is_input;
   static constexpr auto is_input2 = decltype(range2)::is_input;
   static_assert(is_input1, "merge requires InputIterators");
@@ -1550,7 +1592,7 @@ auto merge (Range1&& rng1, Range2&& rng2, OutputIt&& it) -> enable_if_t<
     ::std::end(range1),
     ::std::begin(range2),
     ::std::end(range2),
-    ::std::forward<OutputIt>(it)
+    ::core::forward<OutputIt>(it)
   );
 }
 
@@ -1561,11 +1603,11 @@ auto merge (
   OutputIt&& it,
   Compare&& cmp
 ) -> enable_if_t<
-  all_traits<is_range<Range1>, is_range<Range2>>::value,
+  meta::all<is_range<Range1>, is_range<Range2>>::value,
   decay_t<OutputIt>
 > {
-  auto range1 = make_range(::std::forward<Range1>(rng1));
-  auto range2 = make_range(::std::forward<Range2>(rng2));
+  auto range1 = make_range(::core::forward<Range1>(rng1));
+  auto range2 = make_range(::core::forward<Range2>(rng2));
   static constexpr auto is_input1 = decltype(range1)::is_input;
   static constexpr auto is_input2 = decltype(range2)::is_input;
   static_assert(is_input1, "merge requires InputIterators");
@@ -1575,8 +1617,8 @@ auto merge (
     ::std::end(range1),
     ::std::begin(range2),
     ::std::end(range2),
-    ::std::forward<OutputIt>(it),
-    ::std::forward<Compare>(cmp)
+    ::core::forward<OutputIt>(it),
+    ::core::forward<Compare>(cmp)
   );
 }
 
@@ -1584,12 +1626,12 @@ template <class Range, class BidirIt>
 auto inplace_merge (Range&& rng, BidirIt&& it) -> enable_if_t<
   is_range<Range>::value
 > {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_bidir = decltype(range)::is_bidirectional;
   static_assert(is_bidir, "inplace_merge requires BidirectionalIterators");
   return ::std::inplace_merge(
     ::std::begin(range),
-    ::std::forward<BidirIt>(it),
+    ::core::forward<BidirIt>(it),
     ::std::end(range)
   );
 }
@@ -1598,24 +1640,24 @@ template <class Range, class BidirIt, class Compare>
 auto inplace_merge (Range&& rng, BidirIt&& it, Compare&& cmp) -> enable_if_t<
   is_range<Range>::value
 > {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_bidir = decltype(range)::is_bidirectional;
   static_assert(is_bidir, "inplace_merge requires BidirectionalIterators");
   return ::std::inplace_merge(
     ::std::begin(range),
-    ::std::forward<BidirIt>(it),
+    ::core::forward<BidirIt>(it),
     ::std::end(range),
-    ::std::forward<Compare>(cmp)
+    ::core::forward<Compare>(cmp)
   );
 }
 
 template <class Range1, class Range2>
 auto includes (Range1&& rng1, Range2&& rng2) -> enable_if_t<
-  all_traits<is_range<Range1>, is_range<Range2>>::value,
+  meta::all<is_range<Range1>, is_range<Range2>>::value,
   bool
 > {
-  auto range1 = make_range(::std::forward<Range1>(rng1));
-  auto range2 = make_range(::std::forward<Range2>(rng2));
+  auto range1 = make_range(::core::forward<Range1>(rng1));
+  auto range2 = make_range(::core::forward<Range2>(rng2));
   static constexpr auto is_input1 = decltype(range1)::is_input;
   static constexpr auto is_input2 = decltype(range2)::is_input;
   static_assert(is_input1, "includes requires InputIterators");
@@ -1630,11 +1672,11 @@ auto includes (Range1&& rng1, Range2&& rng2) -> enable_if_t<
 
 template <class Range1, class Range2, class Compare>
 auto includes (Range1&& rng1, Range2&& rng2, Compare&& cmp) -> enable_if_t<
-  all_traits<is_range<Range1>, is_range<Range2>>::value,
+  meta::all<is_range<Range1>, is_range<Range2>>::value,
   bool
 > {
-  auto range1 = make_range(::std::forward<Range1>(rng1));
-  auto range2 = make_range(::std::forward<Range2>(rng2));
+  auto range1 = make_range(::core::forward<Range1>(rng1));
+  auto range2 = make_range(::core::forward<Range2>(rng2));
   static constexpr auto is_input1 = decltype(range1)::is_input;
   static constexpr auto is_input2 = decltype(range2)::is_input;
   static_assert(is_input1, "includes requires InputIterators");
@@ -1644,17 +1686,17 @@ auto includes (Range1&& rng1, Range2&& rng2, Compare&& cmp) -> enable_if_t<
     ::std::end(range1),
     ::std::begin(range2),
     ::std::end(range2),
-    ::std::forward<Compare>(cmp)
+    ::core::forward<Compare>(cmp)
   );
 }
 
 template <class Range1, class Range2, class OutputIt>
 auto set_difference (Range1&& rng1, Range2&& rng2, OutputIt&& it) -> enable_if_t<
-  all_traits<is_range<Range1>, is_range<Range2>>::value,
+  meta::all<is_range<Range1>, is_range<Range2>>::value,
   decay_t<OutputIt>
 > {
-  auto range1 = make_range(::std::forward<Range1>(rng1));
-  auto range2 = make_range(::std::forward<Range2>(rng2));
+  auto range1 = make_range(::core::forward<Range1>(rng1));
+  auto range2 = make_range(::core::forward<Range2>(rng2));
   static constexpr auto is_input1 = decltype(range1)::is_input;
   static constexpr auto is_input2 = decltype(range2)::is_input;
   static_assert(is_input1, "set_difference requires InputIterators");
@@ -1664,7 +1706,7 @@ auto set_difference (Range1&& rng1, Range2&& rng2, OutputIt&& it) -> enable_if_t
     ::std::end(range1),
     ::std::begin(range2),
     ::std::end(range2),
-    ::std::forward<OutputIt>(it)
+    ::core::forward<OutputIt>(it)
   );
 }
 
@@ -1675,11 +1717,11 @@ auto set_difference (
   OutputIt&& it,
   Compare&& cmp
 ) -> enable_if_t<
-  all_traits<is_range<Range1>, is_range<Range2>>::value,
+  meta::all<is_range<Range1>, is_range<Range2>>::value,
   decay_t<OutputIt>
 > {
-  auto range1 = make_range(::std::forward<Range1>(rng1));
-  auto range2 = make_range(::std::forward<Range2>(rng2));
+  auto range1 = make_range(::core::forward<Range1>(rng1));
+  auto range2 = make_range(::core::forward<Range2>(rng2));
   static constexpr auto is_input1 = decltype(range1)::is_input;
   static constexpr auto is_input2 = decltype(range2)::is_input;
   static_assert(is_input1, "set_difference requires InputIterators");
@@ -1689,18 +1731,18 @@ auto set_difference (
     ::std::end(range1),
     ::std::begin(range2),
     ::std::end(range2),
-    ::std::forward<OutputIt>(it),
-    ::std::forward<Compare>(cmp)
+    ::core::forward<OutputIt>(it),
+    ::core::forward<Compare>(cmp)
   );
 }
 
 template <class Range1, class Range2, class OutputIt>
 auto set_intersection (Range1&& rng1, Range2&& rng2, OutputIt&& it) -> enable_if_t<
-  all_traits<is_range<Range1>, is_range<Range2>>::value,
+  meta::all<is_range<Range1>, is_range<Range2>>::value,
   decay_t<OutputIt>
 > {
-  auto range1 = make_range(::std::forward<Range1>(rng1));
-  auto range2 = make_range(::std::forward<Range2>(rng2));
+  auto range1 = make_range(::core::forward<Range1>(rng1));
+  auto range2 = make_range(::core::forward<Range2>(rng2));
   static constexpr auto is_input1 = decltype(range1)::is_input;
   static constexpr auto is_input2 = decltype(range2)::is_input;
   static_assert(is_input1, "set_intersection requires InputIterators");
@@ -1710,7 +1752,7 @@ auto set_intersection (Range1&& rng1, Range2&& rng2, OutputIt&& it) -> enable_if
     ::std::end(range1),
     ::std::begin(range2),
     ::std::end(range2),
-    ::std::forward<OutputIt>(it)
+    ::core::forward<OutputIt>(it)
   );
 }
 
@@ -1721,11 +1763,11 @@ auto set_intersection (
   OutputIt&& it,
   Compare&& cmp
 ) -> enable_if_t<
-  all_traits<is_range<Range1>, is_range<Range2>>::value,
+  meta::all<is_range<Range1>, is_range<Range2>>::value,
   decay_t<OutputIt>
 > {
-  auto range1 = make_range(::std::forward<Range1>(rng1));
-  auto range2 = make_range(::std::forward<Range2>(rng2));
+  auto range1 = make_range(::core::forward<Range1>(rng1));
+  auto range2 = make_range(::core::forward<Range2>(rng2));
   static constexpr auto is_input1 = decltype(range1)::is_input;
   static constexpr auto is_input2 = decltype(range2)::is_input;
   static_assert(is_input1, "set_intersection requires InputIterators");
@@ -1735,18 +1777,18 @@ auto set_intersection (
     ::std::end(range1),
     ::std::begin(range2),
     ::std::end(range2),
-    ::std::forward<OutputIt>(it),
-    ::std::forward<Compare>(cmp)
+    ::core::forward<OutputIt>(it),
+    ::core::forward<Compare>(cmp)
   );
 }
 
 template <class Range1, class Range2, class OutputIt>
 auto set_symmetric_difference (Range1&& rng1, Range2&& rng2, OutputIt&& it) -> enable_if_t<
-  all_traits<is_range<Range1>, is_range<Range2>>::value,
+  meta::all<is_range<Range1>, is_range<Range2>>::value,
   decay_t<OutputIt>
 > {
-  auto range1 = make_range(::std::forward<Range1>(rng1));
-  auto range2 = make_range(::std::forward<Range2>(rng2));
+  auto range1 = make_range(::core::forward<Range1>(rng1));
+  auto range2 = make_range(::core::forward<Range2>(rng2));
   static constexpr auto is_input1 = decltype(range1)::is_input;
   static constexpr auto is_input2 = decltype(range2)::is_input;
   static_assert(is_input1, "set_symmetric_difference requires InputIterators");
@@ -1756,7 +1798,7 @@ auto set_symmetric_difference (Range1&& rng1, Range2&& rng2, OutputIt&& it) -> e
     ::std::end(range1),
     ::std::begin(range2),
     ::std::end(range2),
-    ::std::forward<OutputIt>(it)
+    ::core::forward<OutputIt>(it)
   );
 }
 
@@ -1767,11 +1809,11 @@ auto set_symmetric_difference (
   OutputIt&& it,
   Compare&& cmp
 ) -> enable_if_t<
-  all_traits<is_range<Range1>, is_range<Range2>>::value,
+  meta::all<is_range<Range1>, is_range<Range2>>::value,
   decay_t<OutputIt>
 > {
-  auto range1 = make_range(::std::forward<Range1>(rng1));
-  auto range2 = make_range(::std::forward<Range2>(rng2));
+  auto range1 = make_range(::core::forward<Range1>(rng1));
+  auto range2 = make_range(::core::forward<Range2>(rng2));
   static constexpr auto is_input1 = decltype(range1)::is_input;
   static constexpr auto is_input2 = decltype(range2)::is_input;
   static_assert(is_input1, "set_symmetric_difference requires InputIterators");
@@ -1781,18 +1823,18 @@ auto set_symmetric_difference (
     ::std::end(range1),
     ::std::begin(range2),
     ::std::end(range2),
-    ::std::forward<OutputIt>(it),
-    ::std::forward<Compare>(cmp)
+    ::core::forward<OutputIt>(it),
+    ::core::forward<Compare>(cmp)
   );
 }
 
 template <class Range1, class Range2, class OutputIt>
 auto set_union (Range1&& rng1, Range2&& rng2, OutputIt&& it) -> enable_if_t<
-  all_traits<is_range<Range1>, is_range<Range2>>::value,
+  meta::all<is_range<Range1>, is_range<Range2>>::value,
   decay_t<OutputIt>
 > {
-  auto range1 = make_range(::std::forward<Range1>(rng1));
-  auto range2 = make_range(::std::forward<Range2>(rng2));
+  auto range1 = make_range(::core::forward<Range1>(rng1));
+  auto range2 = make_range(::core::forward<Range2>(rng2));
   static constexpr auto is_input1 = decltype(range1)::is_input;
   static constexpr auto is_input2 = decltype(range2)::is_input;
   static_assert(is_input1, "set_union requires InputIterators");
@@ -1802,7 +1844,7 @@ auto set_union (Range1&& rng1, Range2&& rng2, OutputIt&& it) -> enable_if_t<
     ::std::end(range1),
     ::std::begin(range2),
     ::std::end(range2),
-    ::std::forward<OutputIt>(it)
+    ::core::forward<OutputIt>(it)
   );
 }
 
@@ -1813,11 +1855,11 @@ auto set_union (
   OutputIt&& it,
   Compare&& cmp
 ) -> enable_if_t<
-  all_traits<is_range<Range1>, is_range<Range2>>::value,
+  meta::all<is_range<Range1>, is_range<Range2>>::value,
   decay_t<OutputIt>
 > {
-  auto range1 = make_range(::std::forward<Range1>(rng1));
-  auto range2 = make_range(::std::forward<Range2>(rng2));
+  auto range1 = make_range(::core::forward<Range1>(rng1));
+  auto range2 = make_range(::core::forward<Range2>(rng2));
   static constexpr auto is_input1 = decltype(range1)::is_input;
   static constexpr auto is_input2 = decltype(range2)::is_input;
   static_assert(is_input1, "set_union requires InputIterators");
@@ -1827,15 +1869,15 @@ auto set_union (
     ::std::end(range1),
     ::std::begin(range2),
     ::std::end(range2),
-    ::std::forward<OutputIt>(it),
-    ::std::forward<Compare>(cmp)
+    ::core::forward<OutputIt>(it),
+    ::core::forward<Compare>(cmp)
   );
 }
 
 /* heap operations */
 template <class Range>
 auto is_heap (Range&& rng) -> enable_if_t<is_range<Range>::value, bool> {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_random = decltype(range)::is_random_access;
   static_assert(is_random, "is_heap requires RandomAccessIterators");
   return ::std::is_heap(::std::begin(range), ::std::end(range));
@@ -1846,22 +1888,22 @@ auto is_heap (Range&& rng, Compare&& cmp) -> enable_if_t<
   is_range<Range>::value,
   bool
 > {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_random = decltype(range)::is_random_access;
   static_assert(is_random, "is_heap requires RandomAccessIterators");
   return ::std::is_heap(
     ::std::begin(range),
     ::std::end(range),
-    ::std::forward<Compare>(cmp)
+    ::core::forward<Compare>(cmp)
   );
 }
 
 template <class Range>
 auto is_heap_until (Range&& rng) -> enable_if_t<
   is_range<Range>::value,
-  decltype(::std::begin(::std::forward<Range>(rng)))
+  decltype(::std::begin(::core::forward<Range>(rng)))
 > {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_random = decltype(range)::is_random_access;
   static_assert(is_random, "is_heap_until requires RandomAccessIterators");
   return ::std::is_heap_until(::std::begin(range), ::std::end(range));
@@ -1870,21 +1912,21 @@ auto is_heap_until (Range&& rng) -> enable_if_t<
 template <class Range, class Compare>
 auto is_heap_until (Range&& rng, Compare&& cmp) -> enable_if_t<
   is_range<Range>::value,
-  decltype(::std::begin(::std::forward<Range>(rng)))
+  decltype(::std::begin(::core::forward<Range>(rng)))
 > {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_random = decltype(range)::is_random_access;
   static_assert(is_random, "is_heap_until requires RandomAccessIterators");
   return ::std::is_heap_until(
     ::std::begin(range),
     ::std::end(range),
-    ::std::forward<Compare>(cmp)
+    ::core::forward<Compare>(cmp)
   );
 }
 
 template <class Range>
 auto make_heap (Range&& rng) -> enable_if_t<is_range<Range>::value> {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_random = decltype(range)::is_random_access;
   static_assert(is_random, "make_heap requires RandomAccessIterators");
   return ::std::make_heap(::std::begin(range), ::std::end(range));
@@ -1894,19 +1936,19 @@ template <class Range, class Compare>
 auto make_heap (Range&& rng, Compare&& cmp) -> enable_if_t<
   is_range<Range>::value
 > {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_random = decltype(range)::is_random_access;
   static_assert(is_random, "make_heap requires RandomAccessIterators");
   return ::std::make_heap(
     ::std::begin(range),
     ::std::end(range),
-    ::std::forward<Compare>(cmp)
+    ::core::forward<Compare>(cmp)
   );
 }
 
 template <class Range>
 auto push_heap (Range&& rng) -> enable_if_t<is_range<Range>::value> {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_random = decltype(range)::is_random_access;
   static_assert(is_random, "push_heap requires RandomAccessIterators");
   return ::std::push_heap(::std::begin(range), ::std::end(range));
@@ -1916,19 +1958,19 @@ template <class Range, class Compare>
 auto push_heap (Range&& rng, Compare&& cmp) -> enable_if_t<
   is_range<Range>::value
 > {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_random = decltype(range)::is_random_access;
   static_assert(is_random, "push_heap requires RandomAccessIterators");
   return ::std::push_heap(
     ::std::begin(range),
     ::std::end(range),
-    ::std::forward<Compare>(cmp)
+    ::core::forward<Compare>(cmp)
   );
 }
 
 template <class Range>
 auto pop_heap (Range&& rng) -> enable_if_t<is_range<Range>::value> {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_random = decltype(range)::is_random_access;
   static_assert(is_random, "pop_heap requires RandomAccessIterators");
   return ::std::pop_heap(::std::begin(range), ::std::end(range));
@@ -1938,19 +1980,19 @@ template <class Range, class Compare>
 auto pop_heap (Range&& rng, Compare&& cmp) -> enable_if_t<
   is_range<Range>::value
 > {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_random = decltype(range)::is_random_access;
   static_assert(is_random, "pop_heap requires RandomAccessIterators");
   return ::std::pop_heap(
     ::std::begin(range),
     ::std::end(range),
-    ::std::forward<Compare>(cmp)
+    ::core::forward<Compare>(cmp)
   );
 }
 
 template <class Range>
 auto sort_heap (Range&& rng) -> enable_if_t<is_range<Range>::value> {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_random = decltype(range)::is_random_access;
   static_assert(is_random, "sort_heap requires RandomAccessIterators");
   return ::std::sort_heap(::std::begin(range), ::std::end(range));
@@ -1960,13 +2002,13 @@ template <class Range, class Compare>
 auto sort_heap (Range&& rng, Compare&& cmp) -> enable_if_t<
   is_range<Range>::value
 > {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_random = decltype(range)::is_random_access;
   static_assert(is_random, "sort_heap requires RandomAccessIterators");
   return ::std::sort_heap(
     ::std::begin(range),
     ::std::end(range),
-    ::std::forward<Compare>(cmp)
+    ::core::forward<Compare>(cmp)
   );
 }
 
@@ -1974,9 +2016,9 @@ auto sort_heap (Range&& rng, Compare&& cmp) -> enable_if_t<
 template <class Range>
 auto max_element (Range&& rng) -> enable_if_t<
   is_range<Range>::value,
-  decltype(::std::begin(::std::forward<Range>(rng)))
+  decltype(::std::begin(::core::forward<Range>(rng)))
 > {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_forward = decltype(range)::is_forward;
   static_assert(is_forward, "max_element requires ForwardIterators");
   return ::std::max_element(::std::begin(range), ::std::end(range));
@@ -1985,24 +2027,24 @@ auto max_element (Range&& rng) -> enable_if_t<
 template <class Range, class Compare>
 auto max_element (Range&& rng, Compare&& cmp) -> enable_if_t<
   is_range<Range>::value,
-  decltype(::std::begin(::std::forward<Range>(rng)))
+  decltype(::std::begin(::core::forward<Range>(rng)))
 > {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_forward = decltype(range)::is_forward;
   static_assert(is_forward, "max_element requires ForwardIterators");
   return ::std::max_element(
     ::std::begin(range),
     ::std::end(range),
-    ::std::forward<Compare>(cmp)
+    ::core::forward<Compare>(cmp)
   );
 }
 
 template <class Range>
 auto min_element (Range&& rng) -> enable_if_t<
   is_range<Range>::value,
-  decltype(::std::begin(::std::forward<Range>(rng)))
+  decltype(::std::begin(::core::forward<Range>(rng)))
 > {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_forward = decltype(range)::is_forward;
   static_assert(is_forward, "min_element requires ForwardIterators");
   return ::std::min_element(::std::begin(range), ::std::end(range));
@@ -2011,15 +2053,15 @@ auto min_element (Range&& rng) -> enable_if_t<
 template <class Range, class Compare>
 auto min_element (Range&& rng, Compare&& cmp) -> enable_if_t<
   is_range<Range>::value,
-  decltype(::std::begin(::std::forward<Range>(rng)))
+  decltype(::std::begin(::core::forward<Range>(rng)))
 > {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_forward = decltype(range)::is_forward;
   static_assert(is_forward, "min_element requires ForwardIterators");
   return ::std::min_element(
     ::std::begin(range),
     ::std::end(range),
-    ::std::forward<Compare>(cmp)
+    ::core::forward<Compare>(cmp)
   );
 }
 
@@ -2027,11 +2069,11 @@ template <class Range>
 auto minmax_element (Range&& rng) -> enable_if_t<
   is_range<Range>::value,
   ::std::pair<
-    decltype(::std::begin(::std::forward<Range>(rng))),
-    decltype(::std::begin(::std::forward<Range>(rng)))
+    decltype(::std::begin(::core::forward<Range>(rng))),
+    decltype(::std::end(::core::forward<Range>(rng)))
   >
 > {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_forward = decltype(range)::is_forward;
   static_assert(is_forward, "minmax_element requires ForwardIterators");
   return ::std::minmax_element(::std::begin(range), ::std::end(range));
@@ -2041,27 +2083,27 @@ template <class Range, class Compare>
 auto minmax_element (Range&& rng, Compare&& cmp) -> enable_if_t<
   is_range<Range>::value,
   ::std::pair<
-    range<decltype(::std::begin(::std::forward<Range>(rng)))>,
-    range<decltype(::std::begin(::std::forward<Range>(rng)))>
+    range<decltype(::std::begin(::core::forward<Range>(rng)))>,
+    range<decltype(::std::end(::core::forward<Range>(rng)))>
   >
 > {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_forward = decltype(range)::is_forward;
   static_assert(is_forward, "minmax_element requires ForwardIterators");
   return ::std::minmax_element(
     ::std::begin(range),
     ::std::end(range),
-    ::std::forward<Compare>(cmp)
+    ::core::forward<Compare>(cmp)
   );
 }
 
 template <class Range1, class Range2>
 auto lexicographical_compare (Range1&& rng1, Range2&& rng2) -> enable_if_t<
-  all_traits<is_range<Range1>, is_range<Range2>>::value,
+  meta::all<is_range<Range1>, is_range<Range2>>::value,
   bool
 > {
-  auto range1 = make_range(::std::forward<Range1>(rng1));
-  auto range2 = make_range(::std::forward<Range2>(rng2));
+  auto range1 = make_range(::core::forward<Range1>(rng1));
+  auto range2 = make_range(::core::forward<Range2>(rng2));
   static constexpr auto is_input1 = decltype(range1)::is_input;
   static constexpr auto is_input2 = decltype(range2)::is_input;
   static_assert(is_input1, "lexicographical_compare requires InputIterators");
@@ -2080,11 +2122,11 @@ auto lexicographical_compare (
   Range2&& rng2,
   Compare&& cmp
 ) -> enable_if_t<
-  all_traits<is_range<Range1>, is_range<Range2>>::value,
+  meta::all<is_range<Range1>, is_range<Range2>>::value,
   bool
 > {
-  auto range1 = make_range(::std::forward<Range1>(rng1));
-  auto range2 = make_range(::std::forward<Range2>(rng2));
+  auto range1 = make_range(::core::forward<Range1>(rng1));
+  auto range2 = make_range(::core::forward<Range2>(rng2));
   static constexpr auto is_input1 = decltype(range1)::is_input;
   static constexpr auto is_input2 = decltype(range2)::is_input;
   static_assert(is_input1, "lexicographical_compare requires InputIterators");
@@ -2094,17 +2136,17 @@ auto lexicographical_compare (
     ::std::end(range1),
     ::std::begin(range2),
     ::std::end(range2),
-    ::std::forward<Compare>(cmp)
+    ::core::forward<Compare>(cmp)
   );
 }
 
 template <class Range1, class Range2>
 auto is_permutation (Range1&& rng1, Range2&& rng2) -> enable_if_t<
-  all_traits<is_range<Range1>, is_range<Range2>>::value,
+  meta::all<is_range<Range1>, is_range<Range2>>::value,
   bool
 > {
-  auto range1 = make_range(::std::forward<Range1>(rng1));
-  auto range2 = make_range(::std::forward<Range2>(rng2));
+  auto range1 = make_range(::core::forward<Range1>(rng1));
+  auto range2 = make_range(::core::forward<Range2>(rng2));
   static constexpr auto is_forward1 = decltype(range1)::is_forward;
   static constexpr auto is_forward2 = decltype(range2)::is_forward;
   static_assert(is_forward1, "is_permutation requires ForwardIterators");
@@ -2122,11 +2164,11 @@ auto is_permutation (
   Range2&& rng2,
   BinaryPredicate&& bp
 ) -> enable_if_t<
-  all_traits<is_range<Range1>, is_range<Range2>>::value,
+  meta::all<is_range<Range1>, is_range<Range2>>::value,
   bool
 > {
-  auto range1 = make_range(::std::forward<Range1>(rng1));
-  auto range2 = make_range(::std::forward<Range2>(rng2));
+  auto range1 = make_range(::core::forward<Range1>(rng1));
+  auto range2 = make_range(::core::forward<Range2>(rng2));
   static constexpr auto is_forward1 = decltype(range1)::is_forward;
   static constexpr auto is_forward2 = decltype(range2)::is_forward;
   static_assert(is_forward1, "is_permutation requires ForwardIterators");
@@ -2135,7 +2177,7 @@ auto is_permutation (
     ::std::begin(range1),
     ::std::end(range1),
     ::std::begin(range2),
-    ::std::forward<BinaryPredicate>(bp)
+    ::core::forward<BinaryPredicate>(bp)
   );
 }
 
@@ -2144,7 +2186,7 @@ auto next_permutation (Range&& rng) -> enable_if_t<
   is_range<Range>::value,
   bool
 > {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_bidir = decltype(range)::is_bidirectional;
   static_assert(is_bidir, "next_permutation requires BidirectionalIterators");
   return ::std::next_permutation(::std::begin(range), ::std::end(range));
@@ -2155,13 +2197,13 @@ auto next_permutation (Range&& rng, Compare&& cmp) -> enable_if_t<
   is_range<Range>::value,
   bool
 > {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_bidir = decltype(range)::is_bidirectional;
   static_assert(is_bidir, "next_permutation requires BidirectionalIterators");
   return ::std::next_permutation(
     ::std::begin(range),
     ::std::end(range),
-    ::std::forward<Compare>(cmp)
+    ::core::forward<Compare>(cmp)
   );
 }
 
@@ -2170,7 +2212,7 @@ auto prev_permutation (Range&& rng) -> enable_if_t<
   is_range<Range>::value,
   bool
 > {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_bidir = decltype(range)::is_bidirectional;
   static_assert(is_bidir, "prev_permutation requires BidirectionalIterators");
   return ::std::prev_permutation(::std::begin(range), ::std::end(range));
@@ -2181,16 +2223,16 @@ auto prev_permutation (Range&& rng, Compare&& cmp) -> enable_if_t<
   is_range<Range>::value,
   bool
 > {
-  auto range = make_range(::std::forward<Range>(rng));
+  auto range = make_range(::core::forward<Range>(rng));
   static constexpr auto is_bidir = decltype(range)::is_bidirectional;
   static_assert(is_bidir, "prev_permutation requires BidirectionalIterators");
   return ::std::prev_permutation(
     ::std::begin(range),
     ::std::end(range),
-    ::std::forward<Compare>(cmp)
+    ::core::forward<Compare>(cmp)
   );
 }
 
-}} /* namespace core::v1 */
+}} /* namespace core::v2 */
 
 #endif /* CORE_ALGORITHM_HPP */

@@ -16,6 +16,7 @@ A :ref:`search<search>` feature is also available.
 
 .. toctree::
    :maxdepth: 1
+   :hidden:
 
    Using MNMLSTC Core <usage>
    Type Traits <type-traits>
@@ -28,6 +29,7 @@ A :ref:`search<search>` feature is also available.
    Variant Type <variant>
    Uncategorized Utilities <utility>
    Metatemplate Programming <meta>
+   Propagating Const <propagate-const>
    Memory <memory>
    String Utilities <string>
    Range Type <range>

@@ -19,8 +19,26 @@
 #endif /* CORE_NO_EXCEPTIONS */
 
 namespace core {
-inline namespace v1 {
+inline namespace v2 {
 namespace impl {
+
+template <class T>
+using addressof_builtin_t = decltype(&::std::declval<T>());
+
+template <class T>
+using addressof_member_t = decltype(::std::declval<T>().operator&());
+
+template <class T>
+using addressof_free_t = decltype(operator &(::std::declval<T>()));
+
+template <class T>
+using has_no_addressof_overload = meta::all<
+  meta::none<
+    is_detected<addressof_member_t, T>,
+    is_detected<addressof_free_t, T>
+  >,
+  is_detected<addressof_builtin_t, T>
+>;
 
 struct place_t { };
 constexpr place_t place { };
@@ -39,7 +57,7 @@ struct storage {
   };
   bool engaged { false };
 
-  constexpr storage () noexcept : dummy { '\0' } { }
+  constexpr storage () noexcept : dummy { } { }
   storage (storage const& that) :
     engaged { that.engaged }
   {
@@ -85,7 +103,7 @@ struct storage<T, true> {
   };
   bool engaged { false };
 
-  constexpr storage () noexcept : dummy { '\0' } { }
+  constexpr storage () noexcept : dummy { } { }
   storage (storage const& that) :
     engaged { that.engaged }
   {
@@ -324,7 +342,7 @@ struct optional final : private impl::storage<Type> {
   value_type& operator * () noexcept { return this->val; }
 
   constexpr value_type const* operator -> () const noexcept {
-    return this->ptr(trait::address<value_type> { });
+    return this->ptr(impl::has_no_addressof_overload<value_type> { });
   }
 
   value_type* operator -> () noexcept { return ::std::addressof(this->val); }
@@ -1163,6 +1181,7 @@ struct result final {
     return this->cnd;
   }
 
+  // TODO: remove
   /* member function extensions */
   template <class Visitor, class... Args>
   constexpr auto visit (Visitor&& visitor, Args&&... args) const -> common_type_t<
@@ -1196,6 +1215,7 @@ struct result final {
           ::core::forward<Args>(args)...);
   }
 
+  // TODO: remove
   template <class... Visitors>
   auto match (Visitors&&... visitors) const -> decltype(
     this->visit(impl::make_overload(::core::forward<Visitors>(visitors)...))
@@ -1212,6 +1232,7 @@ struct result final {
       impl::make_overload(::core::forward<Visitors>(visitors)...));
   }
 
+  // TODO: remove
   template <
     class F,
     class=enable_if_t<is_result<invoke_of_t<F, value_type&>>::value>
@@ -1228,6 +1249,7 @@ struct result final {
     return this->cnd;
   }
 
+  // TODO: remove
   template <class F>
   auto operator >>= (F&& f) -> decltype(
     ::std::declval<result>().then(::core::forward<F>(f))
@@ -2025,14 +2047,14 @@ void swap (result<T>& lhs, result<T>& rhs) noexcept (
   noexcept(lhs.swap(rhs))
 ) { lhs.swap(rhs); }
 
-}} /* namespace core::v1 */
+}} /* namespace core::v2 */
 
 namespace std {
 
 template <class Type>
-struct hash<::core::v1::optional<Type>> {
+struct hash<::core::v2::optional<Type>> {
   using result_type = typename hash<Type>::result_type;
-  using argument_type = ::core::v1::optional<Type>;
+  using argument_type = ::core::v2::optional<Type>;
 
   result_type operator () (argument_type const& value) const noexcept {
     return value ? hash<Type> { }(*value) : result_type { };
@@ -2041,9 +2063,9 @@ struct hash<::core::v1::optional<Type>> {
 
 #ifndef CORE_NO_EXCEPTIONS
 template <class Type>
-struct hash<::core::v1::expected<Type>> {
+struct hash<::core::v2::expected<Type>> {
   using result_type = typename hash<Type>::result_type;
-  using argument_type = ::core::v1::expected<Type>;
+  using argument_type = ::core::v2::expected<Type>;
 
   result_type operator () (argument_type const& value) const noexcept {
     return value ? hash<Type> { }(*value) : result_type { };
@@ -2052,9 +2074,9 @@ struct hash<::core::v1::expected<Type>> {
 #endif /* CORE_NO_EXCEPTIONS */
 
 template <class Type>
-struct hash<::core::v1::result<Type>> {
+struct hash<::core::v2::result<Type>> {
   using result_type = typename hash<Type>::result_type;
-  using argument_type = ::core::v1::result<Type>;
+  using argument_type = ::core::v2::result<Type>;
 
   result_type operator () (argument_type const& value) const noexcept {
     return value ? hash<Type> { }(*value) : result_type { };

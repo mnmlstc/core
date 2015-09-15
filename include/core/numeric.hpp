@@ -6,7 +6,7 @@
 #include <core/range.hpp>
 
 namespace core {
-inline namespace v1 {
+inline namespace v2 {
 
 template <class Range, class T>
 auto iota (Range&& rng, T&& value) -> enable_if_t<is_range<Range>::value> {
@@ -151,6 +151,13 @@ auto partial_sum (Range&& rng, OutputIt&& it, BinaryOp&& op) -> enable_if_t<
   );
 }
 
-}} /* namespace core::v1 */
+// TODO: need some more builtins -- also formula is
+//       greater % lesser ? gcd(greater, greater % lesser) : lesser;
+template <class M, class N>
+constexpr auto gcd (M m, N n) -> enable_if_t<
+  meta::all<::std::is_integral<M>, ::std::is_integral<N>>::value
+> { return m % n ? gcd(m, m % n) : n; }
+
+}} /* namespace core::v2 */
 
 #endif /* CORE_NUMERIC_HPP */

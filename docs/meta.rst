@@ -146,7 +146,8 @@ Additionally, all types declared in this component are located inside the
       
       template <class T> struct void_to_int : identity<T> { };
       template <> struct void_to_int<void> : identity<int> { };
-      template <class T> using void_to_int_t = typename void_to_int<T>::type;
+      template <class T>
+      using void_to_int_t = typename void_to_int<T>::type;
       using out = meta::pack<int, int, double, int>;
       using in = meta::pack<void, int, double, void>;
       using result = meta::transform_t<in, void_to_int_t>;
@@ -354,7 +355,10 @@ Additionally, all types declared in this component are located inside the
 
       using in1 = meta::pack<std::string, double, int, void>;
       using in2 = meta::pack<void, double, int>;
-      using out = meta::pack<std::string, double, int, void, void, double, int>;
+      using out = meta::pack<
+        std::string, double, int,
+        void, void, double, int
+      >;
       using result = meta::merge<in1, in2>;
       static_assert(is_same<result, out>::value, "");
 

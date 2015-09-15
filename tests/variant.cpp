@@ -154,7 +154,7 @@ TEST_CASE("variant-methods", "[variant][methods]") {
     );
   }
 
-  SECTION("which") {
+  SECTION("index") {
     using variant_type = core::variant<
       std::uint64_t,
       std::string,
@@ -162,12 +162,12 @@ TEST_CASE("variant-methods", "[variant][methods]") {
     >;
 
     variant_type vector { std::vector<std::string> { "1", "2", "3" } };
-    variant_type string { std::string { "which" } };
+    variant_type string { std::string { "index" } };
     variant_type integer { };
 
-    CHECK(integer.which() == 0u);
-    CHECK(string.which() == 1u);
-    CHECK(vector.which() == 2u);
+    CHECK(integer.index() == 0u);
+    CHECK(string.index() == 1u);
+    CHECK(vector.index() == 2u);
   }
 
   SECTION("empty") {
@@ -306,8 +306,8 @@ TEST_CASE("variant-issues", "[variant][issues]") {
     auto const b = bar();
     auto const c = a;
 
-    CHECK(a.which() == 0u);
-    CHECK(b.which() == 1u);
+    CHECK(a.index() == 0u);
+    CHECK(b.index() == 1u);
   }
 
   SECTION("issue-25") {
@@ -316,6 +316,6 @@ TEST_CASE("variant-issues", "[variant][issues]") {
     using variant_type = core::variant<A, B>;
 
     variant_type variant { B { 0.0 } };
-    CHECK(variant.which() == 1u);
+    CHECK(variant.index() == 1u);
   }
 }

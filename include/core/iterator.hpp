@@ -8,7 +8,7 @@
 #include <core/type_traits.hpp>
 
 namespace core {
-inline namespace v1 {
+inline namespace v2 {
 
 /* capacity */
 template <class Container>
@@ -239,6 +239,6 @@ number_iterator<T> make_number_iterator (T value) noexcept {
   return number_iterator<T> { value };
 }
 
-}} /* namespace core::v1 */
+}} /* namespace core::v2 */
 
 #endif /* CORE_ITERATOR_HPP */

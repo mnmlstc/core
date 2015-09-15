@@ -10,6 +10,8 @@
 TEST_CASE("predicates", "[non-modifying-sequence]") {
   std::vector<int> values { 1, 2, 3, 4, 5 };
 
+  static_assert(core::is_range<std::vector<int>>::value, "UH OH");
+
   SECTION("all-of") {
     auto result = core::all_of(values, [](int v) { return v > 0; });
     CHECK(result);

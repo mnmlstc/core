@@ -5,8 +5,8 @@ import os
 project = 'MNMLSTC Core'
 copyright = 'MNMLSTC'
 
-version = '1.2'
-release = '1.2'
+version = '2.0'
+release = '2.0'
 
 needs_sphinx = '1.3'
 

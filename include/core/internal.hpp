@@ -17,11 +17,18 @@
 #include <core/meta.hpp>
 
 namespace core {
-inline namespace v1 {
+inline namespace v2 {
 namespace impl {
 
-/* deduce_t workaround for gcc */
-template <class...> struct deducer { using type = void; };
+/* void_t workaround for gcc */
+template <class...> struct make_void : meta::identity<void> { };
+
+template <class T, class Void, template <class...> class, class...>
+struct make_detect : meta::identity<T> { using value_t = ::std::false_type; };
+template <class T, template <class...> class U, class... Args>
+struct make_detect<T, typename make_void<U<Args...>>::type, U, Args...> :
+  meta::identity<U<Args...>>
+{ using value_t = ::std::true_type; };
 
 /* extremely useful custom type traits */
 template <class T> struct class_of : meta::identity<T> { };
@@ -29,7 +36,7 @@ template <class Signature, class T>
 struct class_of<Signature T::*> : meta::identity<T> { };
 
 /* aliases */
-template <class... Ts> using deduce_t = typename deducer<Ts...>::type;
+template <class... Ts> using deduce_t = typename make_void<Ts...>::type;
 template <class T> using class_of_t = typename class_of<T>::type;
 template <class T> using decay_t = typename ::std::decay<T>::type;
 template <class T>
@@ -126,7 +133,8 @@ template <class... Args> struct invoke_of<true, Args...> :
 /* Used to provide lambda based 'pattern matching' for variant and optional
  * types.
  *
- * Based off of Dave Abrahams C++11 'generic lambda' example
+ * Based off of Dave Abrahams C++11 'generic lambda' example (no longer
+ * available on the internet)
  */
 
 template <class... Lambdas> struct overload;
@@ -161,7 +169,7 @@ auto make_overload(Lambdas&&... lambdas) -> overload<Lambdas...> {
 
 /* union used for variant<Ts...> and implementing aligned_union, which is
  * not provided by gcc 4.8.x, but is provided by clang. (aligned_union_t is
- * the only alias missing from <type_traits>
+ * the only alias missing from <type_traits>)
  */
 template <class... Ts> union discriminate;
 template <> union discriminate<> { };
@@ -266,6 +274,6 @@ template <> struct murmur<8> {
   }
 };
 
-}}} /* namespace core::v1::impl */
+}}} /* namespace core::v2::impl */
 
 #endif /* CORE_INTERNAL_HPP */

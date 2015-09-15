@@ -11,30 +11,22 @@
 #include <core/iterator.hpp>
 
 namespace core {
-inline namespace v1 {
+inline namespace v2 {
 namespace impl {
 
 using ::std::begin;
 using ::std::end;
 
-template <class T, class=void> struct adl_begin : ::std::false_type { };
-template <class T>
-struct adl_begin<T, deduce_t<decltype(begin(::std::declval<T>()))>> :
-  ::std::true_type
-{ using type = decltype(begin(::std::declval<T>())); };
-
-template <class T, class=void> struct adl_end : ::std::false_type { };
-template <class T>
-struct adl_end<T, deduce_t<decltype(end(::std::declval<T>()))>> :
-  ::std::true_type
-{ using type = decltype(end(::std::declval<T>())); };
-
-template <class T> using begin_t = typename adl_begin<T>::type;
+template <class T> using adl_begin_t = decltype(begin(::std::declval<T>()));
+template <class T> using adl_end_t = decltype(end(::std::declval<T>()));
 
 } /* namespace impl */
 
 template <class R>
-struct is_range : meta::all<impl::adl_begin<R>, impl::adl_end<R>> { };
+struct is_range : meta::all<
+  is_detected<impl::adl_begin_t, R>,
+  is_detected<impl::adl_end_t, R>
+> { };
 
 template <class Iterator>
 struct range {
@@ -81,7 +73,7 @@ struct range {
       meta::all<
         meta::none<::std::is_pointer<iterator>>,
         is_range<Range>,
-        ::std::is_convertible<impl::begin_t<Range>, iterator>
+        ::std::is_convertible<detected_t<impl::adl_begin_t, Range>, iterator>
       >::value
     >
   > explicit range (Range&& r) noexcept :
@@ -173,14 +165,12 @@ struct range {
     bool const start_positive = start > 0;
     bool const stop_positive = stop > 0;
     bool const stop_less = stop < start;
-    bool const first_return_empty =
-      (start_positive and stop_positive and stop_less) or
-      (not start_positive and not stop_positive and stop_less);
+    bool const first_return_empty = start_positive == stop_positive and stop_less;
     if (first_return_empty) { return range { }; }
 
     /* now safe to compute size */
     auto const size = this->size();
-    auto third_empty = ::std::abs(stop) + start;
+    auto const third_empty = ::std::abs(stop) + start;
 
     bool const second_return_empty =
       (start_positive and not stop_positive and third_empty >= size) or
@@ -192,8 +182,8 @@ struct range {
      * start or stop are negative.
      * TODO: Specialize for bidirectional operators
      */
-    if (not start_positive) { start = size + start; }
-    if (not stop_positive) { stop = size + stop; }
+    if (not start_positive) { start += size; }
+    if (not stop_positive) { stop += size; }
 
     auto begin = this->begin();
     ::std::advance(begin, start);
@@ -329,6 +319,6 @@ void swap (range<Iterator>& lhs, range<Iterator>& rhs) noexcept(
   noexcept(lhs.swap(rhs))
 ) { lhs.swap(rhs); }
 
-}} /* namespace core::v1 */
+}} /* namespace core::v2 */
 
 #endif /* CORE_RANGE_HPP */

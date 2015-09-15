@@ -4,7 +4,9 @@ list(APPEND SOURCE_GENERATORS TXZ)
 list(APPEND SOURCE_GENERATORS ZIP)
 list(APPEND SOURCE_GENERATORS 7Z)
 
-list(APPEND BINARY_GENERATORS STGZ)
+if (NOT WIN32)
+  list(APPEND BINARY_GENERATORS STGZ)
+endif ()
 
 if (BUILD_PACKAGE_MSI)
   list(APPEND BINARY_GENERATORS "WIX")
@@ -82,7 +84,8 @@ list(APPEND CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION "/usr/share/cmake")
 include(CPack)
 
 # Create some custom commands to piggy back off of CPack
-if (APPLE)
+# If not on OS X, we create an "empty" command for 'dist'
+if (APPLE AND BUILD_PACKAGE_PKG)
   find_package(PythonInterp REQUIRED)
   add_custom_target(pkgbuild
   COMMAND ${PYTHON_EXECUTABLE}
@@ -92,7 +95,6 @@ if (APPLE)
   COMMENT "Run pkgbuild.py packaging script"
   VERBATIM)
 else ()
-  # An "empty" command for 'dist'
   add_custom_target(pkgbuild COMMAND ${CMAKE_COMMAND} -E sleep 0 VERBATIM)
 endif ()
 

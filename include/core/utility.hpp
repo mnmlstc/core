@@ -8,7 +8,7 @@
 #include <core/type_traits.hpp>
 
 namespace core {
-inline namespace v1 {
+inline namespace v2 {
 
 template <class T>
 constexpr T&& forward (remove_reference_t<T>& t) noexcept {
@@ -151,6 +151,8 @@ auto make_capture (remove_reference_t<T>&& ref) -> capture<T> {
   return capture<T> { core::move(ref) };
 }
 
-}} /* namespace core::v1 */
+struct erased_type { };
+
+}} /* namespace core::v2 */
 
 #endif /* CORE_UTILITY_HPP */

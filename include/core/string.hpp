@@ -14,7 +14,7 @@
 #include <core/internal.hpp>
 
 namespace core {
-inline namespace v1 {
+inline namespace v2 {
 
 #ifndef CORE_NO_EXCEPTIONS
 [[noreturn]] inline void throw_out_of_range (char const* msg) {
@@ -60,20 +60,9 @@ struct basic_string_view {
     basic_string_view { str, traits::length(str) }
   { }
 
-  constexpr basic_string_view (basic_string_view const& that) noexcept :
-    str { that.str },
-    len { that.len }
-  { }
-
-  constexpr basic_string_view () noexcept :
-    str { nullptr },
-    len { 0 }
-  { }
-
-  basic_string_view& operator = (basic_string_view const& that) noexcept {
-    basic_string_view { that }.swap(*this);
-    return *this;
-  }
+  constexpr basic_string_view (basic_string_view const&) noexcept = default;
+  constexpr basic_string_view () noexcept = default;
+  basic_string_view& operator = (basic_string_view const&) noexcept = default;
 
   template <class Allocator>
   explicit operator ::std::basic_string<CharT, Traits, Allocator> () const {
@@ -420,8 +409,8 @@ struct basic_string_view {
   }
 
 private:
-  pointer str;
-  size_type len;
+  pointer str { nullptr };
+  size_type len { 0 };
 };
 
 using u32string_view = basic_string_view<char32_t>;
@@ -626,13 +615,13 @@ void swap (
   basic_string_view<CharT, Traits>& rhs
 ) noexcept { return lhs.swap(rhs); }
 
-}} /* namespace core::v1 */
+}} /* namespace core::v2 */
 
 namespace std {
 
 template <typename CharT, typename Traits>
-struct hash<core::v1::basic_string_view<CharT, Traits>> {
-  using argument_type = core::v1::basic_string_view<CharT, Traits>;
+struct hash<core::v2::basic_string_view<CharT, Traits>> {
+  using argument_type = core::v2::basic_string_view<CharT, Traits>;
   using result_type = size_t;
 
 

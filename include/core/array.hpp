@@ -8,7 +8,7 @@
 #include <core/utility.hpp>
 
 namespace core {
-inline namespace v1 {
+inline namespace v2 {
 
 template <class V = void, class... Args>
 constexpr auto make_array (Args&&... args) -> ::std::array<
@@ -30,9 +30,9 @@ constexpr auto to_array (T (&array)[N], index_sequence<Is...>) -> ::std::array<
 
 template <class T, ::std::size_t N>
 constexpr auto to_array (T (&array)[N]) -> ::std::array<remove_cv_t<T>, N> {
-  return core::to_array(array, make_index_sequence<N> { });
+  return (to_array)(array, make_index_sequence<N> { });
 }
 
-}} /* namespace core::v1 */
+}} /* namespace core::v2 */
 
 #endif /* CORE_ARRAY_HPP */

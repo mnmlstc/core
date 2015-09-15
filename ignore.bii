@@ -1,8 +1,0 @@
-build-clang/*
-build-gcc/*
-configure/*
-package/*
-scripts/*
-build/*
-docs/*
-.travis.yml

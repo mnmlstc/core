@@ -20,34 +20,34 @@
 #include <typeinfo>
 #endif /* CORE_NO_RTTI */
 
-/* Small hack just for GCC 4.8. Just trust me, it's needed */
-#if defined(__GNUC__) && defined(__GNUC_MINOR__)
-  #if __GNUC__ == 4 && __GNUC_MINOR__ == 8
+/* Small hack just for libstdc++ released with 4.8.x. Trust me, it's needed */
+#if defined(__GLIBCXX__)
+  #if __GLIBCXX__ == 20131008 || \
+      __GLIBCXX__ == 20131016 || \
+      __GLIBCXX__ == 20140522 || \
+      __GLIBCXX__ == 20141219
   namespace std { using ::max_align_t; } /* namespace std */
   #endif
-#endif /* defined(__GNUC__) */
+#endif /* defined(__GLIBCXX__) */
 
 namespace core {
-inline namespace v1 {
+inline namespace v2 {
 namespace impl {
+
+template <class T> using pointer_t = typename T::pointer;
 
 template <class T>
 using deep_lvalue = conditional_t<
   ::std::is_reference<T>::value, T, T const&
 >;
 
-template <class T, class D, class=void> struct pointer :
-  identity<add_pointer_t<T>>
-{ };
-
-template <class T, class D>
-struct pointer<T, D, deduce_t<typename D::pointer>> :
-  identity<typename D::pointer>
-{ };
-
-template <class T, class D> using pointer_t = typename pointer<T, D>::type;
-
 } /* namespace impl */
+
+#ifndef CORE_NO_EXCEPTIONS
+[[noreturn]] inline void throw_bad_alloc () { throw ::std::bad_alloc { }; }
+#else /* CORE_NO_EXCEPTIONS */
+[[noreturn]] inline void throw_bad_alloc () { ::std::abort(); }
+#endif /* CORE_NO_EXCEPTIONS */
 
 namespace memory {
 
@@ -57,7 +57,7 @@ struct arena final {
 
   using size_type = ::std::size_t;
 
-  arena () noexcept : current { } { }
+  arena () noexcept = default;
   ~arena () noexcept = default;
 
   arena (arena const&) noexcept = delete;
@@ -68,21 +68,22 @@ struct arena final {
   }
   static constexpr size_type size () noexcept { return N; }
   size_type max_size () const noexcept { return N; }
-  size_type used () const noexcept { return this->current; }
-  void reset () noexcept { this->current = 0; }
+  size_type used () const noexcept { return N - this->available; }
+  void reset () noexcept { this->available = N; }
 
   void* allocate (size_type n) {
-    if (not this->inside(n)) { return nullptr; }
-    auto ptr = this->pointer() + this->current;
-    this->current += n;
+    auto current = this->pointer() + this->used();
+    auto ptr = ::std::align(alignment(), n, current, this->available);
+    if (not ptr) { return ptr; }
+    this->available -= n;
     return ptr;
   }
 
   void deallocate (void* p, size_type n) {
     auto incoming = static_cast<::std::uint8_t*>(p) + n;
-    auto ptr = this->pointer() + this->current;
+    auto ptr = this->pointer() + this->used();
     if (ptr != incoming) { return; }
-    this->current -= n;
+    this->available += n;
   }
 
   /* used by arena_allocator to permit default construction */
@@ -92,13 +93,12 @@ struct arena final {
   }
 
 private:
-  bool inside (size_type n) const noexcept { return (this->current + n) < N; }
   ::std::uint8_t* pointer () noexcept {
     return reinterpret_cast<::std::uint8_t*>(::std::addressof(this->data));
   }
 
-  aligned_storage_t<N, alignof(::std::max_align_t)> data;
-  size_type current; // byte index
+  aligned_storage_t<N, alignof(::std::max_align_t)> data { };
+  size_type available { N };
 };
 
 } /* namespace memory */
@@ -134,9 +134,7 @@ struct arena_allocator {
     ref { that.ref }
   { }
 
-  arena_allocator (arena_allocator const& that) noexcept :
-    ref { that.ref }
-  { }
+  arena_allocator (arena_allocator const& that) noexcept = default;
 
   template <class U>
   arena_allocator& operator = (arena_allocator<U, N> const& that) noexcept {
@@ -150,8 +148,11 @@ struct arena_allocator {
     ::std::swap(this->ref, that.ref);
   }
 
-  pointer allocate (size_type n, const_void_pointer=nullptr) noexcept {
-    return static_cast<pointer>(this->arena().allocate(n * sizeof(value_type)));
+  pointer allocate (size_type n, const_void_pointer=nullptr) noexcept(false) {
+    auto const size = n * sizeof(value_type);
+    auto ptr = static_cast<pointer>(this->arena().allocate(size));
+    if (not ptr) { throw_bad_alloc(); }
+    return ptr;
   }
 
   void deallocate (pointer ptr, size_type n) noexcept {
@@ -248,7 +249,7 @@ struct poly_ptr final {
     )
   ) noexcept :
     poly_ptr {
-      unique_type { ::std::move(ptr), ::std::forward<E>(deleter) }, copier
+      unique_type { ::std::move(ptr), ::core::forward<E>(deleter) }, copier
     }
   { }
 
@@ -262,9 +263,8 @@ struct poly_ptr final {
     ptr { ::std::move(that.ptr) }
   { that.copier = null_poly_copy<element_type, deleter_type>; }
 
-  constexpr poly_ptr () noexcept { }
-
-  ~poly_ptr () noexcept { }
+  constexpr poly_ptr () noexcept = default;
+  ~poly_ptr () noexcept = default;
 
   template <class U, class E>
   poly_ptr& operator = (::std::unique_ptr<U, E>&& ptr) {
@@ -355,7 +355,11 @@ template <
   using element_type = T;
   using deleter_type = Deleter;
   using copier_type = Copier;
-  using pointer = impl::pointer_t<element_type, deleter_type>;
+  using pointer = detected_or_t<
+    add_pointer_t<element_type>,
+    impl::pointer_t,
+    deleter_type
+  >;
 
   static_assert(
     ::std::is_same<result_of_t<copier_type(pointer)>, pointer>::value,
@@ -411,7 +415,7 @@ template <
     }
   { }
 
-  constexpr deep_ptr () noexcept : data { } { }
+  constexpr deep_ptr () noexcept = default;
 
   ~deep_ptr () noexcept {
     auto& ptr = ::std::get<0>(this->data);
@@ -491,6 +495,11 @@ struct observer_ptr final {
   constexpr observer_ptr (::std::nullptr_t) noexcept : ptr { nullptr } { }
   explicit observer_ptr (pointer ptr) noexcept : ptr { ptr } { }
 
+  template <class T, class D>
+  explicit observer_ptr (::std::unique_ptr<T, D> const& ptr) :
+    observer_ptr { ptr.get() }
+  { }
+
   template <
     class T,
     class=enable_if_t<::std::is_convertible<pointer, add_pointer_t<T>>::value>
@@ -505,8 +514,8 @@ struct observer_ptr final {
     observer_ptr { that.get() }
   { }
 
-  constexpr observer_ptr () noexcept : observer_ptr { nullptr } { }
-  ~observer_ptr () noexcept { this->ptr = nullptr; }
+  constexpr observer_ptr () noexcept = default;
+  ~observer_ptr () noexcept = default;
 
   template <
     class T,
@@ -553,7 +562,7 @@ struct observer_ptr final {
   void reset (pointer ptr = nullptr) noexcept { this->ptr = ptr; }
 
 private:
-  pointer ptr;
+  pointer ptr { nullptr };
 };
 
 template <class T, ::std::size_t N, class U, ::std::size_t M>
@@ -890,7 +899,7 @@ template <
     ::std::is_polymorphic<T>::value and ::std::is_base_of<T, U>::value
   >
 > auto make_poly (U&& value) -> poly_ptr<T> {
-  return poly_ptr<T> { new U { ::std::forward<U>(value) } };
+  return poly_ptr<T> { new U { ::core::forward<U>(value) } };
 }
 #endif /* CORE_NO_RTTI */
 
@@ -900,7 +909,7 @@ template <
   class=enable_if_t<not ::std::is_array<T>::value>,
   class... Args
 > auto make_deep (Args&&... args) -> deep_ptr<T> {
-  return deep_ptr<T> { new T { ::std::forward<Args>(args)... } };
+  return deep_ptr<T> { new T { ::core::forward<Args>(args)... } };
 }
 
 /* make_unique */
@@ -910,7 +919,7 @@ template <
   class... Args
 > auto make_unique(Args&&... args) -> ::std::unique_ptr<Type> {
   return ::std::unique_ptr<Type> {
-    new Type { ::std::forward<Args>(args)... }
+    new Type { ::core::forward<Args>(args)... }
   };
 }
 
@@ -951,14 +960,14 @@ void swap (observer_ptr<W>& lhs, observer_ptr<W>& rhs) noexcept(
   noexcept(lhs.swap(rhs))
 ) { lhs.swap(rhs); }
 
-}} /* namespace core::v1 */
+}} /* namespace core::v2 */
 
 namespace std {
 
 #ifndef CORE_NO_RTTI
 template <class T, class D>
-struct hash<core::v1::poly_ptr<T, D>> {
-  using value_type = core::v1::poly_ptr<T, D>;
+struct hash<core::v2::poly_ptr<T, D>> {
+  using value_type = core::v2::poly_ptr<T, D>;
   size_t operator ()(value_type const& value) const noexcept {
     return hash<typename value_type::pointer>{ }(value.get());
   }
@@ -966,16 +975,16 @@ struct hash<core::v1::poly_ptr<T, D>> {
 #endif /* CORE_NO_RTTI */
 
 template <class T, class Deleter, class Copier>
-struct hash<core::v1::deep_ptr<T, Deleter, Copier>> {
-  using value_type = core::v1::deep_ptr<T, Deleter, Copier>;
+struct hash<core::v2::deep_ptr<T, Deleter, Copier>> {
+  using value_type = core::v2::deep_ptr<T, Deleter, Copier>;
   size_t operator ()(value_type const& value) const noexcept {
     return hash<typename value_type::pointer> { }(value.get());
   }
 };
 
 template <class W>
-struct hash<core::v1::observer_ptr<W>> {
-  using value_type = core::v1::observer_ptr<W>;
+struct hash<core::v2::observer_ptr<W>> {
+  using value_type = core::v2::observer_ptr<W>;
   size_t operator ()(value_type const& value) const noexcept {
     return hash<typename value_type::pointer> { }(value.get());
   }

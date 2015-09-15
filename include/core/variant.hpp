@@ -4,6 +4,7 @@
 #include <core/type_traits.hpp>
 #include <core/functional.hpp>
 #include <core/utility.hpp>
+#include <core/array.hpp>
 
 #include <stdexcept>
 #include <typeinfo>
@@ -13,7 +14,7 @@
 #include <cstdint>
 
 namespace core {
-inline namespace v1 {
+inline namespace v2 {
 namespace impl {
 
 /* This is used to get around GCC's inability to expand lambdas in variadic
@@ -30,7 +31,10 @@ auto visitor_gen () -> Result {
   };
 }
 
-} /* namespace impl */
+}}} /* namespace core::v2::impl */
+
+namespace core {
+inline namespace v2 {
 
 #ifndef CORE_NO_EXCEPTIONS
 struct bad_variant_get final : ::std::logic_error {
@@ -46,42 +50,28 @@ struct bad_variant_get final : ::std::logic_error {
 /* visitation semantics require that, given a callable type C, and variadic
  * arguments Args... that the return type of the visit will be SFINAE-ified
  * as common_type_t<invoke_of_t<C, Args>...> (this assumes a variadic
- * approach can be taken with common_type, which it cannot at this time. A
+ * approach can be taken with common_type, index it cannot at this time. A
  * custom SFINAE-capable version has been written within the type traits
  * component.
  *
  * Obviously if a common type cannot be found, then the visitation function
  * cannot be generated.
  *
- * These same semantics are required for variant<Ts...>::match which simply
+ * These same semantics are required for variant<Ts...>::match index simply
  * calls visit with a generate overload<Lambdas...> type.
  */
 template <class... Ts>
 class variant final {
-  using pack_type = meta::pack<Ts...>;
+  using typelist = meta::list<Ts...>;
 
-  static_assert(
-    pack_type::size() < ::std::numeric_limits<::std::uint8_t>::max(),
-    "Cannot have more elements than variant can containe");
+  static_assert(meta::all<(meta::count<typelist, Ts>() == 1)>...>(), "")
+  static_assert(meta::none_of<typelist, is_reference>::value, "");
+  static_assert(meta::none_of<typelist, is_void>::value, "");
 
-  static_assert(
-    meta::all<
-      meta::boolean<meta::count<Ts, meta::pack<Ts...>>::value == 1>...
-    >::value,
-    "Cannot have duplicate types in variant");
+  using storage_type = aligned_union_t<0, Ts...>;
 
-  static_assert(
-    sizeof...(Ts) < ::std::numeric_limits<uint8_t>::max(),
-    "Cannot have more elements than variant can contain"
-  );
-
-  using storage_type = aligned_storage_t<
-    sizeof(impl::discriminate<Ts...>),
-    ::std::alignment_of<impl::discriminate<Ts...>>::value
-  >;
-
-  template <::std::size_t N> using element = meta::element_t<N, pack_type>;
-  template <::std::size_t N> using index = meta::size<N>;
+  template <::std::size_t N> using size = meta::integral<::std::size_t, N>;
+  template <::std::size_t N> using element = meta::get<typelist, N>;
 
   struct copier final {
     using data_type = add_pointer_t<void>;
@@ -151,9 +141,9 @@ class variant final {
     ::std::size_t N,
     class=enable_if_t<N < sizeof...(Ts)>,
     class T
-  > explicit variant (index<N>&&, ::std::false_type&&, T&& value) :
+  > explicit variant (size<N>&&, ::std::false_type&&, T&& value) :
     variant {
-      index<N + 1> { },
+      size<N + 1> { },
       ::std::is_constructible<type_at_t<N + 1, Ts...>, T> { },
       ::core::forward<T>(value)
     }
@@ -163,15 +153,15 @@ class variant final {
     ::std::size_t N,
     class=enable_if_t<N < sizeof...(Ts)>,
     class T
-  > explicit variant (index<N>&&, ::std::true_type&&, T&& value) :
+  > explicit variant (size<N>&&, ::std::true_type&&, T&& value) :
     data { }, tag { N }
-  { ::new (this->pointer()) type_at_t<N, Ts...> (::core::forward<T>(value)); }
+  { ::new (this->target()) type_at_t<N, Ts...> (::core::forward<T>(value)); }
 
   template <class T>
   using select_index = conditional_t<
-    meta::count<decay_t<T>, pack_type>::value,
-    meta::index<decay_t<T>, pack_type>,
-    index<0>
+    meta::count<decay_t<T>, typelist>::value,
+    meta::index<decay_t<T>, typelist>,
+    size<0>
   >;
 
 public:
@@ -200,11 +190,11 @@ public:
 
   variant (variant const& that) :
     data { }, tag { that.tag }
-  { that.visit(copier { this->pointer() }); }
+  { that.visit(copier { this->target() }); }
 
   variant (variant&& that) noexcept :
     data { }, tag { that.tag }
-  { that.visit(mover { this->pointer() }); }
+  { that.visit(mover { this->target() }); }
 
   variant () : variant { type_at_t<0, Ts...> { } } { }
 
@@ -226,28 +216,28 @@ public:
   variant& operator = (variant&& that) noexcept {
     this->visit(destroyer { });
     this->tag = that.tag;
-    that.visit(mover { this->pointer() });
+    that.visit(mover { this->target() });
     return *this;
   }
 
   /* Placing these inside of the variant results in no implicit conversions
-   * occuring
+   * occuring with any potential constructor types.
    */
   bool operator == (variant const& that) const noexcept {
     if (this->tag != that.tag) { return false; }
-    return that.visit(equality { this->pointer() });
+    return that.visit(equality { this->target() });
   }
 
   bool operator < (variant const& that) const noexcept {
     if (this->tag != that.tag) { return this->tag < that.tag; }
-    return that.visit(less_than { this->pointer() });
+    return that.visit(less_than { this->target() });
   }
 
   void swap (variant& that) noexcept(
-    all_traits<is_nothrow_swappable<Ts>...>::value
+    meta::all<is_nothrow_swappable<Ts>...>::value
   ) {
-    if (this->which() == that.which()) {
-      that.visit(swapper { this->pointer() });
+    if (this->index() == that.index()) {
+      that.visit(swapper { this->target() });
       return;
     }
     variant temp { ::core::move(*this) };
@@ -255,89 +245,80 @@ public:
     that = ::core::move(temp);
   }
 
-  template <class Visitor, class... Args>
-  auto visit (Visitor&& visitor, Args&&... args) -> common_type_t<
-    invoke_of_t<Visitor, add_lvalue_reference_t<Ts>, Args...>...
+  /* V stands for Visitor */
+  template <class V, class... Args>
+  auto visit (V&& visitor, Args&&... args) -> common_type_t<
+    invoke_of_t<V, add_lvalue_reference_t<Ts>, Args...>...
   > {
     using return_type = common_type_t<
       invoke_of_t<
-        Visitor,
+        V,
         add_lvalue_reference_t<Ts>,
         Args...
       >...
     >;
-    using function = return_type(*)(Visitor&&, void*, Args&&...);
-    constexpr ::std::size_t size = pack_type::size();
-
-    static function const callers[size] {
-      impl::visitor_gen<Visitor, Ts, void, function, Args...>()...
-    };
+    using function = add_pointer_t<return_type(V&&, void*, Args&&...)>;
+    static auto const callers = make_array(
+      impl::visitor_gen<V, Ts, void, function, Args...>()...
+    );
 
     return callers[this->tag](
-      ::core::forward<Visitor>(visitor),
-      this->pointer(),
+      ::core::forward<V>(visitor),
+      this->target(),
       ::core::forward<Args>(args)...
     );
   }
 
-  template <class Visitor, class... Args>
-  auto visit (Visitor&& visitor, Args&&... args) const -> common_type_t<
-    invoke_of_t<Visitor, add_lvalue_reference_t<add_const_t<Ts>>, Args...>...
+  /* V stands for Visitor */
+  template <class V, class... Args>
+  auto visit (V&& visitor, Args&&... args) const -> common_type_t<
+    invoke_of_t<V, add_lvalue_reference_t<add_const_t<Ts>>, Args...>...
   > {
     using return_type = common_type_t<
       invoke_of_t<
-        Visitor,
+        V,
         add_lvalue_reference_t<add_const_t<Ts>>,
         Args...
       >...
     >;
-    using function = return_type(*)(Visitor&&, void const*, Args&&...);
-    constexpr ::std::size_t size = pack_type::size();
 
-    static function const callers[size] = {
+    using function = add_pointer_t<return_type(V&&, void const*, Args&&...)>;
+    static auto const callers = make_array(
       impl::visitor_gen<
-        Visitor,
+        V,
         add_const_t<Ts>,
         void const,
         function,
         Args...
       >()...
-    };
+    );
 
     return callers[this->tag](
-      ::core::forward<Visitor>(visitor),
-      this->pointer(),
+      ::core::forward<V>(visitor),
+      this->target(),
       ::core::forward<Args>(args)...
     );
   }
 
-  template <class... Visitors>
-  auto match (Visitors&&... visitors) -> decltype(
-    this->visit(impl::make_overload(::core::forward<Visitors>(visitors)...))
-  ) {
-    return this->visit(
-      impl::make_overload(::core::forward<Visitors>(visitors)...)
-    );
-  }
+  template <class... Vs>
+  auto match (Vs&&... vs) -> decltype(
+    this->visit(impl::make_overload(::core::forward<Vs>(vs)...))
+  ) { return this->visit(impl::make_overload(::core::forward<Vs>(vs)...)); }
 
-  template <class... Visitors>
-  auto match (Visitors&&... visitors) const -> decltype(
-    this->visit(impl::make_overload(::core::forward<Visitors>(visitors)...))
-  ) {
-    return this->visit(
-      impl::make_overload(::core::forward<Visitors>(visitors)...)
-    );
-  }
+  template <class... Vs>
+  auto match (Vs&&... vs) const -> decltype(
+    this->visit(impl::make_overload(::core::forward<Vs>(vs)...))
+  ) { return this->visit(impl::make_overload(::core::forward<Vs>(vs)...)); }
 
   /* These functions are undocumented and should not be used outside of core */
   template <::std::size_t N>
   add_pointer_t<add_const_t<element<N>>> cast () const noexcept {
-    return static_cast<add_pointer_t<add_const_t<element<N>>>>(this->pointer());
+    return static_cast<add_pointer_t<add_const_t<element<N>>>>(this->target());
   }
 
   template <::std::size_t N>
   add_pointer_t<element<N>> cast () noexcept {
-    return static_cast<add_pointer_t<element<N>>>(this->pointer());
+    return static_cast<add_pointer_t<element<N>>>(this->target());
   }
 
 #ifndef CORE_NO_RTTI
@@ -346,12 +327,12 @@ public:
   }
 #endif /* CORE_NO_RTTI */
 
-  ::std::uint32_t which () const noexcept { return this->tag; }
+  ::std::size_t index () const noexcept { return this->tag; }
   bool empty () const noexcept { return false; }
 
 private:
-  void const* pointer () const noexcept { return ::std::addressof(this->data); }
-  void* pointer () noexcept { return ::std::addressof(this->data); }
+  void const* target () const noexcept { return ::std::addressof(this->data); }
+  void* target () noexcept { return ::std::addressof(this->data); }
 
   storage_type data;
   ::std::uint8_t tag;
@@ -363,91 +344,91 @@ void swap (variant<Ts...>& lhs, variant<Ts...>& rhs) noexcept(
 ) { lhs.swap(rhs); }
 
 template <::std::size_t I, class... Ts>
-auto get (variant<Ts...> const* v) noexcept -> enable_if_t<
+auto get (variant<Ts...> const* v) noexcept -> meta::when<
   I < sizeof...(Ts),
-  add_pointer_t<add_const_t<meta::element_t<I, meta::pack<Ts...>>>>
+  add_pointer_t<add_const_t<meta::get<meta::list<Ts...>, I>>>
 > {
-  using t = add_pointer_t<add_const_t<meta::element_t<I, meta::pack<Ts...>>>>;
-  return v and v->which() == I
+  using t = add_pointer_t<add_const_t<meta::get<meta::list<Ts...>, I>>>;
+  return v and v->index() == I
     ? static_cast<t>(v->template cast<I>())
     : nullptr;
 }
 
 template <::std::size_t I, class... Ts>
-auto get (variant<Ts...>* v) noexcept -> enable_if_t<
+auto get (variant<Ts...>* v) noexcept -> meta::when<
   I < sizeof...(Ts),
-  add_pointer_t<meta::element_t<I, meta::pack<Ts...>>>
+  add_pointer_t<meta::get<meta::list<Ts...>, I>>
 > {
-  using t = add_pointer_t<meta::element_t<I, meta::pack<Ts...>>>;
-  return v and v->which() == I
+  using t = add_pointer_t<meta::get<meta::list<Ts...>, I>>;
+  return v and v->index() == I
     ? static_cast<t>(v->template cast<I>())
     : nullptr;
 }
 
 template <::std::size_t I, class... Ts>
-auto get (variant<Ts...> const& v) noexcept(false) -> enable_if_t<
+auto get (variant<Ts...> const& v) noexcept(false) -> meta::when<
   I < sizeof...(Ts),
-  add_lvalue_reference_t<add_const_t<meta::element_t<I, meta::pack<Ts...>>>>
+  add_lvalue_reference_t<add_const_t<meta::get<meta::list<Ts...>, I>>>
 > {
   if (auto ptr = get<I>(::std::addressof(v))) { return *ptr; }
   throw_bad_variant_get();
 }
 
 template <::std::size_t I, class... Ts>
-auto get (variant<Ts...>&& v) noexcept(false) -> enable_if_t<
+auto get (variant<Ts...>&& v) noexcept(false) -> meta::when<
   I < sizeof...(Ts),
-  add_rvalue_reference_t<meta::element_t<I, meta::pack<Ts...>>>
+  add_rvalue_reference_t<meta::get<meta::list<Ts...>, I>>
 > {
   if (auto p = get<I>(::std::addressof(v))) { return ::core::move(*p); }
   throw_bad_variant_get();
 }
 
 template <::std::size_t I, class... Ts>
-auto get (variant<Ts...>& v) noexcept(false) -> enable_if_t<
+auto get (variant<Ts...>& v) noexcept(false) -> meta::when<
   I < sizeof...(Ts),
-  add_lvalue_reference_t<meta::element_t<I, meta::pack<Ts...>>>
+  add_lvalue_reference_t<meta::get<meta::list<Ts...>, I>>
 > {
   if (auto ptr = get<I>(::std::addressof(v))) { return *ptr; }
   throw_bad_variant_get();
 }
 
 template <class T, class... Ts>
-auto get (variant<Ts...> const* v) noexcept(false) -> enable_if_t<
-  not meta::find_t<T, meta::pack<Ts...>>::empty(),
-  decltype(get<meta::index<T, meta::pack<Ts...>>::value>(v))
-> { return get<meta::index<T, meta::pack<Ts...>>::value>(v); }
+auto get (variant<Ts...> const* v) noexcept -> meta::unless<
+  meta::find<meta::list<Ts...>, T>::empty(),
+  decltype(get<meta::index_of<meta::list<Ts...>, T>()>(v))
+> { return get<meta::index_of<meta::list<Ts...>, T>()>(v); }
 
 template <class T, class... Ts>
-auto get (variant<Ts...>* v) noexcept(false) -> enable_if_t<
-  not meta::find_t<T, meta::pack<Ts...>>::empty(),
-  decltype(get<meta::index<T, meta::pack<Ts...>>::value>(v))
-> { return get<meta::index<T, meta::pack<Ts...>>::value>(v); }
+auto get (variant<Ts...>* v) noexcept -> meta::unless<
+  meta::find<meta::list<Ts...>, T>::empty(),
+  decltype(get<meta::index_of<meta::list<Ts...>, T>()>(v))
+> { return get<meta::index_of<meta::list<Ts...>, T>()>(v); }
 
 template <class T, class... Ts>
-auto get (variant<Ts...> const& v) noexcept(false) -> enable_if_t<
-  not meta::find_t<T, meta::pack<Ts...>>::empty(),
-  decltype(get<meta::index<T, meta::pack<Ts...>>::value>(v))
-> { return get<meta::index<T, meta::pack<Ts...>>::value>(v); }
+auto get (variant<Ts...> const& v) noexcept(false) -> meta::unless<
+  meta::find<meta::list<Ts...>, T>::empty(),
+  decltype(get<meta::index_of<meta::list<Ts...>, T>()>(v))
+> { return get<meta::index_of<meta::list<Ts...>, T>()>(v); }
 
 template <class T, class... Ts>
-auto get (variant<Ts...>&& v) noexcept(false) -> enable_if_t<
-  not meta::find_t<T, meta::pack<Ts...>>::empty(),
-  decltype(core::move(get<meta::index<T, meta::pack<Ts...>>::value>(v)))
-> { return core::move(get<meta::index<T, meta::pack<Ts...>>::value>(v)); }
+auto get (variant<Ts...>&& v) noexcept(false) -> meta::unless<
+  meta::find<meta::list<Ts...>, T>::empty(),
+  decltype(core::move(get<meta::index_of<meta::list<Ts...>, T>()>(v)))
+> { return core::move(get<meta::index_of<meta::list<Ts...>, T>()>(v)); }
 
 template <class T, class... Ts>
-auto get (variant<Ts...>& v) noexcept(false) -> enable_if_t<
-  not meta::find_t<T, meta::pack<Ts...>>::empty(),
-  decltype(get<meta::index<T, meta::pack<Ts...>>::value>(v))
-> { return get<meta::index<T, meta::pack<Ts...>>::value>(v); }
+auto get (variant<Ts...>& v) noexcept(false) -> meta::unless<
+  not meta::find<meta::list<Ts...>, T>::empty(),
+  decltype(get<meta::index_of<meta::list<Ts...>, T>()>(v))
+> { return get<meta::index_of<meta::list<Ts...>, T>()>(v); }
 
-}} /* namespace core::v1 */
+}} /* namespace core::v2 */
 
 namespace std {
 
 template <class... Ts>
-struct hash<core::v1::variant<Ts...>> {
-  using argument_type = core::v1::variant<Ts...>;
+struct hash<core::v2::variant<Ts...>> {
+  using argument_type = core::v2::variant<Ts...>;
   using result_type = size_t;
   result_type operator () (argument_type const& value) const {
     return value.match(hash<Ts> { }...);
@@ -456,21 +437,21 @@ struct hash<core::v1::variant<Ts...>> {
 
 template <size_t I, class... Ts>
 [[gnu::deprecated]]
-auto get (::core::v1::variant<Ts...> const& v) noexcept(false) -> decltype(
-  ::core::v1::get<I>(v)
-) { return ::core::v1::get<I>(v); }
+auto get (::core::v2::variant<Ts...> const& v) noexcept(false) -> decltype(
+  ::core::v2::get<I>(v)
+) { return ::core::v2::get<I>(v); }
 
 template <size_t I, class... Ts>
 [[gnu::deprecated]]
-auto get (::core::v1::variant<Ts...>&& v) noexcept(false) -> decltype(
-  ::core::v1::get<I>(v)
-) { return ::core::v1::get<I>(v); }
+auto get (::core::v2::variant<Ts...>&& v) noexcept(false) -> decltype(
+  ::core::v2::get<I>(v)
+) { return ::core::v2::get<I>(v); }
 
 template <size_t I, class... Ts>
 [[gnu::deprecated]]
-auto get (::core::v1::variant<Ts...>& v) noexcept (false) -> decltype(
-  ::core::v1::get<I>(v)
-) { return ::core::v1::get<I>(v); }
+auto get (::core::v2::variant<Ts...>& v) noexcept (false) -> decltype(
+  ::core::v2::get<I>(v)
+) { return ::core::v2::get<I>(v); }
 
 } /* namespace std */
 
