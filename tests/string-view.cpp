@@ -1,5 +1,5 @@
 #define CATCH_CONFIG_MAIN
-#include <core/string.hpp>
+#include <core/string_view.hpp>
 
 #include <unordered_map>
 #include <sstream>

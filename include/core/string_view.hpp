@@ -1,5 +1,5 @@
-#ifndef CORE_STRING_HPP
-#define CORE_STRING_HPP
+#ifndef CORE_STRING_VIEW_HPP
+#define CORE_STRING_VIEW_HPP
 
 #include <initializer_list>
 #include <functional>
@@ -633,4 +633,4 @@ struct hash<core::v2::basic_string_view<CharT, Traits>> {
 
 } /* namespace std */
 
-#endif /* CORE_STRING_HPP */
+#endif /* CORE_STRING_VIEW_HPP */
