@@ -11,26 +11,10 @@
 namespace core {
 inline namespace v2 {
 
-template <class T> struct is_reference_wrapper : ::std::false_type { };
-template <class T>
-struct is_reference_wrapper<::std::reference_wrapper<T>> :
-  ::std::true_type
-{ };
-
-template <class T>
-struct is_reference_wrapper<::std::reference_wrapper<T> const> :
-  ::std::true_type
-{ };
-
-template <class T>
-struct is_reference_wrapper<::std::reference_wrapper<T> volatile> :
-  ::std::true_type
-{ };
-
-template <class T>
-struct is_reference_wrapper<::std::reference_wrapper<T> const volatile> :
-  ::std::true_type
-{ };
+template <class T> using is_reference_wrapper = meta::is_specialization_of<
+  remove_cv_t<T>,
+  ::std::reference_wrapper
+>;
 
 template <class F> struct function_traits;
 
@@ -60,20 +44,20 @@ struct function_traits<R(C::*)(Args...) const> :
 
 template <class R, class... Args>
 struct function_traits<R(Args...)> {
+  using typelist = meta::list<Args...>;
   using return_type = R;
 
-  using pointer = return_type(*)(Args...);
-  static constexpr ::std::size_t arity = sizeof...(Args);
+  using pointer = add_pointer_t<return_type(Args...)>;
+  static constexpr auto arity = typelist::size();
 
-  template <::std::size_t N>
-  using argument = tuple_element_t<N, ::std::tuple<Args...>>;
+  template <::std::size_t N> using argument = meta::get<typelist, 0>;
 };
 
 template <class F> struct function_traits {
   using functor_type = function_traits<decltype(&decay_t<F>::operator())>;
   using return_type = typename functor_type::return_type;
   using pointer = typename functor_type::pointer;
-  static constexpr ::std::size_t arity = functor_type::arity - 1;
+  static constexpr auto arity = functor_type::arity - 1;
   template <::std::size_t N>
   using argument = typename functor_type::template argument<N>;
 };
@@ -86,7 +70,7 @@ auto invoke (Functor&& f, Args&&... args) -> enable_if_t<
 > { return ::std::mem_fn(f)(core::forward<Args>(args)...); }
 
 template <class Functor, class... Args>
-constexpr auto invoke (Functor&& f, Args&&... args) -> enable_if_t<
+auto invoke (Functor&& f, Args&&... args) -> enable_if_t<
   not ::std::is_member_pointer<decay_t<Functor>>::value,
   result_of_t<Functor&&(Args&&...)>
 > { return core::forward<Functor>(f)(core::forward<Args>(args)...); }
@@ -158,101 +142,101 @@ struct converter {
 
 /* function objects -- arithmetic */
 template <class T=void>
-struct plus : impl::binary<T, T, T> {
+struct plus {
   constexpr T operator () (T const& l, T const& r) const { return l + r; }
 };
 
 template <class T=void>
-struct minus : impl::binary<T, T, T> {
+struct minus {
   constexpr T operator () (T const& l, T const& r) const { return l - r; }
 };
 
 template <class T=void>
-struct multiplies : impl::binary<T, T, T> {
+struct multiplies {
   constexpr T operator () (T const& l, T const& r) const { return l * r; }
 };
 
 template <class T=void>
-struct divides : impl::binary<T, T, T> {
+struct divides {
   constexpr T operator () (T const& l, T const& r) const { return l / r; }
 };
 
 template <class T=void>
-struct modulus : impl::binary<T, T, T> {
+struct modulus {
   constexpr T operator () (T const& l, T const& r) const { return l % r; }
 };
 
 template <class T=void>
-struct negate : impl::unary<T, T> {
+struct negate {
   constexpr T operator () (T const& arg) const { return -arg; }
 };
 
 /* function objects -- comparisons */
 template <class T=void>
-struct equal_to : impl::binary<T, T, bool> {
+struct equal_to {
   constexpr bool operator () (T const& l, T const& r) const { return l == r; }
 };
 
 template <class T=void>
-struct not_equal_to : impl::binary<T, T, bool> {
+struct not_equal_to {
   constexpr bool operator () (T const& l, T const& r) const { return l != r; }
 };
 
 template <class T=void>
-struct greater_equal : impl::binary<T, T, bool> {
+struct greater_equal {
   constexpr bool operator () (T const& l, T const& r) const { return l >= r; }
 };
 
 template <class T=void>
-struct less_equal : impl::binary<T, T, bool> {
+struct less_equal {
   constexpr bool operator () (T const& l, T const& r) const { return l <= r; }
 };
 
 template <class T=void>
-struct greater : impl::binary<T, T, bool> {
+struct greater {
   constexpr bool operator () (T const& l, T const& r) const { return l > r; }
 };
 
 template <class T=void>
-struct less : impl::binary<T, T, bool> {
+struct less {
   constexpr bool operator () (T const& l, T const& r) const { return l < r; }
 };
 
 /* function objects -- logical */
 template <class T=void>
-struct logical_and : impl::binary<T, T, bool> {
+struct logical_and {
   constexpr bool operator () (T const& l, T const& r) const { return l and r; }
 };
 
 template <class T=void>
-struct logical_or : impl::binary<T, T, bool> {
+struct logical_or {
   constexpr bool operator () (T const& l, T const& r) const { return l or r; }
 };
 
 template <class T=void>
-struct logical_not : impl::unary<T, bool>  {
+struct logical_not {
   constexpr bool operator () (T const& arg) const { return not arg; }
 };
 
 /* function objects -- bitwise */
 
 template <class T=void>
-struct bit_and : impl::binary<T, T, T> {
+struct bit_and {
   constexpr bool operator () (T const& l, T const& r) const { return l & r; }
 };
 
 template <class T=void>
-struct bit_or : impl::binary<T, T, T> {
+struct bit_or {
   constexpr bool operator () (T const& l, T const& r) const { return l | r; }
 };
 
 template <class T=void>
-struct bit_xor : impl::binary<T, T, T> {
+struct bit_xor {
   constexpr bool operator () (T const& l, T const& r) const { return l ^ r; }
 };
 
 template <class T=void>
-struct bit_not : impl::unary<T, T> {
+struct bit_not {
   constexpr bool operator () (T const& arg) const { return ~arg; }
 };
 
@@ -430,6 +414,8 @@ template <> struct bit_not<void> {
     return ~core::forward<T>(t);
   }
 };
+
+/* N3980 Implementation */
 
 }} /* namespace core::v2 */
 

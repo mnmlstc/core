@@ -37,17 +37,6 @@ TEST_CASE("apply", "[functional]") {
 }
 
 TEST_CASE("functional") {
-  SECTION("invoke-constexpr") {
-    struct type {
-      constexpr type () noexcept { }
-      constexpr int operator ()() const noexcept { return 5; }
-      constexpr int operator ()(int value) const noexcept { return value + 5; }
-    };
-    constexpr type value { };
-    static_assert(core::invoke(value) == 5, "");
-    static_assert(core::invoke(value, 6) == 11, "");
-  }
-
   SECTION("function-traits") {
     auto empty_lambda = []{};
     auto empty_arity = core::function_traits<decltype(empty_lambda)>::arity;

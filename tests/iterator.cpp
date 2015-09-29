@@ -15,7 +15,7 @@ std::ostream& operator << (std::ostream& os, std::vector<T> const& vec) {
   std::copy(
     core::cbegin(vec),
     core::cend(vec),
-    core::infix_ostream_iterator<T> { os, "," }
+    core::make_ostream_joiner(os, ",")
   );
   return os << "]";
 }

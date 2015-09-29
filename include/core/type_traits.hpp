@@ -26,7 +26,8 @@ template <class T> using tuple_size_t = typename ::std::tuple_size<T>::type;
 template <bool B> using bool_constant = ::std::integral_constant<bool, B>;
 
 /* C++ Library Fundamentals V2 TS detection idiom */
-template <class... Ts> using void_t = impl::make_void<Ts...>;
+template <class... Ts> using void_t = meta::deduce<Ts...>;
+
 struct nonesuch {
   nonesuch (nonesuch const&) = delete;
   nonesuch () = delete;
@@ -51,6 +52,12 @@ using is_detected_convertible = ::std::is_convertible<
 
 template <class T, template <class...> class U, class... Args>
 using is_detected_same = ::std::is_same<T, detected_t<U, Args...>>;
+
+template <class T, template<class...> class U, class... Args>
+using is_detected_convertible = ::std::is_convertible<
+  detected_t<U, Args...>,
+  T
+>;
 
 template <template <class...> class T, class... Args>
 using is_detected = typename detected_or<nonesuch, T, Args...>::value_t;
@@ -135,11 +142,11 @@ struct aligned_union {
 template <class... Args> using invoke_of_t = typename invoke_of<Args...>::type;
 
 template <class... Args>
-struct invokable : meta::none<
+struct invokable : meta::none_t<
   std::is_same<
     decltype(impl::INVOKE(::std::declval<Args>()...)),
     impl::undefined
-  >
+  >::value
 > { };
 
 template <class... Args> struct invoke_of :
@@ -181,16 +188,38 @@ struct is_null_pointer<::std::nullptr_t const> : ::std::true_type { };
 template <>
 struct is_null_pointer<::std::nullptr_t> : ::std::true_type { };
 
-/* is_swappable */
-template <class T, class U=T>
-using is_swappable = impl::is_swappable<T, U>;
-
 /* is_nothrow_swappable - N4426 (implemented before paper was proposed) */
 template <class T, class U=T>
 using is_nothrow_swappable = impl::is_nothrow_swappable<T, U>;
 
-template <class T, ::std::size_t N>
-using is_sizeof = meta::boolean<sizeof(T) == N>;
+/* propagates const or volatile without using the name propagate :) */
+template <class T, class U>
+struct transmit_volatile : ::std::conditional<
+  ::std::is_volatile<T>::value,
+  add_volatile_t<U>,
+  U
+> { };
+
+template <class T, class U>
+struct transmit_const : ::std::conditional<
+  ::std::is_const<T>::value,
+  add_const_t<U>,
+  U
+> { };
+
+template <class T, class U>
+struct transmit_cv : transmit_volatile<
+  T, typename transmit_const<T, U>::type
+> { };
+
+template <class T, class U>
+using transmit_volatile_t = typename transmit_volatile<T, U>::type;
+
+template <class T, class U>
+using transmit_const_t = typename transmit_const<T, U>::type;
+
+template <class T, class U>
+using transmit_cv_t = typename transmit_cv<T, U>::type;
 
 }} /* namespace core::v2 */
 

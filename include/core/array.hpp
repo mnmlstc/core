@@ -6,17 +6,18 @@
 #include <core/type_traits.hpp>
 #include <core/functional.hpp>
 #include <core/utility.hpp>
+#include <core/meta.hpp>
 
 namespace core {
 inline namespace v2 {
 
 template <class V = void, class... Args>
 constexpr auto make_array (Args&&... args) -> ::std::array<
-  conditional_t<
+  meta::either<
     meta::all<
-      ::std::is_void<V>,
-      meta::none<is_reference_wrapper<Args>...>
-    >::value,
+      ::std::is_void<V>::value,
+      meta::none_of<meta::list<Args...>, is_reference_wrapper>()
+    >(),
     common_type_t<Args...>,
     V
   >,

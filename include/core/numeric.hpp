@@ -151,12 +151,18 @@ auto partial_sum (Range&& rng, OutputIt&& it, BinaryOp&& op) -> enable_if_t<
   );
 }
 
-// TODO: need some more builtins -- also formula is
-//       greater % lesser ? gcd(greater, greater % lesser) : lesser;
+/* Because they need to be constexpr, these are EXTREMELY ineffecient */
 template <class M, class N>
-constexpr auto gcd (M m, N n) -> enable_if_t<
-  meta::all<::std::is_integral<M>, ::std::is_integral<N>>::value
+constexpr auto gcd (M m, N n) -> meta::when<
+  meta::all_of<meta::list<M, N>, ::std::is_integral>(),
+  common_type_t<M, N>
 > { return m % n ? gcd(m, m % n) : n; }
+
+template <class M, class N>
+constexpr auto lcm (M m, N n) -> meta::when<
+  meta::all_of<meta::list<M, N>, std::is_integral>(),
+  common_type_t<M, N>
+> { return m / gcd(m, n) * n; }
 
 }} /* namespace core::v2 */
 

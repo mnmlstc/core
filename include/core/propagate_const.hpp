@@ -28,7 +28,7 @@ struct propagate_const final {
   /* Although these are public, they are undocumented and for internal use */
   template <class U>
   using is_self = ::std::is_same<decay_t<U>, propagate_const>;
-  using is_nothrow_swappable = is_nothrow_swappable<underlying_type>;
+  using is_nothrow_swap = is_nothrow_swappable<underlying_type>;
 
   propagate_const (propagate_const const&) = delete;
   constexpr propagate_const (propagate_const&&) = default;
@@ -36,8 +36,8 @@ struct propagate_const final {
 
   template <
     class U,
-    meta::require<not ::std::is_convertible<U&&, T>::value> = __LINE__,
-    meta::require<::std::is_constructible<T, U&&>::value> = __LINE__
+    meta::require<::std::is_constructible<T, U&&>::value> = __LINE__,
+    meta::inhibit<::std::is_convertible<U&&, T>::value> = __LINE__
   > explicit propagate_const (propagate_const<U>&& that) :
     pointer { ::core::move(that.pointer) }
   { }
@@ -86,7 +86,7 @@ struct propagate_const final {
     return *this;
   }
 
-  void swap (propagate_const& that) noexcept(is_nothrow_swappable::value) {
+  void swap (propagate_const& that) noexcept(is_nothrow_swap::value) {
     using ::std::swap;
     swap(this->pointer, that.pointer);
   }

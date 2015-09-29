@@ -37,9 +37,12 @@ bool equal (
   ::std::input_iterator_tag
 ) {
   while (not r1.empty() and not r2.empty()) {
-    if (not ::core::forward<Predicate>(p)(r1.front(), r2.front())) {
-      return false;
-    }
+    if (
+      not ::core::invoke(
+        ::core::forward<Predicate>(p),
+        r1.front(),
+        r2.front())
+    ) { return false; }
     r1.pop_front();
     r2.pop_front();
   }
@@ -69,7 +72,7 @@ constexpr T const& max (T const& lhs, T const& rhs, Compare compare) {
   return compare(lhs, rhs) ? rhs : lhs;
 }
 
-/* extension */
+/* extensions */
 template <class T, class Compare=less<>>
 constexpr T const& clamp (
   T const& value,
@@ -84,7 +87,7 @@ constexpr T const& clamp (
       : value;
 }
 
-/* N4318 */
+/* N4318 (modified) */
 template <
   class T,
   class Compare = ::core::less<>,
@@ -100,7 +103,7 @@ template <
 
 /* non-modifying sequence algorithms */
 template <class Range, class UnaryPredicate>
-auto all_of (Range&& rng, UnaryPredicate&& p) -> enable_if_t<
+auto all_of (Range&& rng, UnaryPredicate&& p) -> meta::when<
   is_range<Range>::value,
   bool
 > {
@@ -273,9 +276,8 @@ template <
   class Range1,
   class Range2,
   class BinaryPred,
-  enable_if_t<
-    meta::all<is_range<Range1>, is_range<Range2>>::value,
-    ::std::size_t
+  meta::require<
+    meta::all_of<meta::list<Range1, Range2>, is_range>()
   > = __LINE__
 > auto mismatch (Range1&& r1, Range2&& r2, BinaryPred&& bp) -> ::std::pair<
   decltype(::std::begin(::core::forward<Range1>(r1))),
@@ -297,9 +299,8 @@ template <
 template <
   class Range,
   class InputIt,
-  enable_if_t<
-    meta::all<is_range<Range>, meta::none<is_range<InputIt>>>::value,
-    ::std::size_t
+  meta::require<
+    meta::all<is_range<Range>::value, meta::none<is_range<InputIt>::value>()>()
   > = __LINE__
 > auto mismatch(Range&& rng, InputIt&& it) -> ::std::pair<
   decltype(make_range(::core::forward<Range>(rng)).begin()),
@@ -319,9 +320,8 @@ template <
   class Range,
   class InputIt,
   class BinaryPredicate,
-  enable_if_t<
-    meta::all<is_range<Range>, meta::none<is_range<InputIt>>>::value,
-    ::std::size_t
+  meta::require<
+    meta::all<is_range<Range>::value, meta::none<is_range<InputIt>>()>()
   > = __LINE__
 > auto mismatch(Range&& r, InputIt&& it, BinaryPredicate&& bp) -> ::std::pair<
   decltype(core::make_range(::core::forward<Range>(r).begin())),
@@ -361,9 +361,8 @@ bool equal (InputIt1 first1, InputIt1 last1, InputIt2 first2, InputIt2 last2) {
 template <
   class Range1,
   class Range2,
-  enable_if_t<
-    meta::all<is_range<Range1>, is_range<Range2>>::value,
-    ::std::size_t
+  meta::require<
+    meta::all_of<meta::list<Range1, Range2>, is_range>()
   > = __LINE__
 > bool equal (Range1&& range1, Range2&& range2) {
   auto r1 = make_range(::core::forward<Range1>(range1));
@@ -379,9 +378,8 @@ template <
   class Range1,
   class Range2,
   class BinaryPredicate,
-  enable_if_t<
-    meta::all<is_range<Range1>, is_range<Range2>>::value,
-    ::std::size_t
+  meta::require<
+    meta::all_of<meta::list<Range1, Range2>, is_range>()
   > = __LINE__
 > bool equal (Range1&& range1, Range2&& range2, BinaryPredicate&& bp) {
   auto r1 = make_range(::core::forward<Range1>(range1));
@@ -402,9 +400,8 @@ template <
 template <
   class Range,
   class InputIt,
-  enable_if_t<
-    meta::all<is_range<Range>, meta::none<is_range<InputIt>>>::value,
-    ::std::size_t
+  meta::require<
+    meta::all<is_range<Range>::value, meta::none<is_range<InputIt>::value>()>()
   > = __LINE__
 > bool equal (Range&& rng, InputIt&& it) {
   auto range = make_range(::core::forward<Range>(rng));
@@ -421,9 +418,8 @@ template <
   class Range,
   class InputIt,
   class BinaryPredicate,
-  enable_if_t<
-    meta::all<is_range<Range>, meta::none<is_range<InputIt>>>::value,
-    ::std::size_t
+  meta::require<
+    meta::all<is_range<Range>::value, meta::none<is_range<InputIt>>()>()
   > = __LINE__
 > bool equal (Range&& rng, InputIt&& it, BinaryPredicate&& bp) {
   auto range = make_range(::core::forward<Range>(rng));
@@ -479,8 +475,8 @@ auto find_if_not (Range&& rng, UnaryPredicate&& p) -> enable_if_t<
 }
 
 template <class Range1, class Range2>
-auto find_end (Range1&& rng1, Range2&& rng2) -> enable_if_t<
-  meta::all<is_range<Range1>, is_range<Range2>>::value,
+auto find_end (Range1&& rng1, Range2&& rng2) -> meta::when<
+  meta::all_of<meta::list<Range1, Range2>, is_range>(),
   decltype(::std::begin(::core::forward<Range1>(rng1)))
 > {
   auto range1 = make_range(::core::forward<Range1>(rng1));
@@ -498,8 +494,8 @@ auto find_end (Range1&& rng1, Range2&& rng2) -> enable_if_t<
 }
 
 template <class Range1, class Range2, class BinaryPred>
-auto find_end (Range1&& rng1, Range2&& rng2, BinaryPred& bp) -> enable_if_t<
-  meta::all<is_range<Range1>, is_range<Range2>>::value,
+auto find_end (Range1&& rng1, Range2&& rng2, BinaryPred& bp) -> meta::when<
+  meta::all_of<meta::list<Range1, Range2>, is_range>(),
   decltype(::std::begin(::core::forward<Range1>(rng1)))
 > {
   auto range1 = make_range(::core::forward<Range1>(rng1));
@@ -518,8 +514,8 @@ auto find_end (Range1&& rng1, Range2&& rng2, BinaryPred& bp) -> enable_if_t<
 }
 
 template <class IRange, class FRange>
-auto find_first_of (IRange&& irng, FRange&& frng) -> enable_if_t<
-  meta::all<is_range<IRange>, is_range<FRange>>::value,
+auto find_first_of (IRange&& irng, FRange&& frng) -> meta::when<
+  meta::all_of<meta::list<IRange, FRange>, is_range>(),
   decltype(::std::begin(::core::forward<IRange>(irng)))
 > {
   auto irange = make_range(::core::forward<IRange>(irng));
@@ -541,8 +537,8 @@ auto find_first_of (
   IRange&& irng,
   FRange&& frng,
   BinaryPred&& bp
-) -> enable_if_t<
-  meta::all<is_range<IRange>, is_range<FRange>>::value,
+) -> meta::when<
+  meta::all_of<meta::list<IRange, FRange>, is_range>(),
   decltype(::std::begin(::core::forward<IRange>(irng)))
 > {
   auto irange = make_range(::core::forward<IRange>(irng));
@@ -561,7 +557,7 @@ auto find_first_of (
 }
 
 template <class Range>
-auto adjacent_find (Range&& rng) -> enable_if_t<
+auto adjacent_find (Range&& rng) -> meta::when<
   is_range<Range>::value,
   decltype(::std::begin(::core::forward<Range>(rng)))
 > {
@@ -572,7 +568,7 @@ auto adjacent_find (Range&& rng) -> enable_if_t<
 }
 
 template <class Range, class BinaryPredicate>
-auto adjacent_find (Range&& rng, BinaryPredicate&& bp) -> enable_if_t<
+auto adjacent_find (Range&& rng, BinaryPredicate&& bp) -> meta::when<
   is_range<Range>::value,
   decltype(::std::begin(::core::forward<Range>(rng)))
 > {
@@ -587,8 +583,8 @@ auto adjacent_find (Range&& rng, BinaryPredicate&& bp) -> enable_if_t<
 }
 
 template <class Range1, class Range2>
-auto search (Range1&& rng1, Range2&& rng2) -> enable_if_t<
-  meta::all<is_range<Range1>, is_range<Range2>>::value,
+auto search (Range1&& rng1, Range2&& rng2) -> meta::when<
+  meta::all_of<meta::list<Range1, Range2>, is_range>(),
   decltype(::std::begin(::core::forward<Range1>(rng1)))
 > {
   auto range1 = make_range(::core::forward<Range1>(rng1));
@@ -607,7 +603,7 @@ auto search (Range1&& rng1, Range2&& rng2) -> enable_if_t<
 
 template <class Range1, class Range2, class BinaryPred>
 auto search (Range1&& rng1, Range2&& rng2, BinaryPred&& bp) -> enable_if_t<
-  meta::all<is_range<Range1>, is_range<Range2>>::value,
+  meta::all_of<meta::list<Range1, Range2>, is_range>(),
   decltype(::std::begin(::core::forward<Range1>(rng1)))
 > {
   auto range1 = make_range(::core::forward<Range1>(rng1));
@@ -647,7 +643,7 @@ auto search_n (
   Size&& count,
   T const& value,
   BinaryPred&& bp
-) -> enable_if_t<
+) -> meta::when<
   is_range<Range>::value,
   decltype(::std::begin(::core::forward<Range>(rng)))
 > {
@@ -797,8 +793,8 @@ auto transform_if (
   static constexpr auto is_forward = decltype(range)::is_forward;
   static_assert(is_forward, "transform_if requires ForwardIterators");
   while (not range.empty()) {
-    if (up(range.front())) {
-      *it = op(range.front());
+    if (invoke(up, range.front())) {
+      *it = invoke(op, range.front());
       ++it;
     }
     range.pop_front();
@@ -806,14 +802,48 @@ auto transform_if (
   return it;
 }
 
+template <class InputIt, class Size, class OutputIt, class UnaryOp>
+OutputIt transform_n (InputIt in, Size count, OutputIt out, UnaryOp op) {
+  while (count > 0) {
+    *out = invoke(op, *in);
+    ++out;
+    ++in;
+    --count;
+  }
+  return out;
+}
+
+template <
+  class InputIt1,
+  class InputIt2,
+  class Size,
+  class OutputIt,
+  class UnaryOp
+> OutputIt transform_n (
+  InputIt1 in1,
+  InputIt2 in2,
+  Size count,
+  OutputIt out,
+  UnaryOp op
+) {
+  while (count > 0) {
+    *out = invoke(op, *in1, *in2);
+    ++out;
+    ++in1;
+    ++in2;
+    --count;
+  }
+  return out;
+}
+
+
 template <
   class Range,
   class InputIt,
   class OutputIt,
   class BinaryOperation,
-  enable_if_t<
-    meta::all<is_range<Range>, meta::none<is_range<InputIt>>>::value,
-    ::std::size_t
+  meta::require<
+    meta::all<is_range<Range>::value, meta::none<is_range<InputIt>::value>()>()
   > = __LINE__
 > decay_t<OutputIt> transform (
   Range&& r,
@@ -837,9 +867,8 @@ template <
   class Range2,
   class OutputIt,
   class BinaryOperation,
-  enable_if_t<
-    meta::all<is_range<Range1>, is_range<Range2>>::value,
-    ::std::size_t
+  meta::require<
+    meta::all_of<meta::list<Range1, Range2>, is_range>()
   > = __LINE__
 > decay_t<OutputIt> transform (
   Range1&& rng1,
@@ -874,8 +903,8 @@ template <
   OutputIt it,
   BinaryOperation op,
   BinaryPredicate bp
-) -> enable_if_t<
-  meta::all<is_range<Range1>, is_range<Range2>>::value,
+) -> meta::when<
+  meta::all_of<meta::list<Range1, Range2>, is_range>(),
   OutputIt
 > {
   auto range1 = make_range(::core::forward<Range1>(rng1));
@@ -1373,8 +1402,8 @@ auto partial_sort (Range&& rng, RandomIt&& it, Compare&& cmp) -> enable_if_t<
 }
 
 template <class IRange, class RRange>
-auto partial_sort_copy (IRange&& irng, RRange&& rrng) -> enable_if_t<
-  meta::all<is_range<IRange>, is_range<RRange>>::value,
+auto partial_sort_copy (IRange&& irng, RRange&& rrng) -> meta::when<
+  meta::all_of<meta::list<IRange, RRange>, is_range>(),
   decltype(::std::begin(::core::forward<RRange>(rrng)))
 > {
   auto irange = make_range(::core::forward<IRange>(irng));
@@ -1396,8 +1425,8 @@ auto partial_sort_copy (
   IRange&& irng,
   RRange&& rrng,
   Compare&& cmp
-) -> enable_if_t<
-  meta::all<is_range<IRange>, is_range<RRange>>::value,
+) -> meta::when<
+  meta::all_of<meta::list<IRange, RRange>, is_range>(),
   decltype(::std::begin(::core::forward<RRange>(rrng)))
 > {
   auto irange = make_range(::core::forward<IRange>(irng));
@@ -1577,8 +1606,8 @@ auto equal_range (Range&& rng, T const& value, Compare&& cmp) -> enable_if_t<
 
 /* set operations (on sorted ranges) */
 template <class Range1, class Range2, class OutputIt>
-auto merge (Range1&& rng1, Range2&& rng2, OutputIt&& it) -> enable_if_t<
-  meta::all<is_range<Range1>, is_range<Range2>>::value,
+auto merge (Range1&& rng1, Range2&& rng2, OutputIt&& it) -> meta::when<
+  meta::all_of<meta::list<Range1, Range2>, is_range>(),
   decay_t<OutputIt>
 > {
   auto range1 = make_range(::core::forward<Range1>(rng1));
@@ -1603,7 +1632,7 @@ auto merge (
   OutputIt&& it,
   Compare&& cmp
 ) -> enable_if_t<
-  meta::all<is_range<Range1>, is_range<Range2>>::value,
+  meta::all_of<meta::list<Range1, Range2>, is_range>(),
   decay_t<OutputIt>
 > {
   auto range1 = make_range(::core::forward<Range1>(rng1));
@@ -1623,7 +1652,7 @@ auto merge (
 }
 
 template <class Range, class BidirIt>
-auto inplace_merge (Range&& rng, BidirIt&& it) -> enable_if_t<
+auto inplace_merge (Range&& rng, BidirIt&& it) -> meta::when<
   is_range<Range>::value
 > {
   auto range = make_range(::core::forward<Range>(rng));
@@ -1637,7 +1666,7 @@ auto inplace_merge (Range&& rng, BidirIt&& it) -> enable_if_t<
 }
 
 template <class Range, class BidirIt, class Compare>
-auto inplace_merge (Range&& rng, BidirIt&& it, Compare&& cmp) -> enable_if_t<
+auto inplace_merge (Range&& rng, BidirIt&& it, Compare&& cmp) -> meta::when<
   is_range<Range>::value
 > {
   auto range = make_range(::core::forward<Range>(rng));
@@ -1652,8 +1681,8 @@ auto inplace_merge (Range&& rng, BidirIt&& it, Compare&& cmp) -> enable_if_t<
 }
 
 template <class Range1, class Range2>
-auto includes (Range1&& rng1, Range2&& rng2) -> enable_if_t<
-  meta::all<is_range<Range1>, is_range<Range2>>::value,
+auto includes (Range1&& rng1, Range2&& rng2) -> meta::when<
+  meta::all_of<meta::list<Range1, Range2>, is_range>(),
   bool
 > {
   auto range1 = make_range(::core::forward<Range1>(rng1));
@@ -1671,8 +1700,8 @@ auto includes (Range1&& rng1, Range2&& rng2) -> enable_if_t<
 }
 
 template <class Range1, class Range2, class Compare>
-auto includes (Range1&& rng1, Range2&& rng2, Compare&& cmp) -> enable_if_t<
-  meta::all<is_range<Range1>, is_range<Range2>>::value,
+auto includes (Range1&& rng1, Range2&& rng2, Compare&& cmp) -> meta::when<
+  meta::all_of<meta::list<Range1, Range2>, is_range>(),
   bool
 > {
   auto range1 = make_range(::core::forward<Range1>(rng1));
@@ -1691,8 +1720,8 @@ auto includes (Range1&& rng1, Range2&& rng2, Compare&& cmp) -> enable_if_t<
 }
 
 template <class Range1, class Range2, class OutputIt>
-auto set_difference (Range1&& rng1, Range2&& rng2, OutputIt&& it) -> enable_if_t<
-  meta::all<is_range<Range1>, is_range<Range2>>::value,
+auto set_difference (Range1&& rng1, Range2&& rng2, OutputIt&& it) -> meta::when<
+  meta::all_of<meta::list<Range1, Range2>, is_range>(),
   decay_t<OutputIt>
 > {
   auto range1 = make_range(::core::forward<Range1>(rng1));
@@ -1716,8 +1745,8 @@ auto set_difference (
   Range2&& rng2,
   OutputIt&& it,
   Compare&& cmp
-) -> enable_if_t<
-  meta::all<is_range<Range1>, is_range<Range2>>::value,
+) -> meta::when<
+  meta::all_of<meta::list<Range1, Range2>, is_range>(),
   decay_t<OutputIt>
 > {
   auto range1 = make_range(::core::forward<Range1>(rng1));
@@ -1737,8 +1766,8 @@ auto set_difference (
 }
 
 template <class Range1, class Range2, class OutputIt>
-auto set_intersection (Range1&& rng1, Range2&& rng2, OutputIt&& it) -> enable_if_t<
-  meta::all<is_range<Range1>, is_range<Range2>>::value,
+auto set_intersection (Range1&& rng1, Range2&& rng2, OutputIt&& it) -> meta::when<
+  meta::all_of<meta::list<Range1, Range2>, is_range>(),
   decay_t<OutputIt>
 > {
   auto range1 = make_range(::core::forward<Range1>(rng1));
@@ -1763,7 +1792,7 @@ auto set_intersection (
   OutputIt&& it,
   Compare&& cmp
 ) -> enable_if_t<
-  meta::all<is_range<Range1>, is_range<Range2>>::value,
+  meta::all_of<meta::list<Range1, Range2>, is_range>(),
   decay_t<OutputIt>
 > {
   auto range1 = make_range(::core::forward<Range1>(rng1));
@@ -1784,7 +1813,7 @@ auto set_intersection (
 
 template <class Range1, class Range2, class OutputIt>
 auto set_symmetric_difference (Range1&& rng1, Range2&& rng2, OutputIt&& it) -> enable_if_t<
-  meta::all<is_range<Range1>, is_range<Range2>>::value,
+  meta::all_of<meta::list<Range1, Range2>, is_range>(),
   decay_t<OutputIt>
 > {
   auto range1 = make_range(::core::forward<Range1>(rng1));
@@ -1809,7 +1838,7 @@ auto set_symmetric_difference (
   OutputIt&& it,
   Compare&& cmp
 ) -> enable_if_t<
-  meta::all<is_range<Range1>, is_range<Range2>>::value,
+  meta::all_of<meta::list<Range1, Range2>, is_range>(),
   decay_t<OutputIt>
 > {
   auto range1 = make_range(::core::forward<Range1>(rng1));
@@ -1830,7 +1859,7 @@ auto set_symmetric_difference (
 
 template <class Range1, class Range2, class OutputIt>
 auto set_union (Range1&& rng1, Range2&& rng2, OutputIt&& it) -> enable_if_t<
-  meta::all<is_range<Range1>, is_range<Range2>>::value,
+  meta::all_of<meta::list<Range1, Range2>, is_range>(),
   decay_t<OutputIt>
 > {
   auto range1 = make_range(::core::forward<Range1>(rng1));
@@ -1855,7 +1884,7 @@ auto set_union (
   OutputIt&& it,
   Compare&& cmp
 ) -> enable_if_t<
-  meta::all<is_range<Range1>, is_range<Range2>>::value,
+  meta::all_of<meta::list<Range1, Range2>, is_range>(),
   decay_t<OutputIt>
 > {
   auto range1 = make_range(::core::forward<Range1>(rng1));
@@ -2099,7 +2128,7 @@ auto minmax_element (Range&& rng, Compare&& cmp) -> enable_if_t<
 
 template <class Range1, class Range2>
 auto lexicographical_compare (Range1&& rng1, Range2&& rng2) -> enable_if_t<
-  meta::all<is_range<Range1>, is_range<Range2>>::value,
+  meta::all_of<meta::list<Range1, Range2>, is_range>(),
   bool
 > {
   auto range1 = make_range(::core::forward<Range1>(rng1));
@@ -2122,7 +2151,7 @@ auto lexicographical_compare (
   Range2&& rng2,
   Compare&& cmp
 ) -> enable_if_t<
-  meta::all<is_range<Range1>, is_range<Range2>>::value,
+  meta::all_of<meta::list<Range1, Range2>, is_range>(),
   bool
 > {
   auto range1 = make_range(::core::forward<Range1>(rng1));
@@ -2142,7 +2171,7 @@ auto lexicographical_compare (
 
 template <class Range1, class Range2>
 auto is_permutation (Range1&& rng1, Range2&& rng2) -> enable_if_t<
-  meta::all<is_range<Range1>, is_range<Range2>>::value,
+  meta::all_of<meta::list<Range1, Range2>, is_range>(),
   bool
 > {
   auto range1 = make_range(::core::forward<Range1>(rng1));
@@ -2163,8 +2192,8 @@ auto is_permutation (
   Range1&& rng1,
   Range2&& rng2,
   BinaryPredicate&& bp
-) -> enable_if_t<
-  meta::all<is_range<Range1>, is_range<Range2>>::value,
+) -> meta::when<
+  meta::all_of<meta::list<Range1, Range2>, is_range>(),
   bool
 > {
   auto range1 = make_range(::core::forward<Range1>(rng1));

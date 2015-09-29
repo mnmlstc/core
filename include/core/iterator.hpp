@@ -6,6 +6,7 @@
 #include <ostream>
 
 #include <core/type_traits.hpp>
+#include <core/utility.hpp>
 
 namespace core {
 inline namespace v2 {
@@ -124,49 +125,52 @@ template <class Iterator>
 }
 
 template <
-  class T,
+  class DelimT,
   class CharT=char,
   class Traits=::std::char_traits<CharT>
-> struct infix_ostream_iterator final : ::std::iterator<
+> struct ostream_joiner final : ::std::iterator<
   ::std::output_iterator_tag,
   void,
   void,
   void,
   void
 > {
+  using delimiter_type = DelimT;
   using ostream_type = ::std::basic_ostream<CharT, Traits>;
   using traits_type = Traits;
   using char_type = CharT;
 
-  infix_ostream_iterator (ostream_type& os) :
-    infix_ostream_iterator { os, nullptr }
+  ostream_joiner (ostream_type& stream, delimiter_type const& delimiter) :
+    stream { stream },
+    delimiter { delimiter }
   { }
 
-  infix_ostream_iterator (ostream_type& os, char_type const* delimiter) :
-    os { os },
-    delimiter { delimiter },
+  ostream_joiner (ostream_type& stream, delimiter_type&& delimiter) :
+    stream { stream },
+    delimiter { ::core::move(delimiter) },
     first { true }
   { }
 
-  infix_ostream_iterator& operator = (T const& item) {
-    if (not first and delimiter) { this->os.get() << delimiter; }
-    os.get() << item;
+  template <class T>
+  ostream_joiner& operator = (T const& item) {
+    if (not first and delimiter) { this->stream << delimiter; }
+    this->stream << item;
     this->first = false;
     return *this;
   }
 
-  infix_ostream_iterator& operator ++ (int) { return *this; }
-  infix_ostream_iterator& operator ++ () { return *this; }
-  infix_ostream_iterator& operator * () { return *this; }
+  ostream_joiner& operator ++ (int) noexcept { return *this; }
+  ostream_joiner& operator ++ () noexcept { return *this; }
+  ostream_joiner& operator * () noexcept { return *this; }
 
 private:
-  ::std::reference_wrapper<ostream_type> os;
-  char_type const* delimiter;
+  ostream_type& stream;
+  delimiter_type delimiter;
   bool first;
 };
 
 template <class T>
-struct number_iterator final {
+struct number_iterator {
   using iterator_category = ::std::bidirectional_iterator_tag;
   using difference_type = T;
   using value_type = T;
@@ -227,6 +231,17 @@ private:
 template <class T>
 void swap (number_iterator<T>& lhs, number_iterator<T>& rhs) noexcept {
   lhs.swap(rhs);
+}
+
+template <class CharT, class Traits, class DelimT>
+ostream_joiner<decay_t<DelimT>, CharT, Traits> make_ostream_joiner (
+  ::std::basic_ostream<CharT, Traits>& stream,
+  DelimT&& delimiter
+) {
+  return ostream_joiner<decay_t<DelimT>, CharT, Traits> {
+    stream,
+    ::core::forward<DelimT>(delimiter)
+  };
 }
 
 template <class T>

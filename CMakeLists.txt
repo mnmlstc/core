@@ -41,13 +41,6 @@ cmake_dependent_option(BUILD_PACKAGE_PKG "Create a PKG" ON "${PKG_DEP}" OFF)
 cmake_dependent_option(BUILD_WITH_LIBCXX "Use libc++" OFF "BUILD_TESTING" OFF)
 cmake_dependent_option(BUILD_WITH_COVERAGE "Use GCov" OFF "BUILD_TESTING" OFF)
 
-if (BIICODE)
-  add_biicode_targets()
-  include(biicode/cmake/tools)
-  activate_cpp11(INTERFACE ${BII_BLOCK_TARGET})
-  return()
-endif ()
-
 #------------------------------------------------------------------------------
 # Configuration
 #------------------------------------------------------------------------------

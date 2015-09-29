@@ -20,13 +20,10 @@ namespace core {
 inline namespace v2 {
 namespace impl {
 
-/* void_t workaround for gcc */
-template <class...> struct make_void : meta::identity<void> { };
-
 template <class T, class Void, template <class...> class, class...>
 struct make_detect : meta::identity<T> { using value_t = ::std::false_type; };
 template <class T, template <class...> class U, class... Args>
-struct make_detect<T, typename make_void<U<Args...>>::type, U, Args...> :
+struct make_detect<T, meta::deduce<U<Args...>>, U, Args...> :
   meta::identity<U<Args...>>
 { using value_t = ::std::true_type; };
 
@@ -36,7 +33,6 @@ template <class Signature, class T>
 struct class_of<Signature T::*> : meta::identity<T> { };
 
 /* aliases */
-template <class... Ts> using deduce_t = typename make_void<Ts...>::type;
 template <class T> using class_of_t = typename class_of<T>::type;
 template <class T> using decay_t = typename ::std::decay<T>::type;
 template <class T>
@@ -55,17 +51,17 @@ template <class T, class U>
 struct is_swappable<
   T,
   U,
-  deduce_t<
+  meta::deduce<
     decltype(swap(declval<T&>(), declval<U&>())),
     decltype(swap(declval<U&>(), declval<T&>()))
   >
 > : ::std::true_type { };
 
-template <class T, class U>
-struct is_nothrow_swappable : meta::all<
-  is_swappable<T, U>,
-  meta::boolean<noexcept(swap(declval<T&>(), declval<U&>()))>,
-  meta::boolean<noexcept(swap(declval<U&>(), declval<T&>()))>
+template <class T, class U=T>
+struct is_nothrow_swappable : meta::all_t<
+  is_swappable<T, U>::value,
+  noexcept(swap(declval<T&>(), declval<U&>())),
+  noexcept(swap(declval<U&>(), declval<T&>()))
 > { };
 
 /* used below but also for the functional objects defined later to cut down
@@ -101,7 +97,7 @@ constexpr T&& pass (remove_reference_t<T>&& t) noexcept {
 }
 
 /* INVOKE pseudo-expression plumbing, *much* more simplified than previous
- * versions of core
+ * versions of Core
  */
 struct undefined { constexpr undefined (...) noexcept { } };
 

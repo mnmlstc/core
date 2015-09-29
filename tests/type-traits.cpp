@@ -42,11 +42,4 @@ TEST_CASE("type-traits") {
     CHECK(core::is_nothrow_swappable<C>::value);
     CHECK(core::is_nothrow_swappable<D>::value);
   }
-
-  SECTION("is-swappable") {
-    CHECK(core::is_swappable<A>::value);
-    CHECK(core::is_swappable<B>::value);
-    CHECK(core::is_swappable<C>::value);
-    CHECK(core::is_swappable<D>::value);
-  }
 }

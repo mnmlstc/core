@@ -41,13 +41,6 @@ using make_index_sequence = make_integer_sequence<::std::size_t, N>;
 template <class... Ts>
 using index_sequence_for = make_index_sequence<sizeof...(Ts)>;
 
-/* N3761 (with some additions) */
-template <::std::size_t N, class... Ts>
-struct type_at : meta::element<N, meta::pack<Ts...>> { };
-
-template <::std::size_t N, class... Ts>
-using type_at_t = typename type_at<N, Ts...>::type;
-
 template <::std::size_t N, class T, class... Ts>
 constexpr auto value_at (T&& value, Ts&&...) -> enable_if_t<
   N == 0 and N < (sizeof...(Ts) + 1),
@@ -57,7 +50,7 @@ constexpr auto value_at (T&& value, Ts&&...) -> enable_if_t<
 template <::std::size_t N, class T, class... Ts>
 constexpr auto value_at (T&&, Ts&&... values) -> enable_if_t<
   N != 0 and N < (sizeof...(Ts) + 1),
-  type_at_t<N, T, Ts...>
+  meta::get<meta::list<T, Ts...>, N>
 > { return value_at<N - 1, Ts...>(::core::forward<Ts>(values)...); }
 
 template <class Callable>
@@ -100,15 +93,31 @@ T exchange (T& obj, U&& value) noexcept(
   meta::all<
     ::std::is_nothrow_move_constructible<T>,
     ::std::is_nothrow_assignable<add_lvalue_reference_t<T>, U>
-  >::value
+  >()
 ) {
   T old = ::core::move(obj);
   obj = ::core::forward<U>(value);
   return old;
 }
 
+inline ::std::uintptr_t as_int (void const* ptr) noexcept {
+  return reinterpret_cast<::std::uintptr_t>(ptr);
+}
+
+template <class T>
+void const* as_void (T const* ptr) { return static_cast<void const*>(ptr); }
+
+template <class T>
+void* as_void (T* ptr) { return static_cast<void*>(ptr); }
+
+template <class T>
+void const* as_void (T const& ref) { return as_void(::std::addressof(ref)); }
+
+template <class T>
+void* as_void (T& ref) { return as_void(::std::addressof(ref)); }
+
 template <class E>
-constexpr auto to_integral(E e) noexcept -> enable_if_t<
+constexpr auto as_under(E e) noexcept -> meta::when<
   std::is_enum<E>::value,
   underlying_type_t<E>
 > { return static_cast<underlying_type_t<E>>(e); }

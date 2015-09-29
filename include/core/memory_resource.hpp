@@ -2,6 +2,8 @@
 #define CORE_MEMORY_RESOURCE_HPP
 
 #include <core/memory.hpp>
+
+#include <atomic>
 #include <new>
 
 namespace core {
@@ -180,13 +182,22 @@ struct memory_resource {
 
 protected:
 
-  virtual void do_deallocate (void* p, ::std::size_t, ::std::size_t) = 0;
+  virtual void do_deallocate (void*, ::std::size_t, ::std::size_t) = 0;
   virtual void* do_allocate (::std::size_t, ::std::size_t) = 0;
   virtual bool do_is_equal (memory_resource const&) const noexcept = 0;
 };
 
 struct monotonic_buffer_resource : memory_resource {
-  virtual ~monotonic_buffer_resource () noexcept = default;
+
+  virtual ~monotonic_buffer_resource () noexcept { }
+
+  monotonic_buffer_resource& operator = (
+    monotonic_buffer_resource const&
+  ) = delete;
+
+protected:
+
+  virtual void do_deallocate (void*, ::std::size_t, ::std::size_t) override { }
 };
 
 inline memory_resource* set_default_resource (memory_resource* mr) noexcept {

@@ -37,18 +37,47 @@ namespace impl {
 template <class T> using pointer_t = typename T::pointer;
 
 template <class T>
-using deep_lvalue = conditional_t<
-  ::std::is_reference<T>::value, T, T const&
->;
+using deep_lvalue = conditional_t<::std::is_reference<T>::value, T, T const&>;
 
-} /* namespace impl */
+}}} /* namespace core::v2::impl */
+
+namespace core {
+inline namespace v2 {
 
 #ifndef CORE_NO_EXCEPTIONS
+struct bad_polymorphic_reset : ::std::logic_error {
+  using ::std::logic_error::logic_error;
+};
+
+[[noreturn]] inline void throw_bad_poly_reset (char const* msg) {
+  throw bad_polymorphic_reset { msg };
+}
 [[noreturn]] inline void throw_bad_alloc () { throw ::std::bad_alloc { }; }
 #else /* CORE_NO_EXCEPTIONS */
+[[noreturn]] inline void throw_bad_poly_reset (char const*) { ::std::abort(); }
 [[noreturn]] inline void throw_bad_alloc () { ::std::abort(); }
 #endif /* CORE_NO_EXCEPTIONS */
 
+inline void* align (
+  ::std::size_t alignment,
+  ::std::size_t size,
+  void*& ptr,
+  ::std::size_t& space
+) noexcept {
+  if (size > space) { return nullptr; }
+  auto const beg = static_cast<::std::uint8_t*>(ptr);
+  auto const mix = as_int(beg + (alignment - 1));
+  auto const end = reinterpret_cast<::std::uint8_t*>(mix & -alignment);
+  auto const distance = static_cast<::std::size_t>(::std::distance(beg, end));
+  if (distance > space - size) { return nullptr; }
+  space -= distance;
+  return ptr = end;
+}
+
+}} /* namespace core::v2 */
+
+namespace core {
+inline namespace v2 {
 namespace memory {
 
 template <::std::size_t N>
@@ -73,7 +102,7 @@ struct arena final {
 
   void* allocate (size_type n) {
     auto current = this->pointer() + this->used();
-    auto ptr = ::std::align(alignment(), n, current, this->available);
+    auto ptr = ::core::align(alignment(), n, current, this->available);
     if (not ptr) { return ptr; }
     this->available -= n;
     return ptr;
@@ -94,14 +123,58 @@ struct arena final {
 
 private:
   ::std::uint8_t* pointer () noexcept {
-    return reinterpret_cast<::std::uint8_t*>(::std::addressof(this->data));
+    return static_cast<::std::uint8_t*>(::core::as_void(this->data));
   }
 
   aligned_storage_t<N, alignof(::std::max_align_t)> data { };
   size_type available { N };
 };
 
-} /* namespace memory */
+}}} /* namespace core::v2::memory */
+
+namespace core {
+inline namespace v2 {
+
+/* An SG14 influenced raw_storage_iterator */
+template <class OutputIt, class T>
+struct raw_storage_iterator {
+  using difference_type = void;
+  using value_type = void;
+
+  using reference = void;
+  using pointer = void;
+
+  using iterator_category = ::std::output_iterator_tag;
+
+  explicit raw_storage_iterator (OutputIt iter) : iter { iter } { }
+
+  template <
+    class U,
+    meta::inhibit<
+      ::std::is_same<decay_t<U>, raw_storage_iterator>::value
+    > = __LINE__,
+    meta::require<::std::is_constructible<T, U>::value> = __LINE__
+  > raw_storage_iterator& operator = (U&& item) {
+    ::new (::core::as_void(*this->iter)) T(::core::forward<U>(item));
+    return *this;
+  }
+
+  raw_storage_iterator& operator * () { return *this; }
+
+  raw_storage_iterator& operator ++ () {
+    ++this->iter;
+    return *this;
+  }
+
+  raw_storage_iterator& operator ++ (int) {
+    return raw_storage_iterator(this->iter++);
+  }
+
+  OutputIt base () const { return this->iter; }
+
+private:
+  OutputIt iter;
+};
 
 template <class T, ::std::size_t N>
 struct arena_allocator {
@@ -186,18 +259,6 @@ template <class T, class D>
   ::std::unique_ptr<T, D> const&
 ) noexcept { return ::std::unique_ptr<T, D> { }; }
 #endif /* CORE_NO_RTTI */
-
-#ifndef CORE_NO_EXCEPTIONS
-struct bad_polymorphic_reset : ::std::logic_error {
-  using ::std::logic_error::logic_error;
-};
-
-[[noreturn]] inline void throw_bad_poly_reset (char const* msg) {
-  throw bad_polymorphic_reset { msg };
-}
-#else /* CORE_NO_EXCEPTIONS */
-[[noreturn]] inline void throw_bad_poly_reset (char const*) { ::std::abort(); }
-#endif /* CORE_NO_EXCEPTIONS */
 
 /* deep_ptr copier */
 template <class T>
@@ -415,7 +476,10 @@ template <
     }
   { }
 
-  constexpr deep_ptr () noexcept = default;
+  /* This is not defaulted because of an issue with libstdc++ pre 5.1. But
+   * what else is new.
+   */
+  constexpr deep_ptr () noexcept { }
 
   ~deep_ptr () noexcept {
     auto& ptr = ::std::get<0>(this->data);
@@ -899,7 +963,7 @@ template <
     ::std::is_polymorphic<T>::value and ::std::is_base_of<T, U>::value
   >
 > auto make_poly (U&& value) -> poly_ptr<T> {
-  return poly_ptr<T> { new U { ::core::forward<U>(value) } };
+  return poly_ptr<T> { new U(::core::forward<U>(value)) };
 }
 #endif /* CORE_NO_RTTI */
 
@@ -909,7 +973,7 @@ template <
   class=enable_if_t<not ::std::is_array<T>::value>,
   class... Args
 > auto make_deep (Args&&... args) -> deep_ptr<T> {
-  return deep_ptr<T> { new T { ::core::forward<Args>(args)... } };
+  return deep_ptr<T> { new T(::core::forward<Args>(args)...) };
 }
 
 /* make_unique */
@@ -918,9 +982,7 @@ template <
   class=enable_if_t<not ::std::is_array<Type>::value>,
   class... Args
 > auto make_unique(Args&&... args) -> ::std::unique_ptr<Type> {
-  return ::std::unique_ptr<Type> {
-    new Type { ::core::forward<Args>(args)... }
-  };
+  return ::std::unique_ptr<Type> { new Type(::core::forward<Args>(args)...) };
 }
 
 template <
@@ -960,6 +1022,172 @@ void swap (observer_ptr<W>& lhs, observer_ptr<W>& rhs) noexcept(
   noexcept(lhs.swap(rhs))
 ) { lhs.swap(rhs); }
 
+/* SG14 Suggestions */
+template <class T, class It>
+raw_storage_iterator<decay_t<It>, T> make_storage_iterator (It&& iter) {
+ return raw_storage_iterator<decay_t<It>, T>(::core::forward<It>(iter));
+}
+
+template <class ForwardIt>
+void destroy (ForwardIt first, ForwardIt last) {
+  using type = typename ::std::iterator_traits<ForwardIt>::value_type;
+  while (first != last) {
+    *first.~type();
+    ++first;
+  }
+}
+
+#ifndef CORE_NO_EXCEPTIONS
+template <class InputIt, class ForwardIt>
+ForwardIt uninitialized_move (InputIt first, InputIt last, ForwardIt dest) {
+  using type = typename ::std::iterator_traits<ForwardIt>::value_type;
+  auto current = dest;
+  try {
+    while (first != last) {
+      ::new (::core::as_void(*current)) type(::core::move(*first));
+      ++current;
+      ++first;
+    }
+  } catch (...) {
+    destroy(dest, current);
+    throw;
+  }
+  return current;
+}
+
+template <class InputIt, class Size, class ForwardIt>
+ForwardIt uninitialized_move_n (InputIt first, Size count, ForwardIt dest) {
+  using type = typename ::std::iterator_traits<ForwardIt>::value_type;
+  auto current = dest;
+  try {
+    while (count > 0) {
+      ::new (::core::as_void(*dest)) type(::core::move(*first));
+      ++dest;
+      ++first;
+      --count;
+    }
+  } catch (...) {
+    destroy(dest, current);
+    throw;
+  }
+  return current;
+}
+
+template <class ForwardIt>
+ForwardIt uninitialized_value_construct (ForwardIt first, ForwardIt last) {
+  using type = typename ::std::iterator_traits<ForwardIt>::value_type;
+  auto current = first;
+  try {
+    while (current != last) {
+      ::new (::core::as_void(*current)) type();
+      ++current;
+    }
+  } catch (...) {
+    destroy(first, current);
+    throw;
+  }
+  return current;
+}
+
+template <class ForwardIt>
+ForwardIt uninitialized_default_construct (ForwardIt first, ForwardIt last) {
+  using type = typename ::std::iterator_traits<ForwardIt>::value_type;
+  auto current = first;
+  try {
+    while (current != last) {
+      ::new (::core::as_void(*current)) type();
+      ++current;
+    }
+  } catch (...) {
+    destroy(first, current);
+    throw;
+  }
+  return current;
+}
+
+/* Personal Extension to SG14 mentioned during CppCon 2015 */
+template <class InputIt, class ForwardIt, class UnaryOp>
+ForwardIt uninitialized_transform (
+  InputIt first,
+  InputIt last,
+  ForwardIt dest,
+  UnaryOp op
+) {
+  using type = typename ::std::iterator_traits<ForwardIt>::value_type;
+  auto current = dest;
+  try {
+    while (first != last) {
+      ::new (::core::as_void(*current)) type(::core::invoke(op, *first));
+      ++current;
+      ++first;
+    }
+  } catch (...) {
+    destroy(dest, current);
+    throw;
+  }
+  return current;
+}
+
+#else /* CORE_NO_EXCEPTIONS */
+template <class InputIt, class ForwardIt>
+ForwardIt uninitialized_move (InputIt first, InputIt last, ForwardIt dest) {
+  using type = typename ::std::iterator_traits<ForwardIt>::value_type;
+  while (first != last) {
+    ::new (::core::as_void(*first)) type(::core::move(*first));
+    ++first;
+  }
+  return first;
+}
+
+template <class InputIt, class Size, class ForwardIt>
+ForwardIt uninitialized_move_n (InputIt first, Size count, ForwardIt dest) {
+  using type = typename ::std::iterator_traits<ForwardIt>::value_type;
+  while (count > 0) {
+    ::new (::core::as_void(*dest)) type (::core::move(*first));
+    ++dest;
+    ++first;
+    --count;
+  }
+  return first;
+}
+
+template <class ForwardIt>
+ForwardIt uninitialized_value_construct (ForwardIt first, ForwardIt last) {
+  using type = typename ::std::iterator_traits<ForwardIt>::value_type;
+  while (first != last) {
+    ::new (::core::as_void(*first)) type();
+    ++first;
+  }
+  return first;
+}
+
+template <class ForwardIt>
+ForwardIt uninitialized_default_construct (ForwardIt first, ForwardIt last) {
+  using type = typename ::std::iterator_traits<ForwardIt>::value_type;
+  while (first != last) {
+    ::new (::core::as_void(*first)) type;
+    ++first;
+  }
+  return first;
+}
+
+template <class InputIt, class ForwardIt, class UnaryOp>
+ForwardIt uninitialized_transform (
+  InputIt first,
+  InputIt last,
+  ForwardIt dest,
+  UnaryOp
+) {
+  using type = typename ::std::iterator_traits<ForwardIt>::value_type;
+  while (first != last) {
+    ::new (::core::as_void(*dest)) type(::core::invoke(op, *first));
+    ++dest;
+    ++first;
+  }
+  return dest;
+}
+#endif /* CORE_NO_EXCEPTIONS */
+
 }} /* namespace core::v2 */
 
 namespace std {
@@ -975,21 +1203,33 @@ struct hash<core::v2::poly_ptr<T, D>> {
 #endif /* CORE_NO_RTTI */
 
 template <class T, class Deleter, class Copier>
-struct hash<core::v2::deep_ptr<T, Deleter, Copier>> {
-  using value_type = core::v2::deep_ptr<T, Deleter, Copier>;
+struct hash<::core::v2::deep_ptr<T, Deleter, Copier>> {
+  using value_type = ::core::v2::deep_ptr<T, Deleter, Copier>;
   size_t operator ()(value_type const& value) const noexcept {
     return hash<typename value_type::pointer> { }(value.get());
   }
 };
 
 template <class W>
-struct hash<core::v2::observer_ptr<W>> {
-  using value_type = core::v2::observer_ptr<W>;
+struct hash<::core::v2::observer_ptr<W>> {
+  using value_type = ::core::v2::observer_ptr<W>;
   size_t operator ()(value_type const& value) const noexcept {
     return hash<typename value_type::pointer> { }(value.get());
   }
 };
 
 } /* namespace std */
+
+template <class T, class U>
+void* operator new (
+  ::std::size_t s,
+  ::core::v2::raw_storage_iterator<T, U> it
+) noexcept { return ::operator new(s, it.base()); }
+
+template <class T, class U>
+void operator delete (
+  void* p,
+  ::core::v2::raw_storage_iterator<T, U> it
+) noexcept { return ::operator delete(p, it.base()); }
 
 #endif /* CORE_MEMORY_HPP */

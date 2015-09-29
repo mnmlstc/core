@@ -20,12 +20,24 @@ using ::std::end;
 template <class T> using adl_begin_t = decltype(begin(::std::declval<T>()));
 template <class T> using adl_end_t = decltype(end(::std::declval<T>()));
 
+template <class T>
+adl_begin_t<T> adl_begin (T&& t) {
+  using ::std::begin;
+  return begin(::core::forward<T>(t));
+}
+
+template <class T>
+adl_end_t<T> adl_end (T&& t) {
+  using ::std::end;
+  return end(::core::forward<T>(t));
+}
+
 } /* namespace impl */
 
 template <class R>
-struct is_range : meta::all<
-  is_detected<impl::adl_begin_t, R>,
-  is_detected<impl::adl_end_t, R>
+struct is_range : meta::all_t<
+  is_detected<impl::adl_begin_t, R>::value,
+  is_detected<impl::adl_end_t, R>::value
 > { };
 
 template <class Iterator>
@@ -69,15 +81,19 @@ struct range {
 
   template <
     class Range,
-    class=enable_if_t<
+    class=meta::when<
       meta::all<
-        meta::none<::std::is_pointer<iterator>>,
-        is_range<Range>,
-        ::std::is_convertible<detected_t<impl::adl_begin_t, Range>, iterator>
-      >::value
+        meta::none<
+          ::std::is_pointer<iterator>::value,
+          ::std::is_same<decay_t<Range>, range>::value
+        >(),
+        is_range<Range>::value,
+        is_detected_convertible<iterator, impl::adl_begin_t, Range>::value
+      >()
     >
   > explicit range (Range&& r) noexcept :
-    range { ::std::begin(r), ::std::end(r) }
+    begin_ { impl::adl_begin(::core::forward<Range>(r)) },
+    end_ { impl::adl_end(::core::forward<Range>(r)) }
   { }
 
   range (::std::pair<iterator, iterator> pair) noexcept :
@@ -94,7 +110,7 @@ struct range {
   { }
 
   range (range&& that) noexcept :
-    range { ::std::move(that.begin_), ::std::move(that.end_) }
+    range { ::core::move(that.begin_), ::core::move(that.end_) }
   { that.begin_ = that.end_; }
 
   range () = default;
@@ -266,8 +282,10 @@ auto make_range (Iterator begin, Iterator end) -> range<Iterator> {
 }
 
 template <class Range>
-auto make_range (Range&& value) -> range<decltype(::std::begin(value))> {
-  return make_range(::std::begin(value), ::std::end(value));
+auto make_range (Range&& value) -> range<decltype(begin(value))> {
+  using ::std::begin;
+  using ::std::end;
+  return make_range(begin(value), end(value));
 }
 
 /* Used like: core::make_range<char>(::std::cin) */

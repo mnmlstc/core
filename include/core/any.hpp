@@ -1,17 +1,14 @@
 #ifndef CORE_ANY_HPP
 #define CORE_ANY_HPP
 
-#ifdef CORE_NO_RTTI
-  #error "core::any requires RTTI"
-#endif /* CORE_NO_RTTI */
-
-#include <typeinfo>
 #include <memory>
 
 #include <cstdlib>
 #include <cstring>
 
 #include <core/type_traits.hpp>
+#include <core/algorithm.hpp>
+#include <core/typeinfo.hpp>
 #include <core/utility.hpp>
 
 #ifndef CORE_NO_EXCEPTIONS
@@ -25,13 +22,14 @@ namespace impl {
 using data_type = add_pointer_t<void>;
 
 template <class T>
-struct is_small final : meta::boolean<
-  sizeof(decay_t<T>) <= sizeof(data_type) and
-  alignof(decay_t<T>) <= alignof(data_type) and
+struct is_small final : meta::all_t<
+  sizeof(decay_t<T>) <= sizeof(data_type),
+  alignof(decay_t<T>) <= alignof(data_type),
   ::std::is_nothrow_copy_constructible<T>::value
 > { };
 template <> struct is_small<void> final : ::std::true_type { };
 
+// TODO: rename the child classes so that one may take an Allocator ;)
 template <class T=void, bool=is_small<T>::value> struct dispatch;
 template <> struct dispatch<void, true> {
   dispatch () noexcept = default;
@@ -40,9 +38,7 @@ template <> struct dispatch<void, true> {
   virtual void clone (data_type const&, data_type&) const { }
   virtual void move (data_type&, data_type&) const noexcept { }
   virtual void destroy (data_type&) const noexcept { }
-  virtual ::std::type_info const& type () const noexcept {
-    return typeid(void);
-  }
+  virtual type_info const& type () const noexcept { return typeof<void>(); }
 };
 
 template <class T>
@@ -53,28 +49,28 @@ struct dispatch<T, true> final : dispatch<> {
   using allocator_type = ::std::allocator<value_type>;
   using allocator_traits = ::std::allocator_traits<allocator_type>;
 
-  virtual void clone (data_type const& src, data_type& dst) const override {
+  virtual void clone (data_type const& src, data_type& dst) const final {
     allocator_type alloc { };
     auto val = reinterpret_cast<add_const_t<const_pointer>>(&src);
     auto ptr = reinterpret_cast<pointer>(&dst);
     allocator_traits::construct(alloc, ptr, *val);
   }
 
-  virtual void move (data_type& src, data_type& dst) const noexcept override {
+  virtual void move (data_type& src, data_type& dst) const noexcept final {
     allocator_type alloc { };
     auto val = reinterpret_cast<pointer>(&src);
     auto ptr = reinterpret_cast<pointer>(&dst);
     allocator_traits::construct(alloc, ptr, ::core::move(*val));
   }
 
-  virtual void destroy (data_type& src) const noexcept override {
+  virtual void destroy (data_type& src) const noexcept final {
     allocator_type alloc { };
     auto ptr = reinterpret_cast<pointer>(&src);
     allocator_traits::destroy(alloc, ptr);
   }
 
-  virtual ::std::type_info const& type () const noexcept override {
-    return typeid(value_type);
+  virtual type_info const& type () const noexcept final {
+    return typeof<value_type>();
   }
 };
 
@@ -85,7 +81,7 @@ struct dispatch<T, false> final : dispatch<> {
   using allocator_type = ::std::allocator<value_type>;
   using allocator_traits = ::std::allocator_traits<allocator_type>;
 
-  virtual void clone (data_type const& src, data_type& dst) const override {
+  virtual void clone (data_type const& src, data_type& dst) const final {
     allocator_type alloc { };
     auto const& value = *static_cast<add_const_t<pointer>>(src);
     auto ptr = allocator_traits::allocate(alloc, 1);
@@ -97,7 +93,7 @@ struct dispatch<T, false> final : dispatch<> {
     dst = ptr;
   }
 
-  virtual void move (data_type& src, data_type& dst) const noexcept override {
+  virtual void move (data_type& src, data_type& dst) const noexcept final {
     allocator_type alloc { };
     auto& value = *static_cast<pointer>(src);
     auto ptr = allocator_traits::allocate(alloc, 1);
@@ -109,15 +105,15 @@ struct dispatch<T, false> final : dispatch<> {
     dst = ptr;
   }
 
-  virtual void destroy (data_type& src) const noexcept override {
+  virtual void destroy (data_type& src) const noexcept final {
     allocator_type alloc { };
     auto ptr = static_cast<pointer>(src);
     allocator_traits::destroy(alloc, ptr);
     allocator_traits::deallocate(alloc, ptr, 1);
   }
 
-  virtual ::std::type_info const& type () const noexcept override {
-    return typeid(value_type);
+  virtual type_info const& type () const noexcept final {
+    return typeof<value_type>();
   }
 };
 
@@ -133,7 +129,6 @@ template <> inline dispatch<> const* lookup<void> () noexcept {
 
 } /* namespace impl */
 
-/* Forgive the ugly preprocessor macro in the middle of this file */
 #ifndef CORE_NO_EXCEPTIONS
 class bad_any_cast final : public ::std::bad_cast {
 public:
@@ -208,9 +203,7 @@ struct any final {
     this->table = impl::lookup<void>();
   }
 
-  ::std::type_info const& type () const noexcept {
-    return this->table->type();
-  }
+  type_info const& type () const noexcept { return this->table->type(); }
 
   bool empty () const noexcept { return this->table == impl::lookup<void>(); }
 
@@ -268,25 +261,25 @@ private:
 
 template <class T>
 T const* any_cast (any const* operand) noexcept {
-  return operand and operand->type() == typeid(T)
+  return operand and operand->type() == typeof<T>()
     ? operand->cast<T>(impl::is_small<T> { })
     : nullptr;
 }
 
 template <class T>
 T* any_cast (any* operand) noexcept {
-  return operand and operand->type() == typeid(T)
+  return operand and operand->type() == typeof<T>()
     ? operand->cast<T>(impl::is_small<T> { })
     : nullptr;
 }
 
 template <
   class T,
-  class=enable_if_t<
+  class=meta::when<
     meta::any<
-      ::std::is_reference<T>,
-      ::std::is_copy_constructible<T>
-    >::value
+      ::std::is_reference<T>::value,
+      ::std::is_copy_constructible<T>::value
+    >()
   >
 > T any_cast (any const& operand) {
   using type = remove_reference_t<T>;
@@ -297,11 +290,11 @@ template <
 
 template <
   class T,
-  class=enable_if_t<
+  class=meta::when<
     meta::any<
-      ::std::is_reference<T>,
-      ::std::is_copy_constructible<T>
-    >::value
+      ::std::is_reference<T>::value,
+      ::std::is_copy_constructible<T>::value
+    >()
   >
 > T any_cast (any&& operand) {
   using type = remove_reference_t<T>;
@@ -312,11 +305,11 @@ template <
 
 template <
   class T,
-  class=enable_if_t<
+  class=meta::when<
     meta::any<
-      ::std::is_reference<T>,
-      ::std::is_copy_constructible<T>
-    >::value
+      ::std::is_reference<T>::value,
+      ::std::is_copy_constructible<T>::value
+    >()
   >
 > T any_cast (any& operand) {
   using type = remove_reference_t<T>;

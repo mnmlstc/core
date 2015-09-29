@@ -3,6 +3,7 @@
 
 #include <core/type_traits.hpp>
 #include <core/functional.hpp>
+#include <core/typeinfo.hpp>
 #include <core/utility.hpp>
 #include <core/array.hpp>
 
@@ -21,7 +22,7 @@ namespace impl {
  * template functions. You make me so sad sometimes, GCC.
  */
 template <class Visitor, class Type, class Data, class Result, class... Args>
-auto visitor_gen () -> Result {
+auto gen () -> Result {
   return [](Visitor&& visitor, Data* data, Args&&... args) {
     return invoke(
       ::core::forward<Visitor>(visitor),
@@ -30,6 +31,23 @@ auto visitor_gen () -> Result {
     );
   };
 }
+
+template <class, class, class...> struct result;
+template <class V, class... Ts, class... Args>
+struct result<V, meta::list<Ts...>, Args...> final : ::std::conditional<
+  meta::all<
+    meta::all_of<
+      meta::list<result_of_t<V(Ts, Args...)>...>,
+      ::std::is_same,
+      result_of_t<V(Ts, Args...)>
+    >()...
+  >(),
+  result_of_t<V(meta::get<meta::list<Ts...>, 0>, Args...)>,
+  common_type_t<result_of_t<V(Ts, Args...)>...>
+> { };
+
+template <class V, class T, class... Args>
+using result_t = typename result<V, T, Args...>::type;
 
 }}} /* namespace core::v2::impl */
 
@@ -46,6 +64,9 @@ struct bad_variant_get final : ::std::logic_error {
 #else /* CORE_NO_EXCEPTIONS */
 [[noreturn]] inline void throw_bad_variant_get () { ::std::abort(); }
 #endif /* CORE_NO_EXCEPTIONS */
+
+template <::std::size_t> struct emplace_index_t { };
+template <class T> struct emplace_type_t { };
 
 /* visitation semantics require that, given a callable type C, and variadic
  * arguments Args... that the return type of the visit will be SFINAE-ified
@@ -64,9 +85,9 @@ template <class... Ts>
 class variant final {
   using typelist = meta::list<Ts...>;
 
-  static_assert(meta::all<(meta::count<typelist, Ts>() == 1)>...>(), "")
-  static_assert(meta::none_of<typelist, is_reference>::value, "");
-  static_assert(meta::none_of<typelist, is_void>::value, "");
+  //static_assert(meta::all<(meta::count<typelist, Ts>() == 1)...>(), "");
+  static_assert(meta::none_of<typelist, ::std::is_reference>(), "");
+  static_assert(meta::none_of<typelist, ::std::is_void>(), "");
 
   using storage_type = aligned_union_t<0, Ts...>;
 
@@ -128,41 +149,40 @@ class variant final {
     }
   };
 
-#ifndef CORE_NO_RTTI
-  struct type_info final {
+  struct typeinfo final {
     template <class T>
-    ::std::type_info const* operator ()(T&&) const noexcept {
-      return ::std::addressof(typeid(decay_t<T>));
+    type_info const* operator ()(T&&) const noexcept {
+      return ::std::addressof(typeof<decay_t<T>>());
     }
   };
-#endif /* CORE_NO_RTTI */
 
   template <
     ::std::size_t N,
-    class=enable_if_t<N < sizeof...(Ts)>,
+    class=enable_if_t<N < typelist::size()>,
     class T
   > explicit variant (size<N>&&, ::std::false_type&&, T&& value) :
     variant {
       size<N + 1> { },
-      ::std::is_constructible<type_at_t<N + 1, Ts...>, T> { },
+      ::std::is_constructible<meta::get<meta::list<Ts...>, N + 1>, T> { },
       ::core::forward<T>(value)
     }
   { }
 
   template <
     ::std::size_t N,
-    class=enable_if_t<N < sizeof...(Ts)>,
+    class=enable_if_t<N < typelist::size()>,
     class T
   > explicit variant (size<N>&&, ::std::true_type&&, T&& value) :
     data { }, tag { N }
-  { ::new (this->target()) type_at_t<N, Ts...> (::core::forward<T>(value)); }
+  { ::new (this->target()) element<N> (::core::forward<T>(value)); }
 
   template <class T>
-  using select_index = conditional_t<
-    meta::count<decay_t<T>, typelist>::value,
-    meta::index<decay_t<T>, typelist>,
+  using select_index = meta::either<
+    meta::count<typelist, decay_t<T>>(),
+    meta::index_of_t<typelist, decay_t<T>>,
     size<0>
   >;
+
 
 public:
 
@@ -179,30 +199,53 @@ public:
    */
   template <
     class T,
-    class=enable_if_t<not ::std::is_same<decay_t<T>, variant>::value>
+    meta::inhibit<::std::is_same<decay_t<T>, variant>::value> = __LINE__
   > variant (T&& value) :
     variant {
       select_index<T> { },
-      ::std::is_constructible<type_at_t<select_index<T>::value, Ts...>, T> { },
+      ::std::is_constructible<element<select_index<T>::value>, T> { },
       ::core::forward<T>(value)
     }
   { }
 
+  template <
+    class T,
+    class... Args,
+    meta::require<meta::count<typelist, T>() == 1> = __LINE__,
+    meta::require<::std::is_constructible<T, Args...>::value> = __LINE__
+  > variant (emplace_type_t<T>, Args&&... args) :
+    data { },
+    tag { meta::index_of<typelist, T>() }
+  { ::new (this->target()) T(::core::forward<Args>(args)...); }
+
+  template <
+    ::std::size_t I,
+    class... Args,
+    meta::require<I < typelist::size()> = __LINE__,
+    meta::require<
+      ::std::is_constructible<element<I>, Args...>::value
+    > = __LINE__
+  > variant (emplace_index_t<I>, Args&&... args) :
+    data { },
+    tag { I }
+  { ::new (this->target()) element<I>(::core::forward<Args>(args)...); }
+
   variant (variant const& that) :
-    data { }, tag { that.tag }
+    data { },
+    tag { that.tag }
   { that.visit(copier { this->target() }); }
 
   variant (variant&& that) noexcept :
     data { }, tag { that.tag }
   { that.visit(mover { this->target() }); }
 
-  variant () : variant { type_at_t<0, Ts...> { } } { }
+  variant () : variant { element<0> { } } { }
 
   ~variant () { this->visit(destroyer { }); }
 
   template <
     class T,
-    class=enable_if_t<not ::std::is_same<decay_t<T>, variant>::value>
+    meta::inhibit<::std::is_same<decay_t<T>, variant>::value> = __LINE__
   > variant& operator = (T&& value) {
     variant { ::core::forward<T>(value) }.swap(*this);
     return *this;
@@ -234,7 +277,7 @@ public:
   }
 
   void swap (variant& that) noexcept(
-    meta::all<is_nothrow_swappable<Ts>...>::value
+    meta::all_of<typelist, is_nothrow_swappable>()
   ) {
     if (this->index() == that.index()) {
       that.visit(swapper { this->target() });
@@ -248,18 +291,16 @@ public:
   /* V stands for Visitor */
   template <class V, class... Args>
   auto visit (V&& visitor, Args&&... args) -> common_type_t<
-    invoke_of_t<V, add_lvalue_reference_t<Ts>, Args...>...
+    result_of_t<V(add_lvalue_reference_t<Ts>, Args...)>...
   > {
-    using return_type = common_type_t<
-      invoke_of_t<
-        V,
-        add_lvalue_reference_t<Ts>,
-        Args...
-      >...
+    using return_type = impl::result_t<
+      V,
+      meta::list<add_lvalue_reference_t<Ts>...>,
+      Args...
     >;
     using function = add_pointer_t<return_type(V&&, void*, Args&&...)>;
     static auto const callers = make_array(
-      impl::visitor_gen<V, Ts, void, function, Args...>()...
+      impl::gen<V, Ts, void, function, Args...>()...
     );
 
     return callers[this->tag](
@@ -272,25 +313,15 @@ public:
   /* V stands for Visitor */
   template <class V, class... Args>
   auto visit (V&& visitor, Args&&... args) const -> common_type_t<
-    invoke_of_t<V, add_lvalue_reference_t<add_const_t<Ts>>, Args...>...
+    result_of_t<V(add_lvalue_reference_t<add_const_t<Ts>>, Args...)>...
   > {
-    using return_type = common_type_t<
-      invoke_of_t<
-        V,
-        add_lvalue_reference_t<add_const_t<Ts>>,
-        Args...
-      >...
+    using return_type = impl::result_t<
+      V, meta::list<add_lvalue_reference_t<add_const_t<Ts>>...>, Args...
     >;
 
     using function = add_pointer_t<return_type(V&&, void const*, Args&&...)>;
     static auto const callers = make_array(
-      impl::visitor_gen<
-        V,
-        add_const_t<Ts>,
-        void const,
-        function,
-        Args...
-      >()...
+      impl::gen<V, add_const_t<Ts>, void const, function, Args...>()...
     );
 
     return callers[this->tag](
@@ -321,21 +352,22 @@ public:
     return static_cast<add_pointer_t<element<N>>>(this->target());
   }
 
-#ifndef CORE_NO_RTTI
-  ::std::type_info const& type () const noexcept {
-    return *this->visit(type_info { });
+  type_info const& type () const noexcept {
+    return *this->visit(typeinfo { });
   }
-#endif /* CORE_NO_RTTI */
+
+  // Boost.Variant compatibility
+  ::std::size_t which () const noexcept { return this->index(); }
 
   ::std::size_t index () const noexcept { return this->tag; }
   bool empty () const noexcept { return false; }
 
 private:
-  void const* target () const noexcept { return ::std::addressof(this->data); }
-  void* target () noexcept { return ::std::addressof(this->data); }
+  void const* target () const noexcept { return as_void(this->data); }
+  void* target () noexcept { return as_void(this->data); }
 
   storage_type data;
-  ::std::uint8_t tag;
+  ::std::size_t tag;
 };
 
 template <class... Ts>
@@ -418,7 +450,7 @@ auto get (variant<Ts...>&& v) noexcept(false) -> meta::unless<
 
 template <class T, class... Ts>
 auto get (variant<Ts...>& v) noexcept(false) -> meta::unless<
-  not meta::find<meta::list<Ts...>, T>::empty(),
+  meta::find<meta::list<Ts...>, T>::empty(),
   decltype(get<meta::index_of<meta::list<Ts...>, T>()>(v))
 > { return get<meta::index_of<meta::list<Ts...>, T>()>(v); }
 
@@ -427,31 +459,11 @@ auto get (variant<Ts...>& v) noexcept(false) -> meta::unless<
 namespace std {
 
 template <class... Ts>
-struct hash<core::v2::variant<Ts...>> {
-  using argument_type = core::v2::variant<Ts...>;
-  using result_type = size_t;
-  result_type operator () (argument_type const& value) const {
+struct hash<::core::v2::variant<Ts...>> {
+  size_t operator () (::core::v2::variant<Ts...> const& value) const {
     return value.match(hash<Ts> { }...);
   }
 };
-
-template <size_t I, class... Ts>
-[[gnu::deprecated]]
-auto get (::core::v2::variant<Ts...> const& v) noexcept(false) -> decltype(
-  ::core::v2::get<I>(v)
-) { return ::core::v2::get<I>(v); }
-
-template <size_t I, class... Ts>
-[[gnu::deprecated]]
-auto get (::core::v2::variant<Ts...>&& v) noexcept(false) -> decltype(
-  ::core::v2::get<I>(v)
-) { return ::core::v2::get<I>(v); }
-
-template <size_t I, class... Ts>
-[[gnu::deprecated]]
-auto get (::core::v2::variant<Ts...>& v) noexcept (false) -> decltype(
-  ::core::v2::get<I>(v)
-) { return ::core::v2::get<I>(v); }
 
 } /* namespace std */
 
