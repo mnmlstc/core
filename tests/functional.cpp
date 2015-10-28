@@ -54,4 +54,17 @@ TEST_CASE("functional") {
     CHECK(mem_fn_arity == 1u);
     CHECK(empty_arity == 0u);
   }
+
+  SECTION("issue-40") {
+    struct A { };
+    struct B { };
+    struct C { };
+
+    using fun = core::add_pointer_t<A(B, C)>;
+    using first_argument = core::function_traits<fun>::argument<0>;
+    using second_argument = core::function_traits<fun>::argument<1>;
+
+    static_assert(std::is_same<first_argument, B>::value, "Type Mismatch");
+    static_assert(std::is_same<second_argument, C>::value, "Type Mismatch");
+  }
 }

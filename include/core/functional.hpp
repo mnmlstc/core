@@ -50,7 +50,7 @@ struct function_traits<R(Args...)> {
   using pointer = add_pointer_t<return_type(Args...)>;
   static constexpr auto arity = typelist::size();
 
-  template <::std::size_t N> using argument = meta::get<typelist, 0>;
+  template <::std::size_t N> using argument = meta::get<typelist, N>;
 };
 
 template <class F> struct function_traits {
