@@ -18,6 +18,10 @@ template <class T> using identity = meta::identity<T>;
 template <class T> using class_of_t = impl::class_of_t<T>;
 template <class T> using class_of = impl::class_of<T>;
 
+template <class... Ts> using conjunction = meta::all_t<Ts::value...>;
+template <class... Ts> using disjunction = meta::any_t<Ts::value...>;
+template <class... Ts> using negation = meta::none_t<Ts::value...>;
+
 template <::std::size_t I, class T>
 using tuple_element_t = typename ::std::tuple_element<I, T>::type;
 template <class T> using tuple_size_t = typename ::std::tuple_size<T>::type;

@@ -192,7 +192,7 @@ struct number_iterator {
 
   void swap (number_iterator& that) noexcept {
     ::std::swap(this->value, that.value);
-    ::std::swap(this->value, that.value);
+    ::std::swap(this->step, that.step);
   }
 
   reference operator * () noexcept { return this->value; }
