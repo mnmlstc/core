@@ -62,14 +62,14 @@ struct storage {
     engaged { that.engaged }
   {
     if (not this->engaged) { return; }
-    ::new (::std::addressof(this->val)) value_type(that.val);
+    ::new (::core::as_void(this->val)) value_type(that.val);
   }
 
   storage (storage&& that) noexcept(nothrow) :
     engaged { that.engaged }
   {
     if (not this->engaged) { return; }
-    ::new (::std::addressof(this->val)) value_type(::core::move(that.val));
+    ::new (::core::as_void(this->val)) value_type(::core::move(that.val));
   }
 
   constexpr storage (value_type const& value) :
@@ -108,14 +108,14 @@ struct storage<T, true> {
     engaged { that.engaged }
   {
     if (not this->engaged) { return; }
-    ::new (::std::addressof(this->val)) value_type(that.val);
+    ::new (::core::as_void(this->val)) value_type(that.val);
   }
 
   storage (storage&& that) noexcept(nothrow) :
     engaged { that.engaged }
   {
     if (not this->engaged) { return; }
-    ::new (::std::addressof(this->val)) value_type(::core::move(that.val));
+    ::new (::core::as_void(this->val)) value_type(::core::move(that.val));
   }
 
   constexpr storage (value_type const& value) :
@@ -332,7 +332,7 @@ struct optional final : private impl::storage<Type> {
   template <class T, class... Args>
   void emplace (::std::initializer_list<T> il, Args&&... args) {
     *this = nullopt;
-    ::new (::std::addressof(this->val)) value_type(
+    ::new (::core::as_void(this->val)) value_type(
       il,
       ::core::forward<Args>(args)...
     );
@@ -342,7 +342,7 @@ struct optional final : private impl::storage<Type> {
   template <class... Args>
   void emplace (Args&&... args) {
     *this = nullopt;
-    ::new (::std::addressof(this->val)) value_type(
+    ::new (::core::as_void(this->val)) value_type(
       ::core::forward<Args>(args)...
     );
     this->engaged = true;
@@ -399,6 +399,7 @@ private:
 template <class Type>
 struct expected final {
   using value_type = Type;
+  using error_type = ::std::exception_ptr;
 
   static constexpr bool nothrow = ::std::is_nothrow_move_constructible<
     value_type
@@ -476,15 +477,16 @@ struct expected final {
   expected (expected const& that) :
     valid { that.valid }
   {
-    if (*this) { ::new (::core::as_void(this->val)) auto(that.val); }
-    else { ::new (::core::as_void(this->ptr)) auto(that.ptr); }
+    if (*this) { ::new (::core::as_void(this->val)) value_type(that.val); }
+    else { ::new (::core::as_void(this->ptr)) error_type(that.ptr); }
   }
 
   expected (expected&& that) noexcept(nothrow) :
     valid { that.valid }
   {
-    if (*this) { ::new (as_void(this->val)) auto(::core::move(that.val)); }
-    else { ::new (as_void(this->ptr)) auto(that.ptr); }
+    if (*this) {
+      ::new (::core::as_void(this->val)) value_type(::core::move(that.val));
+    } else { ::new (::core::as_void(this->ptr)) error_type(that.ptr); }
   }
 
   expected () :
@@ -674,6 +676,7 @@ struct result final {
   template <class U> friend struct result;
 
   using value_type = Type;
+  using error_type = ::std::error_condition;
 
   static constexpr bool nothrow = ::std::is_nothrow_move_constructible<
     value_type
@@ -762,8 +765,8 @@ struct result final {
   > result (result<T> const& that) :
     valid { that.valid }
   {
-    if (*this) { ::new (as_void(this->val)) auto(that.val); }
-    else { ::new (as_void(this->cnd)) auto(that.cnd); }
+    if (*this) { ::new (::core::as_void(this->val)) value_type(that.val); }
+    else { ::new (::core::as_void(this->cnd)) error_type(that.cnd); }
   }
 
 
@@ -778,8 +781,9 @@ struct result final {
   > result (result<T>&& that) :
     valid { that.valid }
   {
-    if (*this) { ::new (as_void(this->val)) auto(::core::move(that.val)); }
-    else { ::new (as_void(this->cnd)) auto(that.cnd); }
+    if (*this) {
+      ::new (::core::as_void(this->val)) value_type(::core::move(that.val));
+    } else { ::new (::core::as_void(this->cnd)) error_type(that.cnd); }
   }
 
   template <
@@ -809,15 +813,16 @@ struct result final {
   result (result const& that) :
     valid { that.valid }
   {
-    if (*this) { ::new (as_void(this->val)) auto(that.val); }
-    else { ::new (as_void(this->cnd)) auto(that.cnd); }
+    if (*this) { ::new (::core::as_void(this->val)) value_type(that.val); }
+    else { ::new (::core::as_void(this->cnd)) error_type(that.cnd); }
   }
 
   result (result&& that) :
     valid { that.valid }
   {
-    if (*this) { ::new (as_void(this->val)) auto(::core::move(that.val)); }
-    else { ::new (as_void(this->cnd)) auto(that.cnd); }
+    if (*this) {
+      ::new (::core::as_void(this->val)) value_type(::core::move(that.val));
+    } else { ::new (::core::as_void(this->cnd)) error_type(that.cnd); }
   }
 
   result () :
@@ -886,7 +891,7 @@ struct result final {
     if (not *this) { this->cnd = cnd; }
     else {
       this->reset();
-      ::new (::std::addressof(this->cnd)) ::std::error_condition(cnd);
+      ::new (::core::as_void(this->cnd)) error_type(cnd);
       this->valid = false;
     }
     return *this;
@@ -930,7 +935,7 @@ struct result final {
   template <class T, class... Args>
   void emplace (::std::initializer_list<T> il, Args&&... args) {
     this->reset();
-    ::new (::std::addressof(this->val)) value_type(
+    ::new (::core::as_void(this->val)) value_type(
       il,
       ::core::forward<Args>(args)...
     );
@@ -940,7 +945,7 @@ struct result final {
   template <class... Args>
   void emplace (Args&&... args) {
     this->reset();
-    ::new (::std::addressof(this->val)) value_type(
+    ::new (::core::as_void(this->val)) value_type(
       ::core::forward<Args>(args)...
     );
     this->valid = true;
@@ -994,7 +999,7 @@ private:
 
   union {
     value_type val;
-    ::std::error_condition cnd;
+    error_type cnd;
   };
   bool valid { false };
 };
