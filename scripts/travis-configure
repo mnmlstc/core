@@ -1,7 +1,6 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/bin/sh
 
-# travis-build.py - build script
+# travis-configure - build-script
 # Written in 2015 by MNMLSTC
 # To the extent possible under law, the author(s) have dedicated all copyright
 # and related and neighboring rights to this software to the public domain
@@ -9,13 +8,12 @@
 # received a copy of the CC0 Public Domain Dedication along with this software.
 # If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+CURRENT=$(pwd)
 
-from __future__ import print_function
-from utility import LocateError
-from utility import execute
-from utility import which
-from utility import exit
+mkdir build && cd build || exit 1
 
-if __name__ == '__main__':
-    try: execute(which('cmake'), '--build', 'build', '--target', 'check')
-    except LocateError as e: exit(e)
+$HOME/cmake/bin/cmake $CURRENT \
+  -DCMAKE_BUILD_TYPE:STRING=${BUILD:-Debug} \
+  -DBUILD_WITH_COVERAGE:BOOL=ON \
+  -DBUILD_WITH_LIBCXX:BOOL=${LIBCXX:-OFF}
+  -DBUILD_TESTING:BOOL=ON

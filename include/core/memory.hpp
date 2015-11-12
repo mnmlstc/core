@@ -21,14 +21,29 @@
 #endif /* CORE_NO_RTTI */
 
 /* Small hack just for libstdc++ released with 4.8.x. Trust me, it's needed */
-#if defined(__GLIBCXX__)
-  #if __GLIBCXX__ == 20131008 || \
-      __GLIBCXX__ == 20131016 || \
-      __GLIBCXX__ == 20140522 || \
-      __GLIBCXX__ == 20141219
+#define CORE_LIBSTDCXX_MAX_ALIGN_HACK 0
+
+#if defined(__clang__) and defined(__GLIBCXX__)
+  #if __GLIBCXX__ == 20131008 or \
+    __GLIBCXX__ == 20131016 or \
+    __GLIBCXX__ == 20140522 or \
+    __GLIBCXX__ == 20141219
+    #undef CORE_LIBSTDCXX_MAX_ALIGN_HACK
+    #define CORE_LIBSTDCXX_MAX_ALIGN_HACK
+  #endif /* __GLIBCXX__ == N */
+#endif /* defined(__clang__) and defined(__GLIBCXX__) */
+
+/* separate check for g++ is done because of spurious failures in travis-ci */
+#if not defined(__clang__) and defined(__GXX_ABI_VERSION)
+  #if  __GNUC__ == 4 and __GNUC_MINOR__ == 8
+    #undef CORE_LIBSTDCXX_MAX_ALIGN_HACK
+    #define CORE_LIBSTDCXX_MAX_ALIGN_HACK 1
+  #endif /* __GNUC__ == 4 and __GNUC_MINOR__ == 8 */
+#endif /* not defined(__clang__) */
+
+#if CORE_LIBSTDCXX_MAX_ALIGN_HACK
   namespace std { using ::max_align_t; } /* namespace std */
-  #endif
-#endif /* defined(__GLIBCXX__) */
+#endif /* CORE_LIBSTDCXX_MAX_ALIGN_HACK */
 
 namespace core {
 inline namespace v2 {

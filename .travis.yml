@@ -1,45 +1,353 @@
 # Matrix Build Declaration
 language: cpp
-
-compiler:
-  - clang
-  - gcc
-
-env:
-  - BUILD_TYPE=Release PACKAGE=3.4
-  - BUILD_TYPE=Release PACKAGE=3.5
-  - BUILD_TYPE=Release PACKAGE=3.6
-  - BUILD_TYPE=Release PACKAGE=4.8
-  - BUILD_TYPE=Release PACKAGE=4.9
-  - BUILD_TYPE=Debug PACKAGE=3.4
-  - BUILD_TYPE=Debug PACKAGE=3.5
-  - BUILD_TYPE=Debug PACKAGE=3.6
-  - BUILD_TYPE=Debug PACKAGE=4.8
-  - BUILD_TYPE=Debug PACKAGE=4.9
-
-# We don't want a version mismatch between gcc and clang
-matrix:
-  exclude:
-    - { compiler: clang, env: BUILD_TYPE=Release PACKAGE=4.8 }
-    - { compiler: clang, env: BUILD_TYPE=Release PACKAGE=4.9 }
-    - { compiler: clang, env: BUILD_TYPE=Debug PACKAGE=4.8 }
-    - { compiler: clang, env: BUILD_TYPE=Debug PACKAGE=4.9 }
-    - { compiler: gcc, env: BUILD_TYPE=Release PACKAGE=3.4 }
-    - { compiler: gcc, env: BUILD_TYPE=Release PACKAGE=3.5 }
-    - { compiler: gcc, env: BUILD_TYPE=Release PACKAGE=3.6 }
-    - { compiler: gcc, env: BUILD_TYPE=Debug PACKAGE=3.4 }
-    - { compiler: gcc, env: BUILD_TYPE=Debug PACKAGE=3.5 }
-    - { compiler: gcc, env: BUILD_TYPE=Debug PACKAGE=3.6 }
-
+sudo: false
 branches:
   only: master
+git:
+  submodules: false
+cache:
+  directories:
+    - ${HOME}/cmake
+before_install: bash ./scripts/travis-before-install
+before_script: bash ./scripts/travis-configure
 
-# Environment Setup (Fixing Travis-CI, effectively)
-before_install: python ./scripts/travis-before-install.py
-install: python ./scripts/travis-install.py
+install: bash ./scripts/travis-install
+script: bash ./scripts/travis-build
 
-# Configure, Build, Test Steps
-before_script: python ./scripts/travis-configure.py
-script: python ./scripts/travis-build.py
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+      - llvm-toolchain-precise-3.4
+      - llvm-toolchain-precise-3.5
+      - llvm-toolchain-precise-3.6
+      - llvm-toolchain-precise-3.7
 
-after_failure: python ./scripts/travis-failure.py
+# We have a large number of targets to hit and travis-ci doesn't let us
+# 'append' values to a given row to produce more so we need to MANUALLY
+# declare all of them so that we can have "fine grained control"
+matrix:
+  include:
+    # osx : clang : release
+    - os: osx
+      compiler: clang
+      env: BUILD=Release
+      osx_image: xcode7.2b3
+    - os: osx
+      compiler: clang
+      env: BUILD=Release
+      osx_image: xcode7.1
+    - os: osx
+      compiler: clang
+      env: BUILD=Release
+      osx_image: xcode7
+    - os: osx
+      compiler: clang
+      env: BUILD=Release
+      osx_image: xcode6.4
+    - os: osx
+      compiler: clang
+      env: BUILD=Release
+      osx_image: beta-xcode6.3
+    - os: osx
+      compiler: clang
+      env: BUILD=Release
+      osx_image: beta_xcode6.2
+    - os: osx
+      compiler: clang
+      env: BUILD=Release
+
+    # osx : gcc : release
+    - os: osx
+      compiler: gcc
+      env: BUILD=Release VERSION=5
+    - os: osx
+      compiler: gcc
+      env: BUILD=Release VERSION=4.9
+    - os: osx
+      compiler: gcc
+      env: BUILD=Release VERSION=4.8
+
+    # osx : clang : debug
+    - os: osx
+      compiler: clang
+      env: BUILD=Debug
+      osx_image: xcode7.2b3
+    - os: osx
+      compiler: clang
+      env: BUILD=Debug
+      osx_image: xcode7.1
+    - os: osx
+      compiler: clang
+      env: BUILD=Debug
+      osx_image: xcode7
+    - os: osx
+      compiler: clang
+      env: BUILD=Debug
+      osx_image: xcode6.4
+    - os: osx
+      compiler: clang
+      env: BUILD=Debug
+      osx_image: beta-xcode6.3
+    - os: osx
+      compiler: clang
+      env: BUILD=Debug
+      osx_image: beta_xcode6.2
+    - os: osx
+      compiler: clang
+      env: BUILD=Debug
+
+    # os x : gcc : debug
+    - os: osx
+      compiler: gcc
+      env: BUILD=Debug VERSION=5
+    - os: osx
+      compiler: gcc
+      env: BUILD=Debug VERSION=4.9
+    - os: osx
+      compiler: gcc
+      env: BUILD=Debug VERSION=4.8
+
+    # os x : clang : libc++ : release
+    - os: linux
+      compiler: clang
+      env: BUILD=Release VERSION=3.7 LIBCXX=ON
+      addons:
+        apt:
+          packages:
+            - clang-3.7
+            - libc++1
+    - os: linux
+      compiler: clang
+      env: BUILD=Release VERSION=3.6 LIBCXX=ON
+      addons:
+        apt:
+          packages:
+            - clang-3.6
+            - libc++1
+    - os: linux
+      compiler: clang
+      env: BUILD=Release VERSION=3.5 LIBCXX=ON
+      addons:
+        apt:
+          packages:
+            - clang-3.5
+            - libc++1
+    - os: linux
+      compiler: clang
+      env: BUILD=Release VERSION=3.4 LIBCXX=ON
+      addons:
+        apt:
+          packages:
+            - clang-3.4
+            - libc++1
+    # os x : clang : libstdc++-4.9 : release
+    - os: linux
+      compiler: clang
+      env: BUILD=Release VERSION=3.7
+      addons:
+        apt:
+          packages:
+            - clang-3.7
+            - libstdc++-4.9-dev
+    - os: linux
+      compiler: clang
+      env: BUILD=Release VERSION=3.6
+      addons:
+        apt:
+          packages:
+            - clang-3.6
+            - libstdc++-4.9-dev
+    - os: linux
+      compiler: clang
+      env: BUILD=Release VERSION=3.5
+      addons:
+        apt:
+          packages:
+            - clang-3.5
+            - libstdc++-4.9-dev
+    - os: linux
+      compiler: clang
+      env: BUILD=Release VERSION=3.4
+      addons:
+        apt:
+          packages:
+            - clang-3.4
+            - libstdc++-4.9-dev
+    # os x : clang : libstdc++-4.8 : release
+    - os: linux
+      compiler: clang
+      env: BUILD=Release VERSION=3.7
+      addons:
+        apt:
+          packages:
+            - clang-3.7
+            - libstdc++-4.8-dev
+    - os: linux
+      compiler: clang
+      env: BUILD=Release VERSION=3.6
+      addons:
+        apt:
+          packages:
+            - clang-3.6
+            - libstdc++-4.8-dev
+    - os: linux
+      compiler: clang
+      env: BUILD=Release VERSION=3.5
+      addons:
+        apt:
+          packages:
+            - clang-3.5
+            - libstdc++-4.8-dev
+    - os: linux
+      compiler: clang
+      env: BUILD=Release VERSION=3.4
+      addons:
+        apt:
+          packages:
+            - clang-3.4
+            - libstdc++-4.8-dev
+
+    # linux : gcc : release
+    - os: linux
+      compiler: gcc
+      env: BUILD=Release VERSION=5
+      addons:
+        apt:
+          packages:
+            - gcc-5
+    - os: linux
+      compiler: gcc
+      env: BUILD=Release VERSION=4.9
+      addons:
+        apt:
+          packages:
+            - gcc-4.9
+    - os: linux
+      compiler: gcc
+      env: BUILD=Release VERSION=4.8
+      addons:
+        apt:
+          packages:
+            - gcc-4.8
+    # linux : clang : libc++ : debug
+    - os: linux
+      compiler: clang
+      env: BUILD=Debug VERSION=3.7 LIBCXX=ON
+      addons:
+        apt:
+          packages:
+            - clang-3.7
+            - libc++1
+    - os: linux
+      compiler: clang
+      env: BUILD=Debug VERSION=3.6 LIBCXX=ON
+      addons:
+        apt:
+          packages:
+            - clang-3.6
+            - libc++1
+    - os: linux
+      compiler: clang
+      env: BUILD=Debug VERSION=3.5 LIBCXX=ON
+      addons:
+        apt:
+          packages:
+            - clang-3.5
+            - libc++1
+    - os: linux
+      compiler: clang
+      env: BUILD=Debug VERSION=3.4 LIBCXX=ON
+      addons:
+        apt:
+          packages:
+            - clang-3.4
+            - libc++1
+    # linux : clang : libstdc++-4.9 : debug
+    - os: linux
+      compiler: clang
+      env: BUILD=Debug VERSION=3.7
+      addons:
+        apt:
+          packages:
+            - clang-3.7
+            - libstdc++-4.9-dev
+    - os: linux
+      compiler: clang
+      env: BUILD=Debug VERSION=3.6
+      addons:
+        apt:
+          packages:
+            - clang-3.6
+            - libstdc++-4.9-dev
+    - os: linux
+      compiler: clang
+      env: BUILD=Debug VERSION=3.5
+      addons:
+        apt:
+          packages:
+            - clang-3.5
+            - libstdc++-4.9-dev
+    - os: linux
+      compiler: clang
+      env: BUILD=Debug VERSION=3.4
+      addons:
+        apt:
+          packages:
+            - clang-3.4
+            - libstdc++-4.9-dev
+    # linux : clang : libstdc++-4.8 : debug
+    - os: linux
+      compiler: clang
+      env: BUILD=Debug VERSION=3.7
+      addons:
+        apt:
+          packages:
+            - clang-3.7
+            - libstdc++-4.8-dev
+    - os: linux
+      compiler: clang
+      env: BUILD=Debug VERSION=3.6
+      addons:
+        apt:
+          packages:
+            - clang-3.6
+            - libstdc++-4.8-dev
+    - os: linux
+      compiler: clang
+      env: BUILD=Debug VERSION=3.5
+      addons:
+        apt:
+          packages:
+            - clang-3.5
+            - libstdc++-4.8-dev
+    - os: linux
+      compiler: clang
+      env: BUILD=Debug VERSION=3.4
+      addons:
+        apt:
+          packages:
+            - clang-3.4
+            - libstdc++-4.8-dev
+    # linux : gcc : debug
+    - os: linux
+      compiler: gcc
+      env: BUILD=Debug VERSION=5
+      addons:
+        apt:
+          packages:
+            - gcc-5
+    - os: linux
+      compiler: gcc
+      env: BUILD=Debug VERSION=4.9
+      addons:
+        apt:
+          packages:
+            - gcc-4.9
+    - os: linux
+      compiler: gcc
+      env: BUILD=Debug VERSION=4.8
+      addons:
+        apt:
+          packages:
+            - gcc-4.8

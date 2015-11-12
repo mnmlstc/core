@@ -29,7 +29,6 @@ struct is_small final : meta::all_t<
 > { };
 template <> struct is_small<void> final : ::std::true_type { };
 
-// TODO: rename the child classes so that one may take an Allocator ;)
 template <class T=void, bool=is_small<T>::value> struct dispatch;
 template <> struct dispatch<void, true> {
   dispatch () noexcept = default;
@@ -38,7 +37,7 @@ template <> struct dispatch<void, true> {
   virtual void clone (data_type const&, data_type&) const { }
   virtual void move (data_type&, data_type&) const noexcept { }
   virtual void destroy (data_type&) const noexcept { }
-  virtual type_info const& type () const noexcept { return typeof<void>(); }
+  virtual type_info const& type () const noexcept { return type_of<void>(); }
 };
 
 template <class T>
@@ -70,7 +69,7 @@ struct dispatch<T, true> final : dispatch<> {
   }
 
   virtual type_info const& type () const noexcept final {
-    return typeof<value_type>();
+    return type_of<value_type>();
   }
 };
 
@@ -113,7 +112,7 @@ struct dispatch<T, false> final : dispatch<> {
   }
 
   virtual type_info const& type () const noexcept final {
-    return typeof<value_type>();
+    return type_of<value_type>();
   }
 };
 
@@ -261,14 +260,14 @@ private:
 
 template <class T>
 T const* any_cast (any const* operand) noexcept {
-  return operand and operand->type() == typeof<T>()
+  return operand and operand->type() == type_of<T>()
     ? operand->cast<T>(impl::is_small<T> { })
     : nullptr;
 }
 
 template <class T>
 T* any_cast (any* operand) noexcept {
-  return operand and operand->type() == typeof<T>()
+  return operand and operand->type() == type_of<T>()
     ? operand->cast<T>(impl::is_small<T> { })
     : nullptr;
 }

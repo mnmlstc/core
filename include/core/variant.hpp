@@ -152,7 +152,7 @@ class variant final {
   struct typeinfo final {
     template <class T>
     type_info const* operator ()(T&&) const noexcept {
-      return ::std::addressof(typeof<decay_t<T>>());
+      return ::std::addressof(type_of<decay_t<T>>());
     }
   };
 

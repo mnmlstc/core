@@ -11,9 +11,6 @@ function(require_cxx_include_file header)
   if (CAN_USE_STDLIB_LIBCXX AND BUILD_WITH_LIBCXX)
     set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} ${USE_STDLIB_LIBCXX}")
   endif ()
-  if (CAN_USE_STD_CXX11)
-    set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} ${USE_STD_CXX11}")
-  endif ()
   check_include_file_cxx(${header} variable)
   if (NOT variable)
     message(FATAL_ERROR "Header <${header}> could not be found")
@@ -30,7 +27,6 @@ function(add_unit_test name file)
     PRIVATE
       $<$<BOOL:${BUILD_WITH_COVERAGE}>:${USE_COVERAGE}>
       $<$<AND:${LIBCXX}>:${USE_STDLIB_LIBCXX}>
-      $<$<BOOL:${CAN_USE_STD_CXX11}>:${USE_STD_CXX11}>
       $<$<AND:${NO_RTTI}>:${USE_NO_RTTI}>
 
       $<$<BOOL:${CAN_SANITIZE_UNDEFINED}>:${SANITIZE_UNDEFINED}>
@@ -56,6 +52,7 @@ function(add_unit_test name file)
       $<$<BOOL:${CAN_WARN_NO_DEPRECATED}>:${WARN_NO_DEPRECATED}>
       $<$<BOOL:${CAN_WARN_NO_ATTRIBUTES}>:${WARN_NO_ATTRIBUTES}>
       $<$<BOOL:${CAN_WARN_NO_EXIT_TIME}>:${WARN_NO_EXIT_TIME}>
+      $<$<BOOL:${CAN_WARN_NO_MACRO_EXP}>:${WARN_NO_MACRO_EXP}>
       $<$<BOOL:${CAN_WARN_NO_SHADOW}>:${WARN_NO_SHADOW}>
       $<$<BOOL:${CAN_WARN_NO_PADDED}>:${WARN_NO_PADDED}>)
 
@@ -72,7 +69,6 @@ endfunction ()
 # Compiler Environment Check
 #------------------------------------------------------------------------------
 set(USE_STDLIB_LIBCXX "-stdlib=libc++")
-set(USE_STD_CXX11 "-std=c++11")
 set(USE_COVERAGE "--coverage")
 
 set(USE_NO_EXCEPTIONS "-fno-exceptions")
@@ -103,6 +99,7 @@ set(WARN_NO_FLOAT_EQUAL "-Wno-float-equal")
 set(WARN_NO_DEPRECATED "-Wno-deprecated-declarations")
 set(WARN_NO_ATTRIBUTES "-Wno-attributes")
 set(WARN_NO_EXIT_TIME "-Wno-exit-time-destructors")
+set(WARN_NO_MACRO_EXP "-Wno-disabled-macro-expansion")
 set(WARN_NO_SHADOW "-Wno-shadow")
 set(WARN_NO_PADDED "-Wno-padded")
 
@@ -114,7 +111,6 @@ if (MSVC)
 endif ()
 
 check_cxx_compiler_flag(${USE_STDLIB_LIBCXX} CAN_USE_STDLIB_LIBCXX)
-check_cxx_compiler_flag(${USE_STD_CXX11} CAN_USE_STD_CXX11)
 check_cxx_compiler_flag(${USE_NO_RTTI} CAN_USE_NO_RTTI)
 
 check_cxx_compiler_flag(${SANITIZE_UNDEFINED} CAN_SANITIZE_UNDEFINED)
@@ -142,6 +138,7 @@ check_cxx_compiler_flag(${WARN_NO_FLOAT_EQUAL} CAN_WARN_NO_FLOAT_EQUAL)
 check_cxx_compiler_flag(${WARN_NO_DEPRECATED} CAN_WARN_NO_DEPRECATED)
 check_cxx_compiler_flag(${WARN_NO_ATTRIBUTES} CAN_WARN_NO_ATTRIBUTES)
 check_cxx_compiler_flag(${WARN_NO_EXIT_TIME} CAN_WARN_NO_EXIT_TIME)
+check_cxx_compiler_flag(${WARN_NO_MACRO_EXP} CAN_WARN_NO_MACRO_EXP)
 check_cxx_compiler_flag(${WARN_NO_SHADOW} CAN_WARN_NO_SHADOW)
 check_cxx_compiler_flag(${WARN_NO_PADDED} CAN_WARN_NO_PADDED)
 

@@ -16,7 +16,7 @@ inline namespace v2 {
 using type_info = ::std::type_info;
 
 template <class T>
-type_info const& typeof () noexcept { return typeid(T); }
+type_info const& type_of () noexcept { return typeid(T); }
 #else /* CORE_NO_RTTI */
 struct type_info final {
 
@@ -28,7 +28,7 @@ struct type_info final {
 
   /* If we had C++14 template variables, this would actually be easier */
   template <class T>
-  friend type_info const& typeof () noexcept {
+  friend type_info const& type_of () noexcept {
     return type_info::cref<remove_reference_t<remove_cv_t<T>>>();
   }
 
