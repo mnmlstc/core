@@ -18,16 +18,34 @@ template <class T> using identity = meta::identity<T>;
 template <class T> using class_of_t = impl::class_of_t<T>;
 template <class T> using class_of = impl::class_of<T>;
 
-template <class... Ts> using conjunction = meta::all_t<Ts::value...>;
-template <class... Ts> using disjunction = meta::any_t<Ts::value...>;
-template <class... Ts> using negation = meta::none_t<Ts::value...>;
-
 template <::std::size_t I, class T>
 using tuple_element_t = typename ::std::tuple_element<I, T>::type;
 template <class T> using tuple_size_t = typename ::std::tuple_size<T>::type;
 
 /* Implementation of N4389 */
 template <bool B> using bool_constant = ::std::integral_constant<bool, B>;
+
+template <class...> struct conjunction;
+template <class...> struct disjunction;
+template <class...> struct negation;
+
+template <class T, class... Ts>
+struct conjunction<T, Ts...> :
+  bool_constant<T::value and conjunction<Ts...>::value>
+{ };
+template <> struct conjunction<> : ::std::true_type { };
+
+template <class T, class... Ts>
+struct disjunction<T, Ts...> :
+  bool_constant<T::value or disjunction<Ts...>::value>
+{ };
+template <> struct disjunction<> : ::std::false_type { };
+
+template <class T, class... Ts>
+struct negation<T, Ts...> :
+  bool_constant<not T::value and negation<Ts...>::value>
+{ };
+template <> struct negation<> : ::std::false_type { };
 
 /* C++ Library Fundamentals V2 TS detection idiom */
 template <class... Ts> using void_t = meta::deduce<Ts...>;

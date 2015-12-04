@@ -32,10 +32,6 @@ matrix:
     - os: osx
       compiler: clang
       env: BUILD=Release
-      osx_image: xcode7.2b3
-    - os: osx
-      compiler: clang
-      env: BUILD=Release
       osx_image: xcode7.1
     - os: osx
       compiler: clang
@@ -69,10 +65,6 @@ matrix:
       env: BUILD=Release VERSION=4.8
 
     # osx : clang : debug
-    - os: osx
-      compiler: clang
-      env: BUILD=Debug
-      osx_image: xcode7.2b3
     - os: osx
       compiler: clang
       env: BUILD=Debug
