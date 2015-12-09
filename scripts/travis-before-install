@@ -16,5 +16,5 @@ if [[ -d $HOME/cmake && $VERSION = $(version | sed s/[^0-9]*//) ]]; then
 fi
 
 curl $URL -o cmake.tar.gz || exit 1
-tar xzf cmake.tar.gz -C cmake --strip-components=1
+mkdir cmake && tar xzf cmake.tar.gz -C cmake --strip-components=1
 ls $HOME/cmake
