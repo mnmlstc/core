@@ -173,7 +173,7 @@ struct memory_resource {
   void deallocate (
     void* ptr,
     ::std::size_t bytes,
-    ::std::size_t alignment = alignof(max_align_t)
+    ::std::size_t alignment = alignof(::std::max_align_t)
   ) noexcept(false) { this->do_deallocate(ptr, bytes, alignment); }
 
   bool is_equal (memory_resource const& that) const noexcept {
