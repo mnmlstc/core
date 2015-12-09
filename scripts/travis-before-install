@@ -9,6 +9,10 @@
 VERSION=3.3.2
 URL=https://cmake.org/files/v3.3/cmake-$VERSION-$(uname -s)-x86_64.tar.gz
 
+if [[ "Darwin" = $(uname -s) ]]; then
+  COMPONENTS=3
+fi
+
 function version { $HOME/cmake/bin/cmake --version | head -n1; }
 
 if [[ -d $HOME/cmake && $VERSION = $(version | sed s/[^0-9]*//) ]]; then
@@ -16,5 +20,6 @@ if [[ -d $HOME/cmake && $VERSION = $(version | sed s/[^0-9]*//) ]]; then
 fi
 
 curl $URL -o cmake.tar.gz || exit 1
-mkdir cmake && tar xzf cmake.tar.gz -C cmake --strip-components=1
+mkdir -p cmake
+tar xzf cmake.tar.gz -C cmake --strip-components=${COMPONENTS:-1}
 ls $HOME/cmake

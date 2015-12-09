@@ -17,4 +17,6 @@ fi
 
 if [[ ! -z ${VERSION} ]]; then
   export CXX="${CXX}-${VERSION}" CC="${CC}-${VERSION}"
+  echo CXX=${CXX}
+  echo CC=${CC}
 fi

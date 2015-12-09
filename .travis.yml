@@ -5,9 +5,9 @@ branches:
   only: master
 git:
   submodules: false
-cache:
-  directories:
-    - ${HOME}/cmake
+#cache:
+#  directories:
+#    - ${HOME}/cmake
 before_install: bash ./scripts/travis-before-install
 before_script: bash ./scripts/travis-configure
 
@@ -23,14 +23,14 @@ addons:
       - llvm-toolchain-precise-3.6
       - llvm-toolchain-precise-3.7
     packages:
-      clang-3.4
-      clang-3.5
-      clang-3.6
-      clang-3.7
-      g++-4.8
-      g++-4.9
-      g++-5
-      libc++1
+      - clang-3.4
+      - clang-3.5
+      - clang-3.6
+      - clang-3.7
+      - g++-4.8
+      - g++-4.9
+      - g++-5
+      - libc++1
 
 # We have a large number of targets to hit and travis-ci doesn't let us
 # 'append' values to a given row to produce more so we need to MANUALLY
