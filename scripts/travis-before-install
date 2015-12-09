@@ -21,5 +21,5 @@ fi
 
 curl $URL -o cmake.tar.gz || exit 1
 mkdir -p $HOME/cmake
-tar xvzf cmake.tar.gz -C $HOME/cmake --strip-components=${COMPONENTS:-1} 2>&1 | head -n 6
+tar xzf cmake.tar.gz -C $HOME/cmake --strip-components=${COMPONENTS:-1}
 ls $HOME/cmake
