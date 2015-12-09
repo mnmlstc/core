@@ -8,11 +8,15 @@ include(CheckIncludeFileCXX)
 # Macros and Functions
 #------------------------------------------------------------------------------
 function(require_cxx_include_file header)
+  if (CAN_USE_STD_CXX11)
+    set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} ${USE_STD_CXX11}")
+  endif ()
   if (CAN_USE_STDLIB_LIBCXX AND BUILD_WITH_LIBCXX)
     set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} ${USE_STDLIB_LIBCXX}")
   endif ()
-  check_include_file_cxx(${header} variable)
-  if (NOT variable)
+  string(TOUPPER "${header}" item)
+  check_include_file_cxx(${header} ${item})
+  if (NOT ${item})
     message(FATAL_ERROR "Header <${header}> could not be found")
   endif ()
 endfunction ()
@@ -26,6 +30,7 @@ function(add_unit_test name file)
   target_compile_options(test-${name}
     PRIVATE
       $<$<BOOL:${BUILD_WITH_COVERAGE}>:${USE_COVERAGE}>
+      $<$<BOOL:${CAN_USE_STD_CXX11}>:${USE_STD_CXX11}>
       $<$<AND:${LIBCXX}>:${USE_STDLIB_LIBCXX}>
       $<$<AND:${NO_RTTI}>:${USE_NO_RTTI}>
 
@@ -68,6 +73,9 @@ endfunction ()
 #------------------------------------------------------------------------------
 # Compiler Environment Check
 #------------------------------------------------------------------------------
+
+set(USE_STD_CXX11 "-std=c++11")
+
 set(USE_STDLIB_LIBCXX "-stdlib=libc++")
 set(USE_COVERAGE "--coverage")
 
@@ -108,6 +116,11 @@ if (MSVC)
   set(WARN_EVERYTHING "/Wall")
   set(WARN_ERROR "/Werror")
   set(WARN_ALL "/W4")
+endif ()
+
+# Only for when using certain cmake versions (like the ones found on travis-ci)
+if (${CMAKE_VERSION} VERSION_LESS "3.1.0")
+  check_cxx_compiler_flag(${USE_STD_CXX11} CAN_USE_STD_CXX11)
 endif ()
 
 check_cxx_compiler_flag(${USE_STDLIB_LIBCXX} CAN_USE_STDLIB_LIBCXX)

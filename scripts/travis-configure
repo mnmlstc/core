@@ -1,18 +1,19 @@
 #!/bin/sh
-
 # travis-configure - build-script
-# Written in 2015 by MNMLSTC
-# To the extent possible under law, the author(s) have dedicated all copyright
-# and related and neighboring rights to this software to the public domain
-# worldwide. This software is distributed without any warranty. You should have
-# received a copy of the CC0 Public Domain Dedication along with this software.
-# If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
 CURRENT=$(pwd)
+if [[ ! -z ${VERSION} ]]; then
+  CXX=${CXX}-${VERSION}
+  CC=${CC}-${VERSION}
+fi
+
+echo Using $(cmake --version | head -n1)
+echo CXX=${CXX}
 
 mkdir build && cd build || exit 1
 
-$HOME/cmake/bin/cmake $CURRENT \
+cmake $CURRENT \
+  -DCMAKE_CXX_COMPILER:STRING=${CXX} \
   -DCMAKE_BUILD_TYPE:STRING=${BUILD:-Debug} \
   -DBUILD_WITH_COVERAGE:BOOL=ON \
   -DBUILD_WITH_LIBCXX:BOOL=${LIBCXX:-OFF} \

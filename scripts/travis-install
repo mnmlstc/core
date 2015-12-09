@@ -1,22 +1,14 @@
 #!/bin/sh
-
 # travis-configure - build-script
-# Written in 2015 by MNMLSTC
-# To the extent possible under law, the author(s) have dedicated all copyright
-# and related and neighboring rights to this software to the public domain
-# worldwide. This software is distributed without any warranty. You should have
-# received a copy of the CC0 Public Domain Dedication along with this software.
-# If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
-
 
 if [[ "Darwin" = $(uname -s) && ${CXX} == "g++" ]]; then
-  brew update
   brew tap homebrew/versions
   brew install gcc${VERSION/./}
 fi
 
-if [[ ! -z ${VERSION} ]]; then
-  export CXX="${CXX}-${VERSION}" CC="${CC}-${VERSION}"
-  echo CXX=${CXX}
-  echo CC=${CC}
+if [[ "Darwin" = $(uname -s) ]]; then
+  if [[ ! -z $(brew ls --versions cmake) ]]; then
+    brew install --without-docs cmake
+  fi
+  brew outdated cmake || brew upgrade cmake
 fi
