@@ -119,7 +119,7 @@ if (MSVC)
 endif ()
 
 # Only for when using certain cmake versions (like the ones found on travis-ci)
-if (${CMAKE_VERSION} VERSION_LESS "3.1.0")
+if (${CMAKE_VERSION} VERSION_LESS "3.1.0" OR "$ENV{TRAVIS}" STREQUAL "true")
   check_cxx_compiler_flag(${USE_STD_CXX11} CAN_USE_STD_CXX11)
 endif ()
 
