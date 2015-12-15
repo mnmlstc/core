@@ -1,5 +1,5 @@
 #!/bin/sh
-# travis-configure - build-script
+# travis-install - build-script
 
 if [[ "Darwin" = $(uname -s) && ${CXX} == "g++" ]]; then
   brew tap homebrew/versions
@@ -7,8 +7,6 @@ if [[ "Darwin" = $(uname -s) && ${CXX} == "g++" ]]; then
 fi
 
 if [[ "Darwin" = $(uname -s) ]]; then
-  if [[ ! -z $(brew ls --versions cmake) ]]; then
-    brew install --without-docs cmake
-  fi
+  brew ls | grep -wq cmake || brew install --without-docs cmake
   brew outdated cmake || brew upgrade cmake
 fi

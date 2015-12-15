@@ -12,7 +12,7 @@ before_install: bash ./scripts/travis-before-install
 before_script: bash ./scripts/travis-configure
 
 install: bash ./scripts/travis-install
-script: bash ./scripts/travis-build
+script: cmake --build build --target check -- CTEST_OUTPUT_ON_FAILURE=1
 
 addons:
   apt:
@@ -124,95 +124,87 @@ matrix:
     - os: linux
       compiler: clang
       env: BUILD=Release VERSION=3.4 LIBCXX=ON
+
     # os x : clang : libstdc++-4.9 : release
     - os: linux
       compiler: clang
       env: BUILD=Release VERSION=3.7
-      addons:
-        apt:
-          packages:
-            - clang-3.7
-            - libstdc++-4.9-dev
     - os: linux
       compiler: clang
       env: BUILD=Release VERSION=3.6
-      addons:
-        apt:
-          packages:
-            - clang-3.6
-            - libstdc++-4.9-dev
     - os: linux
       compiler: clang
       env: BUILD=Release VERSION=3.5
-      addons:
-        apt:
-          packages:
-            - clang-3.5
-            - libstdc++-4.9-dev
     - os: linux
       compiler: clang
       env: BUILD=Release VERSION=3.4
-      addons:
-        apt:
-          packages:
-            - clang-3.4
-            - libstdc++-4.9-dev
+
     # os x : clang : libstdc++-4.8 : release
     - os: linux
       compiler: clang
       env: BUILD=Release VERSION=3.7
       addons:
         apt:
+          sources:
+            - george-edison55-precise-backports
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-precise-3.7
           packages:
             - clang-3.7
-            - libstdc++-4.8-dev
+            - g++-4.8
+            - cmake-data
+            - cmake
     - os: linux
       compiler: clang
       env: BUILD=Release VERSION=3.6
       addons:
         apt:
+          sources:
+            - george-edison55-precise-backports
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-precise-3.6
           packages:
             - clang-3.6
-            - libstdc++-4.8-dev
+            - g++-4.8
+            - cmake-data
+            - cmake
     - os: linux
       compiler: clang
       env: BUILD=Release VERSION=3.5
       addons:
         apt:
+          sources:
+            - george-edison55-precise-backports
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-precise-3.5
           packages:
             - clang-3.5
-            - libstdc++-4.8-dev
+            - g++-4.8
+            - cmake-data
+            - cmake
     - os: linux
       compiler: clang
-      env: BUILD=Release VERSION=3.4
+      env: BUILD=Release #VERSION=3.4
       addons:
         apt:
+          sources:
+            - george-edison55-precise-backports
+            - ubuntu-toolchain-r-test
           packages:
-            - clang-3.4
-            - libstdc++-4.8-dev
-
+            - g++-4.8
+            - cmake-data
+            - cmake
     # linux : gcc : release
     - os: linux
       compiler: gcc
       env: BUILD=Release VERSION=5
-      addons:
-        apt:
-          packages:
-            - gcc5
     - os: linux
       compiler: gcc
       env: BUILD=Release VERSION=4.9
-      addons:
-        apt:
-          packages:
-            - gcc4.9
     - os: linux
       compiler: gcc
       env: BUILD=Release VERSION=4.8
-      addons:
-        apt:
-          packages:
-            - gcc4.8
+
     # linux : clang : libc++ : debug
     - os: linux
       compiler: clang
@@ -226,91 +218,42 @@ matrix:
     - os: linux
       compiler: clang
       env: BUILD=Debug VERSION=3.4 LIBCXX=ON
+
     # linux : clang : libstdc++-4.9 : debug
     - os: linux
       compiler: clang
       env: BUILD=Debug VERSION=3.7
-      addons:
-        apt:
-          packages:
-            - clang-3.7
-            - libstdc++-4.9-dev
     - os: linux
       compiler: clang
       env: BUILD=Debug VERSION=3.6
-      addons:
-        apt:
-          packages:
-            - clang-3.6
-            - libstdc++-4.9-dev
     - os: linux
       compiler: clang
       env: BUILD=Debug VERSION=3.5
-      addons:
-        apt:
-          packages:
-            - clang-3.5
-            - libstdc++-4.9-dev
     - os: linux
       compiler: clang
       env: BUILD=Debug VERSION=3.4
-      addons:
-        apt:
-          packages:
-            - clang-3.4
-            - libstdc++-4.9-dev
+
     # linux : clang : libstdc++-4.8 : debug
     - os: linux
       compiler: clang
       env: BUILD=Debug VERSION=3.7
-      addons:
-        apt:
-          packages:
-            - clang-3.7
-            - libstdc++-4.8-dev
     - os: linux
       compiler: clang
       env: BUILD=Debug VERSION=3.6
-      addons:
-        apt:
-          packages:
-            - clang-3.6
-            - libstdc++-4.8-dev
     - os: linux
       compiler: clang
       env: BUILD=Debug VERSION=3.5
-      addons:
-        apt:
-          packages:
-            - clang-3.5
-            - libstdc++-4.8-dev
     - os: linux
       compiler: clang
       env: BUILD=Debug VERSION=3.4
-      addons:
-        apt:
-          packages:
-            - clang-3.4
-            - libstdc++-4.8-dev
+
     # linux : gcc : debug
     - os: linux
       compiler: gcc
       env: BUILD=Debug VERSION=5
-      addons:
-        apt:
-          packages:
-            - gcc-5
     - os: linux
       compiler: gcc
       env: BUILD=Debug VERSION=4.9
-      addons:
-        apt:
-          packages:
-            - gcc-4.9
     - os: linux
       compiler: gcc
       env: BUILD=Debug VERSION=4.8
-      addons:
-        apt:
-          packages:
-            - gcc-4.8

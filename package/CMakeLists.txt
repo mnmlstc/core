@@ -44,17 +44,15 @@ set(CPACK_PACKAGE_INSTALL_DIRECTORY "mnmlstc/${PROJECT_NAME}")
 list(APPEND CPACK_SOURCE_IGNORE_FILES "/build-clang/")
 list(APPEND CPACK_SOURCE_IGNORE_FILES "/build-msvc/")
 list(APPEND CPACK_SOURCE_IGNORE_FILES "/build-gcc/")
+list(APPEND CPACK_SOURCE_IGNORE_FILES "/build/")
 list(APPEND CPACK_SOURCE_IGNORE_FILES "/.git/")
-list(APPEND CPACK_SOURCE_IGNORE_FILES "/bii/")
-list(APPEND CPACK_SOURCE_IGNORE_FILES "/bin/")
 
 list(APPEND CPACK_SOURCE_IGNORE_FILES ".gitattributes")
-list(APPEND CPACK_SOURCE_IGNORE_FILES "biicode.conf")
 list(APPEND CPACK_SOURCE_IGNORE_FILES ".travis.yml")
 list(APPEND CPACK_SOURCE_IGNORE_FILES ".gitignore")
-list(APPEND CPACK_SOURCE_IGNORE_FILES "ignore.bii")
 list(APPEND CPACK_SOURCE_IGNORE_FILES ".DS_Store")
 
+list(APPEND CPACK_SOURCE_IGNORE_FILES "appveyor.yml")
 #------------------------------------------------------------------------------
 # Wix Configuration
 #------------------------------------------------------------------------------

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.0)
-project(core VERSION 1.2.0 LANGUAGES CXX)
+project(core VERSION 2.0.0 LANGUAGES CXX)
 
 #------------------------------------------------------------------------------
 # Modules, Variables, and Options
