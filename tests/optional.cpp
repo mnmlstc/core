@@ -832,8 +832,8 @@ TEST_CASE("result-operator-equal", "[result][operators]") {
   CHECK(lhs_valid == rhs_valid);
   CHECK(invalid == condition);
   CHECK(condition == invalid);
-  CHECK(invalid == code);
-  CHECK(code == invalid);
+  CHECK(invalid == code.default_error_condition());
+  CHECK(code.default_error_condition() == invalid);
   CHECK(lhs_valid == value);
   CHECK(value == rhs_valid);
 }

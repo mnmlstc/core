@@ -111,7 +111,7 @@ matrix:
       compiler: gcc
       env: BUILD=Debug VERSION=4.8
 
-    # os x : clang : libc++ : release
+    # linux : clang : libc++ : release
     - os: linux
       compiler: clang
       env: BUILD=Release VERSION=3.7 LIBCXX=ON
@@ -125,7 +125,7 @@ matrix:
       compiler: clang
       env: BUILD=Release VERSION=3.4 LIBCXX=ON
 
-    # os x : clang : libstdc++-4.9 : release
+    # linux : clang : libstdc++-4.9 : release
     - os: linux
       compiler: clang
       env: BUILD=Release VERSION=3.7
@@ -139,7 +139,7 @@ matrix:
       compiler: clang
       env: BUILD=Release VERSION=3.4
 
-    # os x : clang : libstdc++-4.8 : release
+    # linux : clang : libstdc++-4.8 : release
     - os: linux
       compiler: clang
       env: BUILD=Release VERSION=3.7
@@ -198,13 +198,39 @@ matrix:
     - os: linux
       compiler: gcc
       env: BUILD=Release VERSION=5
+      addons:
+        apt:
+          sources:
+            - george-edison55-precise-backports
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-5
+            - cmake-data
+            - cmake
     - os: linux
       compiler: gcc
       env: BUILD=Release VERSION=4.9
+      addons:
+        apt:
+          sources:
+            - george-edison55-precise-backports
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-4.9
+            - cmake-data
+            - cmake
     - os: linux
       compiler: gcc
       env: BUILD=Release VERSION=4.8
-
+      addons:
+        apt:
+          sources:
+            - george-edison55-precise-backports
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-4.8
+            - cmake-data
+            - cmake
     # linux : clang : libc++ : debug
     - os: linux
       compiler: clang
@@ -251,9 +277,36 @@ matrix:
     - os: linux
       compiler: gcc
       env: BUILD=Debug VERSION=5
+      addons:
+        apt:
+          sources:
+            - george-edison55-precise-backports
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-5
+            - cmake-data
+            - cmake
     - os: linux
       compiler: gcc
       env: BUILD=Debug VERSION=4.9
+      addons:
+        apt:
+          sources:
+            - george-edison55-precise-backports
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-4.9
+            - cmake-data
+            - cmake
     - os: linux
       compiler: gcc
       env: BUILD=Debug VERSION=4.8
+      addons:
+        apt:
+          sources:
+            - george-edison55-precise-backports
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-4.8
+            - cmake-data
+            - cmake
