@@ -141,12 +141,12 @@ template <
   using char_type = CharT;
 
   ostream_joiner (ostream_type& stream, delimiter_type const& delimiter) :
-    stream { stream },
+    stream(stream),
     delimiter { delimiter }
   { }
 
   ostream_joiner (ostream_type& stream, delimiter_type&& delimiter) :
-    stream { stream },
+    stream(stream),
     delimiter { ::core::move(delimiter) },
     first { true }
   { }
