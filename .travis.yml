@@ -233,10 +233,10 @@ matrix:
       env: BUILD=Debug VERSION=3.7 LIBCXX=ON
       addons:
         apt:
-          source:
+          sources:
             - george-edison55-precise-backports
             - llvm-toolchain-precise-3.5
-          package:
+          packages:
             - clang-3.7
             - libc++1
             - cmake-data
@@ -249,7 +249,7 @@ matrix:
           sources:
             - george-edison55-precise-backports
             - llvm-toolchain-precise-3.6
-          package:
+          packages:
             - clang-3.6
             - libc++1
             - cmake-data
@@ -262,7 +262,7 @@ matrix:
           sources:
             - george-edison55-precise-backports
             - llvm-toolchain-precise-3.5
-          package:
+          packages:
             - clang-3.5
             - libc++1
             - cmake-data
@@ -278,7 +278,7 @@ matrix:
             - libc++1
             - cmake-data
             - cmake
-    # linux : clang : libstdc++-4.8 : debug
+    # linux : clang : libstdc++ : debug
     - os: linux
       compiler: clang
       env: BUILD=Debug VERSION=3.7
