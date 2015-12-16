@@ -1,4 +1,3 @@
-#define CATCH_CONFIG_MAIN
 #include <core/memory_resource.hpp>
 
 #include "catch.hpp"

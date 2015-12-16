@@ -1,4 +1,3 @@
-#define CATCH_CONFIG_MAIN
 #include <core/iterator.hpp>
 #include <algorithm>
 #include <ostream>

@@ -1,4 +1,3 @@
-#define CATCH_CONFIG_MAIN
 #include <core/any.hpp>
 #include <type_traits>
 #include <string>

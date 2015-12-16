@@ -1,4 +1,3 @@
-#define CATCH_CONFIG_MAIN
 #include <core/algorithm.hpp>
 #include <initializer_list>
 #include <random>

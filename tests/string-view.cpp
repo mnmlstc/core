@@ -1,4 +1,3 @@
-#define CATCH_CONFIG_MAIN
 #include <core/string_view.hpp>
 
 #include <unordered_map>

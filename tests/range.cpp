@@ -1,4 +1,3 @@
-#define CATCH_CONFIG_MAIN
 #include <core/range.hpp>
 
 #include <forward_list>

@@ -1,4 +1,3 @@
-#define CATCH_CONFIG_MAIN
 #include <core/variant.hpp>
 
 #include <unordered_map>

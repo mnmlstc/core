@@ -5,34 +5,11 @@ branches:
   only: master
 git:
   submodules: false
-#cache:
-#  directories:
-#    - ${HOME}/cmake
+
 before_install: bash ./scripts/travis-before-install
 before_script: bash ./scripts/travis-configure
-
 install: bash ./scripts/travis-install
 script: cmake --build build --target check -- CTEST_OUTPUT_ON_FAILURE=1
-
-addons:
-  apt:
-    sources:
-      - george-edison55-precise-backports
-      - ubuntu-toolchain-r-test
-      - llvm-toolchain-precise-3.5
-      - llvm-toolchain-precise-3.6
-      - llvm-toolchain-precise-3.7
-    packages:
-      - clang-3.4
-      #- clang-3.5
-      #- clang-3.6
-      #- clang-3.7
-      - g++-4.8
-      - g++-4.9
-      - g++-5
-      - libc++1
-      - cmake-data
-      - cmake
 
 # We have a large number of targets to hit and travis-ci doesn't let us
 # 'append' values to a given row to produce more so we need to MANUALLY
@@ -63,7 +40,6 @@ matrix:
     - os: osx
       compiler: clang
       env: BUILD=Release
-
     # osx : gcc : release
     - os: osx
       compiler: gcc
@@ -74,7 +50,6 @@ matrix:
     - os: osx
       compiler: gcc
       env: BUILD=Release VERSION=4.8
-
     # osx : clang : debug
     - os: osx
       compiler: clang
@@ -99,7 +74,6 @@ matrix:
     - os: osx
       compiler: clang
       env: BUILD=Debug
-
     # os x : gcc : debug
     - os: osx
       compiler: gcc
@@ -110,36 +84,62 @@ matrix:
     - os: osx
       compiler: gcc
       env: BUILD=Debug VERSION=4.8
-
     # linux : clang : libc++ : release
     - os: linux
       compiler: clang
       env: BUILD=Release VERSION=3.7 LIBCXX=ON
+      addons:
+        apt:
+          sources:
+            - george-edison55-precise-backports
+            - llvm-toolchain-precise-3.7
+            - ubuntu-toolchain-r-test
+          packages:
+            - clang-3.7
+            - libc++1
+            - cmake-data
+            - cmake
     - os: linux
       compiler: clang
       env: BUILD=Release VERSION=3.6 LIBCXX=ON
+      addons:
+        apt:
+          sources:
+            - george-edison55-precise-backports
+            - llvm-toolchain-precise-3.6
+            - ubuntu-toolchain-r-test
+          packages:
+            - clang-3.6
+            - libc++1
+            - cmake-data
+            - cmake
     - os: linux
       compiler: clang
       env: BUILD=Release VERSION=3.5 LIBCXX=ON
+      addons:
+        apt:
+          sources:
+            - george-edison55-precise-backports
+            - llvm-toolchain-precise-3.5
+            - ubuntu-toolchain-r-test
+          packages:
+            - clang-3.5
+            - libc++1
+            - cmake-data
+            - cmake
     - os: linux
       compiler: clang
-      env: BUILD=Release VERSION=3.4 LIBCXX=ON
+      env: BUILD=Release LIBCXX=ON
+      addons:
+        apt:
+          sources:
+            - george-edison55-precise-backports
+          packages:
+            - libc++1
+            - cmake-data
+            - cmake
 
-    # linux : clang : libstdc++-4.9 : release
-    - os: linux
-      compiler: clang
-      env: BUILD=Release VERSION=3.7
-    - os: linux
-      compiler: clang
-      env: BUILD=Release VERSION=3.6
-    - os: linux
-      compiler: clang
-      env: BUILD=Release VERSION=3.5
-    - os: linux
-      compiler: clang
-      env: BUILD=Release VERSION=3.4
-
-    # linux : clang : libstdc++-4.8 : release
+    # linux : clang : libstdc++ : release
     - os: linux
       compiler: clang
       env: BUILD=Release VERSION=3.7
@@ -151,7 +151,6 @@ matrix:
             - llvm-toolchain-precise-3.7
           packages:
             - clang-3.7
-            - g++-4.8
             - cmake-data
             - cmake
     - os: linux
@@ -165,7 +164,6 @@ matrix:
             - llvm-toolchain-precise-3.6
           packages:
             - clang-3.6
-            - g++-4.8
             - cmake-data
             - cmake
     - os: linux
@@ -179,19 +177,17 @@ matrix:
             - llvm-toolchain-precise-3.5
           packages:
             - clang-3.5
-            - g++-4.8
             - cmake-data
             - cmake
     - os: linux
       compiler: clang
-      env: BUILD=Release #VERSION=3.4
+      env: BUILD=Release
       addons:
         apt:
           sources:
             - george-edison55-precise-backports
             - ubuntu-toolchain-r-test
           packages:
-            - g++-4.8
             - cmake-data
             - cmake
     # linux : gcc : release
@@ -235,44 +231,104 @@ matrix:
     - os: linux
       compiler: clang
       env: BUILD=Debug VERSION=3.7 LIBCXX=ON
+      addons:
+        apt:
+          source:
+            - george-edison55-precise-backports
+            - llvm-toolchain-precise-3.5
+          package:
+            - clang-3.7
+            - libc++1
+            - cmake-data
+            - cmake
     - os: linux
       compiler: clang
       env: BUILD=Debug VERSION=3.6 LIBCXX=ON
+      addons:
+        apt:
+          sources:
+            - george-edison55-precise-backports
+            - llvm-toolchain-precise-3.6
+          package:
+            - clang-3.6
+            - libc++1
+            - cmake-data
+            - cmake
     - os: linux
       compiler: clang
       env: BUILD=Debug VERSION=3.5 LIBCXX=ON
+      addons:
+        apt:
+          sources:
+            - george-edison55-precise-backports
+            - llvm-toolchain-precise-3.5
+          package:
+            - clang-3.5
+            - libc++1
+            - cmake-data
+            - cmake
     - os: linux
       compiler: clang
-      env: BUILD=Debug VERSION=3.4 LIBCXX=ON
-
-    # linux : clang : libstdc++-4.9 : debug
-    - os: linux
-      compiler: clang
-      env: BUILD=Debug VERSION=3.7
-    - os: linux
-      compiler: clang
-      env: BUILD=Debug VERSION=3.6
-    - os: linux
-      compiler: clang
-      env: BUILD=Debug VERSION=3.5
-    - os: linux
-      compiler: clang
-      env: BUILD=Debug VERSION=3.4
-
+      env: BUILD=Debug LIBCXX=ON
+      addons:
+        apt:
+          sources:
+            - george-edison55-precise-backports
+          packages:
+            - libc++1
+            - cmake-data
+            - cmake
     # linux : clang : libstdc++-4.8 : debug
     - os: linux
       compiler: clang
       env: BUILD=Debug VERSION=3.7
+      addons:
+        apt:
+          sources:
+            - george-edison55-precise-backports
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-precise-3.7
+          packages:
+            - clang-3.7
+            - cmake-data
+            - cmake
     - os: linux
       compiler: clang
       env: BUILD=Debug VERSION=3.6
+      addons:
+        apt:
+          sources:
+            - george-edison55-precise-backports
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-precise-3.6
+          packages:
+            - clang-3.6
+            - cmake-data
+            - cmake
     - os: linux
       compiler: clang
       env: BUILD=Debug VERSION=3.5
+      addons:
+        apt:
+          sources:
+            - george-edison55-precise-backports
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-precise-3.5
+          packages:
+            - clang-3.5
+            - cmake-data
+            - cmake
     - os: linux
       compiler: clang
-      env: BUILD=Debug VERSION=3.4
-
+      env: BUILD=Debug
+      addons:
+        apt:
+          sources:
+            - george-edison55-precise-backports
+            - ubuntu-toolchain-r-test
+          packages:
+            - cmake-data
+            - cmake
     # linux : gcc : debug
     - os: linux
       compiler: gcc

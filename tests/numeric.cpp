@@ -1,4 +1,3 @@
-#define CATCH_CONFIG_MAIN
 #include <core/numeric.hpp>
 
 #include <functional>

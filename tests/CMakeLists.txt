@@ -24,43 +24,48 @@ endfunction ()
 function(add_unit_test name file)
   set(LIBCXX $<BOOL:${CAN_USE_STDLIB_LIBCXX}>,$<BOOL:${BUILD_WITH_LIBCXX}>)
   set(NO_RTTI $<BOOL:${CAN_USE_NO_RTTI}>,$<BOOL:${DISABLE_RTTI}>)
-  add_executable(test-${name} ${file})
+  if (NOT TARGET catch-main)
+    add_library(catch-main OBJECT "${TEST_SOURCE_DIR}/catch.cpp")
+    target_compile_options(catch-main
+      PUBLIC
+        $<$<BOOL:${BUILD_WITH_COVERAGE}>:${USE_COVERAGE}>
+        $<$<BOOL:${CAN_USE_STD_CXX11}>:${USE_STD_CXX11}>
+        $<$<AND:${LIBCXX}>:${USE_STDLIB_LIBCXX}>
+        $<$<AND:${NO_RTTI}>:${USE_NO_RTTI}>
+
+        $<$<BOOL:${CAN_SANITIZE_UNDEFINED}>:${SANITIZE_UNDEFINED}>
+        $<$<BOOL:${CAN_SANITIZE_ADDRESS}>:${SANITIZE_ADDRESS}>
+        $<$<BOOL:${CAN_SANITIZE_MEMORY}>:${SANITIZE_MEMORY}>
+
+        $<$<BOOL:${CAN_WARN_MAYBE_UNINIT}>:${WARN_MAYBE_UNINIT}>
+        $<$<BOOL:${CAN_WARN_EVERYTHING}>:${WARN_EVERYTHING}>
+        $<$<BOOL:${CAN_WARN_NOEXCEPT}>:${WARN_NOEXCEPT}>
+        $<$<BOOL:${CAN_WARN_PEDANTIC}>:${WARN_PEDANTIC}>
+        $<$<BOOL:${CAN_WARN_EXTRA}>:${WARN_EXTRA}>
+        $<$<BOOL:${CAN_WARN_ODR}>:${WARN_ODR}>
+        $<$<BOOL:${CAN_WARN_ALL}>:${WARN_ALL}>
+
+        $<$<BOOL:${CAN_WARN_NO_CXX98_PEDANTIC}>:${WARN_NO_CXX98_PEDANTIC}>
+        $<$<BOOL:${CAN_WARN_NO_POTENTIAL_EXPR}>:${WARN_NO_POTENTIAL_EXPR}>
+        $<$<BOOL:${CAN_WARN_NO_INTERNAL_DECL}>:${WARN_NO_INTERNAL_DECL}>
+        $<$<BOOL:${CAN_WARN_NO_CXX98_COMPAT}>:${WARN_NO_CXX98_COMPAT}>
+        $<$<BOOL:${CAN_WARN_NO_WEAK_VTABLES}>:${WARN_NO_WEAK_VTABLES}>
+        $<$<BOOL:${CAN_WARN_NO_UNUSED_MEMFN}>:${WARN_NO_UNUSED_MEMFN}>
+        $<$<BOOL:${CAN_WARN_NO_UNUSED_FUNC}>:${WARN_NO_UNUSED_FUNC}>
+        $<$<BOOL:${CAN_WARN_NO_FLOAT_EQUAL}>:${WARN_NO_FLOAT_EQUAL}>
+        $<$<BOOL:${CAN_WARN_NO_DEPRECATED}>:${WARN_NO_DEPRECATED}>
+        $<$<BOOL:${CAN_WARN_NO_ATTRIBUTES}>:${WARN_NO_ATTRIBUTES}>
+        $<$<BOOL:${CAN_WARN_NO_EXIT_TIME}>:${WARN_NO_EXIT_TIME}>
+        $<$<BOOL:${CAN_WARN_NO_MACRO_EXP}>:${WARN_NO_MACRO_EXP}>
+        $<$<BOOL:${CAN_WARN_NO_SHADOW}>:${WARN_NO_SHADOW}>
+        $<$<BOOL:${CAN_WARN_NO_PADDED}>:${WARN_NO_PADDED}>)
+  endif ()
+  add_executable(test-${name} ${file} $<TARGET_OBJECTS:catch-main>)
   add_test(${name} test-${name})
   add_dependencies(check test-${name})
   target_compile_options(test-${name}
     PRIVATE
-      $<$<BOOL:${BUILD_WITH_COVERAGE}>:${USE_COVERAGE}>
-      $<$<BOOL:${CAN_USE_STD_CXX11}>:${USE_STD_CXX11}>
-      $<$<AND:${LIBCXX}>:${USE_STDLIB_LIBCXX}>
-      $<$<AND:${NO_RTTI}>:${USE_NO_RTTI}>
-
-      $<$<BOOL:${CAN_SANITIZE_UNDEFINED}>:${SANITIZE_UNDEFINED}>
-      $<$<BOOL:${CAN_SANITIZE_ADDRESS}>:${SANITIZE_ADDRESS}>
-      $<$<BOOL:${CAN_SANITIZE_MEMORY}>:${SANITIZE_MEMORY}>
-
-      $<$<BOOL:${CAN_WARN_MAYBE_UNINIT}>:${WARN_MAYBE_UNINIT}>
-      $<$<BOOL:${CAN_WARN_EVERYTHING}>:${WARN_EVERYTHING}>
-      $<$<BOOL:${CAN_WARN_NOEXCEPT}>:${WARN_NOEXCEPT}>
-      $<$<BOOL:${CAN_WARN_PEDANTIC}>:${WARN_PEDANTIC}>
-      $<$<BOOL:${CAN_WARN_EXTRA}>:${WARN_EXTRA}>
-      $<$<BOOL:${CAN_WARN_ODR}>:${WARN_ODR}>
-      $<$<BOOL:${CAN_WARN_ALL}>:${WARN_ALL}>
-
-      $<$<BOOL:${CAN_WARN_NO_CXX98_PEDANTIC}>:${WARN_NO_CXX98_PEDANTIC}>
-      $<$<BOOL:${CAN_WARN_NO_POTENTIAL_EXPR}>:${WARN_NO_POTENTIAL_EXPR}>
-      $<$<BOOL:${CAN_WARN_NO_INTERNAL_DECL}>:${WARN_NO_INTERNAL_DECL}>
-      $<$<BOOL:${CAN_WARN_NO_CXX98_COMPAT}>:${WARN_NO_CXX98_COMPAT}>
-      $<$<BOOL:${CAN_WARN_NO_WEAK_VTABLES}>:${WARN_NO_WEAK_VTABLES}>
-      $<$<BOOL:${CAN_WARN_NO_UNUSED_MEMFN}>:${WARN_NO_UNUSED_MEMFN}>
-      $<$<BOOL:${CAN_WARN_NO_UNUSED_FUNC}>:${WARN_NO_UNUSED_FUNC}>
-      $<$<BOOL:${CAN_WARN_NO_FLOAT_EQUAL}>:${WARN_NO_FLOAT_EQUAL}>
-      $<$<BOOL:${CAN_WARN_NO_DEPRECATED}>:${WARN_NO_DEPRECATED}>
-      $<$<BOOL:${CAN_WARN_NO_ATTRIBUTES}>:${WARN_NO_ATTRIBUTES}>
-      $<$<BOOL:${CAN_WARN_NO_EXIT_TIME}>:${WARN_NO_EXIT_TIME}>
-      $<$<BOOL:${CAN_WARN_NO_MACRO_EXP}>:${WARN_NO_MACRO_EXP}>
-      $<$<BOOL:${CAN_WARN_NO_SHADOW}>:${WARN_NO_SHADOW}>
-      $<$<BOOL:${CAN_WARN_NO_PADDED}>:${WARN_NO_PADDED}>)
-
+      $<TARGET_PROPERTY:catch-main,INTERFACE_COMPILE_OPTIONS>)
   target_include_directories(test-${name} SYSTEM PRIVATE ${TEST_SOURCE_DIR})
   target_link_libraries(test-${name} PUBLIC core)
   target_link_libraries(test-${name} PRIVATE

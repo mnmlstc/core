@@ -1,4 +1,3 @@
-#define CATCH_CONFIG_MAIN
 #include <core/propagate_const.hpp>
 #include <memory>
 
