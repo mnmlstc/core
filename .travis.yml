@@ -98,7 +98,7 @@ matrix:
             - ubuntu-toolchain-r-test
           packages:
             - clang-3.7
-            - libc++1
+            - libc++-dev
             - cmake-data
             - cmake
     - os: linux
@@ -112,7 +112,7 @@ matrix:
             - ubuntu-toolchain-r-test
           packages:
             - clang-3.6
-            - libc++1
+            - libc++-dev
             - cmake-data
             - cmake
     - os: linux
@@ -126,7 +126,7 @@ matrix:
             - ubuntu-toolchain-r-test
           packages:
             - clang-3.5
-            - libc++1
+            - libc++-dev
             - cmake-data
             - cmake
     - os: linux
@@ -137,7 +137,7 @@ matrix:
           sources:
             - george-edison55-precise-backports
           packages:
-            - libc++1
+            - libc++-dev
             - cmake-data
             - cmake
 
@@ -238,10 +238,10 @@ matrix:
         apt:
           sources:
             - george-edison55-precise-backports
-            - llvm-toolchain-precise-3.5
+            - llvm-toolchain-precise-3.7
           packages:
             - clang-3.7
-            - libc++1
+            - libc++-dev
             - cmake-data
             - cmake
     - os: linux
@@ -254,7 +254,7 @@ matrix:
             - llvm-toolchain-precise-3.6
           packages:
             - clang-3.6
-            - libc++1
+            - libc++-dev
             - cmake-data
             - cmake
     - os: linux
@@ -267,7 +267,7 @@ matrix:
             - llvm-toolchain-precise-3.5
           packages:
             - clang-3.5
-            - libc++1
+            - libc++-dev
             - cmake-data
             - cmake
     - os: linux
@@ -278,7 +278,7 @@ matrix:
           sources:
             - george-edison55-precise-backports
           packages:
-            - libc++1
+            - libc++-dev
             - cmake-data
             - cmake
     # linux : clang : libstdc++ : debug
