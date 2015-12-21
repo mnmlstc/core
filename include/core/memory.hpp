@@ -29,7 +29,7 @@
     __GLIBCXX__ == 20140522 or \
     __GLIBCXX__ == 20141219
     #undef CORE_LIBSTDCXX_MAX_ALIGN_HACK
-    #define CORE_LIBSTDCXX_MAX_ALIGN_HACK
+    #define CORE_LIBSTDCXX_MAX_ALIGN_HACK 1
   #endif /* __GLIBCXX__ == N */
 #endif /* defined(__clang__) and defined(__GLIBCXX__) */
 
