@@ -17,4 +17,5 @@ cmake $CURRENT \
   -DCMAKE_BUILD_TYPE:STRING=${BUILD:-Debug} \
   -DBUILD_WITH_COVERAGE:BOOL=ON \
   -DBUILD_WITH_LIBCXX:BOOL=${LIBCXX:-OFF} \
-  -DBUILD_TESTING:BOOL=ON
+  -DBUILD_TESTING:BOOL=ON || \
+  $(cat ./CMakeFiles/CMakeOutput.log && cat ./CMakeFiles/CMakeError.log)
