@@ -212,11 +212,7 @@ constexpr bool operator == (
 ) { return not r; }
 
 template <class T>
-struct equal_to<propagate_const<T>> : impl::binary<
-  propagate_const<T>,
-  propagate_const<T>,
-  bool
-> {
+struct equal_to<propagate_const<T>> {
   constexpr bool operator () (
     propagate_const<T> const& l,
     propagate_const<T> const& r
@@ -224,11 +220,7 @@ struct equal_to<propagate_const<T>> : impl::binary<
 };
 
 template <class T>
-struct not_equal_to<propagate_const<T>> : impl::binary<
-  propagate_const<T>,
-  propagate_const<T>,
-  bool
-> {
+struct not_equal_to<propagate_const<T>> {
   constexpr bool operator () (
     propagate_const<T> const& l,
     propagate_const<T> const& r
@@ -236,11 +228,7 @@ struct not_equal_to<propagate_const<T>> : impl::binary<
 };
 
 template <class T>
-struct greater_equal<propagate_const<T>> : impl::binary<
-  propagate_const<T>,
-  propagate_const<T>,
-  bool
-> {
+struct greater_equal<propagate_const<T>> {
   constexpr bool operator () (
     propagate_const<T> const& l,
     propagate_const<T> const& r
@@ -250,11 +238,7 @@ struct greater_equal<propagate_const<T>> : impl::binary<
 };
 
 template <class T>
-struct less_equal<propagate_const<T>> : impl::binary<
-  propagate_const<T>,
-  propagate_const<T>,
-  bool
-> {
+struct less_equal<propagate_const<T>> {
   constexpr bool operator () (
     propagate_const<T> const& l,
     propagate_const<T> const& r
@@ -262,11 +246,7 @@ struct less_equal<propagate_const<T>> : impl::binary<
 };
 
 template <class T>
-struct greater<propagate_const<T>> : impl::binary<
-  propagate_const<T>,
-  propagate_const<T>,
-  bool
-> {
+struct greater<propagate_const<T>> {
   constexpr bool operator () (
     propagate_const<T> const& l,
     propagate_const<T> const& r
@@ -274,11 +254,7 @@ struct greater<propagate_const<T>> : impl::binary<
 };
 
 template <class T>
-struct less<propagate_const<T>> : impl::binary<
-  propagate_const<T>,
-  propagate_const<T>,
-  bool
-> {
+struct less<propagate_const<T>> {
   constexpr bool operator () (
     propagate_const<T> const& l,
     propagate_const<T> const& r
