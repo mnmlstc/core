@@ -9,6 +9,32 @@
 
 #include "catch.hpp"
 
+namespace Catch {
+
+template <> struct StringMaker<std::error_condition> {
+  static std::string convert (std::error_condition const& value) {
+    std::ostringstream stream;
+    stream << value.category().name() << ':' << value.value();
+    return stream.str();
+  }
+};
+
+template <class T> struct StringMaker<core::result<T>> {
+  static std::string convert (core::result<T> const& value) {
+    if (value) { return Catch::toString(*value); }
+    return StringMaker<std::error_condition>::convert(value.condition());
+  }
+};
+
+template <> struct StringMaker<core::result<void>> {
+  static std::string convert (core::result<void> const& value) {
+    if (value) { return "result<void>"; }
+    return StringMaker<std::error_condition>::convert(value.condition());
+  }
+};
+
+} /* namespace Catch */
+
 struct variadic {
   template <class... Args> constexpr variadic (Args&&...) { }
   template <class T, class... Args>
@@ -831,12 +857,11 @@ TEST_CASE("result-operator-equal", "[result][operators]") {
   CHECK(lhs_valid == rhs_valid);
   CHECK(invalid == condition);
   CHECK(condition == invalid);
-  CHECK(invalid == code);
-  CHECK(code == invalid);
+  CHECK(invalid == code); // fails
+  CHECK(code == invalid); // fails
   CHECK(lhs_valid == value);
   CHECK(value == rhs_valid);
 }
-
 
 TEST_CASE("result-operator-not-equal", "[result][operators]") {
   core::result<std::string> lhs_valid { "lhs" };
