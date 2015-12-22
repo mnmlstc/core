@@ -49,6 +49,43 @@ struct result<V, meta::list<Ts...>, Args...> final : ::std::conditional<
 template <class V, class T, class... Args>
 using result_t = typename result<V, T, Args...>::type;
 
+/* Used to provide lambda based 'pattern matching' for variant and optional
+ * types.
+ *
+ * Based off of Dave Abrahams C++11 'generic lambda' example (no longer
+ * available on the internet)
+ */
+
+template <class... Lambdas> struct overload;
+template <class Lambda> struct overload<Lambda> : Lambda {
+  using call_type = Lambda;
+  using call_type::operator ();
+};
+
+template <class Lambda, class... Lambdas>
+struct overload<Lambda, Lambdas...> :
+  private Lambda,
+  private overload<Lambdas...>::call_type
+{
+  using base_type = typename overload<Lambdas...>::call_type;
+
+  using lambda_type = Lambda;
+  using call_type = overload;
+
+  overload (Lambda&& lambda, Lambdas&&... lambdas) :
+    lambda_type(pass<Lambda>(lambda)),
+    base_type(pass<Lambdas>(lambdas)...)
+  { }
+
+  using lambda_type::operator ();
+  using base_type::operator ();
+};
+
+template <class... Lambdas>
+auto make_overload(Lambdas&&... lambdas) -> overload<Lambdas...> {
+  return overload<Lambdas...> { pass<Lambdas>(lambdas)... };
+}
+
 }}} /* namespace core::v2::impl */
 
 namespace core {

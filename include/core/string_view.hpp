@@ -11,7 +11,106 @@
 
 #include <cstdlib>
 
-#include <core/internal.hpp>
+namespace core {
+inline namespace v2 {
+namespace impl {
+
+/* implementations of MurmurHash2 *Endian Neutral* (but not alignment!) */
+template <::std::size_t=sizeof(::std::size_t)> struct murmur;
+template <> struct murmur<4> {
+  constexpr murmur () = default;
+
+  ::std::size_t operator () (void const* p, ::std::size_t len) const noexcept {
+    static constexpr ::std::uint32_t magic = UINT32_C(0x5BD1E995);
+    static constexpr auto shift = 24;
+
+    auto hash = len;
+    auto data = static_cast<::std::uint8_t const*>(p);
+
+    while (len >= sizeof(::std::uint32_t)) {
+      ::std::uint32_t mix = data[0];
+      mix |= ::std::uint32_t(data[1]) <<  8;
+      mix |= ::std::uint32_t(data[2]) << 16;
+      mix |= ::std::uint32_t(data[3]) << 24;
+
+      mix *= magic;
+      mix ^= mix >> shift;
+      mix *= magic;
+
+      hash *= magic;
+      hash ^= mix;
+
+      data += sizeof(::std::uint32_t);
+      len -= sizeof(::std::uint32_t);
+    }
+
+    switch (len) {
+      case 3: hash ^= ::std::uint32_t(data[2]) << 16; [[clang::fallthrough]];
+      case 2: hash ^= ::std::uint32_t(data[1]) <<  8; [[clang::fallthrough]];
+      case 1: hash ^= ::std::uint32_t(data[0]);
+              hash *= magic;
+    }
+
+    hash ^= hash >> 13;
+    hash *= magic;
+    hash ^= hash >> 15;
+
+    return hash;
+  }
+};
+
+template <> struct murmur<8> {
+  constexpr murmur () = default;
+
+  ::std::size_t operator () (void const* p, ::std::size_t len) const noexcept {
+    static constexpr ::std::uint64_t magic = UINT64_C(0xC6A4A7935BD1E995);
+    static constexpr auto shift = 47;
+
+    ::std::size_t hash = len * magic;
+
+    auto data = static_cast<::std::uint8_t const*>(p);
+
+    while (len >= sizeof(::std::uint64_t)) {
+      ::std::uint64_t mix = data[0];
+      mix |= ::std::uint64_t(data[1]) <<  8;
+      mix |= ::std::uint64_t(data[2]) << 16;
+      mix |= ::std::uint64_t(data[3]) << 24;
+      mix |= ::std::uint64_t(data[4]) << 32;
+      mix |= ::std::uint64_t(data[5]) << 40;
+      mix |= ::std::uint64_t(data[6]) << 48;
+      mix |= ::std::uint64_t(data[7]) << 54;
+
+      mix *= magic;
+      mix ^= mix >> shift;
+      mix *= magic;
+
+      hash ^= mix;
+      hash *= magic;
+
+      data += sizeof(::std::uint64_t);
+      len -= sizeof(::std::uint64_t);
+    }
+
+    switch (len & 7) {
+      case 7: hash ^= ::std::uint64_t(data[6]) << 48; [[clang::fallthrough]];
+      case 6: hash ^= ::std::uint64_t(data[5]) << 40; [[clang::fallthrough]];
+      case 5: hash ^= ::std::uint64_t(data[4]) << 32; [[clang::fallthrough]];
+      case 4: hash ^= ::std::uint64_t(data[3]) << 24; [[clang::fallthrough]];
+      case 3: hash ^= ::std::uint64_t(data[2]) << 16; [[clang::fallthrough]];
+      case 2: hash ^= ::std::uint64_t(data[1]) << 8;  [[clang::fallthrough]];
+      case 1: hash ^= ::std::uint64_t(data[0]);
+              hash *= magic;
+    }
+
+    hash ^= hash >> shift;
+    hash *= magic;
+    hash ^= hash >> shift;
+
+    return hash;
+  }
+};
+
+}}} /* namespace core::v2::impl */
 
 namespace core {
 inline namespace v2 {
@@ -623,7 +722,6 @@ template <typename CharT, typename Traits>
 struct hash<core::v2::basic_string_view<CharT, Traits>> {
   using argument_type = core::v2::basic_string_view<CharT, Traits>;
   using result_type = size_t;
-
 
   result_type operator ()(argument_type const& ref) const noexcept {
     static constexpr core::impl::murmur<sizeof(size_t)> hasher { };

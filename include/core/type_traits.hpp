@@ -9,6 +9,21 @@
 
 namespace core {
 inline namespace v2 {
+namespace impl {
+
+/* union used for variant<Ts...> and implementing aligned_union, which is
+ * not provided by gcc 4.8.x, but is provided by clang. (aligned_union_t is
+ * the only alias missing from <type_traits>)
+ */
+template <class... Ts> union discriminate;
+template <> union discriminate<> { };
+template <class T, class... Ts>
+union discriminate<T, Ts...> {
+  T value;
+  discriminate<Ts...> rest;
+};
+
+} /* namespace impl */
 
 /* custom type traits and types */
 template <class T> using identity_t = typename meta::identity<T>::type;

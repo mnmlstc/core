@@ -546,7 +546,7 @@ struct expected final {
     if (not *this) { this->ptr = ptr; }
     else {
       this->val.~value_type();
-      ::new (as_void(this->ptr)) ::std::exception_ptr(ptr);
+      ::new (::core::as_void(this->ptr)) ::std::exception_ptr(ptr);
       this->valid = false;
     }
     return *this;
@@ -590,14 +590,19 @@ struct expected final {
   template <class T, class... Args>
   void emplace (::std::initializer_list<T> il, Args&&... args) {
     this->reset();
-    ::new (as_void(this->val)) value_type(il, ::core::forward<Args>(args)...);
+    ::new (::core::as_void(this->val)) value_type(
+      il,
+      ::core::forward<Args>(args)...
+    );
     this->valid = true;
   }
 
   template <class... Args>
   void emplace (Args&&... args) {
     this->reset();
-    ::new (as_void(this->val)) value_type(::core::forward<Args>(args)...);
+    ::new (::core::as_void(this->val)) value_type(
+      ::core::forward<Args>(args)...
+    );
     this->valid = true;
   }
 
@@ -720,8 +725,8 @@ struct result final {
   result (int val, ::std::error_category const& cat) noexcept :
     valid { val == 0 }
   {
-    if (*this) { ::new (as_void(this->val)) value_type(); }
-    else { ::new (as_void(this->cnd)) ::std::error_condition(val, cat); }
+    if (*this) { ::new (::core::as_void(this->val)) value_type(); }
+    else { ::new (::core::as_void(this->cnd)) error_type(val, cat); }
   }
 
   template <
@@ -731,14 +736,14 @@ struct result final {
     valid { core::as_under(e) == 0 }
   {
     if (*this) { ::new (as_void(this->val)) value_type(); }
-    else { ::new (as_void(this->cnd)) ::std::error_condition(e); }
+    else { ::new (as_void(this->cnd)) error_type(e); }
   }
 
   result (::std::error_condition const& ec) :
     valid { not ec }
   {
-    if (*this) { ::new (as_void(this->val)) value_type(); }
-    else { ::new (as_void(this->cnd)) ::std::error_condition(ec); }
+    if (*this) { ::new (::core::as_void(this->val)) value_type(); }
+    else { ::new (::core::as_void(this->cnd)) error_type(ec); }
   }
 
   result (value_type const& val) :
@@ -1057,6 +1062,7 @@ private:
 template <>
 struct result<void> final {
   using value_type = void;
+  using error_type = ::std::error_condition;
 
   result (int val, ::std::error_category const& cat) :
     cnd { val, cat }
