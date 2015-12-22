@@ -18,4 +18,4 @@ cmake $CURRENT \
   -DBUILD_WITH_COVERAGE:BOOL=ON \
   -DBUILD_WITH_LIBCXX:BOOL=${LIBCXX:-OFF} \
   -DBUILD_TESTING:BOOL=ON || \
-  $(cat ./CMakeFiles/CMakeOutput.log && cat ./CMakeFiles/CMakeError.log)
+  cat ./CMakeFiles/CMakeOutput.log ./CMakeFiles/CMakeError.log
