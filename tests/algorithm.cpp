@@ -1,3 +1,5 @@
+#include <ciso646>
+
 #include <core/algorithm.hpp>
 #include <initializer_list>
 #include <random>

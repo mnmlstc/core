@@ -1,3 +1,5 @@
+#include <ciso646>
+
 #include <core/string_view.hpp>
 
 #include <unordered_map>

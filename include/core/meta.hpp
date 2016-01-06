@@ -129,7 +129,7 @@ struct find_if<list<>, F, Args...> : identity<list<>> { };
 
 template <template <class...> class F, class T, class... Ts, class... Args>
 struct find_if<list<T, Ts...>, F, Args...> : ::std::conditional<
-  F<Args..., T> { },
+  F<Args..., T>::value,
   list<T, Ts...>,
   typename find_if<list<Ts...>, F, Args...>::type
 > { };
@@ -172,11 +172,19 @@ namespace core {
 inline namespace v2 {
 namespace meta {
 
-template <bool B, class T = void>
-using unless = typename ::std::enable_if<not B, T>::type;
+template <bool B, typename T = void>
+struct if_en;
+
+template <typename T>
+struct if_en<true, T> {
+  typedef T type;
+};
 
 template <bool B, class T = void>
-using when = typename ::std::enable_if<B, T>::type;
+using unless = typename if_en<!B, T>::type;
+
+template <bool B, class T = void>
+using when = typename if_en<B, T>::type;
 
 template <bool B> using inhibit = unless<B, ::std::size_t>;
 template <bool B> using require = when<B, ::std::size_t>;
@@ -191,7 +199,7 @@ using impl::false_t;
 using impl::true_t;
 
 using impl::identity;
-using impl::deduce;
+template <class... Ts> using deduce = typename impl::deduce<Ts...>;
 using impl::list;
 
 using impl::is_specialization_of;
@@ -285,8 +293,8 @@ template <class T, T... I> struct integer_sequence : identity<T> {
   );
 
   template <T N> using append = integer_sequence<T, I..., N>;
-  static constexpr ::std::size_t size() noexcept { return sizeof...(I); }
-  using next = append<size()>;
+  constexpr static ::std::size_t size() noexcept { return sizeof...(I); }
+  using next = append<sizeof...(I)>;
 };
 
 template <class T, T Index, ::std::size_t N>

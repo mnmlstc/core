@@ -1,3 +1,5 @@
+#include <ciso646>
+
 #include <core/iterator.hpp>
 #include <algorithm>
 #include <ostream>

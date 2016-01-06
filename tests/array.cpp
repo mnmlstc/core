@@ -1,3 +1,5 @@
+#include <ciso646>
+
 #include <core/array.hpp>
 
 #include "catch.hpp"

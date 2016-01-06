@@ -22,7 +22,10 @@ constexpr auto make_array (Args&&... args) -> ::std::array<
     V
   >,
   sizeof...(Args)
-> { return {{ core::forward<Args>(args)... }}; }
+> {
+  using RT = typename decltype(make_array<V>(args...))::value_type;
+  return {{static_cast<RT>(core::forward<Args>(args))...}};
+}
 
 template <class T, ::std::size_t N, ::std::size_t... Is>
 constexpr auto to_array (T (&array)[N], index_sequence<Is...>) -> ::std::array<

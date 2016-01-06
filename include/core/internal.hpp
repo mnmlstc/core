@@ -44,6 +44,40 @@ using enable_if_t = typename ::std::enable_if<B, T>::type;
 using ::std::declval;
 using ::std::swap;
 
+template <class T, class U>
+struct is_swappable_with {
+  template <class TT, class UU>
+  static auto test(void*)
+    -> decltype(swap(declval<TT&>(), declval<UU&>()), std::true_type());
+
+  template <class, class>
+  static std::false_type test(...);
+
+  static const bool value =
+    std::is_same<std::true_type,
+    decltype(test<T, U>(nullptr))>::value;
+};
+
+template <class T, class U>
+struct is_noexcept_swappable_with {
+  template <class TT,
+            class UU,
+            bool ENABLE = noexcept(swap(declval<TT&>(), declval<UU&>()))>
+  static auto test(void*)
+    -> typename std::conditional<
+                  ENABLE,
+                  std::true_type,
+                  std::false_type
+                >::type;
+
+  template <class, class>
+  static std::false_type test(...);
+
+  static const bool value =
+    std::is_same<std::true_type,
+    decltype(test<T, U>(nullptr))>::value;
+};
+
 template <class, class, class=void>
 struct is_swappable : ::std::false_type { };
 
@@ -52,16 +86,16 @@ struct is_swappable<
   T,
   U,
   meta::deduce<
-    decltype(swap(declval<T&>(), declval<U&>())),
-    decltype(swap(declval<U&>(), declval<T&>()))
+    is_swappable_with<T, U>,
+    is_swappable_with<U, T>
   >
 > : ::std::true_type { };
 
 template <class T, class U=T>
 struct is_nothrow_swappable : meta::all_t<
   is_swappable<T, U>::value,
-  noexcept(swap(declval<T&>(), declval<U&>())),
-  noexcept(swap(declval<U&>(), declval<T&>()))
+  is_noexcept_swappable_with<T, U>::value,
+  is_noexcept_swappable_with<U, T>::value
 > { };
 
 /*

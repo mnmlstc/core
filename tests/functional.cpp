@@ -1,3 +1,5 @@
+#include <ciso646>
+
 #include <core/functional.hpp>
 
 #include <unordered_map>
