@@ -463,31 +463,31 @@ auto get (variant<Ts...>& v) noexcept(false) -> meta::when<
 
 template <class T, class... Ts>
 auto get (variant<Ts...> const* v) noexcept -> meta::unless<
-  meta::find<meta::list<Ts...>, T>::empty(),
+  meta::find<meta::list<Ts...>, T>::size() == 0,
   decltype(get<meta::index_of<meta::list<Ts...>, T>()>(v))
 > { return get<meta::index_of<meta::list<Ts...>, T>()>(v); }
 
 template <class T, class... Ts>
 auto get (variant<Ts...>* v) noexcept -> meta::unless<
-  meta::find<meta::list<Ts...>, T>::empty(),
+  meta::find<meta::list<Ts...>, T>::size() == 0,
   decltype(get<meta::index_of<meta::list<Ts...>, T>()>(v))
 > { return get<meta::index_of<meta::list<Ts...>, T>()>(v); }
 
 template <class T, class... Ts>
 auto get (variant<Ts...> const& v) noexcept(false) -> meta::unless<
-  meta::find<meta::list<Ts...>, T>::empty(),
+  meta::find<meta::list<Ts...>, T>::size() == 0,
   decltype(get<meta::index_of<meta::list<Ts...>, T>()>(v))
 > { return get<meta::index_of<meta::list<Ts...>, T>()>(v); }
 
 template <class T, class... Ts>
 auto get (variant<Ts...>&& v) noexcept(false) -> meta::unless<
-  meta::find<meta::list<Ts...>, T>::empty(),
+  meta::find<meta::list<Ts...>, T>::size() == 0,
   decltype(core::move(get<meta::index_of<meta::list<Ts...>, T>()>(v)))
 > { return core::move(get<meta::index_of<meta::list<Ts...>, T>()>(v)); }
 
 template <class T, class... Ts>
 auto get (variant<Ts...>& v) noexcept(false) -> meta::unless<
-  meta::find<meta::list<Ts...>, T>::empty(),
+  meta::find<meta::list<Ts...>, T>::size() == 0,
   decltype(get<meta::index_of<meta::list<Ts...>, T>()>(v))
 > { return get<meta::index_of<meta::list<Ts...>, T>()>(v); }
 
