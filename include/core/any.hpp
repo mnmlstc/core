@@ -25,7 +25,7 @@ template <class T>
 struct is_small final : meta::all_t<
   sizeof(decay_t<T>) <= sizeof(data_type),
   alignof(decay_t<T>) <= alignof(data_type),
-  ::std::is_nothrow_copy_constructible<T>::value
+  ::std::is_nothrow_copy_constructible<decay_t<T>>::value
 > { };
 template <> struct is_small<void> final : ::std::true_type { };
 

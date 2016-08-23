@@ -57,14 +57,14 @@ template <class, template <class...> class, class...> struct find_if;
 template <class, class> struct count;
 template <class, class> struct find;
 
-template <class, template <class...> class, class...> struct none_of;
-template <class, template <class...> class, class...> struct any_of;
-template <class, template <class...> class, class...> struct all_of;
-
 template <class, ::std::size_t> struct rotate;
 template <class> struct reverse;
 
 template <class, class> struct equal;
+
+template <class, template <class...> class, class...> struct none_of;
+template <class, template <class...> class, class...> struct all_of;
+template <class, template <class...> class, class...> struct any_of;
 
 template <bool...> struct none;
 template <bool...> struct all;
@@ -201,12 +201,6 @@ using convert = typename impl::convert<T, U>::type;
 
 template <class T, class U> using rebind = typename impl::rebind<T, U>::type;
 template <class T> using into = typename impl::into<T>::type;
-
-template <class T, template <class...> class F, class... Args>
-using filter = typename impl::filter<T, F, Args...>::type;
-
-template <class T, template <class...> class F, class... Args>
-using map = typename impl::map<T, F, Args...>::type;
 
 template <class... Ts> using join = typename impl::join<Ts...>::type;
 

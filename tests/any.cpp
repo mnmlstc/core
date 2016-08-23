@@ -7,6 +7,57 @@
 
 #include "catch.hpp"
 
+TEST_CASE("issue-47") {
+  struct Foo {
+    int f_;
+
+    Foo() : f_(0) { }
+    Foo(const Foo& other) : f_(other.f_) { }
+    Foo(Foo&& other) { swap(*this, other); }
+
+    Foo& operator=(Foo other) {
+      swap(*this, other);
+      return *this;
+    }
+
+    void swap(Foo& first, Foo& second) {
+      if(&first != &second) {
+        using std::swap;
+
+        swap(first.f_, second.f_);
+      }
+    }
+  };
+
+  // not small because not noexcept
+  CHECK_FALSE(::core::impl::is_small<Foo&>::value);
+
+  int f = 42;
+  Foo foo;
+  foo.f_ = f;
+
+  CHECK(f == foo.f_);
+
+  core::any a = foo;
+
+  CHECK(f == foo.f_);
+  CHECK(f == core::any_cast<Foo>(a).f_);  // Seg fault - the address (this) of
+                                          // the temporary object has a value of
+                                          // 0x2A (42)
+
+  core::any b = a;
+
+  CHECK(f == foo.f_);
+  CHECK(f == core::any_cast<Foo>(a).f_);
+  CHECK(f == core::any_cast<Foo>(b).f_);
+
+  core::any c = std::move(a);
+
+  CHECK(f == foo.f_);
+  CHECK(0 == core::any_cast<Foo>(a).f_);
+  CHECK(f == core::any_cast<Foo>(b).f_);
+  CHECK(f == core::any_cast<Foo>(c).f_);
+}
 TEST_CASE("constructor", "[constructors]") {
   core::any value;
 

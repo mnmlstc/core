@@ -48,6 +48,7 @@ function(add_unit_test name file)
         $<$<BOOL:${CAN_WARN_NO_CXX98_PEDANTIC}>:${WARN_NO_CXX98_PEDANTIC}>
         $<$<BOOL:${CAN_WARN_NO_POTENTIAL_EXPR}>:${WARN_NO_POTENTIAL_EXPR}>
         $<$<BOOL:${CAN_WARN_NO_INTERNAL_DECL}>:${WARN_NO_INTERNAL_DECL}>
+        $<$<BOOL:${CAN_WARN_NO_DOUBLE_PROMO}>:${WARN_NO_DOUBLE_PROMO}>
         $<$<BOOL:${CAN_WARN_NO_CXX98_COMPAT}>:${WARN_NO_CXX98_COMPAT}>
         $<$<BOOL:${CAN_WARN_NO_WEAK_VTABLES}>:${WARN_NO_WEAK_VTABLES}>
         $<$<BOOL:${CAN_WARN_NO_UNUSED_MEMFN}>:${WARN_NO_UNUSED_MEMFN}>
@@ -104,6 +105,7 @@ set(WARN_ALL "-Wall")
 set(WARN_NO_POTENTIAL_EXPR "-Wno-potentially-evaluated-expression")
 set(WARN_NO_INTERNAL_DECL "-Wno-unneeded-internal-declaration")
 set(WARN_NO_CXX98_PEDANTIC "-Wno-c++98-compat-pedantic")
+set(WARN_NO_DOUBLE_PROMO "-Wno-double-promotion")
 set(WARN_NO_CXX98_COMPAT "-Wno-c++98-compat")
 set(WARN_NO_WEAK_VTABLES "-Wno-weak-vtables")
 set(WARN_NO_UNUSED_MEMFN "-Wno-unused-member-function")
@@ -148,6 +150,7 @@ check_cxx_compiler_flag(${WARN_ALL} CAN_WARN_ALL)
 check_cxx_compiler_flag(${WARN_NO_POTENTIAL_EXPR} CAN_WARN_NO_POTENTIAL_EXPR)
 check_cxx_compiler_flag(${WARN_NO_CXX98_PEDANTIC} CAN_WARN_NO_CXX98_PEDANTIC)
 check_cxx_compiler_flag(${WARN_NO_INTERNAL_DECL} CAN_WARN_NO_INTERNAL_DECL)
+check_cxx_compiler_flag(${WARN_NO_DOUBLE_PROMO} CAN_WARN_NO_DOUBLE_PROMO)
 check_cxx_compiler_flag(${WARN_NO_CXX98_COMPAT} CAN_WARN_NO_CXX98_COMPAT)
 check_cxx_compiler_flag(${WARN_NO_WEAK_VTABLES} CAN_WARN_NO_WEAK_VTABLES)
 check_cxx_compiler_flag(${WARN_NO_UNUSED_MEMFN} CAN_WARN_NO_UNUSED_MEMFN)

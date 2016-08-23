@@ -56,67 +56,7 @@ inline ::std::atomic<memory_resource*>& resource () noexcept {
   return instance;
 }
 
-template <class Allocator>
-struct resource_adaptor {
-
-  using allocator_type = Allocator;
-  using alloc_traits = ::std::allocator_traits<allocator_type>;
-
-  static constexpr bool same_cp = ::std::is_same<
-    typename alloc_traits::value_type const*,
-    typename alloc_traits::const_pointer
-  >::value;
-
-  static constexpr bool same_p = ::std::is_same<
-    typename alloc_traits::value_type*,
-    typename alloc_traits::pointer
-  >::value;
-
-  static constexpr bool same_cv = ::std::is_same<
-    typename alloc_traits::const_void_pointer,
-    void const*
-  >::value;
-
-  static constexpr bool same_v = ::std::is_same<
-    typename alloc_traits::void_pointer,
-    void*
-  >::value;
-
-  static_assert(same_cp, "const_pointer must be same as value_type const*");
-  static_assert(same_cv, "const_void_pointer must be same as void const*");
-  static_assert(same_p, "pointer must be same as value_type*");
-  static_assert(same_v, "void_pointer must be same as void*");
-
-  template <class Alloc>
-  resource_adaptor (Alloc&& alloc) :
-    alloc { ::core::forward<Alloc>(alloc) }
-  { }
-
-  resource_adaptor (resource_adaptor const&) = default;
-  resource_adaptor () = default;
-
-  resource_adaptor& operator = (resource_adaptor const&) = default;
-
-  allocator_type get_allocator () const { return this->alloc; }
-
-private:
-
-  virtual void* do_allocate (::std::size_t size, ::std::size_t) final {
-    return alloc_traits::allocate(this->alloc, size);
-  }
-
-  virtual void do_deallocate (void* p, ::std::size_t sz, ::std::size_t) final {
-    alloc_traits::deallocate(this->alloc, p, sz);
-  }
-
-  virtual bool do_is_equal (memory_resource const& that) const noexcept final {
-    auto ptr = dynamic_cast<resource_adaptor const*>(&that);
-    if (not ptr) { return false; }
-    return ptr->alloc == this->alloc;
-  }
-
-  allocator_type alloc;
-};
+template <class> struct resource_adaptor;
 
 }}}} /* namespace core::v2::pmr::impl */
 
@@ -250,7 +190,6 @@ using resource_adaptor = impl::resource_adaptor<
   typename ::std::allocator_traits<Allocator>::template rebind_alloc<char>
 >;
 
-
 inline bool operator == (
   memory_resource const& lhs,
   memory_resource const& rhs
@@ -276,5 +215,74 @@ bool operator != (
 ) noexcept { return *lhs.resource() != *rhs.resource(); }
 
 }}} /* namespace core::v2::pmr */
+
+namespace core {
+inline namespace v2 {
+namespace pmr {
+namespace impl {
+
+template <class Allocator>
+struct resource_adaptor : memory_resource {
+
+  using allocator_type = Allocator;
+  using alloc_traits = ::std::allocator_traits<allocator_type>;
+
+  static constexpr bool same_cp = ::std::is_same<
+    typename alloc_traits::value_type const*,
+    typename alloc_traits::const_pointer
+  >::value;
+
+  static constexpr bool same_p = ::std::is_same<
+    typename alloc_traits::value_type*,
+    typename alloc_traits::pointer
+  >::value;
+
+  static constexpr bool same_cv = ::std::is_same<
+    typename alloc_traits::const_void_pointer,
+    void const*
+  >::value;
+
+  static constexpr bool same_v = ::std::is_same<
+    typename alloc_traits::void_pointer,
+    void*
+  >::value;
+
+  static_assert(same_cp, "const_pointer must be same as value_type const*");
+  static_assert(same_cv, "const_void_pointer must be same as void const*");
+  static_assert(same_p, "pointer must be same as value_type*");
+  static_assert(same_v, "void_pointer must be same as void*");
+
+  template <class Alloc>
+  resource_adaptor (Alloc&& alloc) :
+    alloc { ::core::forward<Alloc>(alloc) }
+  { }
+
+  resource_adaptor (resource_adaptor const&) = default;
+  resource_adaptor () = default;
+
+  resource_adaptor& operator = (resource_adaptor const&) = default;
+
+  allocator_type get_allocator () const { return this->alloc; }
+
+private:
+
+  virtual void* do_allocate (::std::size_t size, ::std::size_t) final {
+    return alloc_traits::allocate(this->alloc, size);
+  }
+
+  virtual void do_deallocate (void* p, ::std::size_t sz, ::std::size_t) final {
+    alloc_traits::deallocate(this->alloc, p, sz);
+  }
+
+  virtual bool do_is_equal (memory_resource const& that) const noexcept final {
+    auto ptr = dynamic_cast<resource_adaptor const*>(&that);
+    if (not ptr) { return false; }
+    return ptr->alloc == this->alloc;
+  }
+
+  allocator_type alloc;
+};
+
+}}}} /* namespace core::v2::pmr::impl */
 
 #endif /* CORE_MEMORY_RESOURCE_HPP */
