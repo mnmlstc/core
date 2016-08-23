@@ -35,6 +35,7 @@ struct detect<T, deduce<Detector<Args...>>, Detector, Args...> :
 template <class... Ts>
 struct list {
   static constexpr ::std::size_t size () noexcept { return sizeof...(Ts); }
+  static constexpr bool empty () noexcept { return size() == 0u; }
 };
 
 template <class, template <class...> class> struct convert;

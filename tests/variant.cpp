@@ -233,6 +233,25 @@ TEST_CASE("variant-functions", "[variant][functions]") {
     CHECK((*core::get<2>(&vector))[2] == std::string { "3" });
   }
 
+  SECTION("get-type") {
+    using variant_type = core::variant<
+      std::uint64_t,
+      std::string,
+      std::vector<std::string>
+    >;
+
+    variant_type const vector { std::vector<std::string> { "1", "2", "3" } };
+    variant_type string { std::string { "get" } };
+    variant_type integer { static_cast<std::uint64_t>(64) };
+
+    CHECK_THROWS_AS(core::get<0>(vector), core::bad_variant_get);
+    CHECK(core::get<std::uint64_t>(core::move(integer)) == 64u);
+    CHECK(core::get<std::string>(string) == "get");
+    CHECK(core::get<std::vector<std::string>>(vector)[0] == "1");
+    CHECK(core::get<std::vector<std::string>>(vector)[1] == "2");
+    CHECK(core::get<std::vector<std::string>>(vector)[2] == "3");
+  }
+
   SECTION("swap") {
     using std::swap;
     using variant_type = core::variant<std::string, double>;
