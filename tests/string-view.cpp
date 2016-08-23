@@ -97,7 +97,7 @@ TEST_CASE("string-view-methods", "[string-view][methods]") {
   SECTION("max-size") {
     constexpr core::string_view ref { };
 
-    CHECK(ref.max_size() == 0u);
+    CHECK(ref.max_size() == ::std::numeric_limits<size_t>::max());
   }
 
   SECTION("size") {
