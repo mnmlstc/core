@@ -63,8 +63,27 @@ matrix:
       compiler: clang
       env: BUILD=Debug VERSION=3.9 LIBCXX=ON
     - os: osx
+      osx_image: xcode6.4
       compiler: clang
       env: BUILD=Release
     - os: osx
+      osx_image: xcode6.4
       compiler: clang
       env: BUILD=Debug
+    - os: osx
+      osx_image: xcode7.3
+      compiler: clang
+      env: BUILD=Release
+    - os: osx
+      osx_image: xcode7.3
+      compiler: clang
+      env: BUILD=Debug
+    - os: osx
+      osx_image: xcode8
+      compiler: clang
+      env: BUILD=Release
+    - os: osx
+      osx_image: xcode8
+      compiler: clang
+      env: BUILD=Debug
+
