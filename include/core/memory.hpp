@@ -24,13 +24,17 @@
 #define CORE_LIBSTDCXX_MAX_ALIGN_HACK 0
 
 #if defined(__clang__) and defined(__GLIBCXX__)
-  #if __GLIBCXX__ == 20131008 or \
-    __GLIBCXX__ == 20131016 or \
-    __GLIBCXX__ == 20140522 or \
-    __GLIBCXX__ == 20141219
-    #undef CORE_LIBSTDCXX_MAX_ALIGN_HACK
-    #define CORE_LIBSTDCXX_MAX_ALIGN_HACK 1
-  #endif /* __GLIBCXX__ == N */
+  #if __defined(__is_identifier)
+    #if __is_identifier(max_align_t)
+      #undef CORE_LIBSTDCXX_MAX_ALIGN_HACK
+      #define CORE_LIBSTDCXX_MAX_ALIGN_HACK 1
+    #endif /* __is_identifier(max_align_t) */
+  #elif defined(__has_include)
+    #if not __has_include(<ext/cmath>) and __has_include(<scoped_allocator>)
+      #undef CORE_LIBSTDCXX_MAX_ALIGN_HACK
+      #define CORE_LIBSTDCXX_MAX_ALIGN_HACK 1
+    #endif /* __has_include(...) */
+  #endif /* defined(__is_identifier) : defined(__has_include) */
 #endif /* defined(__clang__) and defined(__GLIBCXX__) */
 
 /* separate check for g++ is done because of spurious failures in travis-ci */

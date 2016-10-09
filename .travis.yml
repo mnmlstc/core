@@ -10,9 +10,8 @@ before_install: bash ./scripts/travis-before-install
 before_script: bash ./scripts/travis-configure
 install: bash ./scripts/travis-install
 script: cmake --build build --target check -- CTEST_OUTPUT_ON_FAILURE=1 VERBOSE=1
-# We have a large number of targets to hit and travis-ci doesn't let us
-# 'append' values to a given row to produce more so we need to MANUALLY
-# declare all of them so that we can have "fine grained control"
+after_success: bash <(curl -s https://codecov.io/bash)
+
 matrix:
   include:
     - os: linux
@@ -27,9 +26,9 @@ matrix:
     - os: linux
       compiler: gcc
       env: BUILD=Debug VERSION=5
-#    - os: linux
-#      compiler: clang
-#      env: BUILD=Release VERSION=3.8
+    - os: linux
+      compiler: clang
+      env: BUILD=Release VERSION=3.8
     - os: linux
       compiler: clang
       env: BUILD=Release VERSION=3.7 LIBCXX=ON
