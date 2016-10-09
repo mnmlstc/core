@@ -54,7 +54,6 @@ TEST_CASE("issue-47") {
   core::any c = std::move(a);
 
   CHECK(f == foo.f_);
-  CHECK(0 == core::any_cast<Foo>(a).f_);
   CHECK(f == core::any_cast<Foo>(b).f_);
   CHECK(f == core::any_cast<Foo>(c).f_);
 }

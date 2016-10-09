@@ -1,21 +1,25 @@
-#!/bin/sh
-# travis-configure - build-script
+#!/bin/bash -e
 
-CURRENT=$(pwd)
-if [[ ! -z ${VERSION} ]]; then
-  CXX=${CXX}-${VERSION}
-  CC=${CC}-${VERSION}
+script_root="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+project_root="$script_root/.."
+
+mkdir build
+cd build
+
+if [[ ! -z $GCC_VERSION ]] ; then
+    export CXX=g++-$GCC_VERSION
+elif [[ ! -z $CLANG_VERSION ]] ; then
+    export CXX=clang++-$CLANG_VERSION
+    export CXXFLAGS=-stdlib=libc++
+
+    if ! type clang++-$CLANG_VERSION >/dev/null 2>&1 ; then
+        # Travis install location for older clang versions. Explicit to avoid PATH precedence issues
+        export CXX=/usr/bin/clang++
+        export LDFLAGS=$(find /usr/lib*/llvm-*/lib/ -name "libclang_rt.profile-x86_64.a")
+    fi
 fi
 
-echo Using $(cmake --version | head -n1)
-echo CXX=${CXX}
-
-mkdir build && cd build || exit 1
-
-cmake $CURRENT \
-  -DCMAKE_CXX_COMPILER:STRING=${CXX} \
-  -DCMAKE_BUILD_TYPE:STRING=${BUILD:-Debug} \
-  -DBUILD_WITH_COVERAGE:BOOL=ON \
-  -DBUILD_WITH_LIBCXX:BOOL=${LIBCXX:-OFF} \
-  -DBUILD_TESTING:BOOL=ON || \
-  { cat ./CMakeFiles/CMakeOutput.log ./CMakeFiles/CMakeError.log && exit 1; }
+cmake $project_root \
+    -DCMAKE_BUILD_TYPE:STRING=${BUILD:-Debug} \
+    -DBUILD_WITH_COVERAGE:BOOL=ON \
+    -DBUILD_TESTING:BOOL=ON

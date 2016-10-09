@@ -1,13 +1,24 @@
-#!/bin/sh
-# travis-install - build-script
+#!/bin/bash -e
 
-if [[ "osx" = ${TRAVIS_OS_NAME} ]]; then
-  brew ls | grep -wq cmake || brew install --without-docs cmake
-  brew outdated cmake || brew upgrade cmake
-fi
+if [[ $TRAVIS_OS_NAME == "linux" ]] ; then
+    packages=''
+    if [[ ! -z $GCC_VERSION ]] ; then
+        if [[ $GCC_VERSION == '4.9' ]] || [[ $GCC_VERSION == '5' ]] || [[ $GCC_VERSION == '6' ]] ; then
+            # from http://askubuntu.com/questions/466651/how-do-i-use-the-latest-gcc-on-ubuntu
+            sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+        fi
 
-if [[ "linux" = ${TRAVIS_OS_NAME} ]]; then
-  sudo apt-get install ${CC}-${VERSION}
-  sudo apt-get install ${CXX}-${VERSION}
-  sudo apt-get install libc++-dev libc++abi-dev
+        packages="$packages g++-$GCC_VERSION"
+    elif [[ ! -z $CLANG_VERSION ]] ; then
+        if [[ $CLANG_VERSION == '3.9' ]] ; then
+            # from http://apt.llvm.org/
+            wget -O - http://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
+            sudo apt-add-repository -y "deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty-$CLANG_VERSION main"
+        fi
+
+        packages="$packages clang-$CLANG_VERSION libc++-dev"
+    fi
+
+    sudo apt-get update
+    sudo apt-get install -y $packages
 fi
