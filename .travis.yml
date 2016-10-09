@@ -3,9 +3,8 @@ language: cpp
 sudo: required
 dist: trusty
 branches:
-  only: master
-git:
-  submodules: false
+  except:
+    - gh_pages
 
 before_install: bash ./scripts/travis-before-install
 before_script: bash ./scripts/travis-configure
@@ -30,7 +29,7 @@ matrix:
       env: BUILD=Debug VERSION=5
     - os: linux
       compiler: clang
-      env: BUILD=Release VERSION=3.7
+      env: BUILD=Release VERSION=3.8
 #    - os: linux
 #      compiler: clang
 #      env: BUILD=Release VERSION=3.7 LIBCXX=ON
