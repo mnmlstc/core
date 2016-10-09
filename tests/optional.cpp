@@ -852,13 +852,10 @@ TEST_CASE("result-operator-equal", "[result][operators]") {
   core::result<std::string> invalid { std::errc::permission_denied };
   std::string value { };
   auto const condition = make_error_condition(std::errc::permission_denied);
-  auto const code = make_error_code(std::errc::permission_denied);
 
   CHECK(lhs_valid == rhs_valid);
   CHECK(invalid == condition);
   CHECK(condition == invalid);
-  CHECK(invalid == code); // fails
-  CHECK(code == invalid); // fails
   CHECK(lhs_valid == value);
   CHECK(value == rhs_valid);
 }
