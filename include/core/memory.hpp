@@ -24,7 +24,7 @@
 #define CORE_LIBSTDCXX_MAX_ALIGN_HACK 0
 
 #if defined(__clang__) and defined(__GLIBCXX__)
-  #if __defined(__is_identifier)
+  #if defined(__is_identifier)
     #if __is_identifier(max_align_t)
       #undef CORE_LIBSTDCXX_MAX_ALIGN_HACK
       #define CORE_LIBSTDCXX_MAX_ALIGN_HACK 1
