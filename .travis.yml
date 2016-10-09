@@ -16,19 +16,37 @@ matrix:
   include:
     - os: linux
       compiler: gcc
-      env: BUILD=Release VERSION=6
-    - os: linux
-      compiler: gcc
       env: BUILD=Release VERSION=5
-    - os: linux
-      compiler: gcc
-      env: BUILD=Debug VERSION=6
     - os: linux
       compiler: gcc
       env: BUILD=Debug VERSION=5
     - os: linux
+      compiler: gcc
+      env: BUILD=Release VERSION=6
+    - os: linux
+      compiler: gcc
+      env: BUILD=Debug VERSION=6
+    - os: linux
+      compiler: clang
+      env: BUILD=Release VERSION=3.7
+    - os: linux
+      compiler: clang
+      env: BUILD=Debug VERSION=3.7
+    - os: linux
       compiler: clang
       env: BUILD=Release VERSION=3.8
+    - os: linux
+      compiler: clang
+      env: BUILD=Debug VERSION=3.8
+    - os: linux
+      compiler: clang
+      env: BUILD=Release VERSION=3.9
+    - os: linux
+      compiler: clang
+      env: BUILD=Debug VERSION=3.9
+    - os: linux
+      compiler: clang
+      env: BUILD=Release VERSION=3.7 LIBCXX=ON
     - os: linux
       compiler: clang
       env: BUILD=Release VERSION=3.7 LIBCXX=ON
@@ -37,7 +55,13 @@ matrix:
       env: BUILD=Release VERSION=3.8 LIBCXX=ON
     - os: linux
       compiler: clang
+      env: BUILD=Debug VERSION=3.8 LIBCXX=ON
+    - os: linux
+      compiler: clang
       env: BUILD=Release VERSION=3.9 LIBCXX=ON
+    - os: linux
+      compiler: clang
+      env: BUILD=Debug VERSION=3.9 LIBCXX=ON
     - os: osx
       compiler: clang
       env: BUILD=Release
