@@ -27,12 +27,18 @@ matrix:
     - os: linux
       compiler: gcc
       env: BUILD=Debug VERSION=5
-    - os: linux
-      compiler: clang
-      env: BUILD=Release VERSION=3.8
 #    - os: linux
 #      compiler: clang
-#      env: BUILD=Release VERSION=3.7 LIBCXX=ON
+#      env: BUILD=Release VERSION=3.8
+    - os: linux
+      compiler: clang
+      env: BUILD=Release VERSION=3.7 LIBCXX=ON
+    - os: linux
+      compiler: clang
+      env: BUILD=Release VERSION=3.8 LIBCXX=ON
+    - os: linux
+      compiler: clang
+      env: BUILD=Release VERSION=3.9 LIBCXX=ON
     - os: osx
       compiler: clang
       env: BUILD=Release
