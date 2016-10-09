@@ -13,7 +13,7 @@ TEST_CASE("issue-47") {
 
     Foo() : f_(0) { }
     Foo(const Foo& other) : f_(other.f_) { }
-    Foo(Foo&& other) { swap(*this, other); }
+    Foo(Foo&& other) : f_(other.f_) { other.f_ = 0; }
 
     Foo& operator=(Foo other) {
       swap(*this, other);

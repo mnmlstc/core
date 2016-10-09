@@ -33,7 +33,7 @@ function(add_unit_test name file)
         $<$<AND:${LIBCXX}>:${USE_STDLIB_LIBCXX}>
         $<$<AND:${NO_RTTI}>:${USE_NO_RTTI}>
 
-        $<$<BOOL:${CAN_SANITIZE_UNDEFINED}>:${SANITIZE_UNDEFINED}>
+        #$<$<BOOL:${CAN_SANITIZE_UNDEFINED}>:${SANITIZE_UNDEFINED}>
         $<$<BOOL:${CAN_SANITIZE_ADDRESS}>:${SANITIZE_ADDRESS}>
         $<$<BOOL:${CAN_SANITIZE_MEMORY}>:${SANITIZE_MEMORY}>
 
@@ -70,7 +70,7 @@ function(add_unit_test name file)
   target_include_directories(test-${name} SYSTEM PRIVATE ${TEST_SOURCE_DIR})
   target_link_libraries(test-${name} PUBLIC core)
   target_link_libraries(test-${name} PRIVATE
-    $<$<BOOL:${CAN_SANITIZE_UNDEFINED}>:${SANITIZE_UNDEFINED}>
+    #$<$<BOOL:${CAN_SANITIZE_UNDEFINED}>:${SANITIZE_UNDEFINED}>
     $<$<BOOL:${CAN_SANITIZE_ADDRESS}>:${SANITIZE_ADDRESS}>
     $<$<BOOL:${CAN_SANITIZE_MEMORY}>:${SANITIZE_MEMORY}>
     $<$<BOOL:${BUILD_WITH_COVERAGE}>:${USE_COVERAGE}>)
