@@ -20,11 +20,11 @@ template <::std::size_t=sizeof(::std::size_t)> struct murmur;
 template <> struct murmur<4> {
   constexpr murmur () = default;
 
-  ::std::size_t operator () (void const* p, ::std::size_t len) const noexcept {
+  ::std::uint32_t operator () (void const* p, ::std::size_t len) const noexcept {
     static constexpr ::std::uint32_t magic = UINT32_C(0x5BD1E995);
     static constexpr auto shift = 24;
 
-    auto hash = len;
+    auto hash = static_cast<::std::uint32_t>(len);
     auto data = static_cast<::std::uint8_t const*>(p);
 
     while (len >= sizeof(::std::uint32_t)) {
@@ -62,11 +62,11 @@ template <> struct murmur<4> {
 template <> struct murmur<8> {
   constexpr murmur () = default;
 
-  ::std::size_t operator () (void const* p, ::std::size_t len) const noexcept {
+  ::std::uint64_t operator () (void const* p, ::std::size_t len) const noexcept {
     static constexpr ::std::uint64_t magic = UINT64_C(0xC6A4A7935BD1E995);
     static constexpr auto shift = 47;
 
-    ::std::size_t hash = len * magic;
+    ::std::uint64_t hash = len * magic;
 
     auto data = static_cast<::std::uint8_t const*>(p);
 
