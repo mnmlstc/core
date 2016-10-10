@@ -16,7 +16,11 @@ if [[ $TRAVIS_OS_NAME == "linux" ]] ; then
             sudo apt-add-repository -y "deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty-$CLANG_VERSION main"
         fi
 
-        packages="$packages clang-$CLANG_VERSION libc++-dev"
+        packages="$packages clang-$CLANG_VERSION"
+
+        if [[ ! -z $USE_LIBCPP ]] ; then
+            packages="$packages libc++-dev"
+        fi
     fi
 
     sudo apt-get update
