@@ -86,88 +86,88 @@ matrix:
     - os: linux
       compiler: clang
       dist: trusty
-      env: BUILD=Release CLANG_VERSION=3.4
+      env: BUILD=Release CLANG_VERSION=3.4 STDLIB=libstdc++
     - os: linux
       compiler: clang
       dist: trusty
-      env: BUILD=Debug CLANG_VERSION=3.4
+      env: BUILD=Debug CLANG_VERSION=3.4 STDLIB=libstdc++
     - os: linux
       compiler: clang
       dist: trusty
-      env: BUILD=Release CLANG_VERSION=3.4 USE_LIBCPP=1
+      env: BUILD=Release CLANG_VERSION=3.4 STDLIB=libc++
     - os: linux
       compiler: clang
       dist: trusty
-      env: BUILD=Debug CLANG_VERSION=3.4 USE_LIBCPP=1
+      env: BUILD=Debug CLANG_VERSION=3.4 STDLIB=libc++
 
     # clang++-3.5
     - os: linux
       compiler: clang
       dist: trusty
-      env: BUILD=Release CLANG_VERSION=3.5
+      env: BUILD=Release CLANG_VERSION=3.5 STDLIB=libstdc++
     - os: linux
       compiler: clang
       dist: trusty
-      env: BUILD=Debug CLANG_VERSION=3.5
+      env: BUILD=Debug CLANG_VERSION=3.5 STDLIB=libstdc++
     - os: linux
       compiler: clang
       dist: trusty
-      env: BUILD=Release CLANG_VERSION=3.5 USE_LIBCPP=1
+      env: BUILD=Release CLANG_VERSION=3.5 STDLIB=libc++
     - os: linux
       compiler: clang
       dist: trusty
-      env: BUILD=Debug CLANG_VERSION=3.5 USE_LIBCPP=1
+      env: BUILD=Debug CLANG_VERSION=3.5 STDLIB=libc++
 
     # clang++-3.6
     - os: linux
       compiler: clang
       dist: trusty
-      env: BUILD=Release CLANG_VERSION=3.6
+      env: BUILD=Release CLANG_VERSION=3.6 STDLIB=libstdc++
     - os: linux
       compiler: clang
       dist: trusty
-      env: BUILD=Debug CLANG_VERSION=3.6
+      env: BUILD=Debug CLANG_VERSION=3.6 STDLIB=libstdc++
     - os: linux
       compiler: clang
       dist: trusty
-      env: BUILD=Release CLANG_VERSION=3.6 USE_LIBCPP=1
+      env: BUILD=Release CLANG_VERSION=3.6 STDLIB=libc++
     - os: linux
       compiler: clang
       dist: trusty
-      env: BUILD=Debug CLANG_VERSION=3.6 USE_LIBCPP=1
+      env: BUILD=Debug CLANG_VERSION=3.6 STDLIB=libc++
 
     # clang++-3.8
     - os: linux
       compiler: clang
       dist: trusty
-      env: BUILD=Release CLANG_VERSION=3.8
+      env: BUILD=Release CLANG_VERSION=3.8 STDLIB=libstdc++
     - os: linux
       compiler: clang
       dist: trusty
-      env: BUILD=Debug CLANG_VERSION=3.8
+      env: BUILD=Debug CLANG_VERSION=3.8 STDLIB=libstdc++
     - os: linux
       compiler: clang
       dist: trusty
-      env: BUILD=Release CLANG_VERSION=3.8 USE_LIBCPP=1
+      env: BUILD=Release CLANG_VERSION=3.8 STDLIB=libc++
     - os: linux
       compiler: clang
       dist: trusty
-      env: BUILD=Debug CLANG_VERSION=3.8 USE_LIBCPP=1
+      env: BUILD=Debug CLANG_VERSION=3.8 STDLIB=libc++
 
     # clang++-3.9
     - os: linux
       compiler: clang
       dist: trusty
-      env: BUILD=Release CLANG_VERSION=3.9
+      env: BUILD=Release CLANG_VERSION=3.9 STDLIB=libstdc++
     - os: linux
       compiler: clang
       dist: trusty
-      env: BUILD=Debug CLANG_VERSION=3.9
+      env: BUILD=Debug CLANG_VERSION=3.9 STDLIB=libstdc++
     - os: linux
       compiler: clang
       dist: trusty
-      env: BUILD=Release CLANG_VERSION=3.9 USE_LIBCPP=1
+      env: BUILD=Release CLANG_VERSION=3.9 STDLIB=libc++
     - os: linux
       compiler: clang
       dist: trusty
-      env: BUILD=Debug CLANG_VERSION=3.9 USE_LIBCPP=1
+      env: BUILD=Debug CLANG_VERSION=3.9 STDLIB=libc++

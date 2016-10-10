@@ -10,8 +10,8 @@ if [[ ! -z $GCC_VERSION ]] ; then
     export CXX=g++-$GCC_VERSION
 elif [[ ! -z $CLANG_VERSION ]] ; then
     export CXX=clang++-$CLANG_VERSION
-    if [[ ! -z $USE_LIBCPP ]] ; then
-        export CXXFLAGS=-stdlib=libc++
+    if [[ ! -z $STDLIB ]] ; then
+        export CXXFLAGS=-stdlib=$STDLIB
     fi
 
     if ! type clang++-$CLANG_VERSION >/dev/null 2>&1 ; then

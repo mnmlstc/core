@@ -18,7 +18,7 @@ if [[ $TRAVIS_OS_NAME == "linux" ]] ; then
 
         packages="$packages clang-$CLANG_VERSION"
 
-        if [[ ! -z $USE_LIBCPP ]] ; then
+        if [[ $STDLIB == 'libc++' ]] ; then
             packages="$packages libc++-dev"
         fi
     fi
