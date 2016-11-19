@@ -86,4 +86,11 @@ matrix:
       osx_image: xcode8
       compiler: clang
       env: BUILD=Debug
-
+    - os: osx
+      osx_image: xcode8
+      compiler: clang
+      env: BUILD=Release, CXX_STANDARD=c++1z
+    - os: osx
+      osx_image: xcode8
+      compiler: clang
+      env: BUILD=Debug, CXX_STANDARD=c++1z

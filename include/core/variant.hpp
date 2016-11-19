@@ -24,7 +24,7 @@ namespace impl {
 template <class Visitor, class Type, class Data, class Result, class... Args>
 auto gen () -> Result {
   return [](Visitor&& visitor, Data* data, Args&&... args) {
-    return invoke(
+    return ::core::v2::invoke(
       ::core::forward<Visitor>(visitor),
       *static_cast<Type*>(data),
       ::core::forward<Args>(args)...
