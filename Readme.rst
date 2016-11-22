@@ -15,6 +15,9 @@ License.
 .. image:: https://travis-ci.org/mnmlstc/core.svg
     :target: https://travis-ci.org/mnmlstc/core
 
+.. image:: https://codecov.io/gh/mnmlstc/core/branch/master/graph/badge.svg
+  :target: https://codecov.io/gh/mnmlstc/core
+
 Components
 ----------
 
