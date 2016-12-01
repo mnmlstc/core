@@ -18,7 +18,7 @@ header.
 
 .. class:: unpack_t
 
-   .. deprecated:: 1.2 Use :any:`apply` instead of invoke and unpack.
+   .. deprecated:: 2.0 Use :any:`apply` instead of invoke and unpack.
 
    A sentinel class to represent that one wishes to call :any:`invoke` with
    unpack semantics. An instance is available under the name :samp:`{unpack}`.
@@ -29,12 +29,12 @@ header.
    runtime unpack semantics. An instance is available under the name
    :samp:`{runpack}`.
 
-.. class:: is_reference_wrapper<T>
+.. class:: template <class T> is_reference_wrapper
 
    A type trait that will be :cxx:`std::true_type` if :samp:`{T}` is some form
    of :cxx:`std::reference_wrapper`.
 
-.. class:: function_traits<T>
+.. class:: template <class T> function_traits
 
    Function traits to discern various amounts of details for a given callable
    type :samp:`{T}`. The traits allow one to get the :member:`arity` of a
@@ -50,21 +50,20 @@ header.
 
    .. member:: static constexpr size_t arity
 
-      :type: :cxx:`std::size_t`
-
       Represents the number of arguments the callable :samp:`{T}` takes.
 
-   .. type:: argument<N>
+   .. type:: template <size_t N> argument
 
       Given a :cxx:`std::size_t` :samp:`{N}`, argument will be a type alias for
       the type located at the index in its parameter list.
 
-.. function:: auto invoke (Functor&& f, Args&&...)
+.. function:: template <class F, class... Args> \
+              auto invoke (Functor&& f, Args&&...)
 
    An implemenetation of the *INVOKE* pseudo-expression as defined in the C++11
    standard.
 
-   .. versionchanged:: 1.2 There are now only two overloads for this function
+   .. versionchanged:: 2.0 There are now only two overloads for this function
       that now encompass the previous versions, while also augmenting their
       use (:cxx:`std::reference_wrapper` and smart pointers are now guaranteed
       to be usable as the 'object' parameter when invoking a member function
@@ -84,16 +83,18 @@ header.
       assert(core::invoke(mem_fn, ptr) == 13);
       assert(core::invoke(mem_fn, ref) == 13);
 
-.. function:: auto apply (Functor&& f, Tuple&& t)
+.. function:: template <class F, class T> \
+              auto apply (Functor&& f, Tuple&& t)
 
-   .. versionadded:: 1.2
+   .. versionadded:: 2.0
 
    Unpacks the elements of :samp:`{t}` into :samp:`{f}` and then invokes
    :samp:`{f}`.
 
-.. function:: apply_functor<F> make_apply(F&& f)
+.. function:: template <class F>\
+              apply_functor<F> make_apply(F&& f)
 
-   .. versionadded:: 1.2
+   .. versionadded:: 2.0
 
    Creates an :any:`apply_functor` via template deduction.
 
@@ -117,24 +118,24 @@ objects:
    static constexpr auto less = core::less<> { };
    static_assert(less(3, 4), "");
 
-.. class:: apply_functor<F>
+.. class:: template <class F> apply_functor
 
-   .. versionadded:: 1.2
+   .. versionadded:: 2.0
 
    A functor type that allows :any:`apply` to be used in conjunction with
    the standard library algorithm functions.
 
    :example:
 
-   .. code-block:: cpp
+    .. code-block:: cpp
 
-      std::vector<std::tuple<std::string, int, double>> x;
-      auto f = make_apply([] (std::string, int, double) { });
-      for_each(core, f);
+       std::vector<std::tuple<std::string, int, double>> x;
+       auto f = make_apply([] (std::string, int, double) { });
+       for_each(core, f);
 
-.. class:: converter<T>
+.. class:: template <class T> converter
 
-   .. versionadded:: 1.2
+   .. versionadded:: 2.0
 
    A functor type that allows construction of a :samp:`{T}` from any other
    type. This is most useful for calls to :any:`transform`, when a
@@ -149,38 +150,32 @@ objects:
 
    :example:
 
-   .. code-block:: cpp
+    .. code-block:: cpp
 
-      using duration = std::chrono::seconds;
-      std::vector<int> ints { 1, 2, 3, 4, 5 };
-      std::vector<duration> secs { };
-      auto inserter = std::back_inserter(secs);
-      core::transform(ints, secs, converter<duration> { });
+       using duration = std::chrono::seconds;
+       std::vector<int> ints { 1, 2, 3, 4, 5 };
+       std::vector<duration> secs { };
+       auto inserter = std::back_inserter(secs);
+       core::transform(ints, secs, converter<duration> { });
       
 
 Arithmetic Function Objects
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. class:: plus<T>
+.. class:: template <class T> plus
 
-   .. versionadded:: 1.2
+   .. versionadded:: 2.0
 
    Used to call :cxx:`operator +` on two instances of type :samp:`{T}`.
-
-   .. type:: result_type
-             first_argument_type
-             second_argument_type
-
-      Represents :samp:`{T}`
 
    .. function:: constexpr T operator () (T const& lhs, T const& rhs) const
 
       Calls :cxx:`operator +` on :samp:`{lhs}` and :samp:`{rhs}` and returns
       the result.
 
-.. class:: plus<void>
+.. class:: template <> plus<void>
 
-   .. versionadded:: 1.2
+   .. versionadded:: 2.0
 
    .. type:: is_transparent
 
@@ -189,26 +184,20 @@ Arithmetic Function Objects
       Calls :cxx:`operator +` via template deduction on :samp:`{lhs}` and
       :samp:`{rhs}` and returns the result.
 
-.. class:: minus<T>
+.. class:: template <class T> minus
 
-   .. versionadded:: 1.2
+   .. versionadded:: 2.0
 
    Used to call :cxx:`operator -` on two instances of type :samp:`{T}`.
-
-   .. type:: result_type
-             first_argument_type
-             second_argument_type
-
-      Represents :samp:`{T}`
 
    .. function:: constexpr T operator () (T const& lhs, T const& rhs) const
 
       Calls :cxx:`operator -` on :samp:`{lhs}` and :samp:`{rhs}` and returns
       the result.
 
-.. class:: minus<void>
+.. class:: template <> minus<void>
 
-   .. versionadded:: 1.2
+   .. versionadded:: 2.0
 
    .. type:: is_transparent
 
@@ -219,7 +208,7 @@ Arithmetic Function Objects
 
 .. class:: multiplies<T>
 
-   .. versionadded:: 1.2
+   .. versionadded:: 2.0
 
    Used to call :cxx:`operator*` on two instances of type :samp:`{T}`.
 
@@ -236,7 +225,7 @@ Arithmetic Function Objects
 
 .. class:: multiplies<void>
 
-   .. versionadded:: 1.2
+   .. versionadded:: 2.0
 
    .. type:: is_transparent
 
@@ -247,7 +236,7 @@ Arithmetic Function Objects
 
 .. class:: divides<T>
 
-   .. versionadded:: 1.2
+   .. versionadded:: 2.0
 
    Used to call :cxx:`operator /` on two instances of type :samp:`{T}`.
 
@@ -264,7 +253,7 @@ Arithmetic Function Objects
 
 .. class:: divides<void>
 
-   .. versionadded:: 1.2
+   .. versionadded:: 2.0
 
    .. type:: is_transparent
 
@@ -275,7 +264,7 @@ Arithmetic Function Objects
 
 .. class:: modulus<T>
 
-   .. versionadded:: 1.2
+   .. versionadded:: 2.0
 
    Used to call ``operator %`` on two instances of :samp:`{T}`.
 
@@ -292,7 +281,7 @@ Arithmetic Function Objects
 
 .. class:: modulus<void>
 
-   .. versionadded:: 1.2
+   .. versionadded:: 2.0
 
    .. type:: is_transparent
 
@@ -306,7 +295,7 @@ Comparison Function Objects
 
 .. class:: equal_to<T>
 
-   .. versionadded:: 1.2
+   .. versionadded:: 2.0
 
    Used to call :cxx:`operator ==` on two instances of :samp:`{T}`.
 
@@ -326,7 +315,7 @@ Comparison Function Objects
 
 .. class:: equal_to<void>
 
-   .. versionadded:: 1.2
+   .. versionadded:: 2.0
 
    .. type:: is_transparent
 
@@ -337,7 +326,7 @@ Comparison Function Objects
 
 .. class:: not_equal_to<T>
 
-   .. versionadded:: 1.2
+   .. versionadded:: 2.0
 
    Used to call :cxx:`operator !=` on two instances of :samp:`{T}`.
 
@@ -357,7 +346,7 @@ Comparison Function Objects
 
 .. class:: not_equal_to<void>
 
-   .. versionadded:: 1.2
+   .. versionadded:: 2.0
 
    .. type:: is_transparent
 
@@ -368,7 +357,7 @@ Comparison Function Objects
 
 .. class:: greater_equal<T>
 
-   .. versionadded:: 1.2
+   .. versionadded:: 2.0
 
    Used to call :cxx:`operator >=` on two instances of :samp:`{T}`.
 
@@ -388,7 +377,7 @@ Comparison Function Objects
 
 .. class:: greater_equal<void>
 
-   .. versionadded:: 1.2
+   .. versionadded:: 2.0
 
    .. type:: is_transparent
 
@@ -399,7 +388,7 @@ Comparison Function Objects
 
 .. class:: less_equal<T>
 
-   .. versionadded:: 1.2
+   .. versionadded:: 2.0
 
    Used to call :cxx:`operator <=` on two instances of :samp:`{T}`.
 
@@ -419,7 +408,7 @@ Comparison Function Objects
 
 .. class:: less_equal<void>
 
-   .. versionadded:: 1.2
+   .. versionadded:: 2.0
 
    .. type:: is_transparent
 
@@ -430,7 +419,7 @@ Comparison Function Objects
 
 .. class:: greater<T>
 
-   .. versionadded:: 1.2
+   .. versionadded:: 2.0
 
    Used to call :cxx:`operator >` on two instances of :samp:`{T}`.
 
@@ -450,7 +439,7 @@ Comparison Function Objects
 
 .. class:: greater<void>
 
-   .. versionadded:: 1.2
+   .. versionadded:: 2.0
 
    .. type:: is_transparent
 
@@ -461,7 +450,7 @@ Comparison Function Objects
 
 .. class:: less<T>
 
-   .. versionadded:: 1.2
+   .. versionadded:: 2.0
 
    Used to call :cxx:`operator <` on two instances of :samp:`{T}`.
 
@@ -481,7 +470,7 @@ Comparison Function Objects
 
 .. class:: less<void>
 
-   .. versionadded:: 1.2
+   .. versionadded:: 2.0
 
    .. type:: is_transparent
 
@@ -495,7 +484,7 @@ Logical Function Objects
 
 .. class:: logical_and<T>
 
-   .. versionadded:: 1.2
+   .. versionadded:: 2.0
 
    Used to call :cxx:`operator and` on two instances of :samp:`{T}`.
 
@@ -515,7 +504,7 @@ Logical Function Objects
 
 .. class:: logical_and<void>
 
-   .. versionadded:: 1.2
+   .. versionadded:: 2.0
 
    .. type:: is_transparent
 
@@ -526,7 +515,7 @@ Logical Function Objects
 
 .. class:: logical_or<T>
 
-   .. versionadded:: 1.2
+   .. versionadded:: 2.0
 
    Used to call :cxx:`operator or` on two instances of :samp:`{T}`.
 
@@ -546,7 +535,7 @@ Logical Function Objects
 
 .. class:: logical_or<void>
 
-   .. versionadded:: 1.2
+   .. versionadded:: 2.0
 
    .. type:: is_transparent
 
@@ -557,7 +546,7 @@ Logical Function Objects
 
 .. class:: logical_not<T>
 
-   .. versionadded:: 1.2
+   .. versionadded:: 2.0
 
    Used to call :cxx:`operator not` on an instance of :samp:`{T}`.
 
@@ -575,7 +564,7 @@ Logical Function Objects
 
 .. class:: logic_not<void>
 
-   .. versionadded:: 1.2
+   .. versionadded:: 2.0
 
    .. type:: is_transparent
 
@@ -588,7 +577,7 @@ Bitwise Function Objects
 
 .. class:: bit_and<T>
 
-   .. versionadded:: 1.2
+   .. versionadded:: 2.0
 
    Used to call :cxx:`operator &` on two instances of :samp:`{T}`.
 
@@ -605,7 +594,7 @@ Bitwise Function Objects
 
 .. class:: bit_and<void>
 
-   .. version::added:: 1.2
+   .. version::added:: 2.0
 
    .. type:: is_transparent
 
@@ -616,7 +605,7 @@ Bitwise Function Objects
 
 .. class:: bit_xor<T>
 
-   .. versionadded:: 1.2
+   .. versionadded:: 2.0
 
    Used to call :cxx:`operator ^` on two instances of :samp:`{T}`.
 
@@ -633,7 +622,7 @@ Bitwise Function Objects
 
 .. class:: bit_xor<void>
 
-   .. versionadded:: 1.2
+   .. versionadded:: 2.0
 
    .. type:: is_transparent
 
@@ -644,7 +633,7 @@ Bitwise Function Objects
 
 .. class:: bit_or<T>
 
-   .. versionadded:: 1.2
+   .. versionadded:: 2.0
 
    Used to call :cxx:`operator|` on two instances of :samp:`{T}`.
 
@@ -661,7 +650,7 @@ Bitwise Function Objects
 
 .. class:: bit_or<void>
 
-   .. versionadded:: 1.2
+   .. versionadded:: 2.0
 
    .. type:: is_transparent
 
@@ -672,7 +661,7 @@ Bitwise Function Objects
 
 .. class:: bit_not<T>
 
-   .. versionadded:: 1.2
+   .. versionadded:: 2.0
 
    Used to call :cxx:`operator ~` on one instance of :samp:`{T}`.
 
@@ -687,7 +676,7 @@ Bitwise Function Objects
 
 .. class:: bit_not<void>
 
-   .. versionadded:: 1.2
+   .. versionadded:: 2.0
 
    .. type:: is_transparent
 
@@ -705,7 +694,7 @@ version of Core.
 .. function:: auto invoke (unpack_t, Functor&& f, Unpackable&& u)
               auto invoke (unpack_t, Unpackable&& u)
 
-   :deprecated: 1.2 Use :func:`apply` instead.
+   :deprecated: 2.0 Use :func:`apply` instead.
 
 .. function:: auto invoke (runpack_t, Functor&& f, Runpackable&& r)
 

@@ -56,16 +56,34 @@ Users on Windows should use the provided MSI package. At the time of this
 writing, MNMLSTC Core does not work with Visual Studio, and requires either
 GCC or Clang.
 
-The option :cmake:`BUILD_WITH_LIBCXX` is provided for when building the
-tests provided with MNMLSTC Core.
+Configuration Options
+^^^^^^^^^^^^^^^^^^^^^
 
-The option :cmake:`BUILD_DOCS` will require `Sphinx`_ 1.3 or later.
+The options documented below are meant more for those who might be packaging
+MNMLSTC Core for repeatable installations on other systems, or installing
+from source.
+
+.. option:: BUILD_WITH_LIBCXX
+
+   Used when building the tests provided with MNMLSTC Core.
+
+.. option:: BUILD_DOCS
+
+   Builds the sphinx documentation. Requires `Sphinx`_ 1.4.9 or later.
+
+.. option:: DISABLE_EXCEPTIONS
+
+   Exports the :c:macro:`CORE_NO_EXCEPTIONS` when importing MNMLSTC Core via
+   CMake's :cmake:`find_package` command.
 
 The option :cmake:`DISABLE_EXCEPTIONS` allows a user to export the
 :c:macro:`CORE_NO_EXCEPTIONS`
 
 The option :cmake:`DISABLE_RTTI` allows a user to export the
 :c:macro:`CORE_NO_RTTI`
+
+Compile Time Configuration
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Additionally, one can define the following macros when using MNMLSTC Core with
 other libraries to configure MNMLSTC Core's available features.
@@ -79,41 +97,22 @@ other libraries to configure MNMLSTC Core's available features.
 
    Disables all features within MNMLSTC Core that rely on RTTI
 
-Using with Biicode
-------------------
-
-`Biicode`_ is a C and C++ package manager. MNMLSTC Core
-now supports Biicode as of version 1.2. Using MNMLSTC Core with Biicode is
-quite simple. Within your :file:`biicode.conf` file, place the following:
-
-.. code-block:: ini
-
-   [requirements]
-     mnmlstc/core @1.2.0
-
-   [includes]
-     core/*.hpp : mnmlstc/core/include
-
-And then run the :code:`bii find` command. This will pull the latest tagged
-version of MNMLSTC Core 1.2.0, as well as the License file. To use the headers,
-simply include :file:`<core/{header}.hpp>`.
-
 Using with CMake
 ----------------
 
 MNMLSTC Core is also designed to be used with the `CMake`_ build system. Until
-version 1.2, MNMLSTC Core followed a tradition of how :file:`Find{XXX}.cmake`
+version 2.0, MNMLSTC Core followed a tradition of how :file:`Find{XXX}.cmake`
 scripts would perform. Namely, it would define a variable
 :cmake:`CORE_INCLUDE_DIR` and :cmake:`CORE_INCLUDE_DIRS`. Later on it provided
 a :cmake:`core_INCLUDE_DIRS` variable. While these are still provided, MNMLSTC
-Core now follows a new paradigm. Starting with version 1.2, MNMLSTC Core will
+Core now follows a new paradigm. Starting with version 2.0, MNMLSTC Core will
 now supply an *imported* cmake target. This target allows the use of cmake
 generator expressions for the target specific build files. Here is an example
 of using MNMLSTC Core with CMake:
 
 .. code-block:: cmake
 
-   find_package(core 1.2.0 REQUIRED)
+   find_package(core 2.0.0 REQUIRED)
    add_library(my_library STATIC ${MY_SOURCE_FILES})
    target_link_libraries(my_library PUBLIC mnmlstc::core)
 
@@ -124,7 +123,7 @@ one can also use the less transitive form as well:
 
 .. code-block:: cmake
 
-  find_package(core 1.2.0 REQUIRED)
+  find_package(core 2.0 REQUIRED)
   add_library(my_library ${MY_SOURCE_FILES})
   target_include_directories(my_library
     PUBLIC
@@ -135,7 +134,7 @@ one can also use the less transitive form as well:
 
 Both of these approaches allow a user to now use MNMLSTC Core without having to
 install it directly on a machine, and instead use it as a build tree export.
-Before 1.2, this approach was not available, and an installation of MNMLSTC
+Before 2.0, this approach was not available, and an installation of MNMLSTC
 Core was required.
 
 Because :cmake:`mnmlstc::core` is an :cmake:`INTERFACE` library, it will also
@@ -144,7 +143,7 @@ permit *transitive linking* which means it will pass on its
 
 .. code-block:: cmake
 
-   find_package(core 1.2.0 REQUIRED)
+   find_package(core 2.0.0 REQUIRED)
    add_library(my_library ${MY_SOURCE_FILES})
    target_link_libraries(my_library INTERFACE mnmlstc::core)
 
@@ -152,7 +151,7 @@ This has the same result as the previous example.
 
 The following variables are available for use after finding MNMLSTC Core:
 
-.. code-block:: cmake
+.. code-block:: none
 
    CORE_VERSION
    CORE_VERSION_MAJOR
@@ -162,7 +161,7 @@ The following variables are available for use after finding MNMLSTC Core:
 
 The following variables are available but deprecated for use:
 
-.. code-block:: cmake
+.. code-block:: none
 
    CORE_INCLUDE_DIR
    CORE_INCLUDE_DIRS
@@ -179,21 +178,23 @@ provides are:
 Debugging
 ---------
 
-Starting with version 1.2, MNMLSTC Core provides a set of pretty printers for
+Starting with version 2.0, MNMLSTC Core provides a set of pretty printers for
 the type it provides for use with both `GDB`_ and `LLDB`_. Because Visual
 Studio is not supported, no pretty printing is available.
 
 GDB
 ^^^
 
-To enable the GDB pretty printers, add the following to your :file:`.gdbinit`::
+To enable the GDB pretty printers, add the following to your :file:`.gdbinit`
 
-  python
-  import sys
-  sys.path.insert(0, '/install-prefix/share/mnmlstc/formatter')
-  import core
-  core.__gdb_init_module(None)
-  end
+.. code-block:: none
+
+   python
+   import sys
+   sys.path.insert(0, '/install-prefix/share/mnmlstc/formatter')
+   import core
+   core.__gdb_init_module(None)
+   end
 
 The :samp:`{install-prefix}` is typically :file:`/usr/local` on POSIX systems.
 However, check with your system administrator for the installation location to
@@ -228,11 +229,11 @@ in minor version releaes. Any API rewrites will be in major releases. It should
 also be noted that MNMLSTC Database uses inline namespaces to keep major
 versions as well as keep a stable ABI.
 
-.. note:: While MNMLSTC Core has stated before version 1.2 that it follows
+.. note:: While MNMLSTC Core has stated before version 2.0 that it follows
    Semantic Versioning, it has not done so in practice. C++ has the additional
    concern of internal ABI changes. for example, the difference between a user
    defined copy constructor and a defaulted copy constructor can, in some
-   cases, cause obscure bugs and even segmentation faults. Starting with 1.2,
+   cases, cause obscure bugs and even segmentation faults. Starting with 2.0,
    MNMLSTC Core will make a more concerted effort to properly follow
    the Semantic Versioning specification.
 
@@ -247,8 +248,8 @@ naming convention of these packages is as follows:
 
    core-<major>.<minor>.<patch>+<os>.<platform>.<extension>
 
-For example, a 64-bit Windows MSI for 1.2.0 would be
-:code:`core-1.2.0+windows.x64.msi`.
+For example, a 64-bit Windows MSI for 2.0.0 would be
+:code:`core-2.0.0+windows.x64.msi`.
 
 As of right now, the following binary package formats are provided:
 

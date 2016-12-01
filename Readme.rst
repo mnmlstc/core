@@ -13,10 +13,10 @@ Build scripts provided by MNMLSTC Core are released under the CC0 1.0 Universal
 License.
 
 .. image:: https://travis-ci.org/mnmlstc/core.svg
-    :target: https://travis-ci.org/mnmlstc/core
+   :target: https://travis-ci.org/mnmlstc/core
 
 .. image:: https://codecov.io/gh/mnmlstc/core/branch/master/graph/badge.svg
-  :target: https://codecov.io/gh/mnmlstc/core
+   :target: https://codecov.io/gh/mnmlstc/core
 
 Components
 ----------
@@ -46,13 +46,13 @@ There are several requirements to fully use MNMLSTC Core:
    set required to build and use MNMLSTC Core)
  * `CMake 3.0.0 <http://cmake.org>`_
 
-Additionally, to actively develop MNMLSTC Core, the following are required:
+Additionally, to develop or package MNMLSTC Core, the following are required:
 
  * `Sphinx Documentation Generator <http://sphinx-doc.org>`_
- * `Alabaster Sphinx Theme <https://github.com/bitprophet/alabaster>`_
+ * `Guzzle Sphinx Theme <https://github.com/guzzle/guzzle_sphinx_theme>`_
  * `WiX Toolset <http://wixtoolset.org>`_
 
-Sphinx and the Alabaster Sphinx Theme are only necessary if generating
-documentation manually.
+Sphinx and the Guzzle Sphinx Theme are only necessary if generating
+documentation manually to be included with the package.
 
 WiX Toolset is only required if building packages for Windows.

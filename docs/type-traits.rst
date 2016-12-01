@@ -63,7 +63,7 @@ header.
    attempting to discover the common type of two ``void&&``. Additionally,
    this type trait follows the C++14 rules of decaying the common type.
 
-.. type:: is_nothrow_swappable<T>
+.. type:: template <class T> is_nothrow_swappable
 
    A type trait that is ``std::true_type`` if a given swap call on a type is
    actually marked as *noexcept*, and ``std::false_type`` otherwise. This trait
@@ -73,20 +73,20 @@ header.
    :cxx:`is_nothrow_swappable` trait proposed in N4426_, and was added to
    MNMLSTC Core before the proposal was submitted.
 
-.. type:: aligned_union<Len, Ts...>
+.. class:: template <size_t Len, class... Ts> aligned_union
 
    This is an implementation of :cxx:`std::aligned_union`, and is provided
    for a certain compiler whose library implementations may not have added it
    until 2015-APR-22 and whose colloqiual pronunciation rhymes with
    "Pre Free Tea". That's "Free as in Tea", not "Free as in Speech" ;)
 
-.. type:: bool_constant<B>
+.. type:: template <bool B> bool_constant
 
    An alias of :cxx:`std::integral_constant<bool, B>`. This is a implementation
    of N4389_.
 
-.. type:: tuple_element_t<I, T>
-          tuple_size_t<T>
+.. type:: template <size_t I, class T> tuple_element_t
+          template <class T> tuple_size_t
 
    These two type aliases are provided as they are missing from C++11. They
    are simply type aliases for :cxx:`std::tuple_element` and
@@ -99,12 +99,12 @@ The detection idiom is a set of powerful meta templates that obviate the need
 for the 'old' approach to detecting if a member function, member, or function
 call would work for SFINAE purposes. It was originally started with
 Walter E. Brown's :any:`void_t`, but has since grown to include several
-additional types such as :any:`is_detected`, `detected_or`, etc.
+additional types such as :any:`is_detected`, :any:`detected_or`, etc.
 
 To give users a better idea, each entry has an example of how each part of
 the detection idiom would be used.
 
-.. type:: void_t<Args...>
+.. type:: template <class... Args> void_t
 
    The infamous :any:`void_t` is a powerful SFINAE metaprogramming tool
    discovered by Walter E. Brown. It is used as the basis for
@@ -112,23 +112,24 @@ the detection idiom would be used.
 
    :example:
 
-   .. code-block:: cpp
+     .. code-block:: cpp
 
-      // detect if class has a T::size() member function, but ignore the
-      // return type.
-      template <class T, class=void>
-      struct has_size_mem_fn : std::false_type { };
+        // detect if class has a T::size() member function, but ignore the
+        // return type.
+        template <class T, class=void>
+        struct has_size_mem_fn : std::false_type { };
 
-      template <class T>
-      struct has_size_mem_fn<
-        T,
-        void_t<decltype(std::declval<T>().size())>
-      > : std::true_type { };
+        template <class T>
+        struct has_size_mem_fn<
+          T,
+          void_t<decltype(std::declval<T>().size())>
+        > : std::true_type { };
 
-      static_assert(has_size_mem_fn<std::string>::value, "");
-      static_assert(not has_size_mem_fn<int>::value, "");
+        static_assert(has_size_mem_fn<std::string>::value, "");
+        static_assert(not has_size_mem_fn<int>::value, "");
 
-.. type:: is_detected<Op<Ts...>, Args...>
+.. type:: template <template <class...> class Op, class... Args> \
+          is_detected
 
    Some text goes here
 
@@ -140,5 +141,5 @@ the detection idiom would be used.
 
    EVEN. MORE. TEXT.
 
-.. _N4389: http://open-std.org/JTC1/SC22/WG21/docs/papers/2015/n4389.html
-.. _N4426: http://open-std.org/JTC1/SC22/WG21/docs/papers/2015/n4426.html
+.. _N4389: https://wg21.link/n4389
+.. _N4426: https://wg21.link/n4426

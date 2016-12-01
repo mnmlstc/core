@@ -15,7 +15,7 @@ glance at the :ref:`Generated Index<genindex>` might be of assistance.
 A :ref:`search<search>` feature is also available.
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
    :hidden:
 
    Using MNMLSTC Core <usage>
