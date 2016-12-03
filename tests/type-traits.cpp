@@ -1,3 +1,5 @@
+#include <ciso646>
+
 #include <core/type_traits.hpp>
 
 #include "catch.hpp"

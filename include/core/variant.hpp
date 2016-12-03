@@ -35,13 +35,13 @@ auto gen () -> Result {
 template <class, class, class...> struct result;
 template <class V, class... Ts, class... Args>
 struct result<V, meta::list<Ts...>, Args...> final : ::std::conditional<
-  meta::all<
-    meta::all_of<
+  meta::all_t<
+    meta::all_of_t<
       meta::list<result_of_t<V(Ts, Args...)>...>,
       ::std::is_same,
       result_of_t<V(Ts, Args...)>
-    >()...
-  >(),
+    >::value...
+  >::value,
   result_of_t<V(meta::get<meta::list<Ts...>, 0>, Args...)>,
   common_type_t<result_of_t<V(Ts, Args...)>...>
 > { };
@@ -195,7 +195,7 @@ class variant final {
 
   template <
     ::std::size_t N,
-    class=enable_if_t<N < typelist::size()>,
+    class=enable_if_t<(N < typelist::size())>,
     class T
   > explicit variant (size<N>&&, ::std::false_type&&, T&& value) :
     variant {
@@ -207,7 +207,7 @@ class variant final {
 
   template <
     ::std::size_t N,
-    class=enable_if_t<N < typelist::size()>,
+    class=enable_if_t<(N < typelist::size())>,
     class T
   > explicit variant (size<N>&&, ::std::true_type&&, T&& value) :
     data { }, tag { N }
@@ -258,7 +258,7 @@ public:
   template <
     ::std::size_t I,
     class... Args,
-    meta::require<I < typelist::size()> = __LINE__,
+    meta::require<(I < typelist::size())> = __LINE__,
     meta::require<
       ::std::is_constructible<element<I>, Args...>::value
     > = __LINE__
@@ -314,7 +314,7 @@ public:
   }
 
   void swap (variant& that) noexcept(
-    meta::all_of<typelist, is_nothrow_swappable>()
+    meta::all_of_t<typelist, is_nothrow_swappable>::value
   ) {
     if (this->index() == that.index()) {
       that.visit(swapper { this->target() });

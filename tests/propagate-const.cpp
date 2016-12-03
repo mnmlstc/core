@@ -1,3 +1,5 @@
+#include <ciso646>
+
 #include <core/propagate_const.hpp>
 #include <memory>
 

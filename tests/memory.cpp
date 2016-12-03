@@ -1,3 +1,5 @@
+#include <ciso646>
+
 #include <core/memory.hpp>
 
 #include "catch.hpp"

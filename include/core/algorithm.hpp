@@ -300,7 +300,7 @@ template <
   class Range,
   class InputIt,
   meta::require<
-    meta::all<is_range<Range>::value, meta::none<is_range<InputIt>::value>()>()
+    meta::all<is_range<Range>::value, meta::none_t<is_range<InputIt>::value>::value>()
   > = __LINE__
 > auto mismatch(Range&& rng, InputIt&& it) -> ::std::pair<
   decltype(make_range(::core::forward<Range>(rng)).begin()),
@@ -321,7 +321,7 @@ template <
   class InputIt,
   class BinaryPredicate,
   meta::require<
-    meta::all<is_range<Range>::value, meta::none<is_range<InputIt>>()>()
+    meta::all<is_range<Range>::value, meta::none_t<is_range<InputIt>::value>::value>()
   > = __LINE__
 > auto mismatch(Range&& r, InputIt&& it, BinaryPredicate&& bp) -> ::std::pair<
   decltype(core::make_range(::core::forward<Range>(r).begin())),
@@ -401,7 +401,7 @@ template <
   class Range,
   class InputIt,
   meta::require<
-    meta::all<is_range<Range>::value, meta::none<is_range<InputIt>::value>()>()
+    meta::all<is_range<Range>::value, meta::none_t<is_range<InputIt>::value>::value>()
   > = __LINE__
 > bool equal (Range&& rng, InputIt&& it) {
   auto range = make_range(::core::forward<Range>(rng));
@@ -419,7 +419,7 @@ template <
   class InputIt,
   class BinaryPredicate,
   meta::require<
-    meta::all<is_range<Range>::value, meta::none<is_range<InputIt>>()>()
+    meta::all<is_range<Range>::value, meta::none_t<is_range<InputIt>::value>::value>()
   > = __LINE__
 > bool equal (Range&& rng, InputIt&& it, BinaryPredicate&& bp) {
   auto range = make_range(::core::forward<Range>(rng));
@@ -843,7 +843,7 @@ template <
   class OutputIt,
   class BinaryOperation,
   meta::require<
-    meta::all<is_range<Range>::value, meta::none<is_range<InputIt>::value>()>()
+    meta::all<is_range<Range>::value, meta::none_t<is_range<InputIt>::value>::value>()
   > = __LINE__
 > decay_t<OutputIt> transform (
   Range&& r,
