@@ -13,6 +13,7 @@
 #include <type_traits>
 #include <functional>
 #include <utility>
+#include <ciso646>
 
 #include <core/meta.hpp>
 
@@ -44,6 +45,35 @@ using enable_if_t = typename ::std::enable_if<B, T>::type;
 using ::std::declval;
 using ::std::swap;
 
+// MSVC 2015 workaround
+template <class T, class U>
+struct is_swappable_with {
+  template <class X, class Y>
+  static auto test (void*) noexcept(true) -> decltype(
+    swap(declval<X&>(), declval<Y&>())
+  );
+
+  template <class, class>
+  static void test (...) noexcept(false);
+
+  static constexpr bool value = noexcept(test<T, U>(nullptr));
+};
+
+// MSVC 2015 workaround
+template <class T, class U>
+struct is_noexcept_swappable_with {
+  template <
+    class X,
+    class Y,
+    bool B=noexcept(swap(declval<X&>(), declval<Y&>()))
+  > static void test (enable_if_t<B>*) noexcept(true);
+
+  template <class, class>
+  static void test (...) noexcept(false);
+
+  static constexpr bool value = noexcept(test<T, U>(nullptr));
+};
+
 template <class, class, class=void>
 struct is_swappable : ::std::false_type { };
 
@@ -52,16 +82,16 @@ struct is_swappable<
   T,
   U,
   meta::deduce<
-    decltype(swap(declval<T&>(), declval<U&>())),
-    decltype(swap(declval<U&>(), declval<T&>()))
+    is_swappable_with<T, U>,
+    is_swappable_with<U, T>
   >
 > : ::std::true_type { };
 
 template <class T, class U=T>
 struct is_nothrow_swappable : meta::all_t<
   is_swappable<T, U>::value,
-  noexcept(swap(declval<T&>(), declval<U&>())),
-  noexcept(swap(declval<U&>(), declval<T&>()))
+  is_noexcept_swappable_with<T, U>::value,
+  is_noexcept_swappable_with<U, T>::value
 > { };
 
 /*

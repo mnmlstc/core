@@ -130,7 +130,7 @@ struct find_if<list<>, F, Args...> : identity<list<>> { };
 
 template <template <class...> class F, class T, class... Ts, class... Args>
 struct find_if<list<T, Ts...>, F, Args...> : ::std::conditional<
-  F<Args..., T> { },
+  F<Args..., T>::value,
   list<T, Ts...>,
   typename find_if<list<Ts...>, F, Args...>::type
 > { };
@@ -192,10 +192,11 @@ using impl::false_t;
 using impl::true_t;
 
 using impl::identity;
-using impl::deduce;
 using impl::list;
 
 using impl::is_specialization_of;
+
+template <class... Ts> using deduce = typename impl::deduce<Ts...>;
 
 template <class T, template <class...> class U>
 using convert = typename impl::convert<T, U>::type;
@@ -281,7 +282,7 @@ template <class T, T... I> struct integer_sequence : identity<T> {
 
   template <T N> using append = integer_sequence<T, I..., N>;
   static constexpr ::std::size_t size() noexcept { return sizeof...(I); }
-  using next = append<size()>;
+  using next = append<sizeof...(I)>;
 };
 
 template <class T, T Index, ::std::size_t N>

@@ -18,6 +18,12 @@
 #include <stdexcept>
 #endif /* CORE_NO_EXCEPTIONS */
 
+#if defined(_MSC_VER)
+  #pragma warning(push)
+  #pragma warning(disable:4458)
+  #pragma warning(disable:4702)
+#endif /* defined(_MSC_VER) */
+
 namespace core {
 inline namespace v2 {
 namespace impl {
@@ -1784,5 +1790,9 @@ struct hash<::core::v2::result<Type>> {
 };
 
 } /* namespace std */
+
+#if defined(_MSC_VER)
+  #pragma warning(pop)
+#endif /* defined(_MSC_VER) */
 
 #endif /* CORE_OPTIONAL_HPP */

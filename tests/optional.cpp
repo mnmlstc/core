@@ -9,6 +9,10 @@
 
 #include "catch.hpp"
 
+#if defined(_MSC_VER)
+  #pragma warning(disable:4702)
+#endif /* defined(_MSC_VER) */
+
 namespace Catch {
 
 template <> struct StringMaker<std::error_condition> {

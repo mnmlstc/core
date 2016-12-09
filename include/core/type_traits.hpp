@@ -172,7 +172,10 @@ struct aligned_union {
     impl::discriminate<Types...>
   );
 
-  using type = aligned_storage_t<size(), alignment_value>;
+  using type = aligned_storage_t<
+    (Len > sizeof(union_type) ? Len : sizeof(union_type)),
+    alignment_value
+  >;
 };
 
 /* custom type trait specializations */

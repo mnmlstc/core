@@ -10,6 +10,13 @@
 #include <limits>
 
 #include <cstdlib>
+#include <ciso646>
+
+#if defined(_MSC_VER)
+  #pragma warning(push)
+  #pragma warning(disable:5030)
+  #pragma warning(disable:4702)
+#endif /* defined(_MSC_VER) */
 
 namespace core {
 inline namespace v2 {
@@ -733,4 +740,8 @@ struct hash<core::v2::basic_string_view<CharT, Traits>> {
 
 } /* namespace std */
 
+
+#if defined(_MSC_VER)
+  #pragma warning(pop)
+#endif /* defined(_MSC_VER) */
 #endif /* CORE_STRING_VIEW_HPP */

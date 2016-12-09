@@ -121,9 +121,9 @@ set(WARN_NO_PADDED "-Wno-padded")
 
 # MSVC is not supported, but hopefully it will be one day!
 if (MSVC)
-  set(WARN_EVERYTHING "/Wall")
   set(WARN_ERROR "/Werror")
   set(WARN_ALL "/W4")
+  set(WARN_NO_SHADOW "/wd4458")
 endif ()
 
 # Only for when using certain cmake versions (like the ones found on travis-ci)
