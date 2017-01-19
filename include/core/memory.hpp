@@ -9,7 +9,6 @@
 #include <cstdlib>
 
 #include <core/type_traits.hpp>
-#include <core/algorithm.hpp>
 #include <core/range.hpp>
 
 #ifndef CORE_NO_EXCEPTIONS
