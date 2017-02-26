@@ -11,8 +11,9 @@ Optional Component
 The optional component contains several types that store an optional value.
 Arguably the most well known is the :any:`optional` type (for which this
 component is named). :any:`optional` is available in Boost. However, this
-implementation of :any:`optional` follows the revision 5 proposal (N3793_) as
-closely as possible (there are several constexpr issues in older compilers)
+implementation of :any:`optional` follows the revision 5 proposal (
+:wg21:`N3793`) as closely as possible (there are several constexpr issues in
+older compilers)
 
 In addition to :any:`optional`, an :any:`expected` type is provided. This type
 is based off of a type mentioned by Andrei Alexandrescu in his 2012 talk
@@ -107,7 +108,7 @@ The optional component resides in the :file:`<core/{optional}.hpp>` header.
 Optional Type
 -------------
 
-.. class:: optional<T>
+.. class:: template <class T> optional
 
    The :any:`optional` manages an *optional* value. This value may be in either an
    initialized state, or an uninitialized state. This value is guaranteed to be
@@ -119,10 +120,10 @@ Optional Type
 
    .. versionadded:: 1.1
 
-      :any:`optional` follows the N3793_ proposal. This means :any:`optional`
-      is now usable as a constexpr-able type. Additionally, :any:`optional` now
-      has the other comparison operators available. These are implemented in
-      terms of :any:`~optional\<T>::operator ==` and
+      :any:`optional` follows the :wg21:`N3793` proposal. This means
+      :any:`optional` is now usable as a constexpr-able type. Additionally,
+      :any:`optional` now has the other comparison operators available. These
+      are implemented in terms of :any:`~optional\<T>::operator ==` and
       :any:`~optional\<T>::operator <`.
 
    An :any:`optional` object is *engaged* when one of the following occurs:
@@ -289,7 +290,9 @@ Optional Type
 Expected Type
 -------------
 
-.. class:: expected<T>
+.. class:: template <class T> expected
+
+   .. deprecated:: 2.0
 
    :any:`expected` works much like :any:`optional` in that it contains an
    optionally instantiated type :samp:`{T}`. However, unlike :any:`optional` it
@@ -300,7 +303,7 @@ Expected Type
 
    This type is unavailable if :c:macro:`CORE_NO_EXCEPTIONS` is defined.
    
-   :any:`expected` does *not* implement the interface proposed in N4015_.
+   :any:`expected` does *not* implement the interface proposed in :wg21:`N4015`.
    :any:`expected` was originally written over a year in advance of the
    proposal, and any work on it was unknown to the author of this library
    component.
@@ -477,9 +480,10 @@ Expected Type
 Result Type
 -----------
 
-.. class:: result<T>
+.. class:: template <class T> result
 
    .. versionadded:: 1.1
+   .. deprecated:: 2.0
 
    :any:`result` works much like :any:`expected`. However, it does not manage an
    exception, but rather a ``std::error_condition``. This is done to provide a
@@ -655,7 +659,7 @@ Result Type
 Functions
 ---------
 
-.. function:: optional<T> make_optional<T>(T&& value)
+.. function:: template <class T> optional<T> make_optional(T&& value)
 
    :raises: Any exceptions thrown by the constructor of T
 
@@ -664,11 +668,11 @@ Functions
        optional<typename std::decay<T>::type>(std::forward<T>(value));
 
    Due to a bug in Apple Clang-503.0.40, this function is *not* marked
-   constexpr, and this causes an incompatibility with N3793_.
+   constexpr, and this causes an incompatibility with :wg21:`N3793`.
 
-.. function:: expected<T> make_expected (T&& value)
-              expected<T> make_expected (E&& exception)
-              expected<T> make_expected (std::exception_ptr)
+.. function:: template <class T> expected<T> make_expected (T&& value)
+              template <class T> expected<T> make_expected (E&& exception)
+              template <class T> expected<T> make_expected (std::exception_ptr)
 
    .. versionadded:: 1.1 The overload version which takes exception type *E*
 
@@ -678,9 +682,9 @@ Functions
    inherit from ``std::exception``. The third overload takes an exception
    pointer and returns an *invalid* :any:`expected` from it.
 
-.. function:: result<T> make_result (T&& value)
-              result<T> make_result (std::error_condition cnd)
-              result<T> make_result (ErrorConditionEnum e)
+.. function:: template <class T> result<T> make_result (T&& value)
+              template <class T> result<T> make_result (std::error_condition cnd)
+              template <class T> result<T> make_result (ErrorConditionEnum e)
 
    .. versionadded:: 1.1
 
@@ -847,7 +851,9 @@ Swap
 Specializations
 ---------------
 
-.. class:: expected<void>
+.. class:: template <> expected<void>
+
+   .. deprecated:: 2.0
 
    :any:`expected\<void>` is provided as a way to have the same semantics as
    :any:`expected`, but for functions that do not (or cannot) return a value.
@@ -885,7 +891,7 @@ Specializations
 
       :returns: Whether the :any:`expected\<void>` is *valid* or *invalid*.
 
-   .. function:: E expect<E> () const
+   .. function:: template <class E> E expect () const
 
       See :any:`expected\<T>::expect`
 
@@ -913,7 +919,7 @@ Specializations
                *valid*.
       :noexcept: :cxx:`false`.
 
-.. class:: result<void>
+.. class:: template <> result
 
    :any:`result\<void>` is provided as a way to have the same semantics as
    :any:`result`, but for functions that do not (or cannot) return a value. Its
@@ -971,7 +977,7 @@ Specializations
 std::hash
 ^^^^^^^^^
 
-.. class:: hash<optional<T>>
+.. class:: template <class T> hash<optional<T>>
 
    Specialization of :cxx:`std::hash`.
 
@@ -980,7 +986,9 @@ std::hash
    value for :cxx:`hash<value_type>`. Otherwise, it will return a default
    constructed :cxx:`std::hash<value_type>::result_type`.
 
-.. class:: hash<expected<T>>
+.. class:: template <class T> hash<expected<T>>
+
+   .. deprecated:: 2.0
 
    Specialization of :cxx:`std::hash`.
 
@@ -992,7 +1000,9 @@ std::hash
    This specialization is unavailable if :c:macro:`CORE_NO_EXCEPTIONS` is
    defined.
 
-.. class:: hash<result<T>>
+.. class:: template <class T> hash<result<T>>
+
+   .. deprecated:: 2.0
 
    Specialization of :cxx:`std::hash`.
 
@@ -1000,6 +1010,3 @@ std::hash
    :cxx:`std::hash`. If the :any:`result` is *valid*, it will return the hash
    value for :cxx:`hash<value_type>`. Otherwise, it will return a default
    constructed :cxx:`std::hash<value_type>::result_type`.
-
-.. _N3793: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2013/n3793.html
-.. _N4015: https://isocpp.org/files/papers/n4015.pdf

@@ -71,17 +71,17 @@ header.
 
    :example:
 
-   .. code-block:: cpp
+    .. code-block:: cpp
 
-      std::string str { "Hello, World!" };
-      auto shared_ptr = make_shared(str);
-      auto ref = std::ref(str);
-      auto ptr = std::addressof(str);
-      auto mem_fn = &::std::string::size;
+       std::string str { "Hello, World!" };
+       auto shared_ptr = make_shared(str);
+       auto ref = std::ref(str);
+       auto ptr = std::addressof(str);
+       auto mem_fn = &::std::string::size;
 
-      assert(core::invoke(mem_fn, shared_ptr) == 13);
-      assert(core::invoke(mem_fn, ptr) == 13);
-      assert(core::invoke(mem_fn, ref) == 13);
+       assert(core::invoke(mem_fn, shared_ptr) == 13);
+       assert(core::invoke(mem_fn, ptr) == 13);
+       assert(core::invoke(mem_fn, ref) == 13);
 
 .. function:: template <class F, class T> \
               auto apply (Functor&& f, Tuple&& t)
@@ -148,15 +148,15 @@ objects:
 
       :returns: :samp:`{T}` constructed via :samp:`{args}`
 
-   :example:
+      :example:
 
-    .. code-block:: cpp
+         .. code-block:: cpp
 
-       using duration = std::chrono::seconds;
-       std::vector<int> ints { 1, 2, 3, 4, 5 };
-       std::vector<duration> secs { };
-       auto inserter = std::back_inserter(secs);
-       core::transform(ints, secs, converter<duration> { });
+            using duration = std::chrono::seconds;
+            std::vector<int> ints { 1, 2, 3, 4, 5 };
+            std::vector<duration> secs { };
+            auto inserter = std::back_inserter(secs);
+            core::transform(ints, secs, converter<duration> { });
       
 
 Arithmetic Function Objects
@@ -206,7 +206,7 @@ Arithmetic Function Objects
       Calls :cxx:`operator -` on :samp:`{lhs}` and :samp:`{rhs}` and returns
       the result.
 
-.. class:: multiplies<T>
+.. class:: template <class T> multiplies
 
    .. versionadded:: 2.0
 
@@ -220,10 +220,10 @@ Arithmetic Function Objects
 
    .. function:: constexpr T operator () (T const& lhs, T const& rhs) const
 
-      Calls :cxx:`operator*` on :samp`{lhs}` and :samp:`{rhs}` and returns the
+      Calls :cxx:`operator*` on :samp:`{lhs}` and :samp:`{rhs}` and returns the
       result.
 
-.. class:: multiplies<void>
+.. class:: template <> multiplies<void>
 
    .. versionadded:: 2.0
 
@@ -234,7 +234,7 @@ Arithmetic Function Objects
       Calls :cxx:`operator*` on :samp:`{lhs}` and :samp:`{rhs}` and returns the
       result.
 
-.. class:: divides<T>
+.. class:: template <class T> divides
 
    .. versionadded:: 2.0
 
@@ -251,7 +251,7 @@ Arithmetic Function Objects
       Calls :cxx:`operator /` on :samp:`{lhs}` and :samp:`{rhs}` and returns
       the result.
 
-.. class:: divides<void>
+.. class:: template <> divides<void>
 
    .. versionadded:: 2.0
 
@@ -262,7 +262,7 @@ Arithmetic Function Objects
       Calls :cxx:`operator /` on :samp:`{lhs}` and :samp:`{rhs}` and returns
       the result.
 
-.. class:: modulus<T>
+.. class:: template <class T> modulus
 
    .. versionadded:: 2.0
 
@@ -279,7 +279,7 @@ Arithmetic Function Objects
       Calls ``operator %`` on :samp:`{lhs}` and :samp:`{rhs}` and returns the
       result.
 
-.. class:: modulus<void>
+.. class:: template <> modulus<void>
 
    .. versionadded:: 2.0
 
@@ -293,7 +293,7 @@ Arithmetic Function Objects
 Comparison Function Objects
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. class:: equal_to<T>
+.. class:: template <class T> equal_to
 
    .. versionadded:: 2.0
 
@@ -313,7 +313,7 @@ Comparison Function Objects
       Calls :cxx:`operator ==` on :samp:`{lhs}` and :samp:`{rhs}` and returns
       the result
 
-.. class:: equal_to<void>
+.. class:: template <> equal_to<void>
 
    .. versionadded:: 2.0
 
@@ -324,7 +324,7 @@ Comparison Function Objects
       Calls :cxx:`operator ==` on :samp:`{lhs}` and :samp:`{rhs}` and returns
       the result.
 
-.. class:: not_equal_to<T>
+.. class:: template <class T> not_equal_to
 
    .. versionadded:: 2.0
 
@@ -344,7 +344,7 @@ Comparison Function Objects
       Calls :cxx:`operator !=` on :samp:`{lhs}` and :samp:`{rhs}` and returns
       the result
 
-.. class:: not_equal_to<void>
+.. class:: template <> not_equal_to<void>
 
    .. versionadded:: 2.0
 
@@ -355,7 +355,7 @@ Comparison Function Objects
       Calls :cxx:`operator !=` on :samp:`{lhs}` and :samp:`{rhs}` and returns
       the result
 
-.. class:: greater_equal<T>
+.. class:: template <class T> greater_equal
 
    .. versionadded:: 2.0
 
@@ -375,7 +375,7 @@ Comparison Function Objects
       Calls :cxx:`operator >=` on :samp:`{lhs}` and :samp:`{rhs}` and returns
       the result
 
-.. class:: greater_equal<void>
+.. class:: template <> greater_equal<void>
 
    .. versionadded:: 2.0
 
@@ -386,7 +386,7 @@ Comparison Function Objects
       Calls :cxx:`operator >=` on :samp:`{lhs}` and :samp:`{rhs}` and returns
       the result.
 
-.. class:: less_equal<T>
+.. class:: template <class T> less_equal
 
    .. versionadded:: 2.0
 
@@ -406,7 +406,7 @@ Comparison Function Objects
       Calls :cxx:`operator <=` on :samp:`{lhs}` and :samp:`{rhs}` and returns
       the result
 
-.. class:: less_equal<void>
+.. class:: template <> less_equal<void>
 
    .. versionadded:: 2.0
 
@@ -417,7 +417,7 @@ Comparison Function Objects
       Calls :cxx:`operator <=` on :samp:`{lhs}` and :samp:`{rhs}` and returns
       the result
 
-.. class:: greater<T>
+.. class:: template <class T> greater
 
    .. versionadded:: 2.0
 
@@ -437,7 +437,7 @@ Comparison Function Objects
       Calls :cxx:`operator >` on :samp:`{lhs}` and :samp:`{rhs}` and returns
       the result
 
-.. class:: greater<void>
+.. class:: template <> greater<void>
 
    .. versionadded:: 2.0
 
@@ -448,7 +448,7 @@ Comparison Function Objects
       Calls :cxx:`operator >` on :samp:`{lhs}` and :samp:`{rhs}` and returns
       the result
 
-.. class:: less<T>
+.. class:: template <class T> less
 
    .. versionadded:: 2.0
 
@@ -468,7 +468,7 @@ Comparison Function Objects
       Calls :cxx:`operator <` on :samp:`{lhs}` and :samp:`{rhs}` and returns
       the result.
 
-.. class:: less<void>
+.. class:: template <> less<void>
 
    .. versionadded:: 2.0
 
@@ -482,7 +482,7 @@ Comparison Function Objects
 Logical Function Objects
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. class:: logical_and<T>
+.. class:: template <class T> logical_and
 
    .. versionadded:: 2.0
 
@@ -502,7 +502,7 @@ Logical Function Objects
       Calls :cxx:`operator and` on :samp:`{lhs}` and :samp:`{rhs}` and returns
       the result.
 
-.. class:: logical_and<void>
+.. class:: template <> logical_and<void>
 
    .. versionadded:: 2.0
 
@@ -513,7 +513,7 @@ Logical Function Objects
       Calls :cxx:`operator and` on :samp:`{lhs}` and :samp:`{rhs}` and returns
       the result
 
-.. class:: logical_or<T>
+.. class:: template <class T> logical_or
 
    .. versionadded:: 2.0
 
@@ -533,7 +533,7 @@ Logical Function Objects
       Calls :cxx:`operator or` on :samp:`{lhs}` and :samp:`{rhs}` and returns
       the result.
 
-.. class:: logical_or<void>
+.. class:: template <> logical_or
 
    .. versionadded:: 2.0
 
@@ -544,7 +544,7 @@ Logical Function Objects
       Calls :cxx:`operator or` on :samp:`{lhs}` and :samp:`{rhs}` and returns
       the result.
 
-.. class:: logical_not<T>
+.. class:: template <class T> logical_not
 
    .. versionadded:: 2.0
 
@@ -562,7 +562,7 @@ Logical Function Objects
 
       Calls :cxx:`operator not` on :samp:`{arg}` and returns the result.
 
-.. class:: logic_not<void>
+.. class:: template <> logic_not<void>
 
    .. versionadded:: 2.0
 
@@ -575,7 +575,7 @@ Logical Function Objects
 Bitwise Function Objects
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. class:: bit_and<T>
+.. class:: template <class T> bit_and
 
    .. versionadded:: 2.0
 
@@ -592,7 +592,7 @@ Bitwise Function Objects
       Calls :cxx:`operator &` on :samp:`{lhs}` and :samp:`{rhs}` and returns
       the result.
 
-.. class:: bit_and<void>
+.. class:: template <> bit_and<void>
 
    .. version::added:: 2.0
 
@@ -603,7 +603,7 @@ Bitwise Function Objects
       Calls :cxx:`operator &` on :samp:`{lhs}` and :samp:`{rhs}` and returns
       the result.
 
-.. class:: bit_xor<T>
+.. class:: template <class T> bit_xor
 
    .. versionadded:: 2.0
 
@@ -620,7 +620,7 @@ Bitwise Function Objects
       Calls :cxx:`operator ^` on :samp:`{lhs}` and :samp:`{rhs}` and returns
       the result.
 
-.. class:: bit_xor<void>
+.. class:: template <> bit_xor<void>
 
    .. versionadded:: 2.0
 
@@ -631,7 +631,7 @@ Bitwise Function Objects
       Calls :cxx:`operator ^` on :samp:`{lhs}` and :samp:`{rhs}` and returns
       the result.
 
-.. class:: bit_or<T>
+.. class:: template <class T> bit_or
 
    .. versionadded:: 2.0
 
@@ -648,7 +648,7 @@ Bitwise Function Objects
       Calls :cxx:`operator|` on :samp:`{lhs}` and :samp:`{rhs}` and returns the
       result.
 
-.. class:: bit_or<void>
+.. class:: template <> bit_or<void>
 
    .. versionadded:: 2.0
 
@@ -659,7 +659,7 @@ Bitwise Function Objects
       Calls :cxx:`operator|` on :samp:`{lhs}` and :samp:`{rhs}` and returns the
       result.
 
-.. class:: bit_not<T>
+.. class:: template <class T> bit_not
 
    .. versionadded:: 2.0
 
@@ -674,7 +674,7 @@ Bitwise Function Objects
 
       Calls :cxx:`operator ~` on :samp:`{arg}` and returns the result.
 
-.. class:: bit_not<void>
+.. class:: template <> bit_not<void>
 
    .. versionadded:: 2.0
 
@@ -694,9 +694,12 @@ version of Core.
 .. function:: auto invoke (unpack_t, Functor&& f, Unpackable&& u)
               auto invoke (unpack_t, Unpackable&& u)
 
-   :deprecated: 2.0 Use :func:`apply` instead.
+   .. deprecated:: 2.0 Use :func:`apply` instead.
 
 .. function:: auto invoke (runpack_t, Functor&& f, Runpackable&& r)
+
+   .. deprecated:: 2.0 No replacement has been written. This function was a
+      mistake
 
    :requires: :samp:`{r}` must have a member function named :samp:`at`, which
               takes a :cxx:`std::size_t` as its parameters.

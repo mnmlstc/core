@@ -13,43 +13,55 @@ The iterator component can be found in :file:`<core/{iterator}.hpp>`.
 
 .. index:: iterator; functions
 
-.. function:: constexpr auto size (Container const& container) noexcept
+.. function:: template <class Container> \
+              constexpr auto size (Container const& container) noexcept
 
    :returns: :samp:`{container}.size()` or :cxx:`N` if :samp:`{container}` is
              an array.
 
-.. function:: constexpr auto empty (Container const& container) noexcept
+.. function:: template <class Container> \
+              constexpr auto empty (Container const& container) noexcept
 
    :returns: :samp:`{container}.empty()` or :cxx:`false` if
              :samp:`{container}` is an array.
 
-.. function:: constexpr auto front (Container const& container)
+.. function:: template <class Container> \
+              constexpr auto front (Container const& container)
+              template <class Container> \
               constexpr auto front (Container& container)
 
    :returns: :samp:`{container}.front()` or :samp:`{container}[0]` if
              :samp:`{container}` is an array.
 
-.. function:: constexpr auto back (Container const& container)
+.. function:: template <class Container> \
+              constexpr auto back (Container const& container)
+              template <class Container> \
               constexpr auto back (Container&)
 
    :returns: :samp:`{container}.back()` or :samp:`{container}[N - 1]` if
              :samp:`{container}` is an array.
 
-.. function:: constexpr auto data (Container const& container) noexcept
+.. function:: template <class Container> \
+              constexpr auto data (Container const& container) noexcept
+              template <class Container> \
               constexpr auto data (Container& container) noexcept
 
    :returns: :samp:`{container}.data()` or :samp:`{container}` if
              :samp:`{container}` is an array.
 
-.. function:: cbegin (Container const& container)
+.. function:: template <class Container> \
+              cbegin (Container const& container)
 
    :returns: :samp:`begin({container})`
 
-.. function:: cend (Container const& container)
+.. function:: template <class Container> \
+              cend (Container const& container)
 
    :returns: :samp:`end({container})`
 
-.. function:: rbegin (Container const& container)
+.. function:: template <class Container> \
+              rbegin (Container const& container)
+              template <class Container> \
               rbegin (Container& container)
 
    Requires that the given :samp:`{container}` have a member function named
@@ -58,11 +70,14 @@ The iterator component can be found in :file:`<core/{iterator}.hpp>`.
 
    :returns: :samp:`{container}.rbegin()`
 
-.. function:: crbegin (Container const& container)
+.. function:: template <class Container> \
+              crbegin (Container const& container)
 
    :returns: :samp:`rbegin({container})`
 
-.. function:: rend (Container const& container)
+.. function:: template <class Container> \
+              rend (Container const& container)
+              template <class Container> \
               rend (Container& container)
 
    Requires that the given :samp:`{container}` have a member function named
@@ -71,13 +86,14 @@ The iterator component can be found in :file:`<core/{iterator}.hpp>`.
 
    :returns: :samp:`{container}.rend()`
 
-.. function:: crend (Container const& container)
+.. function:: template <class Container> \
+              crend (Container const& container)
 
    :returns: :samp:`rend({container})`
 
 .. index:: iterator; types
 
-.. class:: infix_ostream_iterator<T>
+.. class:: template <class T> infix_ostream_iterator
 
    The :any:`infix_ostream_iterator` is used as a replacement for
    :cxx:`std::ostream_iterator`, where the delimiter is not desired for the
@@ -95,7 +111,7 @@ The iterator component can be found in :file:`<core/{iterator}.hpp>`.
       copy(numbers, iter);
       std::cout << "]" << std::endl;
 
-.. class:: number_iterator<T>
+.. class:: template <class T> number_iterator
 
    This is an iterator that allows one to iterate over numbers when working
    with functions found in :doc:`algorithms <algorithm>`. It is a bidirectional
@@ -168,7 +184,9 @@ The iterator component can be found in :file:`<core/{iterator}.hpp>`.
               Swaps the value and step amount of :samp:`{l}` and :samp:`{r}` by
               calling :samp:`{l}.swap({r})`.
 
-.. function:: auto make_number_iterator (T value, T step) noexcept
+.. function:: template <class T> \
+              auto make_number_iterator (T value, T step) noexcept
+              template <class T> \
               auto make_number_iterator (T value) noexcept
               
               Creates a :any:`number_iterator` via type deduction.

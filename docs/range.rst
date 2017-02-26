@@ -10,8 +10,8 @@ adjacent arguments. This can be tiresome, and in the common case, unnecessary.
 The :any:`range` component works as a high level view. Rather than holding onto
 the container, it simply holds the start and end iterators to represent a
 range. The :any:`range` component implements the interface and behavior
-discussed within N3350_. Some decisions pertaining to open questions were made,
-and these are discussed below.
+discussed within :wg21:`N3350`. Some decisions pertaining to open questions
+were made, and these are discussed below.
 
 The range component resides in the :file:`<core/{range}.hpp>`.
 
@@ -47,12 +47,12 @@ reference to a range-like object from which we can create our :any:`range`.
 Component Interface
 -------------------
 
-.. class:: is_range<R>
+.. class:: template <class R> is_range
 
    Type trait for determining if a type can return a value when :cxx:`begin`
    and :cxx:`end` are called on it.
 
-.. class:: range<T>
+.. class:: template <class T> range
 
 
    Represents an open-ended range of :cxx:`[begin, end)`. The category of range
@@ -262,9 +262,9 @@ Component Interface
 
    :example:
 
-   .. code-block:: cpp
+    .. code-block:: cpp
 
-      auto istream_range = make_range<double>(stream);
+       auto istream_range = make_range<double>(stream);
 
 .. function:: range<std::istreambuf_iterator<CharT, Traits>> make_range \
               (std::basic_streambuf<CharT, Traits>* buffer)
@@ -273,9 +273,9 @@ Component Interface
 
    :example:
 
-   .. code-block:: cpp
+    .. code-block:: cpp
 
-      auto streambuf_range = make_range(stream.rdbuf());
+       auto streambuf_range = make_range(stream.rdbuf());
 
 .. function:: void swap (range<Iterator>& lhs, range<Iterator>& rhs)
 
@@ -284,13 +284,13 @@ Component Interface
 Answers to Open Questions
 -------------------------
 
-There are several questions raised in N3350_. The decisions related to
+There are several questions raised in :wg21:`N3350`. The decisions related to
 these are discussed below.
 
 make_range
 ^^^^^^^^^^
 
-The author of N3350_ mentions that they would like to be able to pass a single
+The author of :wg21:`N3350` mentions that they would like to be able to pass a single
 argument to a :any:`make_range` that is just the beginning of a range, where
 the end of the range is a default constructed iterator. This would make it
 helpful with iterators such as :cxx:`istream_iterator`. The author is concerned
@@ -304,7 +304,7 @@ an :cxx:`istream` and :cxx:`istreambuf` to create a proper range.
 Inherit from std::pair<Iterator, Iterator>
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The author of N3350_ mentions inheriting from
+The author of :wg21:`N3350` mentions inheriting from
 :cxx:`std::pair<Iterator, Iterator>`. Rather than rely on inheritance to
 represent a range, it was decided to allow a :any:`range` to be constructed
 implicitly with a :cxx:`std::pair`.
@@ -312,7 +312,7 @@ implicitly with a :cxx:`std::pair`.
 Remove member functions and replace as free algorithms
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The author of N3350_ mentions that it might be worth placing some member
+The author of :wg21:`N3350` mentions that it might be worth placing some member
 functions such as :cxx:`pop_*` and :any:`slice` as non member
 functions, at the cost of some Iterator copying.
 
@@ -321,18 +321,16 @@ It was decided that this was unnecessary, and the member functions will stay.
 Range Category
 ^^^^^^^^^^^^^^
 
-The author of N3350_ proposes defining range categories.
+The author of :wg21:`N3350` proposes defining range categories.
 
 It was decided that these add nothing of use.
 
 Split takes arbitrary number of indices
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The author of N3350_ mentions taking an arbitrary number of indices and
+The author of :wg21:`N3350` mentions taking an arbitrary number of indices and
 returning an N + 1 element :cxx:`tuple<>`. The author mentions that this would
 be tricky with negative indices and bidirectional iterators.
 
 It was decided that this is an unnecessary complication of the range
 component's internals.
-
-.. _N3350: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2012/n3350.html

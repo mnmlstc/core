@@ -11,4 +11,4 @@ given context.
 
 This component resides in :file:`<core/{propagate_const}.hpp>`
 
-.. class:: propagate_const<T>
+.. class:: template <class T> propagate_const

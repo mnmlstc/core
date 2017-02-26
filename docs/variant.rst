@@ -33,7 +33,7 @@ The variant component resides in :file:`<core/{variant}.hpp>`.
 
    This type is unavailable if :c:macro:`CORE_NO_EXCEPTIONS` is defined.
 
-.. class:: variant<Ts...>
+.. class:: template <class... Ts> variant
 
    The :any:`variant` type represents a type-safe discriminate union. Much like
    the Boost.Variant, a :any:`variant` is never in an uninitialized state. When
@@ -42,7 +42,7 @@ The variant component resides in :file:`<core/{variant}.hpp>`.
 
    .. index:: variant; constructors
 
-   .. function:: variant (T&& value)
+   .. function:: template <class T> variant (T&& value)
 
       :requires: :samp:`{T}` be of a type from which any type in :samp:`{Ts}`
                  is constructible.
@@ -122,12 +122,12 @@ The variant component resides in :file:`<core/{variant}.hpp>`.
 
       :example:
 
-      .. code-block:: cpp
+        .. code-block:: cpp
 
-         variant<int, std::string> item { };
-         item.match(
-           [] (int v) { std::cout << v << std::endl; },
-           [] (std::string const& s) { std::cout << s << std::endl; });
+           variant<int, std::string> item { };
+           item.match(
+             [] (int v) { std::cout << v << std::endl; },
+             [] (std::string const& s) { std::cout << s << std::endl; });
 
    .. index:: variant; observers
 
@@ -164,9 +164,9 @@ The variant component resides in :file:`<core/{variant}.hpp>`.
 
 .. index:: variant; functions
 
-.. function:: auto const& get<N> (variant const& v)
-              auto&& get<N> (variant&& v)
-              auto& get<N> (variant& v)
+.. function:: template <size_t N> auto const& get (variant const& v)
+              template <size_t N> auto&& get (variant&& v)
+              template <size_t N> auto& get (variant& v)
 
    Given an index :samp:`{N}`, which is within the range
    :samp:`[0, sizeof...({Ts}))`, returns :samp:`{T}` if :any:`which` is
@@ -175,17 +175,17 @@ The variant component resides in :file:`<core/{variant}.hpp>`.
    :noexcept: :cxx:`false`
    :throws: :any:`bad_variant_get`
 
-.. function:: T const* get<N> (variant const* v)
-              T* get<N> (variant* v)
+.. function:: template <size_t N> T const* get (variant const* v)
+              template <size_t N> T* get (variant* v)
 
    A pointer form of :any:`get\<N>`. Given an index :samp:`{N}`, which is
    within the range :samp:`[0, sizeof...({Ts}))`, returns :samp:`{T}` if
    :any:`which` is equal to :samp:`{N}`. Otherwise a :cxx:`nullptr` is
    returned.
 
-.. function:: T const& get<T> (variant const& v)
-              T&& get<T> (variant&& v)
-              T& get<T> (variant& v)
+.. function:: template <class T> T const& get (variant const& v)
+              template <class T> T&& get (variant&& v)
+              template <class T> T& get (variant& v)
 
    Given a type :samp:`{T}`, where :samp:`{T}` is one of the types that 
    :samp:`{v}` can contain, return it if the :any:`variant` contains it.
@@ -194,8 +194,8 @@ The variant component resides in :file:`<core/{variant}.hpp>`.
    :noexcept: :cxx:`false`
    :throws: :any:`bad_variant_get`
 
-.. function:: T const* get<T> (variant const* v)
-              T* get<T> (variant* v)
+.. function:: template <class T> T const* get (variant const* v)
+              template <class T> T* get (variant* v)
 
    A pointer form of :any:`get\<T>`. Given a type :samp:`{T}`, where
    :samp:`{T}` is within the parameter pack of :samp:`{v}`, return a pointer to
@@ -213,18 +213,7 @@ These are specializations placed in the :cxx:`std` namespace.
 
 .. namespace:: std
 
-.. class:: hash<variant<Ts...>>
+.. class:: template <class... Ts> hash<variant<Ts...>>
 
    A specialization of :cxx:`std::hash<T>` for variants. Requires that all
    :samp:`{Ts}...` in a :any:`variant` be specialized for :cxx:`std::hash`.
-
-.. function:: auto const& get<N>(variant const&)
-              auto&& get<N>(variant&&)
-              auto& get<N>(variant&)
-
-   .. deprecated:: 1.2 Please use :any:`core::get\<N>`
-
-   Calls :any:`core::get`, and returns the value. This specialization is
-   provided to interact with :cxx:`std::tuple` and to provide *some* semblance
-   of boost interoperability. However it does not support using the type to get
-   the value from the variant.

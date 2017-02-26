@@ -10,7 +10,7 @@ component.
 Everything discussed in this section resides in the :file:`<core/{string}.hpp>`
 header.
 
-.. class:: basic_string_view<CharT, Traits>
+.. class:: template <class CharT, class Traits> basic_string_view
 
    The :any:`basic_string_view` type has been recreated in many different
    projects over the years, especially where work on a string is desired
@@ -514,7 +514,7 @@ Several specializations for standard code are provided
 
 .. namespace:: std
 
-.. class:: hash<core::basic_string_view<CharT, Traits>>
+.. class:: template <> hash<core::basic_string_view<CharT, Traits>>
 
    Specialization hash for :any:`core::basic_string_view`.
 

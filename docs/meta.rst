@@ -18,25 +18,25 @@ The metatemplate component can be found in the :file:`<core/{meta}.hpp>` header.
 Additionally, all types declared in this component are located inside the
 :cxx:`core::meta` namespace.
 
-.. type:: size<N>
+.. type:: template <size_t N> size
 
    .. versionadded:: 1.2
 
    An alias for :samp:`std::integral_constant<std::size_t, {N}>`
 
-.. type:: boolean<B>
+.. type:: template <bool B> boolean
 
    .. versionadded:: 1.2
 
    An alias for :samp:`std::integral_constant<bool, {B}>`
 
-.. type:: integer<I>
+.. type:: template <int I> integer
 
    .. versionadded:: 1.2
 
    An alias for :samp:`std::integral_constant<int, {I}>`
 
-.. type:: all<Args...>
+.. class:: template <class... Args> all
 
    .. versionadded:: 1.2
 
@@ -51,17 +51,17 @@ Additionally, all types declared in this component are located inside the
 
    :example:
 
-   .. code-block:: cpp
+    .. code-block:: cpp
 
-      using result = meta::all<
-        is_void<T>,
-        is_same<T, U>,
-        is_base_of<W, V>
-      >;
+       using result = meta::all<
+         is_void<T>,
+         is_same<T, U>,
+         is_base_of<W, V>
+       >;
 
-      static_assert(result::value, "");
+       static_assert(result::value, "");
 
-.. type:: any<Args...>
+.. class:: template <class... Args> any
 
    .. versionadded:: 1.2
 
@@ -76,15 +76,15 @@ Additionally, all types declared in this component are located inside the
 
    :example:
 
-   .. code-block:: cpp
+    .. code-block:: cpp
 
-      using result = meta::any<
-        is_same<U, T>,
-        is_void<void>
-        is_void<nullptr_t>
-      >;
+       using result = meta::any_t<
+         is_same<U, T>,
+         is_void<void>
+         is_void<nullptr_t>
+       >;
 
-.. type:: none<Args...>
+.. class:: template <class... Args> none
 
    .. versionadded:: 1.2
 
@@ -98,11 +98,11 @@ Additionally, all types declared in this component are located inside the
 
    :example:
 
-   .. code-block:: cpp
+    .. code-block:: cpp
 
-      using result = meta::none<is_void<T>>;
+       using result = meta::none_t<is_void<T>>;
 
-.. class:: pack<Args...>
+.. class:: template <class... Args> pack
 
    .. versionadded:: 1.2
 
@@ -127,7 +127,7 @@ Additionally, all types declared in this component are located inside the
       If :any:`empty` is false, this is an alias for the last type in
       :samp:`{Args}...`. Otherwise, this alias does not exist.
 
-.. class:: transform<T, F<U>>
+.. class:: template <class T, template <class...> class F> transform
 
    .. versionadded:: 1.2
 
@@ -142,18 +142,18 @@ Additionally, all types declared in this component are located inside the
 
    :example:
 
-   .. code-block:: cpp
-      
-      template <class T> struct void_to_int : identity<T> { };
-      template <> struct void_to_int<void> : identity<int> { };
-      template <class T>
-      using void_to_int_t = typename void_to_int<T>::type;
-      using out = meta::pack<int, int, double, int>;
-      using in = meta::pack<void, int, double, void>;
-      using result = meta::transform_t<in, void_to_int_t>;
-      static_assert(is_same<out, result>::value, "");
+    .. code-block:: cpp
+       
+       template <class T> struct void_to_int : identity<T> { };
+       template <> struct void_to_int<void> : identity<int> { };
+       template <class T>
+       using void_to_int_t = typename void_to_int<T>::type;
+       using out = meta::pack<int, int, double, int>;
+       using in = meta::pack<void, int, double, void>;
+       using result = meta::transform_t<in, void_to_int_t>;
+       static_assert(is_same<out, result>::value, "");
 
-.. class:: count_if<T, F<U>>
+.. class:: template <class T, template <class> class F, class U> count_if
 
    .. versionadded:: 1.2
 
@@ -167,13 +167,13 @@ Additionally, all types declared in this component are located inside the
 
    :example:
 
-   .. code-block:: cpp
-      
-      using in = meta::pack<int, void, double, void, std::string, void>;
-      using result = meta::count_if<in, is_void>;
-      static_assert(result::value == 3, "");
+     .. code-block:: cpp
+        
+        using in = meta::pack<int, void, double, void, std::string, void>;
+        using result = meta::count_if<in, is_void>;
+        static_assert(result::value == 3, "");
 
-.. class:: find_if<T, F<U>>
+.. class:: template <class T, template <class> class F, class U> find_if
 
    .. versionadded:: 1.2
 
@@ -190,14 +190,14 @@ Additionally, all types declared in this component are located inside the
 
    :example:
 
-   .. code-block:: cpp
+    .. code-block:: cpp
 
-      using in = meta::pack<int, std::string, int, double, void, double>;
-      using out = meta::pack<void, double>;
-      using result = meta::find_if_t<in, std::is_void>;
-      static_assert(is_same<out, result>::value, "");
+       using in = meta::pack<int, std::string, int, double, void, double>;
+       using out = meta::pack<void, double>;
+       using result = meta::find_if_t<in, std::is_void>;
+       static_assert(is_same<out, result>::value, "");
 
-.. class:: filter<T, F<U>>
+.. class:: template <class T, template <class> class F, class U> filter
 
    .. versionadded:: 1.2
 
@@ -213,15 +213,15 @@ Additionally, all types declared in this component are located inside the
 
    :example:
 
-   .. code-block:: cpp
+     .. code-block:: cpp
 
-      template <class T> struct is_not_void : std::true_type { };
-      template <> struct is_not_void<void> : std::false_type { };
-      using in = meta::pack<int, void, std::string, void, double, void>
-      using out = meta::pack<int, std::string, double>;
-      using result = meta::filter<in, is_not_void>
+        template <class T> struct is_not_void : std::true_type { };
+        template <> struct is_not_void<void> : std::false_type { };
+        using in = meta::pack<int, void, std::string, void, double, void>
+        using out = meta::pack<int, std::string, double>;
+        using result = meta::filter<in, is_not_void>
 
-.. class:: element<N, T>
+.. class:: template <size_t N, class T> element
 
    .. versionadded:: 1.2
 
@@ -233,13 +233,13 @@ Additionally, all types declared in this component are located inside the
 
    :example:
 
-   .. code-block:: cpp
+     .. code-block:: cpp
 
-      using in = meta::pack<void, std::string, int, double>;
-      using result = meta::element_t<0, in>;
-      static_assert(is_void<result>::value, "");
+        using in = meta::pack<void, std::string, int, double>;
+        using result = meta::element_t<0, in>;
+        static_assert(is_void<result>::value, "");
 
-.. class:: push_front<T, Args...>
+.. class:: template <class T, class... Args> push_front
 
    .. versionadded:: 1.2
 
@@ -251,14 +251,14 @@ Additionally, all types declared in this component are located inside the
 
    :example:
   
-   .. code-block:: cpp
+     .. code-block:: cpp
 
-      using in = meta::pack<void, double>;
-      using out = meta::pack<int, double, void, double>;
-      using result = meta::push_front_t<in, int, double>;
-      static_assert(is_same<out, result>::value, "");
+        using in = meta::pack<void, double>;
+        using out = meta::pack<int, double, void, double>;
+        using result = meta::push_front_t<in, int, double>;
+        static_assert(is_same<out, result>::value, "");
 
-.. class:: push_back<T, Args...>
+.. class:: template <class T, class... Args> push_back
 
    .. versionadded:: 1.2
 
@@ -277,7 +277,7 @@ Additionally, all types declared in this component are located inside the
       using result = meta::push_back_t<in, void, int>;
       static_assert(is_same<out, result>::value, "");
 
-.. class:: index<U, T>
+.. class:: template <class U, class T> index
 
    .. versionadded:: 1.2
 
@@ -298,7 +298,7 @@ Additionally, all types declared in this component are located inside the
       using result = meta::index<std::string, in>;
       static_assert(result::value == 2, "");
 
-.. class:: count<U, T>
+.. class:: template <class U, class T> count
 
    .. versionadded:: 1.2
 
@@ -316,7 +316,7 @@ Additionally, all types declared in this component are located inside the
       using result = meta::count<double, in>;
       static_assert(result::value == 2, "");
 
-.. class:: find<U, T>
+.. class:: template <class U, class T> find
 
    .. versionadded:: 1.2
 
@@ -339,7 +339,7 @@ Additionally, all types declared in this component are located inside the
       using result = meta::find_t<std::string, in>;
       static_assert(is_same<out, result>::value, "");
 
-.. class:: merge<Args...>
+.. class:: template <class... Args> merge
 
    .. versionadded:: 1.2
 
@@ -363,7 +363,7 @@ Additionally, all types declared in this component are located inside the
       static_assert(is_same<result, out>::value, "");
 
 
-.. class:: index_sequence_from<T>
+.. class:: template <class T> index_sequence_from
 
    .. versionadded:: 1.2
 
@@ -382,7 +382,7 @@ Additionally, all types declared in this component are located inside the
       using result = index_sequence_from<in>;
       static_assert(is_same<out, result>::value, "");
 
-.. class:: pop_front<T>
+.. class:: template <class T> pop_front
 
    .. versionadded:: 1.2
 
@@ -401,7 +401,7 @@ Additionally, all types declared in this component are located inside the
       using result = meta::pop_front_t<in>;
       static_assert(is_same<out, result>::value, "");
 
-.. class:: pop_back<T>
+.. class:: template <class T> pop_back
 
    .. versionadded:: 1.2
 
@@ -420,7 +420,7 @@ Additionally, all types declared in this component are located inside the
       using result = meta::pop_back_t<in>;
       static_assert(is_same<out, result>::value, "");
 
-.. class:: reverse<T>
+.. class:: template <class T> reverse
 
    .. versionadded:: 1.2
 
@@ -439,7 +439,7 @@ Additionally, all types declared in this component are located inside the
       using result = meta::reverse_t<in>;
       static_assert(is_same<out, result>::value, "");
 
-.. class:: to_pack<T>
+.. class:: template <class T> to_pack
 
    .. versionadded:: 1.2
 
@@ -457,7 +457,7 @@ Additionally, all types declared in this component are located inside the
       using result = meta::to_pack_t<in>;
       static_assert(is_same<out, result>::value, "");
 
-.. class:: from_pack<T, U>
+.. class:: template <class T, class U> from_pack
 
    .. versionadded:: 1.2
 

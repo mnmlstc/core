@@ -9,32 +9,32 @@ type lists.
 
 The utility component can be found in the :file:`<core/{utility}.hpp>` header.
 
-.. class:: integer_sequence<T, Is>
+.. class:: template <class T, T... Is> integer_sequence
 
    Meta template to generate a series of :samp:`{T}` to allow easier unpacking.
 
-.. class:: index_sequence<I>
+.. class:: template <size_t... Is> index_sequence
 
    A shortcut for :any:`integer_sequence`.
 
-.. class:: make_index_sequence<N>
+.. class:: template <size_t N> make_index_sequence
 
    Used to generate the :any:`index_sequence`, with :samp:`{N}` numbers.
 
-.. class:: type_at<N, Ts...>
+.. class:: template <size_t N, class... Ts> type_at
 
    .. type:: type
 
       When accessed, provides the type at the index :samp:`{N}` in the type
       list :samp:`{Ts}`
 
-.. function:: constexpr auto value_at<N>(Ts&&...) noexcept
+.. function:: template <size_t N> constexpr auto value_at(Ts&&...) noexcept
 
    :returns: The value located at the index :samp:`{N}` in the type list
              :samp:`{Ts}`.
    :requires: :samp:`{N}` may not be >= :samp:`sizeof...({Ts})`
 
-.. class:: scope_guard<Callable>
+.. class:: template <class Callable> scope_guard
 
    Scope guard acts much like the Boost.ScopeExit library. It is non-copyable,
    but movable. It can be constructed with any callable type
@@ -55,7 +55,7 @@ The utility component can be found in the :file:`<core/{utility}.hpp>` header.
       :samp:`{Callable}` never being invoked. This can be seen as a way to
       *rollback* bookkeeping code.
 
-.. class:: capture<T>
+.. class:: template <class T> capture
 
    This is used to provide a way to emulate C++14 move captures. It holds a
    value, and can only be move constructed or copy constructed from a non-const

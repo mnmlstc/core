@@ -92,7 +92,7 @@ Non-Range Based Operations
 
    .. versionadded:: 1.2
 
-   An implementation of N4318_.
+   An implementation of :wg21:`N4318`.
 
    This fixes an issue regarding the :cxx:`std::abs` function, where a call
    to :cxx:`std::abs(3u, 5u)` can result in a return value of 4294967294.
@@ -1107,6 +1107,3 @@ Min/Max Operations
       assert(prev_permutation(s) and s == "acb");
       assert(prev_permutation(s) and s == "abc");
       assert(not prev_permutation(s) and s == "cba");
-      
-
-.. _N4318: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n4318.pdf

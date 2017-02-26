@@ -24,7 +24,9 @@ Polymorphic Smart Pointer
    single: smart pointers; poly_ptr
    single: poly_ptr
 
-.. class:: poly_ptr<T, Deleter>
+.. class:: template <class T, class Deleter> poly_ptr
+
+   .. deprecated:: 2.0
 
    The :any:`poly_ptr` is a smart pointer for polymorphic types that
    retains sole ownership of the *polymorphic* type :samp:`{T}` and performs
@@ -203,7 +205,9 @@ Polymorphic Smart Pointer
 Deep Copying Smart Pointer
 --------------------------
 
-.. class:: deep_ptr<T, Deleter, Copier>
+.. class:: template <class T, class Deleter, class Copier> deep_ptr
+
+   :deprecated: 2.0
 
    :any:`deep_ptr` is a smart pointer for a type that retains sole ownership of
    the pointer it manages and performs a *deep copy* on assignment or copy
@@ -346,7 +350,7 @@ Deep Copying Smart Pointer
 Dumbest Smart Pointer
 ---------------------
 
-.. class:: observer_ptr<T>
+.. class:: template <class T> observer_ptr
 
    :any:`observer_ptr` is "the dumbest smart pointer", in that it is only ever
    used in the place of a raw pointer. The idea is to inform the user that the
@@ -420,7 +424,7 @@ Dumbest Smart Pointer
 Custom Allocators
 -----------------
 
-.. class:: arena_allocator<T, N>
+.. class:: template <class T, size_t N> arena_allocator
 
    The :any:`arena_allocator` type fulfills an Allocator capable interface
    that allows stack allocation to reduce the cost of accessing the free
@@ -449,7 +453,7 @@ Utilities
    non-null pointer and the :any:`poly_ptr` does not manage an object, or if
    the passed in pointer differs in type from the currently managed object.
 
-.. class:: default_copy<T>
+.. class:: template <class T> default_copy
 
    The default copy policy used by :any:`deep_ptr` during a copy operation.
    There are no partial specializations available. The default operation to
@@ -473,8 +477,8 @@ Utilities
       Allocates a new :any:`pointer` and initializes it with the dereferenced
       :samp:`{ptr}`, to invoke the copy constructor.
 
-.. function:: std::unique_ptr<T, D> default_poly_copy<T, D, U> (\
-              std::unique_ptr<T, D> const&)
+.. function:: template <class T, class D, class U> \
+              unique_ptr<T, D> default_poly_copy (unique_ptr<T, D> const&)
 
    This function is used as the default copier when assigning a raw pointer or
    unique_ptr to a :any:`poly_ptr`. It will perform a deep copy with a call to
@@ -484,8 +488,8 @@ Utilities
 
    :returns: :cxx:`std::unique_ptr<T, D>` with a managed object.
 
-.. function:: std::unique_ptr<T, D> null_poly_copy<T, D> (\
-              std::unique_ptr<T, D> const&)
+.. function:: template <class T, class D> \
+              unique_ptr<T, D> null_poly_copy (unique_ptr<T, D> const&)
 
    This function is used within a :any:`poly_ptr` for when it does not manage
    an object. Given any :cxx:`std::unique_ptr`, it will return an empty
@@ -584,7 +588,7 @@ Make Functions
    the make_observer function will create an observer from any C++11 standard
    smart pointer, a raw pointer, or the smart pointers provided by MNMLSTC Core
 
-.. function:: poly_ptr<T, Deleter> make_poly<T>(U&& args)
+.. function:: template <class T, class D> poly_ptr<T, D> make_poly(U&& args)
 
    Provided to supplement the :cxx:`std::make_shared<T>`` and
    :any:`make_unique` functions. Constructs a :any:`poly_ptr` with an
@@ -592,7 +596,7 @@ Make Functions
    forwarding reference :samp:`{U}`. This function internally calls
    :any:`make_unique` to create the :any:`poly_ptr`.
 
-.. function:: deep_ptr<T> make_deep<T>(Args&&... args)
+.. function:: template <class T> deep_ptr<T> make_deep(Args&&... args)
 
    Used to supplement the :any:`make_unique`, :any:`make_poly`,
    and :cxx:`std::make_shared` functions. Takes a parameter pack :samp:`{args}`
@@ -600,8 +604,11 @@ Make Functions
    new (the default allocation scheme) and passed to a :any:`deep_ptr` for
    construction. This :any:`deep_ptr` is then returned by the function.
 
-.. function:: std::unique_ptr<T[]> make_unique<T>(std::size_t size)
-              std::unique_ptr<T> make_unique<T>(Args&&... args)
+.. function:: template <class T> \
+              std::unique_ptr<T[]> make_unique(std::size_t size)
+              template <class... Args> \
+              std::unique_ptr<T> make_unique(Args&&... args)
+              template <class T, size_t N> \
               void make_unique<T[N]> (Args&&...) = delete
 
    :any:`make_unique` is provided to help supplement the
@@ -622,7 +629,7 @@ integration with the C++ standard library.
 
 .. namespace:: std
 
-.. class:: hash<poly_ptr<T, Deleter>>
+.. class:: template <> hash<poly_ptr<T, Deleter>>
 
    This specialization of :any:`hash` allows |poly_ptr| to be used as a
    key type in associative containers.
@@ -631,7 +638,7 @@ integration with the C++ standard library.
    ``std::hash<poly_ptr<T, Deleter>> { }(ptr)`` is equivalent to the expression
    ``std::hash<typename poly_ptr<T, Deleter>::pointer> { }(ptr.get())``
 
-.. class:: std::hash<deep_ptr<T, Deleter, Copier>>
+.. class:: template <> hash<deep_ptr<T, Deleter, Copier>>
 
    This specialization of :class:`hash` allows |deep_ptr| to be used as a
    key type in associative containers.

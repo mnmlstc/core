@@ -18,45 +18,49 @@ also documented here.
 The type traits component can be found in the :file:`<core/{type_traits}.hpp>`
 header.
 
-.. type:: is_null_pointer<T>
+.. type:: template <class T> is_null_pointer
 
    An alias for ``std::true_type`` if :samp:`{T}` is any form of the type
    ``std::nullptr_t``. This includes its *const* and *volatile* qualified
    counterparts.
 
-.. type:: class_of<T>
+.. type:: template <class T> class_of_t
 
    Given a member function pointer type :samp:`{T}`, it extracts the underlying
    class type.
 
    :example:
 
-   .. code-block:: cpp
+    .. code-block:: cpp
 
-      struct A { void empty () { } };
+       struct A { void empty () { } };
 
-      using type = class_of_t<decltype(&A::empty)>;
-      static_assert(std::is_same<type, A>::value, "");
+       using type = class_of_t<decltype(&A::empty)>;
+       static_assert(std::is_same<type, A>::value, "");
 
-.. type:: invokable<Args...>
+.. type:: template <class...> invokable
+
+   .. deprecated:: 2.0
 
    Given a typelist :samp:`{Args}...`, checks if the first type in
    :samp:`{Args}...` may be invoked with the rest of the arguments in
    :samp:`{Args}`. The rule for deciding if :samp:`{Args}...` is invokable
    follows the *INVOKE* pseudo expression.
 
-.. type:: invoke_of<Args...>
+.. class:: template <class...> invoke_of
+
+   .. deprecated:: 2.0
 
    Given a typelist :samp:`{Args}...`, the member typedef :cxx:`type` will
    represent the return type if :samp:`{Args}` is invoked according to the
    *INVOKE* pseudo-expression.
 
-.. type:: result_of<T>
+.. class:: template <class T> result_of
 
    This is an SFINAE capable version of :cxx:`std::result_of`. It relies on
    :any:`invoke_of` to work correctly.
 
-.. type:: common_type<Ts...>
+.. class:: template <class...> common_type
 
    A more compiler agnostic version of ``std::common_type<{Ts}...>``. This was
    implemented to workaround an issue with Clang's ``std::common_type``
@@ -70,8 +74,8 @@ header.
    is comparable to libc++'s internal ``__is_nothrow_swappable``.
 
    This is also, oddly enough, an implementation of the
-   :cxx:`is_nothrow_swappable` trait proposed in N4426_, and was added to
-   MNMLSTC Core before the proposal was submitted.
+   :cxx:`is_nothrow_swappable` trait proposed in :wg21:`N4426`, and was added
+   to MNMLSTC Core before the proposal was submitted.
 
 .. class:: template <size_t Len, class... Ts> aligned_union
 
@@ -83,7 +87,7 @@ header.
 .. type:: template <bool B> bool_constant
 
    An alias of :cxx:`std::integral_constant<bool, B>`. This is a implementation
-   of N4389_.
+   of :wg21:`N4389`.
 
 .. type:: template <size_t I, class T> tuple_element_t
           template <class T> tuple_size_t
@@ -133,13 +137,12 @@ the detection idiom would be used.
 
    Some text goes here
 
-.. type:: detected_t<Op<Ts...>, Args...>
+.. type:: template <template <class...> class Op, class... Args> \
+          detected_t
 
    Some More Text
 
-.. type:: detected_or<Default, Op<Ts...>, Args...>
+.. type:: template <class T, template <class...> class Op, class... Args> \
+          detected_or
 
    EVEN. MORE. TEXT.
-
-.. _N4389: https://wg21.link/n4389
-.. _N4426: https://wg21.link/n4426

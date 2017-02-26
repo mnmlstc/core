@@ -7,7 +7,7 @@ Array Component
 
 The array component currently provides two helper functions for working with
 :cxx:`std::array` in the C++ standard library. Specifically, this component
-provides an implementation of `N4315`_. This component can be found in the
+provides an implementation of :wg21:`N4315`. This component can be found in the
 :file:`<core/{array}.hpp>` header.
 
 .. index:: array; functions
@@ -22,15 +22,15 @@ provides an implementation of `N4315`_. This component can be found in the
 
    :example:
 
-   .. code-block:: cpp
+    .. code-block:: cpp
 
-      auto a1 = make_array(1, 2, 3, 4);
-      using type1 = decltype(a1)::value_type;
-      static_assert(std::is_same<type1, int>::value, "");
+       auto a1 = make_array(1, 2, 3, 4);
+       using type1 = decltype(a1)::value_type;
+       static_assert(std::is_same<type1, int>::value, "");
 
-      auto a2 = make_array<long>(1, 2L, 3L, 4);
-      using type2 = decltype(a2)::value_type;
-      static_assert(std::is_same<type2, long>::value, "");
+       auto a2 = make_array<long>(1, 2L, 3L, 4);
+       using type2 = decltype(a2)::value_type;
+       static_assert(std::is_same<type2, long>::value, "");
 
 .. function:: constexpr std::array<T, N> to_array (T (&array)[N])
 
@@ -38,5 +38,3 @@ provides an implementation of `N4315`_. This component can be found in the
    creates a :cxx:`std::array` with the same length and size.
 
    This function will copy initialize each :samp:`{T}`
-
-.. _N4315: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n4315.html

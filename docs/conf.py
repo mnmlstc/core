@@ -34,6 +34,17 @@ rst_prolog = '''
 
 '''
 
-extensions = ['sphinx.ext.todo']#, 'guzzle_sphinx_theme']
+extlinks = {
+    'wg21': ('https://wg21.link/%s', ''),
+    'issue': ('https://github.com/mnmlstc/core/issues/%s', 'issue')
+}
+
+extensions = [
+    'sphinx.ext.todo',
+    'sphinx.ext.githubpages',
+    'sphinx.ext.extlinks',
+#    'sphinxcontrib.inlinesyntaxhighlight',
+#    'sphinxcontrib.versioning'
+]
 
 todo_include_todos = True
