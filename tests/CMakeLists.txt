@@ -74,7 +74,8 @@ function(add_unit_test name file)
     #$<$<BOOL:${CAN_SANITIZE_UNDEFINED}>:${SANITIZE_UNDEFINED}>
     $<$<BOOL:${CAN_SANITIZE_ADDRESS}>:${SANITIZE_ADDRESS}>
     $<$<BOOL:${CAN_SANITIZE_MEMORY}>:${SANITIZE_MEMORY}>
-    $<$<BOOL:${BUILD_WITH_COVERAGE}>:${USE_COVERAGE}>)
+    $<$<BOOL:${BUILD_WITH_COVERAGE}>:${USE_COVERAGE}>
+    $<$<AND:${LIBCXX}>:${USE_STDLIB_LIBCXX}>)
 endfunction ()
 
 #------------------------------------------------------------------------------
@@ -126,11 +127,7 @@ if (MSVC)
   set(WARN_NO_SHADOW "/wd4458")
 endif ()
 
-# Only for when using certain cmake versions (like the ones found on travis-ci)
-if (${CMAKE_VERSION} VERSION_LESS "3.1.0" OR "$ENV{TRAVIS}" STREQUAL "true")
-  check_cxx_compiler_flag(${USE_STD_CXX11} CAN_USE_STD_CXX11)
-endif ()
-
+check_cxx_compiler_flag(${USE_STD_CXX11} CAN_USE_STD_CXX11)
 check_cxx_compiler_flag(${USE_STDLIB_LIBCXX} CAN_USE_STDLIB_LIBCXX)
 check_cxx_compiler_flag(${USE_NO_RTTI} CAN_USE_NO_RTTI)
 
