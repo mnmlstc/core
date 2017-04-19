@@ -206,11 +206,15 @@ TEST_CASE("variant-functions", "[variant][functions]") {
     variant_type integer { static_cast<std::uint64_t>(64) };
 
     CHECK_THROWS_AS(core::get<0>(vector), core::bad_variant_get);
+    CHECK_THROWS_AS(core::get<std::uint64_t>(vector), core::bad_variant_get);
     CHECK(core::get<0>(core::move(integer)) == 64u);
+    CHECK(core::get<std::uint64_t>(core::move(integer)) == 64u);
     CHECK(core::get<1>(string) == "get");
+    CHECK(core::get<std::string>(string) == "get");
     CHECK(core::get<2>(vector)[0] == std::string { "1" });
     CHECK(core::get<2>(vector)[1] == std::string { "2" });
     CHECK(core::get<2>(vector)[2] == std::string { "3" });
+    CHECK(core::get<std::vector<std::string>>(vector)[0] == std::string { "1" });
   }
 #endif /* CORE_NO_EXCEPTIONS */
 
@@ -226,11 +230,15 @@ TEST_CASE("variant-functions", "[variant][functions]") {
     variant_type integer { static_cast<std::uint64_t>(64) };
 
     CHECK_FALSE(core::get<0>(&vector));
+    CHECK_FALSE(core::get<std::uint64_t>(&vector));
     CHECK(*core::get<0>(&integer) == 64u);
+    CHECK(*core::get<std::uint64_t>(&integer) == 64u);
     CHECK(*core::get<1>(&string) == "get");
+    CHECK(*core::get<std::string>(&string) == "get");
     CHECK((*core::get<2>(&vector))[0] == std::string { "1" });
     CHECK((*core::get<2>(&vector))[1] == std::string { "2" });
     CHECK((*core::get<2>(&vector))[2] == std::string { "3" });
+    CHECK((*core::get<std::vector<std::string>>(&vector))[0] == std::string { "1" });
   }
 
   SECTION("get-type") {
