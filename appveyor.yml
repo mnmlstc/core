@@ -20,4 +20,8 @@ install:
   -
 
 build_script:
-  - cmake --build build --target check
+  - mkdir build && cd build
+  - cmake --build build ..
+
+test_script:
+  - ctest
