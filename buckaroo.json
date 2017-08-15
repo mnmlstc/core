@@ -1,0 +1,6 @@
+{
+  "name": "mnmlstc-core",
+  "dependencies": {
+    "github+njlr/mnmlstc-unittest": "1.0.4"
+  }
+}

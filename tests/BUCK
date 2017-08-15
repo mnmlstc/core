@@ -1,0 +1,121 @@
+include_defs('//BUCKAROO_DEPS')
+
+cxx_binary(
+  name = 'algorithm',
+  srcs = [
+    'algorithm.cpp',
+  ],
+  deps = BUCKAROO_DEPS + [
+    '//:core',
+  ],
+)
+
+cxx_binary(
+  name = 'any',
+  srcs = [
+    'any.cpp',
+  ],
+  deps = BUCKAROO_DEPS + [
+    '//:core',
+  ],
+)
+
+cxx_binary(
+  name = 'functional',
+  srcs = [
+    'functional.cpp',
+  ],
+  deps = BUCKAROO_DEPS + [
+    '//:core',
+  ],
+)
+
+cxx_binary(
+  name = 'iterator',
+  srcs = [
+    'iterator.cpp',
+  ],
+  deps = BUCKAROO_DEPS + [
+    '//:core',
+  ],
+)
+
+cxx_binary(
+  name = 'memory',
+  srcs = [
+    'memory.cpp',
+  ],
+  deps = BUCKAROO_DEPS + [
+    '//:core',
+  ],
+)
+
+cxx_binary(
+  name = 'numeric',
+  srcs = [
+    'numeric.cpp',
+  ],
+  deps = BUCKAROO_DEPS + [
+    '//:core',
+  ],
+)
+
+cxx_binary(
+  name = 'optional',
+  srcs = [
+    'optional.cpp',
+  ],
+  deps = BUCKAROO_DEPS + [
+    '//:core',
+  ],
+)
+
+cxx_binary(
+  name = 'range',
+  srcs = [
+    'range.cpp',
+  ],
+  deps = BUCKAROO_DEPS + [
+    '//:core',
+  ],
+)
+
+cxx_binary(
+  name = 'string',
+  srcs = [
+    'string.cpp',
+  ],
+  deps = BUCKAROO_DEPS + [
+    '//:core',
+  ],
+)
+
+cxx_binary(
+  name = 'type-traits',
+  srcs = [
+    'type-traits.cpp',
+  ],
+  deps = BUCKAROO_DEPS + [
+    '//:core',
+  ],
+)
+
+cxx_binary(
+  name = 'utility',
+  srcs = [
+    'utility.cpp',
+  ],
+  deps = BUCKAROO_DEPS + [
+    '//:core',
+  ],
+)
+
+cxx_binary(
+  name = 'variant',
+  srcs = [
+    'variant.cpp',
+  ],
+  deps = BUCKAROO_DEPS + [
+    '//:core',
+  ],
+)
