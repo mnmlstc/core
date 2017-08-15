@@ -1,0 +1,175 @@
+cxx_library(
+  name = 'catch',
+  header_namespace = '',
+  exported_headers = [
+    'catch.hpp',
+  ],
+  srcs = [
+    'catch.cpp'
+  ],
+)
+
+cxx_binary(
+  name = 'algorithm',
+  srcs = [
+    'algorithm.cpp',
+  ],
+  deps = [
+    '//:core',
+    ':catch',
+  ],
+)
+
+cxx_binary(
+  name = 'any',
+  srcs = [
+    'any.cpp',
+  ],
+  deps = [
+    '//:core',
+    ':catch',
+  ],
+)
+
+cxx_binary(
+  name = 'array',
+  srcs = [
+    'array.cpp',
+  ],
+  deps = [
+    '//:core',
+    ':catch',
+  ],
+)
+
+cxx_binary(
+  name = 'functional',
+  srcs = [
+    'functional.cpp',
+  ],
+  deps = [
+    '//:core',
+    ':catch',
+  ],
+)
+
+cxx_binary(
+  name = 'iterator',
+  srcs = [
+    'iterator.cpp',
+  ],
+  deps = [
+    '//:core',
+    ':catch',
+  ],
+)
+
+cxx_binary(
+  name = 'memory-resource',
+  srcs = [
+    'memory-resource.cpp',
+  ],
+  deps = [
+    '//:core',
+    ':catch',
+  ],
+)
+
+cxx_binary(
+  name = 'memory',
+  srcs = [
+    'memory.cpp',
+  ],
+  deps = [
+    '//:core',
+    ':catch',
+  ],
+)
+
+cxx_binary(
+  name = 'numeric',
+  srcs = [
+    'numeric.cpp',
+  ],
+  deps = [
+    '//:core',
+    ':catch',
+  ],
+)
+
+cxx_binary(
+  name = 'optional',
+  srcs = [
+    'optional.cpp',
+  ],
+  deps = [
+    '//:core',
+    ':catch',
+  ],
+)
+
+cxx_binary(
+  name = 'propagate-const',
+  srcs = [
+    'propagate-const.cpp',
+  ],
+  deps = [
+    '//:core',
+    ':catch',
+  ],
+)
+
+cxx_binary(
+  name = 'range',
+  srcs = [
+    'range.cpp',
+  ],
+  deps = [
+    '//:core',
+    ':catch',
+  ],
+)
+
+cxx_binary(
+  name = 'string-view',
+  srcs = [
+    'string-view.cpp',
+  ],
+  deps = [
+    '//:core',
+    ':catch',
+  ],
+)
+
+cxx_binary(
+  name = 'type-traits',
+  srcs = [
+    'type-traits.cpp',
+  ],
+  deps = [
+    '//:core',
+    ':catch',
+  ],
+)
+
+cxx_binary(
+  name = 'utility',
+  srcs = [
+    'utility.cpp',
+  ],
+  deps = [
+    '//:core',
+    ':catch',
+  ],
+)
+
+cxx_binary(
+  name = 'variant',
+  srcs = [
+    'variant.cpp',
+  ],
+  deps = [
+    '//:core',
+    ':catch',
+  ],
+)

@@ -1,0 +1,8 @@
+[project]
+  ignore = .git
+
+[build]
+  engine = deep
+
+[cxx]
+  cxxflags = -std=c++14
