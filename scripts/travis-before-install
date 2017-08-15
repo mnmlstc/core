@@ -1,0 +1,22 @@
+#!/bin/sh
+# travis-before-install - build-script
+
+# This is apparently an expected approach in the event brew update fails on
+# the first try. Wat.
+if [[ "osx" = ${TRAVIS_OS_NAME} ]]; then
+  brew update || brew update || exit 1
+  brew upgrade
+fi
+
+if [[ "linux" = ${TRAVIS_OS_NAME} ]]; then
+  LLVM37="deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty-3.7 main"
+  LLVM38="deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty-3.8 main"
+  LLVM39="deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty-3.9 main"
+  curl http://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
+  sudo add-apt-repository -y "${LLVM37}"
+  sudo add-apt-repository -y "${LLVM38}"
+  sudo add-apt-repository -y "${LLVM39}"
+  sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+  sudo add-apt-repository 
+  sudo apt-get -qq update
+fi

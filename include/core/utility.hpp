@@ -8,43 +8,7 @@
 #include <core/type_traits.hpp>
 
 namespace core {
-inline namespace v1 {
-namespace impl {
-
-template <class T, T... I> struct integer_sequence {
-  static_assert(
-    ::std::is_integral<T>::value,
-    "integer_sequence must use an integral type"
-  );
-
-  template <T N> using append = integer_sequence<T, I..., N>;
-  static constexpr ::std::size_t size () noexcept { return sizeof...(I); }
-  using next = append<size()>;
-  using type = T;
-};
-
-template <class T, T Index, ::std::size_t N>
-struct sequence_generator {
-  static_assert(Index >= 0, "Index cannot be negative");
-  using type = typename sequence_generator<T, Index - 1, N - 1>::type::next;
-};
-
-template <class T, T Index>
-struct sequence_generator<T, Index, 0ul> { using type = integer_sequence<T>; };
-
-template < ::std::size_t Index, class T, class U, class... Types>
-struct typelist_index {
-  using type = typename typelist_index<Index + 1, T, Types...>::type;
-  static constexpr ::std::size_t value = Index;
-};
-
-template < ::std::size_t Index, class T, class... Types>
-struct typelist_index<Index, T, T, Types...> {
-  using type = typelist_index;
-  static constexpr ::std::size_t value = Index;
-};
-
-} /* namespace impl */
+inline namespace v2 {
 
 template <class T>
 constexpr T&& forward (remove_reference_t<T>& t) noexcept {
@@ -63,43 +27,30 @@ constexpr auto move (T&& t) noexcept -> decltype(
 
 
 template <class T, T... I>
-using integer_sequence = impl::integer_sequence<T, I...>;
+using integer_sequence = meta::integer_sequence<T, I...>;
 
-template < ::std::size_t... I>
-using index_sequence = integer_sequence< ::std::size_t, I...>;
+template <::std::size_t... I>
+using index_sequence = integer_sequence<::std::size_t, I...>;
 
 template <class T, T N>
-using make_integer_sequence = typename impl::sequence_generator<T, N, N>::type;
+using make_integer_sequence = typename meta::iota<T, N, N>::type;
 
-template < ::std::size_t N>
-using make_index_sequence = make_integer_sequence< ::std::size_t, N>;
+template <::std::size_t N>
+using make_index_sequence = make_integer_sequence<::std::size_t, N>;
 
-template <class T, class... Ts>
-using typelist_index = ::std::integral_constant<
-  ::std::size_t,
-  impl::typelist_index<0ul, T, Ts...>::type::value
->;
+template <class... Ts>
+using index_sequence_for = make_index_sequence<sizeof...(Ts)>;
 
-/* N3761 (with some additions) */
-template < ::std::size_t N, class T, class... Ts>
-struct type_at { using type = typename type_at<N - 1, Ts...>::type; };
-
-template <class T, class... Ts>
-struct type_at<0ul, T, Ts...> { using type = T; };
-
-template < ::std::size_t N, class... Ts>
-using type_at_t = typename type_at<N, Ts...>::type;
-
-template < ::std::size_t N, class T, class... Ts>
+template <::std::size_t N, class T, class... Ts>
 constexpr auto value_at (T&& value, Ts&&...) -> enable_if_t<
   N == 0 and N < (sizeof...(Ts) + 1),
   decltype(::core::forward<T>(value))
 > { return ::core::forward<T>(value); }
 
-template < ::std::size_t N, class T, class... Ts>
+template <::std::size_t N, class T, class... Ts>
 constexpr auto value_at (T&&, Ts&&... values) -> enable_if_t<
   N != 0 and N < (sizeof...(Ts) + 1),
-  type_at_t<N, T, Ts...>
+  meta::get<meta::list<T, Ts...>, N>
 > { return value_at<N - 1, Ts...>(::core::forward<Ts>(values)...); }
 
 template <class Callable>
@@ -137,6 +88,80 @@ auto make_scope_guard(Callable&& callable) -> scope_guard<decay_t<Callable>> {
   };
 }
 
-}} /* namespace core::v1 */
+template <class T, class U=T>
+T exchange (T& obj, U&& value) noexcept(
+  meta::all<
+    ::std::is_nothrow_move_constructible<T>,
+    ::std::is_nothrow_assignable<add_lvalue_reference_t<T>, U>
+  >()
+) {
+  T old = ::core::move(obj);
+  obj = ::core::forward<U>(value);
+  return old;
+}
+
+inline ::std::uintptr_t as_int (void const* ptr) noexcept {
+  return reinterpret_cast<::std::uintptr_t>(ptr);
+}
+
+template <class T>
+void const* as_void (T const* ptr) { return static_cast<void const*>(ptr); }
+
+template <class T>
+void* as_void (T* ptr) { return static_cast<void*>(ptr); }
+
+template <class T>
+void const* as_void (T const& ref) { return as_void(::std::addressof(ref)); }
+
+template <class T>
+void* as_void (T& ref) { return as_void(::std::addressof(ref)); }
+
+template <class E>
+constexpr auto as_under(E e) noexcept -> meta::when<
+  std::is_enum<E>::value,
+  underlying_type_t<E>
+> { return static_cast<underlying_type_t<E>>(e); }
+
+template <class T>
+struct capture final {
+  static_assert(::std::is_move_constructible<T>::value, "T must be movable");
+  using value_type = T;
+  using reference = add_lvalue_reference_t<value_type>;
+  using pointer = add_pointer_t<value_type>;
+
+  capture (T&& data) : data { core::move(data) } { }
+
+  capture (capture&&) = default;
+  capture (capture& that) : data { core::move(that.data) } { }
+  capture () = delete;
+
+  capture& operator = (capture const&) = delete;
+  capture& operator = (capture&&) = delete;
+
+  operator reference () const noexcept { return this->get(); }
+  reference operator * () const noexcept { return this->get(); }
+  pointer operator -> () const noexcept {
+    return ::std::addressof(this->get());
+  }
+
+  reference get () const noexcept { return this->data; }
+
+private:
+  value_type data;
+};
+
+template <class T>
+auto make_capture (remove_reference_t<T>& ref) -> capture<T> {
+  return capture<T> { core::move(ref) };
+}
+
+template <class T>
+auto make_capture (remove_reference_t<T>&& ref) -> capture<T> {
+  return capture<T> { core::move(ref) };
+}
+
+struct erased_type { };
+
+}} /* namespace core::v2 */
 
 #endif /* CORE_UTILITY_HPP */

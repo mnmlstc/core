@@ -1,12 +1,22 @@
-include_defs('//BUCKAROO_DEPS')
+cxx_library(
+  name = 'catch',
+  header_namespace = '',
+  exported_headers = [
+    'catch.hpp',
+  ],
+  srcs = [
+    'catch.cpp'
+  ],
+)
 
 cxx_binary(
   name = 'algorithm',
   srcs = [
     'algorithm.cpp',
   ],
-  deps = BUCKAROO_DEPS + [
+  deps = [
     '//:core',
+    ':catch',
   ],
 )
 
@@ -15,8 +25,20 @@ cxx_binary(
   srcs = [
     'any.cpp',
   ],
-  deps = BUCKAROO_DEPS + [
+  deps = [
     '//:core',
+    ':catch',
+  ],
+)
+
+cxx_binary(
+  name = 'array',
+  srcs = [
+    'array.cpp',
+  ],
+  deps = [
+    '//:core',
+    ':catch',
   ],
 )
 
@@ -25,8 +47,9 @@ cxx_binary(
   srcs = [
     'functional.cpp',
   ],
-  deps = BUCKAROO_DEPS + [
+  deps = [
     '//:core',
+    ':catch',
   ],
 )
 
@@ -35,8 +58,20 @@ cxx_binary(
   srcs = [
     'iterator.cpp',
   ],
-  deps = BUCKAROO_DEPS + [
+  deps = [
     '//:core',
+    ':catch',
+  ],
+)
+
+cxx_binary(
+  name = 'memory-resource',
+  srcs = [
+    'memory-resource.cpp',
+  ],
+  deps = [
+    '//:core',
+    ':catch',
   ],
 )
 
@@ -45,8 +80,9 @@ cxx_binary(
   srcs = [
     'memory.cpp',
   ],
-  deps = BUCKAROO_DEPS + [
+  deps = [
     '//:core',
+    ':catch',
   ],
 )
 
@@ -55,8 +91,9 @@ cxx_binary(
   srcs = [
     'numeric.cpp',
   ],
-  deps = BUCKAROO_DEPS + [
+  deps = [
     '//:core',
+    ':catch',
   ],
 )
 
@@ -65,8 +102,20 @@ cxx_binary(
   srcs = [
     'optional.cpp',
   ],
-  deps = BUCKAROO_DEPS + [
+  deps = [
     '//:core',
+    ':catch',
+  ],
+)
+
+cxx_binary(
+  name = 'propagate-const',
+  srcs = [
+    'propagate-const.cpp',
+  ],
+  deps = [
+    '//:core',
+    ':catch',
   ],
 )
 
@@ -75,18 +124,20 @@ cxx_binary(
   srcs = [
     'range.cpp',
   ],
-  deps = BUCKAROO_DEPS + [
+  deps = [
     '//:core',
+    ':catch',
   ],
 )
 
 cxx_binary(
-  name = 'string',
+  name = 'string-view',
   srcs = [
-    'string.cpp',
+    'string-view.cpp',
   ],
-  deps = BUCKAROO_DEPS + [
+  deps = [
     '//:core',
+    ':catch',
   ],
 )
 
@@ -95,8 +146,9 @@ cxx_binary(
   srcs = [
     'type-traits.cpp',
   ],
-  deps = BUCKAROO_DEPS + [
+  deps = [
     '//:core',
+    ':catch',
   ],
 )
 
@@ -105,8 +157,9 @@ cxx_binary(
   srcs = [
     'utility.cpp',
   ],
-  deps = BUCKAROO_DEPS + [
+  deps = [
     '//:core',
+    ':catch',
   ],
 )
 
@@ -115,7 +168,8 @@ cxx_binary(
   srcs = [
     'variant.cpp',
   ],
-  deps = BUCKAROO_DEPS + [
+  deps = [
     '//:core',
+    ':catch',
   ],
 )

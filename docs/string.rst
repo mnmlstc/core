@@ -1,313 +1,527 @@
-.. _core-string-component:
-
 String Component
 ================
 
-.. default-domain:: cpp
-
-.. |string_view| replace:: :class:`string_view <basic_string_view\<T>>`
-.. |npos| replace:: :member:`npos <basic_string_view\<T>::npos>`
-
-The string component contains types related to strings, and utilities for
-strings. Specifically, the |string_view| class resides in the
-string component.
-
-The string component resides in the ``<core/string.hpp>`` header.
-
 .. namespace:: core
 
-.. class:: basic_string_view<T>
+The string component contains types related to strings, and utilities for
+strings. Specifically, the :any:`basic_string_view` class resides in the string
+component.
 
-   The |string_view| type has been recreated in many different projects over the
-   years, especially where work on immutable strings is desired. A |string_view|
-   provides an interface equivalent to a ``std::string const``, and any
-   ``std::string`` or ``char const*`` is implicitly convertible to a
-   |string_view|. A |string_view| is ONLY valid as long as the data it *views* is
-   valid.
+Everything discussed in this section resides in the :file:`<core/{string}.hpp>`
+header.
 
-   .. warning:: Attempting to access a |string_view| after the data it is
-      viewing has been destructed will result in undefined behavior.
+.. class:: template <class CharT, class Traits> basic_string_view
+
+   The :any:`basic_string_view` type has been recreated in many different
+   projects over the years, especially where work on a string is desired
+   without having to mutate the string itself. A :any:`basic_string_view`
+   provides an interface to a :cxx:`std::string const`, and any
+   :cxx:`std::string` or :cxx:`char const*` is implicity convertible to a
+   :any:`basic_string_view`. A :any:`basic_string_view` is *only* valid as long
+   as data it *views* is valid.
+
+   Attempting to access a :any:`basic_string_view` after the data is is viewing
+   has been destructed will result in undefined behavior.
 
    .. type:: difference_type
 
-      An alias of ``std::ptrdiff_t``
+      An alias of :cxx:`std::ptrdiff_t`
 
    .. type:: value_type
 
-      An alias of ``T``
+      An alias of :samp:`{CharT}`
 
    .. type:: size_type
 
-      An alias of ``std::size_t``
+      An alias of :cxx:`std::size_t`
 
    .. type:: const_reference
              reference
 
-      ``value_type const&``
+      An alias of :samp:`{value_type} const&`
 
    .. type:: const_pointer
              pointer
 
-      ``value_type const*``
+      An alias of :samp:`{value_type} const*`
 
    .. type:: const_iterator
              iterator
 
-      :type:`pointer`
+      An alias of :any:`pointer`
 
    .. type:: const_reverse_iterator
              reverse_iterator
 
-      ``std::reverse_iterator<const_iterator>``
+      An alias of :cxx:`std::reverse_iterator<const_iterator>`
 
-   .. member:: static constexpr npos
+   .. var:: static constexpr size_type npos
 
-      :type: :type:`size_type`
+      Equal to :cxx:`std::numeric_limits<size_type>::max()`
 
-      equal to ``std::numeric_limits<size_type>::max()``
-
-   .. function:: basic_string_view (std::string const& str)
-
-      Constructs the object such that it views the entire contents of the given
-      string.
-
-      :postcondition: :func:`size` == *str*.size()
-
-   .. function:: constexpr basic_string_view (pointer str, size_type len)
+   .. function:: constexpr basic_string_view(pointer s, size_type len) noexcept
 
       Constructs the object such that it views the given string and has a
-      maximum length of the given length.
+      size of :samp:`{len}`.
 
-      :postcondition: :func:`size` == *len*
+      :postcondition: :any:`size` == :samp:`{len}`
 
-   .. function:: basic_string_view (pointer str)
+   .. function:: basic_string_view(pointer s) noexcept
 
-      Constructs the object such that it views the given string, and has a
-      length of the entire null terminated string.
+      Constructs the :any:`basic_string_view` such that it views the entire
+      length of :samp:`{s}`.
 
-   .. function:: basic_string_view (basic_string_view const&)
+      :requires: :samp:`{s}` must be a null terminated string.
+      :postcondition: :any:`size` == :samp:`strlen({s})`
 
-      Copies the object given, such that they are equivalent in every
-      way.
+   .. function:: basic_string_view (std::string const& str) noexcept
 
-      .. note:: Because copying a |string_view| is cheap, no move constructor is
-         defined.
+      Constructs the :any:`basic_string_view` such that it views the entire
+      length of the string :samp:`{str}`.
 
-   .. function:: constexpr basic_string_view ()
+      :postcondition: :any:`size` == :samp:`{str}.size()`
 
-      Constructs the object to be empty.
+   .. function:: constexpr basic_string_view(basic_string_view const&) noexcept
 
-      :postcondition: :func:`empty` == true
+      Copies the given :any:`basic_string_view`
 
-   .. function:: operator std::basic_string<T> () const
+      :note: Because copying a :any:`basic_string_view` is cheap (it is simply
+             copying a pointer and an integer), no move constructor is
+             defined.
 
-      Marked as *explicit*. Creates a new ``std::basic_string`` from the
-      |string_view|.
+   .. function:: constexpr basic_string_view () noexcept
+
+      Constructs an empty :any:`basic_string_view`.
+
+      :postcondition: :any:`empty` == :cxx:`true`
+
+   .. function:: explicit operator basic_string () const
+
+      Creates a new :cxx:`std::basic_string` from the :any:`basic_string_view`
 
    .. function:: constexpr const_iterator cbegin () const noexcept
                  constexpr const_iterator begin () const noexcept
 
-      :returns: Iterator to the beginning of the |string_view|.
+      :returns: :any:`const_iterator` to the start of the
+                :any:`basic_string_view`
 
    .. function:: constexpr const_iterator cend () const noexcept
                  constexpr const_iterator end () const noexcept
 
-      :returns: Iterator to the end of the |string_view|.
+      :returns: :any:`const_iterator` to the end of the
+                :any:`basic_string_view`
 
-   .. function:: const_reverse_iterator crbegin() const noexcept
+   .. function:: const_reverse_iterator crbegin () const noexcept
                  const_reverse_iterator rbegin () const noexcept
 
-      :returns: reverse iterator to the beginning of the |string_view|
+      :returns: :any:`const_reverse_iterator` to the start of the
+                :any:`basic_string_view`
 
    .. function:: const_reverse_iterator crend () const noexcept
                  const_reverse_iterator rend () const noexcept
 
-      :returns: reverse iterator to the beginning of the |string_view|
+      :returns: :any:`const_reverse_iterator` to the end of the
+                :any:`basic_string_view`
 
    .. function:: constexpr size_type max_size () const noexcept
 
-      :returns: :func:`size`
+      :returns: :any:`size`
 
    .. function:: constexpr size_type length () const noexcept
                  constexpr size_type size () const noexcept
 
-      :returns: Length of the object in terms of ``sizeof(T) * N``
+      :returns: Length of the :any:`basic_string_view` in terms of
+                :samp:`sizeof({CharT}) * N`
 
    .. function:: constexpr bool empty () const noexcept
 
-      :returns: Whether the object is a 'null view'
+      :returns: :any:`size` == 0
 
-   .. function:: constexpr reference operator [] (size_type idx) const
+   .. function:: constexpr reference operator [] (size_type idx) const noexcept
 
-      :returns: reference to the :type:`value_type` located at *idx*.
+      :returns: :any:`reference` to the :any:`value_type` located at *idx*.
 
-   .. function:: constexpr reference front () const
+   .. function:: reference at (size_type idx) const
 
-      :returns: reference to the :type:`value_type` located at the index 0.
+      :returns: :any:`reference` to the :any:`value_type` located at *idx*.
 
-   .. function:: constexpr reference back () const
+      :throws: :cxx:`std::out_of_range` if *idx* is greater than or equal to
+               :any:`size`.
 
-      :returns: reference to the :type:`value_type` located at the end of the
-                |string_view|.
+   .. function:: constexpr reference front () const noexcept
 
-   .. function:: constexpr pointer data () const
+      :returns: :any:`reference` to the :any:`value_type` located at index 0.
 
-      :returns: :type:`pointer` to the data viewed by the |string_view|.
-                This pointer is not guaranteed to be null terminated, and
-                should be treated as such.
+   .. function:: constexpr reference back () const noexcept
 
-   .. function:: void remove_prefix (size_type n)
+      :returns: :any:`reference` to the :any:`value_type` located at the end of
+                the :any:`basic_string_view`
 
-      Moves the front of the |string_view| forward *n* characters or
-      :func:`size` if *n* is greater than :func:`size`.
+      :warning: Calling this function on an empty :any:`basic_string_view`
+                will result in undefined behavior.
 
-   .. function:: void remove_suffix (size_type n)
+   .. function:: constexpr pointer data () const noexcept
 
-      Moves the end of the |string_view| backwards *n* characters or
-      :func:`size` if *n* is greater than :func:`size`.
+      :returns: :any:`pointer` to the data viewed by the
+                :any:`basic_string_view`. This pointer is not guaranteed to be
+                null terminated, and should be treated as such. It is provided
+                for interoperating with :cxx:`std::string`, but also for those
+                cases where a :any:`basic_string_view` is guaranteed to observe
+                null terminated string
+
+   .. function:: void remove_prefix (size_type n) noexcept
+
+      Moves the start of the :any:`basic_string_view` forward *n* characters of
+      :any:`size` if *n* is greater than :any:`size`.
+
+   .. function:: void remove_suffix (size_type n) noexcept
+
+      Moves the end of the :any:`basic_string_view` backwards *n* characters or
+      :any:`size` if *n* is greater than :any:`size`.
 
    .. function:: void clear () noexcept
 
-      Sets the |string_view| to be empty.
+      Sets the :any:`basic_string_view` to no longer observe a string.
 
-      :postconditions: :func:`empty` == true
+      :postconditions: :any:`empty` == :cxx:`true`
 
-   .. function:: constexpr basic_string_view substr \
-                 (size_type pos, size_type n=npos) const
+   .. function:: size_type copy (CharT* s, size_type n, size_type pos=0) const
 
-      :returns: a new |string_view| with starting point *pos* and a length of
-                *n* characters. If *n* is equal to |npos|, or 
-                *pos* + *n* is greater than :func:`size`, the length will be
-                the remainder of the string. Otherwise it will be *n*
-                characters.
-      :throws: ``std::out_of_range`` if *pos* is greater than :func:`size`
+      Copies the substring :samp:`[{pos}, {pos} + {count})` to the character
+      string pointed to by :samp:`{s}`. :samp:`{count}` is the smaller of
+      :samp:`{n}` and :samp:`size() - {pos}`.
+
+      :returns: Number of characters copied.
+
+      :throws: :cxx:`std::out_of_range` if :samp:`{pos}` is greater than
+               :any:`size`
+
+   .. function:: constexpr basic_string_view substr (\
+                   size_type pos,          \
+                   size_type n=npos) const noexcept
+
+      :returns: a new :any:`basic_string_view` with starting point :samp:{pos}
+                and a length of :samp:`{n}` characters. If :samp:{n} is equal
+                to :any:`npos`, or :samp:`{pos} + {n}` is greater than
+                :any:`size`, the length will be the remainder of the string.
+                Otherwise it will be :samp:`{n}` characters.
+
+      :throws: :cxx:`std::out_of_range` if :samp:`{pos}` is greater than
+               :any:`size`
 
    .. function:: bool starts_with (basic_string_view value) const noexcept
                  bool starts_with (value_type value) const noexcept
 
-      :returns: Whether the |string_view| starts with the given *value*.
+      :returns: Whether the :any:`basic_string_view` starts with the given
+                :samp:`{value}`.
 
    .. function:: bool ends_with (basic_string_view value) const noexcept
                  bool ends_with (value_type value) const noexcept
 
-      :returns: Whether the |string_view| ends with the given *value*.
+      :returns: Whether the :any:`basic_string_view` ends with the given 
+                :samp:`{value}`.
 
-   .. function:: difference_type compare (basic_string_view that) const
+   .. function:: difference_type compare (basic_string_view s) const noexcept
 
-      Compares two |string_view|'s. First calculates the number of characters
-      to compare, then compares via a character by character lexicographical
-      comparison. If the result is 0, then their sizes are compared and the
-      return value is affected by their length.
+      Compares two character sequences. Compares the :any:`basic_string_view`
+      with :samp:`{s}` by calling
+      :samp:`{traits}::compare(data(), {s}.data(), {length})`, where
+      :samp:`{length}` is the smaller of :any:`size` and :samp:`{s}.size()`.
 
-      :returns: negative value if this |string_view| is less than the other,
-                zero if the both |string_view|'s are equal,
-                positive value if this |string_view| is greater than the other.
+      :returns: A value according to the following table
 
-   .. function:: reference at (size_type idx) const
+   +--------------------------------+----------------------------------+------+
+   |                            Condition                              |Result|
+   +================================+==================================+======+
+   | :samp:`{traits}::compare < 0`                                     |``-1``|
+   +--------------------------------+----------------------------------+------+
+   |                                | :any:`size` < :samp:`{s}.size()` |``-1``|
+   +                                +----------------------------------+------+
+   | :samp:`{traits}::compare == 0` | :any:`size` == :samp:`{s}.size()`| ``0``|
+   +                                +----------------------------------+------+
+   |                                | :any:`size` > :samp:`{s}.size()` | ``1``|
+   +--------------------------------+----------------------------------+------+
+   | :samp:`{traits}::compare > 0`                                     | ``1``|
+   +--------------------------------+----------------------------------+------+
 
-      :returns: :type:`value_type` located at *idx*.
-      :throws: ``std::out_of_range`` if *idx* is greater than or equal to
-               :func:`size`.
+   .. function:: difference_type compare (\
+                   size_type pos1,        \
+                   size_type n1,          \
+                   basic_string_view s,   \
+                   size_type pos2,        \
+                   size_type n2) const noexcept
 
-   .. function:: size_type find_first_not_of (basic_string_view) const
-                 size_type find_first_not_of (value_type) const
+      Constructs a substring :any:`basic_string_view` with :samp:`{pos1}, {n1}`
+      and then calls its :any:`compare` function on a substring
+      :any:`basic_string_view` constructed from :samp:`{s}` with
+      :samp:`{pos2}, {n2}`.
 
-      Finds the first character equal to none of the characters in the given
-      character sequence. 
+   .. function:: difference_type compare (\
+                   size_type pos,         \
+                   size_type n1,          \
+                   pointer s,             \
+                   size_type n2) const noexcept
+      
+      Constructs a substring :any:`basic_string_view` with :samp:`{pos}, {n1}`
+      and then calls its :any:`compare` function with
+      :samp:`basic_string_view({s}, {n2}`.
 
-      :returns: index of the first character not in the given sequence, or
-                |npos| if no such character is found.
+   .. function:: difference_type compare (\
+                   size_type pos,         \
+                   size_type n,           \
+                   basic_string_view s) const noexcept
 
-   .. function:: size_type find_last_not_of (basic_string_view) const
-                 size_type find_last_not_of (value_type) const
+      Constructs a :any:`basic_string_view` with :samp:`{pos}, {n}`, and
+      then calls its :any:`compare` function with :samp:`{s}`
 
-      Finds the last character equal to none of the characters in the given
-      character sequence.
+   .. function:: difference_type compare (\
+                   size_type pos,         \
+                   size_type n,           \
+                   pointer s) const noexcept
 
-      :returns: index of the last character not in the given sequence, or
-                |npos| if no such character is found.
+      Constructs a :any:`basic_string_view` with :samp:`{pos}, {n}`
+      then calls its :any:`compare` function with
+      :samp:`basic_string_view({s})`.
 
-   .. function:: size_type find_first_of (basic_string_view) const
-                 size_type find_first_of (value_type) const
+   .. function:: difference_type compare (pointer s) const noexcept
 
-      Finds the first character equal to one of characters in the given
-      character sequence.
+      Calls  :any:`compare` with :samp:`basic_string_view({s})`.
 
-      :returns: Index of the first character found, or |npos| if no such 
-                character is found.
+   .. function:: size_type find_first_not_of (\
+                   basic_string_view str,     \
+                   size_type pos = 0) const noexcept
 
-   .. function:: size_type find_last_of (basic_string_view) const
-                 size_type find_last_of (value_type) const
+      Finds the first character not equal to any of the characters of
+      :samp:`{str}` in the :any:`basic_string_view`, starting at :samp:`{pos}`
 
-      Finds the last character equal to one of characters in the given
-      character sequence.
+   .. function:: size_type find_first_not_of (\
+                   pointer s,                 \
+                   size_type pos,             \
+                   size_type n) const noexcept
 
-      :returns: Index of the last character found, or |npos| is no such
-                character is found.
+      Calls :any:`find_first_not_of` with
+      :samp:`basic_string_view({s}, {n}), {pos}`
 
-   .. function:: size_type rfind (basic_string_view) const
-                 size_type rfind (value_type) const
+   .. function:: size_type find_first_not_of (\
+                   pointer s,                 \
+                   size_type pos=0) const noexcept
 
-      Finds the last substring equal to the given character sequence.
+      Calls :any:`find_first_not_of` with
+      :samp:`basic_string_view({s}), {pos}`
 
-      :returns: index of the desired substring, or |npos| if no such substring
-                was found.
+   .. function::  size_type find_first_not_of (\
+                   value_type c,              \
+                   size_type pos=0) const noexcept
 
-   .. function:: size_type find (basic_string_view) const
-                 size_type find (value_type) const
+      Calls  :any:`find_first_not_of` with
+      :samp:`basic_string_view(&{c}, 1), {pos}`
 
-      Finds the first substring equal to the given character sequence.
+   .. function:: size_type find_first_of (\
+                   basic_string_view str, \
+                   size_type pos = 0) const noexcept
 
-      :returns: index of the desired substring, or |npos| if no such substring
-                was found.
+      Finds the first occurence of any of the characters of :samp:`{str}`
+      starting at position :samp:`{pos}`.
+
+   .. function:: size_type find_first_of (\
+                   pointer s,             \
+                   size_type pos,         \
+                   size_type n) const noexcept
+
+      Calls :any:`find_first_of` with
+      :samp:`basic_string_view({s}, {n}), {pos}`
+
+   .. function:: size_type find_first_of (\
+                   pointer s,             \
+                   size_type pos = 0) const noexcept
+
+      Calls :any:`find_first_of` with :samp:`basic_string_view({s}), {pos}`.
+
+   .. function:: size_type find_first_of (\
+                   value_type c,          \
+                   size_type pos = 0) const noexcept
+
+      Calls :any:`find_first_of` with :samp:`basic_string_view(&{c}, 1), {pos}`
+
+   .. function:: size_type find (         \
+                   basic_string_view str, \
+                   size_type pos = 0) const noexcept
+
+      Finds the first occurence of :samp:`{str}` in the
+      :any:`basic_string_view`, starting at :samp:`{pos}`.
+
+   .. function:: size_type find (         \
+                   pointer s,             \
+                   size_type pos,         \
+                   size_type n) const noexcept
+
+      Calls :any:`find` with :samp:`basic_string_view({s}, {n}), {pos}`
+
+   .. function:: size_type find (pointer s, size_type pos=0) const noexcept
+
+      Calls :any:`find` with :samp:`basic_string_view({s}), {pos}`
+
+   .. function:: size_type find (value_type c, size_type pos=0) const noexcept
+
+      Calls :any:`find` with :samp:`basic_string_view(&{c}, 1), {pos}`.
+
+   .. function:: size_type find_last_not_of (\
+                   basic_string_view str,    \
+                   size_type pos=npos) const noexcept
+
+      Finds the last character not equal to any of the characters of
+      :samp:`{str}` in this view, starting at position :samp:`{pos}`. This
+      function searches from the end of the :any:`basic_string_view`.
+
+   .. function:: size_type find_last_not_of (\
+                   pointer s,                \
+                   size_type pos,            \
+                   size_type n) const noexcept
+
+      Calls :any:`find_last_not_of` with
+      :samp:`basic_string_view({s}, {n}), {pos}`
+
+   .. function:: size_type find_last_not_of (\
+                   pointer s,                \
+                   size_type p = npos) const noexcept
+
+      Calls :any:`find_last_not_of` with :samp:`basic_string_view({s}), {pos}`
+
+   .. function:: size_type find_last_not_of (\
+                   value_type c,             \
+                   size_type pos = npos) const noexcept
+
+      Calls :any:`find_last_not_of` with
+      :samp:`basic_string_view(&{c}, 1), {pos}`.
+
+   .. function:: size_type find_last_of ( \
+                   basic_string_view str, \
+                   size_type pos = npos) const noexcept
+
+      Finds the last occurence of any of the characters of :samp:`{str}` in
+      this view, starting at position :samp:`{pos}`. This function starts from
+      the end of the :any:`basic_string_view`.
+
+   .. function:: size_type find_last_of ( \
+                   pointer s,             \
+                   size_type pos,         \
+                   size_type n) const noexcept
+
+      Calls :any:`find_last_of` with :samp:`basic_string_view({s}, {n}), {pos}`
+
+   .. function:: size_type find_last_of ( \
+                   pointer s,             \
+                   size_type pos = npos) const noexcept
+
+      Calls :any:`find_last_of` with :samp:`basic_string_view({s}), {pos}`
+
+   .. function:: size_type find_last_of ( \
+                   value_type c,          \
+                   size_type pos = npos) const noexcept
+
+      Calls :any:`find_last_of` with :samp:`basic_string_view(&{c}, 1), {pos}`
+
+   .. function:: size_type rfind (         \
+                   basic_string_view str,  \
+                   size_type pos = npos) const noexcept
+
+      Finds the last occurence of :samp:`{str}` in :any:`basic_string_view`,
+      starting at :samp:`{pos}`. :samp:`{pos}` represents the position from
+      the *end* of the :any:`basic_string_view`.
+
+   .. function:: size_type rfind (         \
+                   pointer s,              \
+                   size_type pos,          \
+                   size_type n) const noexcept
+
+   .. function:: size_type rfind (pointer s, size_type pos=npos) const noexcept
+
+      Calls :any:`rfind` with :samp:`basic_string_view({s}), {pos}`
+
+   .. function:: size_type rfind (\
+                   value_type c,  \
+                   size_type pos=npos) const noexcept
+
+      Calls :any:`rfind` with :samp:`basic_string_view(&{c}, 1), {pos}`.
 
    .. function:: void swap (basic_string_view& that) noexcept
 
-      Swaps the contents of the |string_view| with *that*.
+      Swaps the contents of the :any:`basic_string_view` with :samp:`{that}`.
 
-.. function:: bool operator == (basic_string_view, basic_string_view)
-              bool operator != (basic_string_view, basic_string_view)
-              bool operator >= (basic_string_view, basic_string_view)
-              bool operator <= (basic_string_view, basic_string_view)
-              bool operator > (basic_string_view, basic_string_view)
-              bool operator < (basic_string_view, basic_string_view)
+.. function:: bool operator == (       \
+                basic_string_view lhs, \
+                basic_string_view rhs) noexcept
+              bool operator != (       \
+                basic_string_view lhs, \
+                basic_string_view rhs) const noexcept
+              bool operator >= (       \
+                basic_string_view lhs, \
+                basic_string_view rhs) const noexcept
+              bool operator <= (       \
+                basic_string_view lhs, \
+                basic_string_view rhs) const noexcept
+              bool operator > (        \
+                basic_string_view lhs, \
+                basic_string_view rhs) const noexcept
+              bool operator < (        \
+                basic_string_view lhs, \
+                basic_string_view rhs) const noexcept
 
-   :returns: Whether the given |string_view|'s meet the requirements for the
-             given operator. Follows the same semantics as the ``std::string``
-             comparison operators.
+   Compares the contents of a :any:`basic_string_view` :samp:`{lhs}` with the
+   contents of a :any:`basic_string_view` :samp:`{rhs}`
 
-.. function:: std::basic_ostream<T>& operator << \
-              (std::basic_ostream<T>& os, basic_string_view<T> const& str)
+   :returns: Whther the given :any:`basic_string_view`'s meet the requirements
+             for the given operator. Follows the same semantics as the
+             :cxx:`std::string` comparison operators.
 
-   Overload to print a |string_view| directly to the given stream *os*.
+.. function:: std::basic_ostream<T>& operator << (\
+                std::basic_ostream<T>& os,        \
+                basic_string_view const& str)
+
+   Overload to print :any:`basic_string_view` directly to the given stream *os*.
+
+   :note: This function calls :any:`to_string` to perform this operation.
 
 .. type:: string_view
 
-   A type alias for |string_view| where ``T`` is ``char``.
+   A type alias for :any:`basic_string_view` where :samp:`{CharT}` is
+   :cxx:`char`.
 
 .. type:: wstring_view
 
-   A type alias for |string_view| where ``T`` is ``wchar_t``.
+   A type alias for :any:`basic_string_view` where :samp:`{CharT}` is
+   :cxx:`wchar_t`.
 
 .. type:: u16string_view
 
-   A type alias for |string_view| where ``T`` is ``char16_t``.
+   A type alias for :any:`basic_string_view` where :samp:`{CharT}` is
+   :cxx:`char16_t`.
 
 .. type:: u32string_view
 
-   A type alias for |string_view| where ``T`` is ``char32_t``.
+   A type alias for :any:`basic_string_view` where :samp:`{CharT}` is
+   :cxx:`char32_t`.
 
 Specializations
 ---------------
 
-.. namespace:: std
-
 Several specializations for standard code are provided
 
-.. function:: void swap(basic_string_view&, basic_string_view&)
+.. function:: void swap(basic_string_view& l, basic_string_view& r) noexcept
 
-   Calls :func:`basic_string_view\<T>::swap`
+   Calls :samp:`{l}.swap({r})`. It is provided for Argument Dependent Lookup
+   purposes.
 
-.. class:: hash<basic_string_view<T>>
+.. namespace:: std
 
-   Specialization hash for |string_view|.
+.. class:: template <> hash<core::basic_string_view<CharT, Traits>>
+
+   Specialization hash for :any:`core::basic_string_view`.
+
+   .. versionadded:: 1.2
+
+      This now uses MurmurHash2 for 32-bit and 64-bit systems. Specifically,
+      an endian neutral version is used.
+
+   .. note:: Versions before 1.2 would simply return a pointer to the
+             underlying data, and could not be relied on for content hashing.

@@ -1,148 +1,165 @@
-.. _core-memory-component:
-
 Memory Component
 ================
 
-.. default-domain:: cpp
+.. namespace:: core
+
+.. index:: memory
 
 This section discusses the memory component of MNMLSTC Core. Contained in this
 component are three new smart pointers (two with deep copy semantics) and a
-C++11 equivalent to C++14's :func:`make_unique\<T>`.
+C++11 equivalent to C++14's :any:`make_unique`.
 
-.. |observer_ptr| replace:: :class:`observer_ptr <observer_ptr\<T>>`
-.. |poly_ptr| replace:: :class:`poly_ptr <poly_ptr\<T, Deleter>>`
-.. |deep_ptr| replace:: :class:`deep_ptr <deep_ptr\<T, Deleter, Copier>>`
+Everything discussed in this section resides in the :file:`<core/{memory}.hpp>`
+header.
 
-.. namespace:: core
+.. |observer_ptr| replace:: :class:`observer_ptr <core::observer_ptr<T>>`
+.. |poly_ptr| replace:: :class:`poly_ptr <core::poly_ptr<T, Deleter>>`
+.. |deep_ptr| replace:: :class:`deep_ptr <core::deep_ptr<T, Deleter, Copier>>`
 
 Polymorphic Smart Pointer
 -------------------------
 
-.. class:: poly_ptr<T, Deleter>
+.. index::
+   single: memory; poly_ptr
+   single: smart pointers; poly_ptr
+   single: poly_ptr
 
-   The |poly_ptr| is a smart pointer for polymorphic types that
-   retains sole ownership of the *polymorphic* type ``T`` and performs *deep
-   copies* on assignment or copy construction.  This use is extremely close to
-   the :class:`any`, however it affords the user the ability to ascertain what
-   possible types the |poly_ptr| has while also allowing custom allocation,
-   copying, and deallocation.  In this way, a |poly_ptr| can be seen as a
-   ``std::unique_ptr`` with deep-copy semantics, and type erasure. |poly_ptr|
-   has an interface equivalent to ``std::unique_ptr``. Due to the type erasure
-   that is used, the size of a |poly_ptr| is
-   ``sizeof(std::unique_ptr<T, Deleter> + sizeof(function-ptr)``.
+.. class:: template <class T, class Deleter> poly_ptr
+
+   .. deprecated:: 2.0
+
+   The :any:`poly_ptr` is a smart pointer for polymorphic types that
+   retains sole ownership of the *polymorphic* type :samp:`{T}` and performs
+   *deep copies* on assignment or copy construction.  This use is extremely
+   close to the :any:`any`, however it affords the user the ability to
+   ascertain what possible types the :any:`poly_ptr` has while also allowing
+   custom allocation, copying, and deallocation.  In this way,
+   a :any:`poly_ptr` can be seen as a :cxx:`std::unique_ptr` with deep-copy
+   semantics, and type erasure. :any:`poly_ptr` has an interface equivalent to
+   :cxx:`std::unique_ptr`. Due to the type erasure that is used, the size of a
+   :cxx:`poly_ptr` is
+   :samp:`sizeof(std::unique_ptr<{T}, {Deleter}> + sizeof(function-ptr)`.
 
    .. note:: Due to the lack of polymorphic allocators in C++, custom memory
       allocation is currently relegated to performing allocation within a
       user-supplied copier function. Because the copier function is a function
-      pointer this means that |poly_ptr| is restricted to stateless lambdas
-      or function pointers.
+      pointer this means that :any:`poly_ptr` is restricted to stateless
+      lambdas or function pointers.
 
-   The |poly_ptr| requires that RTTI and exceptions be enabled. Because of
+   The :any:`poly_ptr` requires that RTTI and exceptions be enabled. Because of
    the type-erasure used, RTTI is absolutely required to for the polymorphic
    deep-copy to take place.
 
-   .. warning:: *Only* a polymorphic type (that is, any type where the
-      ``std::is_polymorphic`` type trait is true) may be used with |poly_ptr|.
-      If deep-copy semantics with a ``std::unique_ptr`` are desired for a
-      non-polymorphic type, use |deep_ptr| instead.
+   *Only* a polymorphic type (that is, any type where the
+   :cxx:`std::is_polymorphic` type trait is true) may be used with 
+   :any:`poly_ptr`. If deep-copy semantics with a :cxx:`std::unique_ptr` are
+   desired for a non-polymorphic type, use :any:`deep_ptr` instead.
 
-   The |poly_ptr| is *not* polymorphic itself and is marked ``final`` to
+   The :any:`poly_ptr` is *not* polymorphic itself and is marked ``final`` to
    prevent user inheritance.
 
+   This type is not available if :c:macro:`CORE_NO_RTTI` is defined.
+
+   .. index:: poly_ptr; type aliases
+
    .. type:: unique_type
-
-      Represents the ``std::unique_ptr`` used internally to hold the managed
+   
+      Represents the :cxx:`std::unique_ptr` used internally to hold the managed
       object.
-
+   
    .. type:: element_type
-
+   
       A type equivalent to the expression
-      ``typename unique_type::element_type``
-
+      :samp:`typename {unique_type}::element_type`
+   
    .. type:: deleter_type
-
+   
       A type equivalent to the expression
-      ``typename unique_type::deleter_type``
-
+      :samp:`typename {unique_type}::deleter_type`
+   
    .. type:: copier_type
-
-      A type used to represent the copy function used to perform deep copies.
-      It has the type signature of: ``unique_type (*)(unique_type const&)``.
+   
+      Represents a copy function used to perform deep copies. Has the
+      type signature :samp:`{unique_type} (*)({unique_type} const&)`
 
    .. type:: pointer
-
-      A type equivalent to the expression ``typename unique_type::pointer``.
-
+   
+      A type equivalent to the expression
+      :samp:`typename {unique_type}::pointer`.
+   
    .. function:: explicit poly_ptr(U* ptr)
 
-      Takes a derived pointer to a given type *U*. *U* must be a non-abstract
-      type and have :type:`element_type` as a base class within its inheritance
-      tree.
+      Takes a derived pointer to a given type :samp:`{U}`. :samp:`{U}` must be
+      a non-abstract type and have :any:`element_type` as a base class within
+      its inheritance tree.
 
-   .. function:: poly_ptr (U*, E&&, copier_type=default_poly_copy)
+   .. function:: poly_ptr (U* ptr, E&& deleter, copier_type=default_poly_copy)
 
-      Takes some derived type *U*, a universal reference *E*, and an optional
-      copier function pointer. The universal reference *E* is forwarded to the
-      internal std::unique_ptr, where it will handle the proper rules required
-      to initialize the deleter_type.
+      Takes some derived type :samp:`{U}`, a forwarding reference :samp:`{E}`,
+      and an optional copier function pointer. The universal reference
+      :samp:`{E}` is forwarded to the internal :cxx:`std::unique_ptr`, where it
+      will handle the proper rules required to initialize the deleter_type.
 
-   .. function:: explicit poly_ptr (std::unique_ptr<U, E>&&, copier_type)
+   .. function:: explicit poly_ptr (            \
+                   std::unique_ptr<U, E>&& ptr, \
+                   copier_type c=default_poly_copy)
 
-      A unique_ptr of type *U* and deleter *E*, with an optional copier_type
-      parameter that is by default :func:`default_poly_copy\<T, D, U>`. As
-      normal, *U* must have :type:`element_type` in its hierarchy.
+      A unique_ptr of type :samp:`{U}` and deleter :samp:`{E}, with an optional
+      :any:`copier_type` parameter that is by default :any:`default_poly_copy`.
+      As usual, :samp:`{U}` must have :any:`element_type` in its parent
+      hierarchy.
 
    .. function:: poly_ptr (poly_ptr const& that)
 
-      Performs a deep copy with the object managed by ``that``, if any such
-      object exists.
+      Performs a deep copy with the object managed by :samp:`{that}`, if any
+      such object exists.
 
    .. function:: poly_ptr (polymorphic&& that)
 
-      Moves ``that``'s pointer and copier into ``*this``, and then sets
-      ``that``'s copier to :func:`null_poly_copy\<T, D>`.
+      Moves :samp:`{that}`'s pointer and copier into the :any:`poly_ptr`, and
+      then sets :samp:`{that}`'s copier to :any:`null_poly_copy`.
 
    .. function:: poly_ptr () noexcept
 
-      The default constructor for a |poly_ptr| will place it into such a state
-      that bool(|poly_ptr|) will return false;
+      The default constructor for a :any:`poly_ptr` will place it into such a
+      state that :any:`operator bool` will return false;
 
-   .. function:: operator = (std::unique_ptr<U, D>&& ptr)
+   .. function:: poly_ptr& operator = (std::unique_ptr<U, D>&& ptr)
 
-      Calls ``poly_ptr<T, Deleter> { std::move(ptr) }.swap(*this)``
+      Assigns the contents of :samp:`{ptr}` to the :any:`poly_ptr`.
 
-      :returns: ``*this``
+      :returns: The same :any:`poly_ptr` that was assigned to.
 
-   .. function:: operator = (poly_ptr<T, Deleter>&& that) noexcept
+   .. function:: poly_ptr& operator = (poly_ptr&& that) noexcept
 
-      Calls ``poly_ptr<T, Deleter> { std::move(that) }.swap(*this)``
+      Moves the pointer, deleter, and copier function of that :samp:`{that}`
+      into the :any:`poly_ptr`.
 
-      :returns: ``*this``
+      :returns: The same :any:`poly_ptr` that was assigned to.
 
-   .. function:: operator = (poly_ptr<T, Deleter> const& that)
+   .. function:: poly_ptr& operator = (poly_ptr const& that)
 
-      Performs a deep copy with the object managed by ``that``, if such
-      an object exists.
+      Performs a deep copy with the object managed by :samp:`{that}`, if such
+      an object exists. Also copies the deleter and copier function of
+      :samp:`{that}`
 
-      :returns: ``*this``
+      :returns: The same :any:`poly_ptr` that was assigned to.
 
-   .. function:: operator bool () const noexcept
+   .. function:: explicit operator bool () const noexcept
 
-      .. note:: This cast operator is marked as explicit.
-
-      :returns: Whether ``*this`` owns an object
+      :returns: Whether the :any:`poly_ptr` manages an object.
 
    .. function:: element_type& operator * () const
 
-      :returns: an lvalue reference to the object owned by ``*this``.
+      :returns: an lvalue reference to the object managed by :any:`poly_ptr`.
 
    .. function:: pointer operator -> () const noexcept
 
-      :returns: a pointer to the object owned by ``*this``
+      :returns: a pointer to the object managed by the :any:`poly_ptr`
 
    .. function:: pointer get () const noexcept
 
-      :returns: A pointer to the managed object, or ``nullptr`` if no such
+      :returns: A pointer to the managed object, or :cxx:`nullptr` if no such
                 object exists.
 
    .. function:: deleter_type const& get_deleter () const noexcept
@@ -152,154 +169,156 @@ Polymorphic Smart Pointer
 
    .. function:: copier_type const& get_copier () const noexcept
                  copier_type& get_copier () noexcept
-
+   
       :returns: The function pointer used for copying the managed object.
-
+   
    .. function:: pointer release () noexcept
-
+   
       Releases the ownership of the managed object, if any such object exists.
-      Any calls to :func:`poly_ptr\<T, Deleter>::get` will return ``nullptr``
-      after this call.
-
-      :returns: pointer to the managed object or ``nullptr`` if the |poly_ptr|
-                did not manage an object.
+      Any calls to :any:`get` will return :cxx:`nullptr` after this call.
+   
+      :returns: pointer to the managed object or `nullptr` if the
+                :any:`poly_ptr` did not manage an object.
 
    .. function:: void reset (pointer ptr = pointer { })
-
+   
       Replaces the managed object. Performs the following actions (these
-      differ from the order of operations followed by ``std::unique_ptr``).
-
-      * If the incoming pointer is ``nullptr``, the order of operations
-        follows those performed by ``std::unique_ptr``, along with the value
-        returned by :func:`poly_ptr\<T, Deleter>::get_copier` being set to a
-        null copier.
-      * If the incoming pointer is *not* ``nullptr``, and there is no
-        managed object, a :class:`bad_polymorphic_reset` exception is thrown.
-      * If the incoming pointer is *not* ``nullptr``, a ``typeid`` comparison
-        between the managed object and the incoming pointer is performed.
-        If the ``std::type_info`` returned from both is not identical,
-        a :class:`bad_polymorphic_reset` is thrown.
-        If the ``std::type_info`` is identical, the order of operations
-        follows those performed by ``std::unique_ptr``.
-
-   .. function:: void swap(poly_ptr&) noexcept
-
-      Swaps the managed object and copier function
+      differ from the order of operations followed by :cxx:`std::unique_ptr`).
+   
+      * If the incoming pointer is :cxx:`nullptr`, the order of operations
+        follows those performed by :cxx:`std::unique_ptr`, along with the value
+        returned by :any:`get_copier` being set to a null copier.
+      * If the incoming pointer is *not* :cxx:`nullptr`, and there is no
+        managed object, a :any:`bad_polymorphic_reset` exception is thrown.
+      * If the incoming pointer is *not* :cxx:`nullptr`, a :cxx:`typeid`
+        comparison between the managed object and the incoming pointer is
+        performed. If the :cxx:`std::type_info` returned from both is not
+        identical, a :any:`bad_polymorphic_reset` is thrown.
+        If the :cxx:`std::type_info` is identical, the order of operations
+        follows those performed by :cxx:`std::unique_ptr`.
+   
+   .. function:: void swap (poly_ptr& that) noexcept
+   
+      Swaps the managed object and copier function of the :any:`poly_ptr` with
+      the managed object and copier function of :samp:`{that}`.
 
 Deep Copying Smart Pointer
 --------------------------
 
-.. class:: deep_ptr<T, Deleter, Copier>
+.. class:: template <class T, class Deleter, class Copier> deep_ptr
 
-   |deep_ptr| is a smart pointer for a type that retains sole ownership of the
-   pointer it manages and performs a *deep copy* on assignment or copy
-   construction. |deep_ptr| is much like ``std::unique_ptr`` with deep-copy
-   semantics. Unlike |poly_ptr|, |deep_ptr| is for concrete types where
-   polymorphism is not desired. |poly_ptr| has *some* storage overhead for
-   copying a polymorphic type, however |deep_ptr| performs the same
-   optimization as ``std::unique_ptr`` in that it is only ``sizeof(T*)``,
-   unless the given Deleter and Copier types hold state.
+   :deprecated: 2.0
 
-   With the exception of the copy assignment and copy constructor, |deep_ptr|
-   has an interface identical to that of ``std::unique_ptr``, and exhibits the
-   same behavior as ``std::unique_ptr``
+   :any:`deep_ptr` is a smart pointer for a type that retains sole ownership of
+   the pointer it manages and performs a *deep copy* on assignment or copy
+   construction. :any:`deep_ptr` is much like :cxx:`std::unique_ptr` with
+   deep-copy semantics. Unlike :any:`poly_ptr`, :any:`deep_ptr` is for concrete
+   types where polymorphism is not desired. :any:`poly_ptr` has *some* storage
+   overhead for copying a polymorphic type, however :any:`deep_ptr` performs
+   the same optimization as :cxx:`std::unique_ptr` in that it is only
+   :samp:`sizeof({T}*)`, unless the given :samp:`{Deleter}` and
+   :samp:`{Copier}` types hold state.
 
-   If the result of the :type:`copier_type` differs from :type:`pointer`, the
+   With the exception of the copy assignment and copy constructor,
+   :any:`deep_ptr` has an interface identical to that of
+   :cxx:`std::unique_ptr`, and exhibits the same behavior as
+   :cxx:`std::unique_ptr`
+
+   If the result of the :any:`copier_type` differs from :any:`pointer`, the
    program will be malformed, and a static assertion will cause a compiler
    error.
 
    .. type:: element_type
-
-      The type of object managed by the |deep_ptr|.
+   
+      The type of object managed by the :any:`deep_ptr`.
 
    .. type:: deleter_type
 
       The deleter object used to destroy and deallocate the object managed by
-      the |deep_ptr|.
+      the :any:`deep_ptr`.
 
    .. type:: copier_type
 
       The copier object used to perform an allocation and deep copy the object
-      managed by |deep_ptr|.
+      managed by :any:`deep_ptr`.
 
    .. type:: pointer
-
-      ``remove_reference_t<deleter_type>::pointer`` if the type exists,
-      otherwise, ``element_type*``.
+   
+      :samp:`remove_reference_t<{deleter_type}>::pointer` if the type exists,
+      otherwise, :samp:`{element_type}*`.
 
    .. function:: deep_ptr (pointer ptr, E&& deleter, C&& copier) noexcept
 
       Actually two separate constructors, these follow the behavior of the
-      ``std::unique_ptr`` constructors that take a pointer, and deleter object.
-      The behavior extends to the type desired for the copier object as well.
+      :cxx:`std::unique_ptr` constructors that take a pointer, and deleter
+      object. The behavior extends to the type desired for the copier object as
+      well.
 
-   .. function:: deep_ptr (std::unique_ptr<U, E>&&) noexcept
+   .. function:: deep_ptr (std::unique_ptr<U, E>&& ptr) noexcept
 
-      Constructs a |deep_ptr| with the contents of the unique_ptr. The given
-      type *U* must be a pointer convertible to :type:`pointer`, and *E* must
-      be a type that can construct a :type:`deleter_type`.
+      Constructs a :any:`deep_ptr` with the contents of the unique_ptr. The
+      given type :samp:`{U}` must be a pointer convertible to :any:`pointer`,
+      and :samp:`{E}` must be a type that can construct a :any:`deleter_type`.
 
    .. function:: explicit deep_ptr (pointer ptr) noexcept
 
-      Constructs a |deep_ptr| with the default deleter, default copier, and the
-      given pointer. The |deep_ptr| assumes ownership of *ptr*.
+      Constructs a :any:`deep_ptr` with the default deleter, default copier,
+      and the given pointer. The :any:`deep_ptr` assumes ownership of
+      :samp:`{ptr}`.
 
    .. function:: deep_ptr (std::nullptr_t) noexcept
 
-      Delegates construction of the |deep_ptr| to the 
+      Delegates construction of the :any:`deep_ptr` to the 
       :ref:`default constructor <deep-ptr-default-constructor>`.
 
    .. function:: deep_ptr (deep_ptr const& that)
 
-      Constructs a new object to be managed via *that*'s object.
+      Constructs a new object to be managed via :samp:`{that}`'s object.
 
    .. function:: deep_ptr (deep_ptr&& that) noexcept
 
-      Constructs a |deep_ptr| with the managed object, deleter, and copier of
-      *that* via move construction.
+      Constructs a :any:`deep_ptr` with the managed object, deleter, and copier
+      of :samp:`{that}` via move construction.
 
-      :postcondition: *that* is empty
+      :postcondition: :samp:`{that}` is empty
 
    .. _deep-ptr-default-constructor:
-
    .. function:: constexpr deep_ptr () noexcept
 
-      Default constructs a |deep_ptr| into an empty state.
+      Default constructs a :any:`deep_ptr` into an empty state.
 
    .. function:: deep_ptr& operator = (std::unique_ptr<U, D>&& ptr) noexcept
-
-      Assigns the contents of *ptr* to ``*this``
+   
+         Assigns the contents of :samp:`{ptr}` to the :any:`deep_ptr`.
  
-   .. function:: deep_ptr& operator = (deep_ptr const&) noexcept
-                 deep_ptr& operator = (deep_ptr&&) noexcept
+   .. function:: deep_ptr& operator = (deep_ptr const& that) noexcept
+                 deep_ptr& operator = (deep_ptr&& that) noexcept
 
-      Assigns the contents of the incoming |deep_ptr| to ``*this``
+      Assigns the contents of :samp:`{that}` to :any:`deep_ptr`.
 
    .. function:: deep_ptr& operator = (std::nullptr_t) noexcept
 
-      Resets the |deep_ptr| and the object it manages.
+      Resets the :any:`deep_ptr` and the object it manages.
 
-   .. function:: operator bool () const noexcept
-
-      .. note:: This cast operator is marked as explicit
-
-      :returns: Whether the |deep_ptr| manages an object
-
+   .. function:: explicit operator bool () const noexcept
+   
+      :returns: Whether the :any:`deep_ptr` manages an object
+   
    .. function:: element_type& operator * () const
-
-      Attempting to dereference a |deep_ptr| that does not manage an object
-      will result in undefined behavior
-
+   
+      Attempting to dereference a :any:`deep_ptr` that does not manage an
+      object will result in undefined behavior
+   
       :returns: an lvalue reference to the managed object
-
+   
    .. function:: pointer operator -> () const noexcept
-
-      :returns: a pointer to the managed object or ``nullptr`` if no such
+   
+      :returns: a pointer to the managed object or :cxx:`nullptr` if no such
                 object exists.
-
+   
    .. function:: pointer get () const noexcept
 
-      :returns: A pointer to the managed object, or ``nullptr`` if no such
+      :returns: A pointer to the managed object, or :cxx:`nullptr` if no such
                 object exists.
 
    .. function:: deleter_type const& get_deleter () const noexcept
@@ -314,163 +333,174 @@ Deep Copying Smart Pointer
 
    .. function:: pointer release () noexcept
 
-      :postcondition: :func:`deep_ptr\<T, Deleter, Copier>::get` returns \
-                      ``nullptr``
+      :postcondition: :any:`get` returns :cxx:`nullptr`
 
       Releases the ownership of the managed object, if any such object exists.
 
    .. function:: void reset (pointer ptr = pointer { })
 
-      Replaces the currently managed object with *ptr*.
+      Replaces the currently managed object with :samp:`{ptr}`.
 
-   .. function:: void swap(deep_ptr&) noexcept
+   .. function:: void swap(deep_ptr& that) noexcept
 
-      Swaps the managed object, copier object, and deleter object.
+      Swaps the managed object, copier object, and deleter object of
+      :samp:`{that}` with the :any:`deep_ptr`
 
 
 Dumbest Smart Pointer
 ---------------------
 
-.. class:: observer_ptr<T>
+.. class:: template <class T> observer_ptr
 
-   |observer_ptr| is "the dumbest smart pointer", in that it is only ever used
-   in the place of a raw pointer. The idea is to inform the user that the
-   |observer_ptr| does not *own* the pointer it *watches*. It can be treated
-   like a raw pointer, except that there is no need to read the documentation
-   to see if the user needs to manage a raw pointer or not. Because the
-   |observer_ptr| is a non-owning smart pointer, the need for a move
-   constructor and assignment operator is superfluous as copying a pointer
-   is just as cheap as moving one.
+   :any:`observer_ptr` is "the dumbest smart pointer", in that it is only ever
+   used in the place of a raw pointer. The idea is to inform the user that the
+   :any:`observer_ptr` does not *own* the pointer it *watches*. It can be
+   treated like a raw pointer, except that there is no need to read the
+   documentation to see if the user needs to manage a raw pointer or not.
+   Because the :any:`observer_ptr` is a non-owning smart pointer, the need for
+   a move constructor and assignment operator is superfluous as copying a
+   pointer is just as cheap as moving one.
 
    .. type:: element_type
 
-      The type of the object managed by |observer_ptr|.
+      The type of the object managed by :any:`observer_ptr`.
 
    .. type:: const_pointer
              pointer
-
-      ``add_pointer_t<add_const_t<element_type>`` and
-      ``add_pointer_t<element_type>`` respectively.
+   
+      :samp:`add_pointer_t<add_const_t<{element_type}>` and
+      :samp:`add_pointer_t<{element_type}>` respectively.
 
    .. type:: const_reference
              reference
 
-      ``add_lvalue_reference<add_const_t<element_type>`` and
-      ``add_lvalue_reference<element_type>`` respectively.
+      :samp:`add_lvalue_reference<add_const_t<{element_type}>` and
+      :samp:`add_lvalue_reference<{element_type}>` respectively.
 
-   .. function:: observer_ptr (std::nullptr_t ptr)
-                 observer_ptr (pointer ptr)
-                 observer_ptr (add_pointer_t<T> ptr)
+   .. function:: observer_ptr (std::nullptr_t ptr) noexcept
+                 observer_ptr (pointer ptr) noexcept
+                 observer_ptr (add_pointer_t<T> ptr) noexcept
 
-      Constructs the |observer_ptr| with the given pointer. If *ptr* is
-      convertible to :type:`observer_ptr\<T>::pointer`, it will construct it
-      that way (via a dynamic_cast).
+      Constructs the :any:`observer_ptr` with the given pointer. If
+      :samp:`{ptr}` is convertible to :any:`pointer`, it will construct it
+      that way (via a :cxx:`dynamic_cast`).
 
-   .. function:: void swap (observer_ptr<T>&)
+   .. function:: void swap (observer_ptr<T>& that) noexcept
 
-      Swaps the contents of the |observer_ptr| with the other.
+      Swaps the pointer observed by :samp:`{that}` with the pointer observed
+      by :any:`observer_ptr`.
 
-   .. function:: operator const_pointer () const
-                 operator pointer ()
+   .. function:: explicit operator const_pointer () const noexcept
+                 explicit operator pointer () noexcept
 
-      :noexcept: true
-      :explicit: Yes
+      Allows an :any:`observer_ptr` to be explicitly converted to
+      :any:`const_pointer` or :any:`pointer` respectively.
 
-      Allows an |observer_ptr| to be explicitly converted to
-      :type:`observer_ptr\<T>::const_pointer` or
-      :type:`observer_ptr\<T>::pointer` respectively.
+   .. function:: explicit operator bool () const noexcept
 
-   .. function:: operator bool () const
+      Allows the :any:`observer_ptr` to be explicitly converted to a boolean.
 
-      :noexcept: true
-      :explicit: Yes
+   .. function:: reference operator * () const noexcept
 
-      Allows the |observer_ptr| to be explicitly converted to a boolean.
+      :returns: reference to the object watched by the :any:`observer_ptr`.
 
-   .. function:: reference operator * () const
+   .. function:: pointer operator -> () const noexcept
 
-      :noexcept: true
-      :returns: reference to the object watched by the |observer_ptr|.
+      :returns: the object watched by the :any:`observer_ptr`
 
-   .. function:: pointer operator -> () const
+   .. function:: pointer get () const noexcept
 
-      :noexcept: true
-      :returns: the object watched by the |observer_ptr|
-
-   .. function:: pointer get () const
-
-      :noexcept: true
-      :returns: The object watched by the |observer_ptr|
+      :returns: The object watched by the :any:`observer_ptr`
 
    .. function:: pointer release () noexcept
 
-      :noexcept: true
-      :returns: the object watched by the |observer_ptr|. The |observer_ptr| is
-                then set to ``nullptr``.
+      :returns: the object watched by the :any:`observer_ptr`. The
+                :any:`observer_ptr` is then set to :cxx:`nullptr`.
 
-   .. function:: void reset (pointer ptr=nullptr)
+   .. function:: void reset (pointer ptr=pointer { }) noexcept
 
-      :noexcept: true
+      Resets the object watched by the :any:`observer_ptr` with :samp:`{ptr}`.
 
-      Resets the object watched by the |observer_ptr| with *ptr*.
+Custom Allocators
+-----------------
+
+.. class:: template <class T, size_t N> arena_allocator
+
+   The :any:`arena_allocator` type fulfills an Allocator capable interface
+   that allows stack allocation to reduce the cost of accessing the free
+   store for short lived objects.
 
 Utilities
 ---------
+
+.. function:: void swap(poly_ptr<T, D>& lhs, poly_ptr<T, D>& rhs) noexcept
+
+   Provided for ADL calls. Equivalent to calling :samp:`{lhs}.swap({rhs})`.
+
+.. function:: void swap(deep_ptr<T, D, C>& l, deep_ptr<T, D, C>& r) noexcept
+
+   Provided for ADL calls. Equivalent to calling :samp:`{l}.swap({r})`.
+
+.. function:: void swap (observer_ptr<T>& lhs, observer_ptr<T>& rhs) noexcept
+
+   Provided for ADL calls. Equivalent to calling :samp:`{lhs}.swap({rhs})`.
 
 .. class:: bad_polymorphic_reset
 
    :inherits: std::logic_error
 
    Thrown when a :func:`poly_ptr<T, Deleter>::reset` is passed a
-   non-null pointer and the |poly_ptr| does not manage an object, or if the
-   passed in pointer differs in type from the currently managed object.
+   non-null pointer and the :any:`poly_ptr` does not manage an object, or if
+   the passed in pointer differs in type from the currently managed object.
 
-.. class:: default_copy<T>
+.. class:: template <class T> default_copy
 
-   The default copy policy used by |deep_ptr| during a copy operation. There
-   are no partial specializations available. The default operation to perform
-   is to allocate a new *T* pointer with ``operator new``, and to initialize
-   this *T* with a ``T const&``.
+   The default copy policy used by :any:`deep_ptr` during a copy operation.
+   There are no partial specializations available. The default operation to
+   perform is to allocate a new :samp:`{T}` pointer with :cxx:`operator new`,
+   and to initialize this :samp:`{T}` with a :samp:`{T} const&`.
 
    .. type:: pointer
 
-      Represents ``T*``
+      Represents :samp:`{T}*`
 
    .. function:: constexpr default_copy ()
 
-      Constructs the :class:`default_copy\<T>` object.
+      Constructs the :any:`default_copy` object.
 
-   .. function:: default_copy (default_copy<U> const&) noexcept
+   .. function:: default_copy (default_copy<U> const& that) noexcept
 
-      Constructs a :class:`default_copy\<T>` from another
-      :class:`default_copy\<T>`.
+      Constructs a :any:`default_copy` from :samp:`{that}`.
 
    .. function:: pointer operator () (pointer const ptr)
 
-      Allocates a new :type:`pointer` and initializes it with the dereferenced
-      *ptr*, to invoke the copy constructor.
+      Allocates a new :any:`pointer` and initializes it with the dereferenced
+      :samp:`{ptr}`, to invoke the copy constructor.
 
-.. function:: std::unique_ptr<T, D> default_poly_copy<T, D, U> (\
-              std::unique_ptr<T, D> const&)
+.. function:: template <class T, class D, class U> \
+              unique_ptr<T, D> default_poly_copy (unique_ptr<T, D> const&)
 
    This function is used as the default copier when assigning a raw pointer or
-   unique_ptr to a |poly_ptr|. It will perform a deep copy with a call to
-   :func:`make_unique<T>`, with type *U* and dynamic_cast the stored pointer
-   of *T* into *U* as it performs the assignment. The :type:`deleter_type` of
-   the given unique_ptr will *also* be copied.
+   unique_ptr to a :any:`poly_ptr`. It will perform a deep copy with a call to
+   :any:`make_unique`, with type :samp:`{U}` and dynamic_cast the stored
+   pointer of :samp:`{T}` into :samp:`{U}` as it performs the assignment. The
+   :any:`deleter_type` of the given :cxx:`unique_ptr` will *also* be copied.
 
-   :returns: ``std::unique_ptr<T, D>`` with a managed object.
+   :returns: :cxx:`std::unique_ptr<T, D>` with a managed object.
 
-.. function:: std::unique_ptr<T, D> null_poly_copy<T, D> (\
-              std::unique_ptr<T, D> const&)
+.. function:: template <class T, class D> \
+              unique_ptr<T, D> null_poly_copy (unique_ptr<T, D> const&)
 
-   This function is used within a |poly_ptr| for when it does not manage an
-   object. Given any unique_ptr, it will return an empty unique_ptr.
+   This function is used within a :any:`poly_ptr` for when it does not manage
+   an object. Given any :cxx:`std::unique_ptr`, it will return an empty
+   :cxx:`std::unique_ptr`.
 
-   :returns: An empty ``std::unique_ptr<T, D>``
+   :returns: An empty :cxx:`std::unique_ptr<T, D>`
 
 Comparison Operators
 --------------------
+
+.. todo:: Fill out each function entry
 
 .. function:: bool operator == (poly_ptr const&, poly_ptr const&) noexcept
               bool operator != (poly_ptr const&, poly_ptr const&) noexcept
@@ -479,8 +509,8 @@ Comparison Operators
               bool operator > (poly_ptr const&, poly_ptr const&) noexcept
               bool operator < (poly_ptr const&, poly_ptr const&) noexcept
 
-   Compares two |poly_ptr|'s via :func:`poly_ptr\<T, Deleter>::get` with
-   the given operator.
+   Compares two :any:`poly_ptr`'s via :any:`~core::poly_ptr\<T, Deleter>::get`
+   with the given operator.
 
 .. function:: bool operator == (deep_ptr const&, deep_ptr const&) noexcept
               bool operator != (deep_ptr const&, deep_ptr const&) noexcept
@@ -489,7 +519,8 @@ Comparison Operators
               bool operator > (deep_ptr const&, deep_ptr const&) noexcept
               bool operator < (deep_ptr const&, deep_ptr const&) noexcept
 
-   Compares two |deep_ptr|'s via :func:`deep_ptr\<T, Deleter>::get` with
+   Compares two :any:`deep_ptr`'s via
+   :any:`~core::deep_ptr\<T, Deleter, Copier>::get` with
    the given operator.
 
 .. function:: bool operator == (poly_ptr<T, D> const&, nullptr_t) noexcept
@@ -508,21 +539,22 @@ Comparison Operators
    :returns: the result of comparing :func:`poly_ptr\<T, Deleter>::get` and
              ``nullptr`` with the given operator.
 
-.. function:: bool operator == (deep_ptr<T, D, C> const&, nullptr_t) noexcept
-              bool operator != (deep_ptr<T, D, C> const&, nullptr_t) noexcept
-              bool operator >= (deep_ptr<T, D, C> const&, nullptr_t) noexcept
-              bool operator <= (deep_ptr<T, D, C> const&, nullptr_t) noexcept
-              bool operator > (deep_ptr<T, D, C> const&, nullptr_t) noexcept
-              bool operator < (deep_ptr<T, D, C> const&, nullptr_t) noexcept
-              bool operator == (nullptr_t, deep_ptr<T, D, C> const&) noexcept
-              bool operator != (nullptr_t, deep_ptr<T, D, C> const&) noexcept
-              bool operator >= (nullptr_t, deep_ptr<T, D, C> const&) noexcept
-              bool operator <= (nullptr_t, deep_ptr<T, D, C> const&) noexcept
-              bool operator > (nullptr_t, deep_ptr<T, D, C> const&) noexcept
-              bool operator < (nullptr_t, deep_ptr<T, D, C> const&) noexcept
+.. function:: bool operator == (deep_ptr const&, nullptr_t) noexcept
+              bool operator != (deep_ptr const&, nullptr_t) noexcept
+              bool operator >= (deep_ptr const&, nullptr_t) noexcept
+              bool operator <= (deep_ptr const&, nullptr_t) noexcept
+              bool operator > (deep_ptr const&, nullptr_t) noexcept
+              bool operator < (deep_ptr const&, nullptr_t) noexcept
+              bool operator == (nullptr_t, deep_ptr const&) noexcept
+              bool operator != (nullptr_t, deep_ptr const&) noexcept
+              bool operator >= (nullptr_t, deep_ptr const&) noexcept
+              bool operator <= (nullptr_t, deep_ptr const&) noexcept
+              bool operator > (nullptr_t, deep_ptr const&) noexcept
+              bool operator < (nullptr_t, deep_ptr const&) noexcept
 
-   :returns: The result of comparing :func:`deep_ptr\<T, Deleter, Copier>::get`
-             and ``nullptr`` with the given operator.
+   :returns: The result of comparing the result of
+             :any:`~deep_ptr\<T, Deleter, Copier>::get` and :cxx:`nullptr` with
+             the given operator.
 
 .. function:: bool operator == (observer_ptr const&, observer_ptr const&)
               bool operator != (observer_ptr const&, observer_ptr const&)
@@ -531,16 +563,16 @@ Comparison Operators
               bool operator  > (observer_ptr const&, observer_ptr const&)
               bool operator  < (observer_ptr const&, observer_ptr const&)
 
-   :returns: The result of comparing the objects watched by |observer_ptr| via
-             the given operator.
+   :returns: The result of comparing the objects watched by :any:`observer_ptr`
+             via the given operator.
 
 .. function:: bool operator == (observer_ptr const&, std::nullptr_t)
               bool operator != (observer_ptr const&, std::nullptr_t)
               bool operator == (std::nullptr_t, observer_const&)
               bool operator != (std::nullptr_t, observer_const&)
 
-   :returns: The result of comparing the objects watched by |observer_ptr| with
-             ``nullptr`` via the given operator
+   :returns: The result of comparing the objects watched by :any:`observer_ptr`
+             with :cxx:`nullptr` via the given operator
 
 Make Functions
 --------------
@@ -556,62 +588,57 @@ Make Functions
    the make_observer function will create an observer from any C++11 standard
    smart pointer, a raw pointer, or the smart pointers provided by MNMLSTC Core
 
-.. function:: poly_ptr<T, Deleter> make_poly<T>(U&& args)
+.. function:: template <class T, class D> poly_ptr<T, D> make_poly(U&& args)
 
-   Provided to supplement the ``std::make_shared<T>`` and
-   :func:`make_unique\<T>` functions. Constructs a |poly_ptr| with an
-   ``element_type`` of *T*, taking derived universal reference *U*. This
-   function internally calls :func:`make_unique\<T>` to create the
-   |poly_ptr|.
+   Provided to supplement the :cxx:`std::make_shared<T>`` and
+   :any:`make_unique` functions. Constructs a :any:`poly_ptr` with an
+   :any:`~poly_ptr\<T, Deleter>::element_type` of :samp:`{T}`, taking a derived
+   forwarding reference :samp:`{U}`. This function internally calls
+   :any:`make_unique` to create the :any:`poly_ptr`.
 
-.. function:: deep_ptr<T> make_deep<T>(args)
+.. function:: template <class T> deep_ptr<T> make_deep(Args&&... args)
 
-   Used to supplement the :func:`make_unique\<T>`, :func:`make_poly\<T>`,
-   and `make_shared<T>` functions. Takes a variadic number of arguments to
-   construct a *T* with. This *T* is allocated via operator new (the default
-   allocation scheme) and passed to a |deep_ptr| for construction. This
-   |deep_ptr| is then returned by the function.
+   Used to supplement the :any:`make_unique`, :any:`make_poly`,
+   and :cxx:`std::make_shared` functions. Takes a parameter pack :samp:`{args}`
+   to construct a :samp:`{T}` with. This :samp:`{T}` is allocated via operator
+   new (the default allocation scheme) and passed to a :any:`deep_ptr` for
+   construction. This :any:`deep_ptr` is then returned by the function.
 
-.. function:: std::unique_ptr<T> make_unique<T>(args)
-              std::unique_ptr<T> make_unique<T>(size)
+.. function:: template <class T> \
+              std::unique_ptr<T[]> make_unique(std::size_t size)
+              template <class... Args> \
+              std::unique_ptr<T> make_unique(Args&&... args)
+              template <class T, size_t N> \
+              void make_unique<T[N]> (Args&&...) = delete
 
-   ``make_unique`` is provided to help supplement the ``std::make_shared<T>``
-   function for the ``std::unique_ptr<T>`` type. The first overload will be
-   used if the given type T is not an array. If the given type T is an array of
-   an unknown bound (that is, ``std::extent<T>::value == 0``) the second
-   overload is used. A third overload is provided to insure that the compiler
+   :any:`make_unique` is provided to help supplement the
+   :cxx:`std::make_shared<T>` function for the :cxx:`std::unique_ptr<T>` type.
+   The first overload will be used if the given type :samp:`{T}` is not an
+   array. If the given type :samp:`{T}` is an array of an unknown bound (that
+   is, :samp:`std::extent<{T}>::value == 0`) the second overload is used.
+   A third overload is provided to insure that the compiler will error. This
+   third overload is available when the given type :samp:`{T}` is an array of a
+   known bound (that is, :samp:`std::extent<{T}>::value != 0`).
 
-   will error. This third overload is available when the given type
-   T is an array of a known bound (that is,
-   ``std::extent<T>::value != 0``).
-
-   :param args: Variadic template arguments with which to construct
-                a T
-   :type args: Args&&...
-   :returns: ``std::unique_ptr<T>``
-
-   :param size: Extent of ``std::unique_ptr<T[]>`` desired.
-   :type size: std::size_t
-   :returns: ``std::unique_ptr<T[]>``
 
 Specializations
 ---------------
 
-There are specializations for |poly_ptr| and |deep_ptr| for integration with
-the C++ standard library.
+There are specializations for :any:`poly_ptr` and :any:`deep_ptr` for
+integration with the C++ standard library.
 
 .. namespace:: std
 
-.. class:: hash<poly_ptr<T, Deleter>>
+.. class:: template <> hash<poly_ptr<T, Deleter>>
 
-   This specialization of :class:`hash` allows |poly_ptr| to be used as a
+   This specialization of :any:`hash` allows |poly_ptr| to be used as a
    key type in associative containers.
 
-   For a given |poly_ptr| *ptr*, this specialization insures that
+   For a given :any:`poly_ptr` *ptr*, this specialization insures that
    ``std::hash<poly_ptr<T, Deleter>> { }(ptr)`` is equivalent to the expression
    ``std::hash<typename poly_ptr<T, Deleter>::pointer> { }(ptr.get())``
 
-.. class:: std::hash<deep_ptr<T, Deleter, Copier>>
+.. class:: template <> hash<deep_ptr<T, Deleter, Copier>>
 
    This specialization of :class:`hash` allows |deep_ptr| to be used as a
    key type in associative containers.
@@ -621,15 +648,4 @@ the C++ standard library.
    expression
    ``std::hash<typename deep_ptr<T, Deleter, Copier>::pointer> { }(ptr.get())``
 
-.. function:: void swap(poly_ptr<T, D>& lhs, poly_ptr<T, D>& rhs) \
-              noexcept
-
-   A specialization of ``std::swap`` that calls
-   :func:`poly_ptr<T, Deleter>::swap`.
-
-.. function:: void swap(deep_ptr<T, D, C>& lhs, deep_ptr<T, D, C>& rhs) \
-              noexcept
-
-   A specialization of ``std::swap`` that calls
-   :func:`deep_ptr<T, Deleter, Copier>::swap`.
 

@@ -1,40 +1,34 @@
 #include <core/utility.hpp>
 
-#include <unittest/unittest.hpp>
+#include "catch.hpp"
 
-int main () {
-  using namespace unittest;
+TEST_CASE("scope-guard", "[scope-guard]") {
+  SECTION("value-constructor") {
+    bool value { false };
+    { auto scope = core::make_scope_guard([&]{ value = true; }); }
+    CHECK(value);
+  }
 
-  test("scope-guard") = {
-    task("value-constructor") = [] {
-      bool value { false };
-      { auto scope = core::make_scope_guard([&]{ value = true; }); }
-      assert::is_true(value);
-    },
-
-    task("dismiss") = [] {
-      bool value { false };
-      {
-        auto scope = core::make_scope_guard([&] { value = true; });
-        scope.dismiss();
-      }
-      assert::is_false(value);
+  SECTION("dismiss") {
+    bool value { false };
+    {
+      auto scope = core::make_scope_guard([&] { value = true; });
+      scope.dismiss();
     }
-  };
+    CHECK_FALSE(value);
+  }
+}
 
-  test("value-at") = {
-    task("runtime") = [] {
-      auto value = core::value_at<3>(1, 2, 3, 4);
-      assert::equal(value, 4);
-    },
+TEST_CASE("value-at") {
+  SECTION("runtime") {
+    auto value = core::value_at<3>(1, 2, 3, 4);
+    CHECK(value == 4);
+  }
 
-    task("compile-time") = [] {
-      constexpr auto value = core::value_at<3>(1, 2, 3, 4);
-      constexpr auto second = core::value_at<2>(1, 2, 4.0f, "");
-      static_assert(value == 4, "");
-      static_assert(second > 3.9f, "");
-    }
-  };
-
-  monitor::run();
+  SECTION("compile-time") {
+    constexpr auto value = core::value_at<3>(1, 2, 3, 4);
+    constexpr auto second = core::value_at<2>(1, 2, 4.0f, "");
+    static_assert(value == 4, "");
+    static_assert(second > 3.9f, "");
+  }
 }

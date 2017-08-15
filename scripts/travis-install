@@ -1,0 +1,13 @@
+#!/bin/sh
+# travis-install - build-script
+
+if [[ "osx" = ${TRAVIS_OS_NAME} ]]; then
+  brew ls | grep -wq cmake || brew install --without-docs cmake
+  brew outdated cmake || brew upgrade cmake
+fi
+
+if [[ "linux" = ${TRAVIS_OS_NAME} ]]; then
+  sudo apt-get install ${CC}-${VERSION}
+  sudo apt-get install ${CXX}-${VERSION}
+  sudo apt-get install libc++-dev libc++abi-dev
+fi

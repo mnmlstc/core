@@ -1,0 +1,28 @@
+#!/bin/sh
+# travis-configure - build-script
+
+CURRENT=$(pwd)
+if [[ ! -z ${VERSION} ]]; then
+  CXX=${CXX}-${VERSION}
+  CC=${CC}-${VERSION}
+fi
+
+if [[ ! -z ${CXX_STANDARD} ]]; then
+  CXXFLAGS=-std=${CXX_STANDARD}
+  STANDARD_REQUIRED=OFF
+fi
+
+echo Using $(cmake --version | head -n1)
+echo CXX=${CXX}
+
+mkdir build && cd build || exit 1
+
+cmake $CURRENT \
+  -DCMAKE_CXX_FLAGS:STRING=${CXXFLAGS} \
+  -DCMAKE_CXX_COMPILER:STRING=${CXX} \
+  -DCMAKE_BUILD_TYPE:STRING=${BUILD:-Debug} \
+  -DCMAKE_CXX_STANDARD_REQUIRED=${STANDARD_REQUIRED:-ON} \
+  -DBUILD_WITH_COVERAGE:BOOL=ON \
+  -DBUILD_WITH_LIBCXX:BOOL=${LIBCXX:-OFF} \
+  -DBUILD_TESTING:BOOL=ON || \
+  { cat ./CMakeFiles/CMakeOutput.log ./CMakeFiles/CMakeError.log && exit 1; }

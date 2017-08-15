@@ -4,31 +4,47 @@
 #include <initializer_list>
 #include <system_error>
 #include <functional>
-#include <exception>
-#include <stdexcept>
 #include <memory>
 
+#include <cstdlib>
 #include <cstdint>
 
 #include <core/type_traits.hpp>
 #include <core/functional.hpp>
 #include <core/utility.hpp>
 
+#ifndef CORE_NO_EXCEPTIONS
+#include <exception>
+#include <stdexcept>
+#endif /* CORE_NO_EXCEPTIONS */
+
+#if defined(_MSC_VER)
+  #pragma warning(push)
+  #pragma warning(disable:4458)
+  #pragma warning(disable:4702)
+#endif /* defined(_MSC_VER) */
+
 namespace core {
-inline namespace v1 {
+inline namespace v2 {
 namespace impl {
 
 template <class T>
-class has_addressof {
-  template <class U>
-  static auto test (U* ptr) noexcept -> decltype(ptr->operator&(), void());
-  template <class> static void test (...) noexcept(false);
-public:
-  static constexpr bool value = noexcept(test<T>(nullptr));
-};
+using addressof_builtin_t = decltype(&::std::declval<T>());
 
 template <class T>
-struct addressof : ::std::integral_constant<bool, has_addressof<T>::value> { };
+using addressof_member_t = decltype(::std::declval<T>().operator&());
+
+template <class T>
+using addressof_free_t = decltype(operator &(::std::declval<T>()));
+
+template <class T>
+using has_no_addressof_overload = meta::all_t<
+  meta::none<
+    is_detected<addressof_member_t, T>::value,
+    is_detected<addressof_free_t, T>::value
+  >(),
+  is_detected<addressof_builtin_t, T>::value
+>;
 
 struct place_t { };
 constexpr place_t place { };
@@ -37,7 +53,7 @@ constexpr place_t place { };
 template <class T, bool = ::std::is_trivially_destructible<T>::value>
 struct storage {
   using value_type = T;
-  static constexpr bool nothrow_mv_ctor = ::std::is_nothrow_move_constructible<
+  static constexpr bool nothrow = ::std::is_nothrow_move_constructible<
     value_type
   >::value;
 
@@ -47,34 +63,34 @@ struct storage {
   };
   bool engaged { false };
 
-  constexpr storage () noexcept : dummy { '\0' } { }
+  constexpr storage () noexcept : dummy { } { }
   storage (storage const& that) :
     engaged { that.engaged }
   {
     if (not this->engaged) { return; }
-    ::new(::std::addressof(this->val)) value_type { that.val };
+    ::new (::core::as_void(this->val)) value_type(that.val);
   }
 
-  storage (storage&& that) noexcept(nothrow_mv_ctor) :
+  storage (storage&& that) noexcept(nothrow) :
     engaged { that.engaged }
   {
     if (not this->engaged) { return; }
-    ::new(::std::addressof(this->val)) value_type { ::core::move(that.val) };
+    ::new (::core::as_void(this->val)) value_type(::core::move(that.val));
   }
 
   constexpr storage (value_type const& value) :
-    val { value },
+    val(value),
     engaged { true }
   { }
 
-  constexpr storage (value_type&& value) noexcept(nothrow_mv_ctor) :
-    val { ::core::move(value) },
+  constexpr storage (value_type&& value) noexcept(nothrow) :
+    val(::core::move(value)),
     engaged { true }
   { }
 
   template <class... Args>
   constexpr explicit storage (place_t, Args&&... args) :
-    val { ::core::forward<Args>(args)... },
+    val(::core::forward<Args>(args)...),
     engaged { true }
   { }
 
@@ -84,7 +100,7 @@ struct storage {
 template <class T>
 struct storage<T, true> {
   using value_type = T;
-  static constexpr bool nothrow_mv_ctor = ::std::is_nothrow_move_constructible<
+  static constexpr bool nothrow = ::std::is_nothrow_move_constructible<
     value_type
   >::value;
   union {
@@ -93,36 +109,34 @@ struct storage<T, true> {
   };
   bool engaged { false };
 
-  constexpr storage () noexcept : dummy { '\0' } { }
+  constexpr storage () noexcept : dummy { } { }
   storage (storage const& that) :
     engaged { that.engaged }
   {
     if (not this->engaged) { return; }
-    ::new(::std::addressof(this->val)) value_type { that.val };
+    ::new (::core::as_void(this->val)) value_type(that.val);
   }
 
-  storage (storage&& that) noexcept(nothrow_mv_ctor) :
+  storage (storage&& that) noexcept(nothrow) :
     engaged { that.engaged }
   {
     if (not this->engaged) { return; }
-    ::new(::std::addressof(this->val)) value_type {
-      ::core::move(that.val)
-    };
+    ::new (::core::as_void(this->val)) value_type(::core::move(that.val));
   }
 
   constexpr storage (value_type const& value) :
-    val { value },
+    val(value),
     engaged { true }
   { }
 
-  constexpr storage (value_type&& value) noexcept(nothrow_mv_ctor) :
-    val { ::core::move(value) },
+  constexpr storage (value_type&& value) noexcept(nothrow) :
+    val(::core::move(value)),
     engaged { true }
   { }
 
   template <class... Args>
   constexpr explicit storage (place_t, Args&&... args) :
-    val { ::core::forward<Args>(args)... },
+    val(::core::forward<Args>(args)...),
     engaged { true }
   { }
 };
@@ -135,6 +149,7 @@ struct nullopt_t { constexpr explicit nullopt_t (int) noexcept { } };
 constexpr in_place_t in_place { };
 constexpr nullopt_t nullopt { 0 };
 
+#ifndef CORE_NO_EXCEPTIONS
 struct bad_optional_access final : ::std::logic_error {
   using ::std::logic_error::logic_error;
 };
@@ -143,9 +158,33 @@ struct bad_expected_type : ::std::logic_error {
   using ::std::logic_error::logic_error;
 };
 
-struct bad_result_condition : ::std::logic_error {
+struct bad_result_condition final : ::std::logic_error {
   using ::std::logic_error::logic_error;
 };
+
+[[noreturn]] inline void throw_bad_optional_access () {
+  throw bad_optional_access { "optional is disengaged" };
+}
+
+[[noreturn]] inline void throw_bad_result_condition () {
+  throw bad_result_condition { "result<T> is valid" };
+}
+
+[[noreturn]] inline void throw_bad_void_result_condition () {
+  throw bad_result_condition { "result<void> is valid" };
+}
+
+[[noreturn]] inline void throw_system_error (::std::error_condition e) {
+  throw ::std::system_error { e.value(), e.category() };
+}
+#else /* CORE_NO_EXCEPTIONS */
+[[noreturn]] inline void throw_bad_optional_access () { ::std::abort(); }
+[[noreturn]] inline void throw_bad_result_condition () { ::std::abort(); }
+[[noreturn]] inline void throw_bad_void_result_condition () { ::std::abort(); }
+[[noreturn]] inline void throw_system_error (::std::error_condition) {
+  ::std::abort();
+}
+#endif /* CORE_NO_EXCEPTIONS */
 
 template <class Type>
 struct optional final : private impl::storage<Type> {
@@ -199,7 +238,7 @@ struct optional final : private impl::storage<Type> {
     base { value }
   { }
 
-  constexpr optional (value_type&& value) noexcept(base::nothrow_mv_ctor) :
+  constexpr optional (value_type&& value) noexcept(base::nothrow) :
     base { ::core::move(value) }
   { }
 
@@ -232,10 +271,10 @@ struct optional final : private impl::storage<Type> {
   }
 
   optional& operator = (optional&& that) noexcept (
-    all_traits<
-      ::std::is_nothrow_move_assignable<value_type>,
-      ::std::is_nothrow_move_constructible<value_type>
-    >::value
+    meta::all<
+      ::std::is_nothrow_move_assignable<value_type>::value,
+      ::std::is_nothrow_move_constructible<value_type>::value
+    >()
   ) {
     optional { ::core::move(that) }.swap(*this);
     return *this;
@@ -263,10 +302,10 @@ struct optional final : private impl::storage<Type> {
   }
 
   void swap (optional& that) noexcept(
-    all_traits<
-      is_nothrow_swappable<value_type>,
-      ::std::is_nothrow_move_constructible<value_type>
-    >::value
+    meta::all<
+      is_nothrow_swappable<value_type>::value,
+      ::std::is_nothrow_move_constructible<value_type>::value
+    >()
   ) {
     using ::std::swap;
     if (not *this and not that) { return; }
@@ -291,7 +330,7 @@ struct optional final : private impl::storage<Type> {
   value_type& operator * () noexcept { return this->val; }
 
   constexpr value_type const* operator -> () const noexcept {
-    return this->ptr(impl::addressof<value_type> { });
+    return this->ptr(impl::has_no_addressof_overload<value_type> { });
   }
 
   value_type* operator -> () noexcept { return ::std::addressof(this->val); }
@@ -299,40 +338,40 @@ struct optional final : private impl::storage<Type> {
   template <class T, class... Args>
   void emplace (::std::initializer_list<T> il, Args&&... args) {
     *this = nullopt;
-    ::new(::std::addressof(this->val)) value_type {
+    ::new (::core::as_void(this->val)) value_type(
       il,
       ::core::forward<Args>(args)...
-    };
+    );
     this->engaged = true;
   }
 
   template <class... Args>
   void emplace (Args&&... args) {
     *this = nullopt;
-    ::new(::std::addressof(this->val)) value_type {
+    ::new (::core::as_void(this->val)) value_type(
       ::core::forward<Args>(args)...
-    };
+    );
     this->engaged = true;
   }
 
   constexpr value_type const& value () const noexcept(false) {
     return *this
       ? **this
-      : (throw bad_optional_access { "optional is disengaged" }, **this);
+      : (throw_bad_optional_access(), **this);
   }
 
   value_type& value () noexcept(false) {
     if (*this) { return **this; }
-    throw bad_optional_access { "optional is disengaged" };
+    throw_bad_optional_access();
   }
 
   template <
     class T,
-    class=enable_if_t<
-      all_traits<
-        ::std::is_copy_constructible<value_type>,
-        ::std::is_convertible<T, value_type>
-      >::value
+    class=meta::when<
+      meta::all<
+        ::std::is_copy_constructible<value_type>::value,
+        ::std::is_convertible<T, value_type>::value
+      >()
     >
   > constexpr value_type value_or (T&& val) const& {
     return *this ? **this : static_cast<value_type>(::core::forward<T>(val));
@@ -341,10 +380,10 @@ struct optional final : private impl::storage<Type> {
   template <
     class T,
     class=enable_if_t<
-      all_traits<
+      meta::all<
         ::std::is_move_constructible<value_type>,
         ::std::is_convertible<T, value_type>
-      >::value
+      >()
     >
   > value_type value_or (T&& val) && {
     return *this
@@ -362,9 +401,11 @@ private:
   }
 };
 
+#ifndef CORE_NO_EXCEPTIONS
 template <class Type>
 struct expected final {
   using value_type = Type;
+  using error_type = ::std::exception_ptr;
 
   static constexpr bool nothrow = ::std::is_nothrow_move_constructible<
     value_type
@@ -406,20 +447,20 @@ struct expected final {
   { }
 
   expected (value_type const& val) :
-    val { val },
+    val(val),
     valid { true }
   { }
 
   expected (value_type&& val) noexcept(nothrow) :
-    val { ::core::move(val) },
+    val(::core::move(val)),
     valid { true }
   { }
 
   template <
     class... Args,
-    class=enable_if_t< ::std::is_constructible<value_type, Args...>::value>
+    class=enable_if_t<::std::is_constructible<value_type, Args...>::value>
   > explicit expected (in_place_t, Args&&... args) :
-    val { ::core::forward<Args>(args)... },
+    val(::core::forward<Args>(args)...),
     valid { true }
   { }
 
@@ -437,25 +478,21 @@ struct expected final {
     in_place_t,
     ::std::initializer_list<T> il,
     Args&&... args
-  ) : val { il, ::core::forward<Args>(args)... }, valid { true } { }
+  ) : val(il, ::core::forward<Args>(args)...), valid { true } { }
 
   expected (expected const& that) :
     valid { that.valid }
   {
-    if (*this) { ::new (::std::addressof(this->val)) value_type { that.val }; }
-    else {
-      ::new (::std::addressof(this->ptr)) ::std::exception_ptr { that.ptr };
-    }
+    if (*this) { ::new (::core::as_void(this->val)) value_type(that.val); }
+    else { ::new (::core::as_void(this->ptr)) error_type(that.ptr); }
   }
 
   expected (expected&& that) noexcept(nothrow) :
     valid { that.valid }
   {
     if (*this) {
-      ::new (::std::addressof(this->val)) value_type { ::core::move(that.val) };
-    } else {
-      ::new (::std::addressof(this->ptr)) ::std::exception_ptr { that.ptr };
-    }
+      ::new (::core::as_void(this->val)) value_type(::core::move(that.val));
+    } else { ::new (::core::as_void(this->ptr)) error_type(that.ptr); }
   }
 
   expected () :
@@ -471,10 +508,10 @@ struct expected final {
   }
 
   expected& operator = (expected&& that) noexcept(
-    all_traits<
-      ::std::is_nothrow_move_assignable<value_type>,
-      ::std::is_nothrow_move_constructible<value_type>
-    >::value
+    meta::all<
+      ::std::is_nothrow_move_assignable<value_type>::value,
+      ::std::is_nothrow_move_constructible<value_type>::value
+    >()
   ) {
     expected { ::core::move(that) }.swap(*this);
     return *this;
@@ -483,14 +520,15 @@ struct expected final {
   template <
     class T,
     class=enable_if_t<
-      all_traits<
-        no_traits<
-          ::std::is_same<decay_t<T>, expected>,
-          ::std::is_same<decay_t<T>, ::std::exception_ptr>
-        >,
-        ::std::is_constructible<value_type, T>,
-        ::std::is_assignable<value_type&, T>
-      >::value
+      meta::all<
+        meta::none<
+          meta::list<expected, ::std::exception_ptr>,
+          ::std::is_same,
+          decay_t<T>
+        >(),
+        ::std::is_constructible<value_type, T>::value,
+        ::std::is_assignable<value_type&, T>::value
+      >()
     >
   > expected& operator = (T&& value) {
     if (not *this) { this->emplace(::core::forward<T>(value)); }
@@ -514,17 +552,17 @@ struct expected final {
     if (not *this) { this->ptr = ptr; }
     else {
       this->val.~value_type();
-      ::new (::std::addressof(this->ptr)) ::std::exception_ptr { ptr };
+      ::new (::core::as_void(this->ptr)) ::std::exception_ptr(ptr);
       this->valid = false;
     }
     return *this;
   }
 
   void swap (expected& that) noexcept(
-    all_traits<
-      is_nothrow_swappable<value_type>,
-      ::std::is_nothrow_move_constructible<value_type>
-    >::value
+    meta::all<
+      is_nothrow_swappable<value_type>::value,
+      ::std::is_nothrow_move_constructible<value_type>::value
+    >()
   ) {
     using ::std::swap;
 
@@ -558,19 +596,19 @@ struct expected final {
   template <class T, class... Args>
   void emplace (::std::initializer_list<T> il, Args&&... args) {
     this->reset();
-    ::new (::std::addressof(this->val)) value_type {
+    ::new (::core::as_void(this->val)) value_type(
       il,
       ::core::forward<Args>(args)...
-    };
+    );
     this->valid = true;
   }
 
   template <class... Args>
   void emplace (Args&&... args) {
     this->reset();
-    ::new (::std::addressof(this->val)) value_type {
+    ::new (::core::as_void(this->val)) value_type(
       ::core::forward<Args>(args)...
-    };
+    );
     this->valid = true;
   }
 
@@ -586,11 +624,11 @@ struct expected final {
 
   template <
     class T,
-    class=enable_if_t<
-      all_traits<
-        ::std::is_copy_constructible<value_type>,
-        ::std::is_convertible<T, value_type>
-      >::value
+    class=meta::when<
+      meta::all<
+        ::std::is_copy_constructible<value_type>::value,
+        ::std::is_convertible<T, value_type>::value
+      >()
     >
   > value_type value_or (T&& val) const& {
     return *this ? **this : static_cast<value_type>(::core::forward<T>(val));
@@ -599,10 +637,10 @@ struct expected final {
   template <
     class T,
     class=enable_if_t<
-      all_traits<
-        ::std::is_move_constructible<value_type>,
-        ::std::is_convertible<T, value_type>
-      >::value
+      meta::all<
+        ::std::is_move_constructible<value_type>::value,
+        ::std::is_convertible<T, value_type>::value
+      >()
     >
   > value_type value_or (T&& val) && {
     return *this
@@ -629,10 +667,6 @@ struct expected final {
     return this->ptr;
   }
 
-  [[gnu::deprecated]] ::std::exception_ptr get_ptr () const noexcept(false) {
-    return this->pointer();
-  }
-
 private:
 
   void reset () {
@@ -645,10 +679,15 @@ private:
   };
   bool valid { false };
 };
+#endif /* CORE_NO_EXCEPTIONS */
+
 
 template <class Type>
 struct result final {
+  template <class U> friend struct result;
+
   using value_type = Type;
+  using error_type = ::std::error_condition;
 
   static constexpr bool nothrow = ::std::is_nothrow_move_constructible<
     value_type
@@ -692,46 +731,77 @@ struct result final {
   result (int val, ::std::error_category const& cat) noexcept :
     valid { val == 0 }
   {
-    if (*this) { ::new (::std::addressof(this->val)) value_type { }; }
-    else {
-      ::new (::std::addressof(this->cnd)) ::std::error_condition { val, cat };
-    }
+    if (*this) { ::new (::core::as_void(this->val)) value_type(); }
+    else { ::new (::core::as_void(this->cnd)) error_type(val, cat); }
   }
 
   template <
-    class ErrorConditionEnum,
-    class=enable_if_t<
-      ::std::is_error_condition_enum<ErrorConditionEnum>::value
-    >
-  > result (ErrorConditionEnum e) noexcept :
-    valid { static_cast<core::underlying_type_t<ErrorConditionEnum>>(e) == 0 }
+    class E,
+    class=meta::when<::std::is_error_condition_enum<E>::value>
+  > result (E e) noexcept :
+    valid { core::as_under(e) == 0 }
   {
-    if (*this) { ::new (::std::addressof(this->val)) value_type { }; }
-    else { ::new (::std::addressof(this->cnd)) ::std::error_condition { e }; }
+    if (*this) { ::new (as_void(this->val)) value_type(); }
+    else { ::new (as_void(this->cnd)) error_type(e); }
   }
 
   result (::std::error_condition const& ec) :
     valid { not ec }
   {
-    if (*this) { ::new (::std::addressof(this->val)) value_type { }; }
-    else { ::new (::std::addressof(this->cnd)) ::std::error_condition { ec }; }
+    if (*this) { ::new (::core::as_void(this->val)) value_type(); }
+    else { ::new (::core::as_void(this->cnd)) error_type(ec); }
   }
 
   result (value_type const& val) :
-    val { val },
+    val(val),
     valid { true }
   { }
 
   result (value_type&& val) noexcept(nothrow) :
-    val { ::core::move(val) },
+    val(::core::move(val)),
     valid { true }
   { }
 
   template <
+    class T,
+    class=meta::when<
+      meta::all<
+        meta::none<::std::is_same<result, result<T>>::value>(),
+        ::std::is_constructible<
+          value_type,
+          add_lvalue_reference_t<add_const_t<T>>
+        >::value
+      >()
+    >
+  > result (result<T> const& that) :
+    valid { that.valid }
+  {
+    if (*this) { ::new (::core::as_void(this->val)) value_type(that.val); }
+    else { ::new (::core::as_void(this->cnd)) error_type(that.cnd); }
+  }
+
+
+  template <
+    class T,
+    class=meta::when<
+      meta::all<
+        meta::none<::std::is_same<result, result<T>>::value>(),
+        ::std::is_constructible<value_type, add_rvalue_reference_t<T>>::value
+      >()
+    >
+  > result (result<T>&& that) :
+    valid { that.valid }
+  {
+    if (*this) {
+      ::new (::core::as_void(this->val)) value_type(::core::move(that.val));
+    } else { ::new (::core::as_void(this->cnd)) error_type(that.cnd); }
+  }
+
+  template <
     class... Args,
-    class=enable_if_t< ::std::is_constructible<value_type, Args...>::value>
+    class=enable_if_t<::std::is_constructible<value_type, Args...>::value>
   > explicit result (in_place_t, Args&&... args) :
-    val { ::core::forward<Args>(args)... },
+    val(::core::forward<Args>(args)...),
     valid { true }
   { }
 
@@ -749,25 +819,21 @@ struct result final {
     in_place_t,
     ::std::initializer_list<T> il,
     Args&&... args
-  ) : val { il, ::core::forward<Args>(args)... }, valid { true } { }
+  ) : val(il, ::core::forward<Args>(args)...), valid { true } { }
 
   result (result const& that) :
     valid { that.valid }
   {
-    if (*this) { ::new (::std::addressof(this->val)) value_type { that.val }; }
-    else {
-      ::new (::std::addressof(this->cnd)) ::std::error_condition { that.cnd };
-    }
+    if (*this) { ::new (::core::as_void(this->val)) value_type(that.val); }
+    else { ::new (::core::as_void(this->cnd)) error_type(that.cnd); }
   }
 
   result (result&& that) :
     valid { that.valid }
   {
     if (*this) {
-      ::new (::std::addressof(this->val)) value_type { ::core::move(that.val) };
-    } else {
-      ::new (::std::addressof(this->cnd)) ::std::error_condition { that.cnd };
-    }
+      ::new (::core::as_void(this->val)) value_type(::core::move(that.val));
+    } else { ::new (::core::as_void(this->cnd)) error_type(that.cnd); }
   }
 
   result () :
@@ -783,10 +849,10 @@ struct result final {
   }
 
   result& operator = (result&& that) noexcept(
-    all_traits<
-      ::std::is_nothrow_move_assignable<value_type>,
-      ::std::is_nothrow_move_constructible<value_type>
-    >::value
+    meta::all<
+      ::std::is_nothrow_move_assignable<value_type>::value,
+      ::std::is_nothrow_move_constructible<value_type>::value
+    >()
   ) {
     result { ::core::move(that) }.swap(*this);
     return *this;
@@ -794,15 +860,16 @@ struct result final {
 
   template <
     class T,
-    class=enable_if_t<
-      all_traits<
-        no_traits<
-          ::std::is_same<decay_t<T>, result>,
-          ::std::is_same<decay_t<T>, ::std::error_condition>
-        >,
-        ::std::is_constructible<value_type, T>,
-        ::std::is_assignable<value_type&, T>
-      >::value
+    class=meta::when<
+      meta::all<
+        meta::none_of<
+          meta::list<result, ::std::error_condition>,
+          ::std::is_same,
+          decay_t<T>
+        >(),
+        ::std::is_constructible<value_type, T>::value,
+        ::std::is_assignable<value_type&, T>::value
+      >()
     >
   > result& operator = (T&& value) {
     if (not *this) { this->emplace(::core::forward<T>(value)); }
@@ -812,9 +879,7 @@ struct result final {
 
   template <
     class ErrorConditionEnum,
-    class=enable_if_t<
-      ::std::is_error_condition_enum<ErrorConditionEnum>::value
-    >
+    class=meta::when<::std::is_error_condition_enum<ErrorConditionEnum>::value>
   > result& operator = (ErrorConditionEnum e) {
     result { e }.swap(*this);
     return *this;
@@ -837,17 +902,17 @@ struct result final {
     if (not *this) { this->cnd = cnd; }
     else {
       this->reset();
-      ::new (::std::addressof(this->cnd)) ::std::error_condition { cnd };
+      ::new (::core::as_void(this->cnd)) error_type(cnd);
       this->valid = false;
     }
     return *this;
   }
 
   void swap (result& that) noexcept(
-    all_traits<
-      is_nothrow_swappable<value_type>,
-      ::std::is_nothrow_move_constructible<value_type>
-    >::value
+    meta::all<
+      is_nothrow_swappable<value_type>::value,
+      ::std::is_nothrow_move_constructible<value_type>::value
+    >()
   ) {
     using ::std::swap;
     if (not *this and not that) {
@@ -881,39 +946,39 @@ struct result final {
   template <class T, class... Args>
   void emplace (::std::initializer_list<T> il, Args&&... args) {
     this->reset();
-    ::new (::std::addressof(this->val)) value_type {
+    ::new (::core::as_void(this->val)) value_type(
       il,
       ::core::forward<Args>(args)...
-    };
+    );
     this->valid = true;
   }
 
   template <class... Args>
   void emplace (Args&&... args) {
     this->reset();
-    ::new (::std::addressof(this->val)) value_type {
+    ::new (::core::as_void(this->val)) value_type(
       ::core::forward<Args>(args)...
-    };
+    );
     this->valid = true;
   }
 
   value_type const& value () const noexcept(false) {
     if (*this) { return **this; }
-    throw ::std::system_error { this->cnd.value(), this->cnd.category() };
+    throw_system_error(this->cnd);
   }
 
   value_type& value () noexcept(false) {
     if (*this) { return **this; }
-   throw ::std::system_error { this->cnd.value(), this->cnd.category() };
+   throw_system_error(this->cnd);
   }
 
   template <
     class T,
-    class=enable_if_t<
-      all_traits<
-        ::std::is_copy_constructible<value_type>,
-        ::std::is_convertible<T, value_type>
-      >::value
+    class=meta::when<
+      meta::all<
+        ::std::is_copy_constructible<value_type>::value,
+        ::std::is_convertible<T, value_type>::value
+      >()
     >
   > value_type value_or (T&& val) const& {
     return *this ? **this : static_cast<value_type>(::core::forward<T>(val));
@@ -921,11 +986,11 @@ struct result final {
 
   template <
     class T,
-    class=enable_if_t<
-      all_traits<
-        ::std::is_move_constructible<value_type>,
-        ::std::is_convertible<T, value_type>
-      >::value
+    class=meta::when<
+      meta::all<
+        ::std::is_move_constructible<value_type>::value,
+        ::std::is_convertible<T, value_type>::value
+      >()
     >
   > value_type value_or (T&& val) && {
     return *this
@@ -934,7 +999,7 @@ struct result final {
   }
 
   ::std::error_condition const& condition () const noexcept(false) {
-    if (*this) { throw bad_result_condition { "result<T> is valid" }; }
+    if (*this) { throw_bad_result_condition(); }
     return this->cnd;
   }
 
@@ -945,11 +1010,12 @@ private:
 
   union {
     value_type val;
-    ::std::error_condition cnd;
+    error_type cnd;
   };
   bool valid { false };
 };
 
+#ifndef CORE_NO_EXCEPTIONS
 template <>
 struct expected<void> final {
   using value_type = void;
@@ -994,17 +1060,15 @@ struct expected<void> final {
     return this->ptr;
   }
 
-  [[gnu::deprecated]] ::std::exception_ptr get_ptr () const noexcept(false) {
-    return this->pointer();
-  }
-
 private:
   ::std::exception_ptr ptr;
 };
+#endif /* CORE_NO_EXCEPTIONS */
 
 template <>
 struct result<void> final {
   using value_type = void;
+  using error_type = ::std::error_condition;
 
   result (int val, ::std::error_category const& cat) :
     cnd { val, cat }
@@ -1016,9 +1080,7 @@ struct result<void> final {
 
   template <
     class ErrorConditionEnum,
-    class=enable_if_t<
-      ::std::is_error_condition_enum<ErrorConditionEnum>::value
-    >
+    class=meta::when<::std::is_error_condition_enum<ErrorConditionEnum>::value>
   > result (ErrorConditionEnum e) noexcept :
     cnd { e }
   { }
@@ -1051,7 +1113,7 @@ struct result<void> final {
   explicit operator bool () const noexcept { return not this->cnd; }
 
   ::std::error_condition const& condition () const noexcept(false) {
-    if (*this) { throw bad_result_condition { "result<void> is valid" }; }
+    if (*this) { throw_bad_void_result_condition(); }
     return this->cnd;
   }
 
@@ -1090,6 +1152,7 @@ constexpr bool operator == (T const& value, optional<T> const& opt) noexcept {
   return opt and value == *opt;
 }
 
+#ifndef CORE_NO_EXCEPTIONS
 template <class T>
 bool operator == (expected<T> const& lhs, expected<T> const& rhs) noexcept {
   if (lhs and rhs) { return *lhs == *rhs; }
@@ -1115,6 +1178,7 @@ template <class T>
 bool operator == (T const& lhs, expected<T> const& rhs) noexcept {
   return rhs and lhs == *rhs;
 }
+#endif /* CORE_NO_EXCEPTIONS */
 
 template <class T>
 bool operator == (result<T> const& lhs, result<T> const& rhs) noexcept {
@@ -1157,6 +1221,7 @@ bool operator == (T const& value, result<T> const& res) noexcept {
   return res and value == *res;
 }
 
+#ifndef CORE_NO_EXCEPTIONS
 /* void specializations */
 template <>
 inline bool operator == <void> (
@@ -1166,6 +1231,7 @@ inline bool operator == <void> (
   if (not lhs and not rhs) { return lhs.pointer() == rhs.pointer(); }
   return lhs and rhs;
 }
+#endif /* CORE_NO_EXCEPTIONS */
 
 template <>
 inline bool operator == <void> (
@@ -1205,6 +1271,7 @@ constexpr bool operator < (T const& value, optional<T> const& opt) noexcept {
   return opt and value < *opt;
 }
 
+#ifndef CORE_NO_EXCEPTIONS
 template <class T>
 bool operator < (expected<T> const& lhs, expected<T> const& rhs) noexcept {
   if (not rhs) { return false; }
@@ -1230,6 +1297,7 @@ template <class T>
 bool operator < (T const& value, expected<T> const& exp) noexcept {
   return exp and value < *exp;
 }
+#endif /* CORE_NO_EXCEPTIONS */
 
 template <class T>
 bool operator < (result<T> const& lhs, result<T> const& rhs) noexcept {
@@ -1296,6 +1364,7 @@ constexpr bool operator != (T const& value, optional<T> const& opt) noexcept {
   return not (value == opt);
 }
 
+#ifndef CORE_NO_EXCEPTIONS
 template <class T>
 bool operator != (expected<T> const& lhs, expected<T> const& rhs) noexcept {
   return not (lhs == rhs);
@@ -1320,6 +1389,7 @@ template <class T>
 bool operator != (T const& value, expected<T> const& exp) noexcept {
   return not (value == exp);
 }
+#endif /* CORE_NO_EXCEPTIONS */
 
 template <class T>
 bool operator != (result<T> const& lhs, result<T> const& rhs) noexcept {
@@ -1360,11 +1430,13 @@ bool operator != (T const& value, result<T> const& res) noexcept {
   return not (value == res);
 }
 
+#ifndef CORE_NO_EXCEPTIONS
 template <>
 inline bool operator != <void> (
   expected<void> const& lhs,
   expected<void> const& rhs
 ) noexcept { return not (lhs == rhs); }
+#endif /* CORE_NO_EXCEPTIONS */
 
 template <>
 inline bool operator != <void> (
@@ -1399,6 +1471,7 @@ constexpr bool operator >= (T const& value, optional<T> const& opt) noexcept {
   return not (value < opt);
 }
 
+#ifndef CORE_NO_EXCEPTIONS
 template <class T>
 bool operator >= (expected<T> const& lhs, expected<T> const& rhs) noexcept {
   return not (lhs < rhs);
@@ -1423,6 +1496,7 @@ template <class T>
 bool operator >= (T const& value, expected<T> const& exp) noexcept {
   return not (value < exp);
 }
+#endif /* CORE_NO_EXCEPTIONS */
 
 template <class T>
 bool operator >= (result<T> const& lhs, result<T> const& rhs) noexcept {
@@ -1484,6 +1558,7 @@ constexpr bool operator <= (T const& value, optional<T> const& opt) noexcept {
   return not (value > opt);
 }
 
+#ifndef CORE_NO_EXCEPTIONS
 template <class T>
 bool operator <= (expected<T> const& lhs, expected<T> const& rhs) noexcept {
   return not (rhs < lhs);
@@ -1508,6 +1583,7 @@ template <class T>
 bool operator <= (T const& value, expected<T> const& exp) noexcept {
   return not (exp < value);
 }
+#endif /* CORE_NO_EXCEPTIONS */
 
 template <class T>
 bool operator <= (result<T> const& lhs, result<T> const& rhs) noexcept {
@@ -1563,6 +1639,7 @@ constexpr bool operator > (T const& value, optional<T> const& opt) noexcept {
   return opt < value;
 }
 
+#ifndef CORE_NO_EXCEPTIONS
 template <class T>
 bool operator > (expected<T> const& lhs, expected<T> const& rhs) noexcept {
   return rhs < lhs;
@@ -1577,6 +1654,7 @@ template <class T>
 bool operator > (T const& value, expected<T> const& exp) noexcept {
   return exp < value;
 }
+#endif /* CORE_NO_EXCEPTIONS */
 
 template <class T>
 bool operator > (result<T> const& lhs, result<T> const& rhs) noexcept {
@@ -1611,6 +1689,7 @@ auto make_optional (Type&& value) -> optional<decay_t<Type>> {
   return optional<decay_t<Type>> { ::core::forward<Type>(value) };
 }
 
+#ifndef CORE_NO_EXCEPTIONS
 template <class T>
 auto make_expected (::std::exception_ptr error) -> expected<T> {
   return expected<T> { error };
@@ -1631,6 +1710,7 @@ auto make_expected (U&& value) -> enable_if_t<
     ::std::make_exception_ptr(::core::forward<U>(value))
   );
 }
+#endif /* CORE_NO_EXCEPTIONS */
 
 template <class T>
 auto make_result (::std::error_condition const& e) -> result<T> {
@@ -1641,7 +1721,7 @@ template <
   class T,
   class ErrorConditionEnum,
   class=enable_if_t<
-    std::is_error_condition_enum<ErrorConditionEnum>::value
+    ::std::is_error_condition_enum<ErrorConditionEnum>::value
   >
 > auto make_result (ErrorConditionEnum e) -> result<T> {
   return result<T> { e };
@@ -1652,48 +1732,57 @@ template <class T> auto make_result (T&& value) -> result<decay_t<T>> {
 }
 
 template <class T>
+result<T> make_result (int val, ::std::error_category const& cat) {
+  return make_result<T>(::std::error_condition { val, cat });
+}
+
+template <class T>
 void swap (optional<T>& lhs, optional<T>& rhs) noexcept(
   noexcept(lhs.swap(rhs))
 ) { lhs.swap(rhs); }
 
+#ifndef CORE_NO_EXCEPTIONS
 template <class T>
 void swap (expected<T>& lhs, expected<T>& rhs) noexcept(
   noexcept(lhs.swap(rhs))
 ) { lhs.swap(rhs); }
+#endif /* CORE_NO_EXCEPTIONS */
 
 template <class T>
 void swap (result<T>& lhs, result<T>& rhs) noexcept (
   noexcept(lhs.swap(rhs))
 ) { lhs.swap(rhs); }
 
-}} /* namespace core::v1 */
+}} /* namespace core::v2 */
 
 namespace std {
 
 template <class Type>
-struct hash< ::core::v1::optional<Type>> {
+struct hash<::core::v2::optional<Type>> {
   using result_type = typename hash<Type>::result_type;
-  using argument_type = ::core::v1::optional<Type>;
+  using argument_type = ::core::v2::optional<Type>;
 
   result_type operator () (argument_type const& value) const noexcept {
     return value ? hash<Type> { }(*value) : result_type { };
   }
 };
 
+#ifndef CORE_NO_EXCEPTIONS
 template <class Type>
-struct hash< ::core::v1::expected<Type>> {
+struct hash<::core::v2::expected<Type>> {
   using result_type = typename hash<Type>::result_type;
-  using argument_type = ::core::v1::expected<Type>;
+  using argument_type = ::core::v2::expected<Type>;
 
   result_type operator () (argument_type const& value) const noexcept {
     return value ? hash<Type> { }(*value) : result_type { };
   }
 };
+#endif /* CORE_NO_EXCEPTIONS */
 
 template <class Type>
-struct hash< ::core::v1::result<Type>> {
+struct hash<::core::v2::result<Type>> {
   using result_type = typename hash<Type>::result_type;
-  using argument_type = ::core::v1::result<Type>;
+  using argument_type = ::core::v2::result<Type>;
 
   result_type operator () (argument_type const& value) const noexcept {
     return value ? hash<Type> { }(*value) : result_type { };
@@ -1701,5 +1790,9 @@ struct hash< ::core::v1::result<Type>> {
 };
 
 } /* namespace std */
+
+#if defined(_MSC_VER)
+  #pragma warning(pop)
+#endif /* defined(_MSC_VER) */
 
 #endif /* CORE_OPTIONAL_HPP */

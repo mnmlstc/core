@@ -1,7 +1,6 @@
 #ifndef CORE_RANGE_HPP
 #define CORE_RANGE_HPP
 
-#include <iterator>
 #include <istream>
 #include <utility>
 #include <memory>
@@ -9,36 +8,36 @@
 #include <cstdlib>
 
 #include <core/type_traits.hpp>
+#include <core/iterator.hpp>
 
 namespace core {
-inline namespace v1 {
+inline namespace v2 {
 namespace impl {
 
-template <class T>
-class begin {
-  template <class U>
-  static auto check (U&& u) noexcept -> decltype(::std::begin(u));
-  static void check (...) noexcept(false);
-public:
-  using type = decltype(check(::std::declval<T>()));
-  static constexpr bool value = noexcept(check(::std::declval<T>()));
-};
+using ::std::begin;
+using ::std::end;
+
+template <class T> using adl_begin_t = decltype(begin(::std::declval<T>()));
+template <class T> using adl_end_t = decltype(end(::std::declval<T>()));
 
 template <class T>
-class end {
-  template <class U>
-  static auto check (U&& u) noexcept -> decltype(::std::end(u));
-  static void check (...) noexcept(false);
-public:
-  using type = decltype(check(::std::declval<T>()));
-  static constexpr bool value = noexcept(check(::std::declval<T>()));
-};
+adl_begin_t<T> adl_begin (T&& t) {
+  using ::std::begin;
+  return begin(::core::forward<T>(t));
+}
+
+template <class T>
+adl_end_t<T> adl_end (T&& t) {
+  using ::std::end;
+  return end(::core::forward<T>(t));
+}
 
 } /* namespace impl */
 
 template <class R>
-struct is_range : ::std::integral_constant<bool,
-  impl::begin<R>::value and impl::end<R>::value
+struct is_range : meta::all_t<
+  is_detected<impl::adl_begin_t, R>::value,
+  is_detected<impl::adl_end_t, R>::value
 > { };
 
 template <class Iterator>
@@ -81,14 +80,20 @@ struct range {
   >::value;
 
   template <
-    typename Range,
-    typename=enable_if_t<
-      not ::std::is_pointer<iterator>::value and
-      is_range<Range>::value and
-      ::std::is_convertible<typename impl::begin<Range>::type, iterator>::value
+    class Range,
+    class=meta::when<
+      meta::all<
+        meta::none<
+          ::std::is_pointer<iterator>::value,
+          ::std::is_same<decay_t<Range>, range>::value
+        >(),
+        is_range<Range>::value,
+        is_detected_convertible<iterator, impl::adl_begin_t, Range>::value
+      >()
     >
   > explicit range (Range&& r) noexcept :
-    range { ::std::begin(r), ::std::end(r) }
+    begin_ { impl::adl_begin(::core::forward<Range>(r)) },
+    end_ { impl::adl_end(::core::forward<Range>(r)) }
   { }
 
   range (::std::pair<iterator, iterator> pair) noexcept :
@@ -105,7 +110,7 @@ struct range {
   { }
 
   range (range&& that) noexcept :
-    range { ::std::move(that.begin_), ::std::move(that.end_) }
+    range { ::core::move(that.begin_), ::core::move(that.end_) }
   { that.begin_ = that.end_; }
 
   range () = default;
@@ -176,14 +181,12 @@ struct range {
     bool const start_positive = start > 0;
     bool const stop_positive = stop > 0;
     bool const stop_less = stop < start;
-    bool const first_return_empty =
-      (start_positive and stop_positive and stop_less) or
-      (not start_positive and not stop_positive and stop_less);
+    bool const first_return_empty = start_positive == stop_positive and stop_less;
     if (first_return_empty) { return range { }; }
 
     /* now safe to compute size */
     auto const size = this->size();
-    auto third_empty = ::std::abs(stop) + start;
+    auto const third_empty = ::std::abs(stop) + start;
 
     bool const second_return_empty =
       (start_positive and not stop_positive and third_empty >= size) or
@@ -195,8 +198,8 @@ struct range {
      * start or stop are negative.
      * TODO: Specialize for bidirectional operators
      */
-    if (not start_positive) { start = size + start; }
-    if (not stop_positive) { stop = size + stop; }
+    if (not start_positive) { start += size; }
+    if (not stop_positive) { stop += size; }
 
     auto begin = this->begin();
     ::std::advance(begin, start);
@@ -268,20 +271,22 @@ private:
   iterator end_;
 };
 
+template <class T>
+auto make_range (T* ptr, ::std::size_t n) -> range<T*> {
+  return range<T*> { ptr, ptr + n };
+}
+
 template <class Iterator>
 auto make_range (Iterator begin, Iterator end) -> range<Iterator> {
   return range<Iterator> { begin, end };
 }
 
 template <class Range>
-auto make_range (Range&& value) -> range<decltype(::std::begin(value))> {
-  return make_range(::std::begin(value), ::std::end(value));
+auto make_range (Range&& value) -> range<decltype(begin(value))> {
+  using ::std::begin;
+  using ::std::end;
+  return make_range(begin(value), end(value));
 }
-
-template <class Range>
-auto make_ptr_range (Range&& value) -> range<
-  decltype(::std::addressof(*::std::begin(value)))
->;
 
 /* Used like: core::make_range<char>(::std::cin) */
 template <
@@ -303,11 +308,35 @@ auto make_range (::std::basic_streambuf<CharT, Traits>* buffer) -> range<
   return make_range(iterator { buffer }, iterator { });
 }
 
+template <class Iter>
+range<::std::move_iterator<Iter>> make_move_range (Iter start, Iter stop) {
+  return make_range(
+    ::std::make_move_iterator(start),
+    ::std::make_move_iterator(stop));
+}
+
+template <class T>
+range<::std::move_iterator<T*>> make_move_range (T* ptr, ::std::size_t n) {
+  return make_move_range(ptr, ptr + n);
+}
+
+template <class T>
+range<number_iterator<T>> make_number_range(T start, T stop, T step) noexcept {
+  auto begin = make_number_iterator(start, step);
+  auto end = make_number_iterator(stop, step);
+  return make_range(begin, end);
+}
+
+template <class T>
+range<number_iterator<T>> make_number_range (T start, T stop) noexcept {
+  return make_range(make_number_iterator(start), make_number_iterator(stop));
+}
+
 template <class Iterator>
 void swap (range<Iterator>& lhs, range<Iterator>& rhs) noexcept(
   noexcept(lhs.swap(rhs))
 ) { lhs.swap(rhs); }
 
-}} /* namespace core::v1 */
+}} /* namespace core::v2 */
 
 #endif /* CORE_RANGE_HPP */

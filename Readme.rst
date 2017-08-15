@@ -9,6 +9,14 @@ Information on installing and using MNMLSTC Core can be found in its
 `documentation <http://mnmlstc.github.io/core/>`_.
 
 MNMLSTC Core is released under the Apache 2.0 License.
+Build scripts provided by MNMLSTC Core are released under the CC0 1.0 Universal
+License.
+
+.. image:: https://travis-ci.org/mnmlstc/core.svg
+   :target: https://travis-ci.org/mnmlstc/core
+
+.. image:: https://codecov.io/gh/mnmlstc/core/branch/master/graph/badge.svg
+   :target: https://codecov.io/gh/mnmlstc/core
 
 Components
 ----------
@@ -34,14 +42,17 @@ Requirements
 
 There are several requirements to fully use MNMLSTC Core:
 
- * A C++11 compliant compiler (GCC 4.8.2 or Clang 3.3 meet the minimum feature
+ * A C++11 compliant compiler (GCC 4.8.1 or Clang 3.4 meet the minimum feature
    set required to build and use MNMLSTC Core)
- * `CMake 2.8.11 <http://cmake.org>`_
- * `MNMLSTC Unittest <https://github.com/mnmlstc/unittest>`_
+ * `CMake 3.0.0 <http://cmake.org>`_
+
+Additionally, to develop or package MNMLSTC Core, the following are required:
+
  * `Sphinx Documentation Generator <http://sphinx-doc.org>`_
- * `Sphinx RTD Theme <https://pypi.python.org/pypi/sphinx_rtd_theme>`_
+ * `Guzzle Sphinx Theme <https://github.com/guzzle/guzzle_sphinx_theme>`_
+ * `WiX Toolset <http://wixtoolset.org>`_
 
-MNMLSTC Unittest is only necessary if building and running the unit tests.
+Sphinx and the Guzzle Sphinx Theme are only necessary if generating
+documentation manually to be included with the package.
 
-Sphinx and the Sphinx RTD Theme are only necessary if generating
-documentation manually.
+WiX Toolset is only required if building packages for Windows.

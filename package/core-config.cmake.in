@@ -1,0 +1,23 @@
+@PACKAGE_INIT@
+
+set(CORE_VERSION_MAJOR @PROJECT_VERSION_MAJOR@)
+set(CORE_VERSION_MINOR @PROJECT_VERSION_MINOR@)
+set(CORE_VERSION_PATCH @PROJECT_VERSION_PATCH@)
+set(CORE_VERSION @PROJECT_VERSION@)
+
+if (EXISTS "${CMAKE_CURRENT_LIST_DIR}/core-targets.cmake")
+  include("${CMAKE_CURRENT_LIST_DIR}/core-targets.cmake")
+elseif (EXISTS "${CMAKE_CURRENT_LIST_DIR}/core-export.cmake")
+  include("${CMAKE_CURRENT_LIST_DIR}/core-export.cmake")
+endif ()
+
+# Provided for backwards compatibility
+get_target_property(CORE_DIR mnmlstc::core INTERFACE_INCLUDE_DIRECTORIES)
+
+set_and_check(CORE_INCLUDE_DIR ${CORE_DIR})
+set_and_check(CORE_INCLUDE_DIRS ${CORE_INCLUDE_DIR})
+set_and_check(core_INCLUDE_DIRS ${CORE_INCLUDE_DIR})
+
+unset(CORE_DIR) # This shouldn't be exported
+
+check_required_components(core)

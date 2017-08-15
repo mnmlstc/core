@@ -3,41 +3,106 @@
 
 #include <type_traits>
 #include <utility>
+#include <tuple>
+
+#include <core/internal.hpp>
 
 namespace core {
-inline namespace v1 {
+inline namespace v2 {
+namespace impl {
 
-/* custom type traits */
-/* tuple_size is used by unpack, so we expect it to be available.
- * We also expect ::std::get<N> to be available for the give type T
+/* union used for variant<Ts...> and implementing aligned_union, which is
+ * not provided by gcc 4.8.x, but is provided by clang. (aligned_union_t is
+ * the only alias missing from <type_traits>)
  */
-template <class T>
-class is_unpackable {
-  template <class U> using tuple_size_t = typename ::std::tuple_size<U>::type;
-  template <class U> static void check (tuple_size_t<U>*) noexcept;
-  template <class> static void check (...) noexcept(false);
-public:
-  static constexpr bool value = noexcept(check<T>(nullptr));
+template <class... Ts> union discriminate;
+template <> union discriminate<> { };
+template <class T, class... Ts>
+union discriminate<T, Ts...> {
+  T value;
+  discriminate<Ts...> rest;
 };
 
-/* Used for types that have a .at(size_type) member function */
-template <class T>
-class is_runpackable {
-  template <class U>
-  static auto check (U* u) noexcept -> decltype(u->at(0ul), void());
-  template <class> static void check (...) noexcept(false);
-public:
-  static constexpr bool value = noexcept(check<T>(nullptr));
-};
+} /* namespace impl */
+
+/* custom type traits and types */
+template <class T> using identity_t = typename meta::identity<T>::type;
+template <class T> using identity = meta::identity<T>;
 
 /* extracts the class of a member function ponter */
-template <class T> struct class_of { using type = T; };
-template <class Signature, class Type>
-struct class_of<Signature Type::*> { using type = Type; };
+template <class T> using class_of_t = impl::class_of_t<T>;
+template <class T> using class_of = impl::class_of<T>;
+
+template <::std::size_t I, class T>
+using tuple_element_t = typename ::std::tuple_element<I, T>::type;
+template <class T> using tuple_size_t = typename ::std::tuple_size<T>::type;
+
+/* Implementation of N4389 */
+template <bool B> using bool_constant = ::std::integral_constant<bool, B>;
+
+template <class...> struct conjunction;
+template <class...> struct disjunction;
+template <class...> struct negation;
+
+template <class T, class... Ts>
+struct conjunction<T, Ts...> :
+  bool_constant<T::value and conjunction<Ts...>::value>
+{ };
+template <> struct conjunction<> : ::std::true_type { };
+
+template <class T, class... Ts>
+struct disjunction<T, Ts...> :
+  bool_constant<T::value or disjunction<Ts...>::value>
+{ };
+template <> struct disjunction<> : ::std::false_type { };
+
+template <class T, class... Ts>
+struct negation<T, Ts...> :
+  bool_constant<not T::value and negation<Ts...>::value>
+{ };
+template <> struct negation<> : ::std::false_type { };
+
+/* C++ Library Fundamentals V2 TS detection idiom */
+template <class... Ts> using void_t = meta::deduce<Ts...>;
+
+struct nonesuch {
+  nonesuch (nonesuch const&) = delete;
+  nonesuch () = delete;
+  ~nonesuch () = delete;
+  void operator = (nonesuch const&) = delete;
+};
+
+template <class T, template <class...> class U, class... Args>
+using detected_or = impl::make_detect<T, void, U, Args...>;
+
+template <template <class...> class T, class... Args>
+using detected_t = typename detected_or<nonesuch, T, Args...>::type;
+
+template <class T, template <class...> class U, class... Args>
+using detected_or_t = typename detected_or<T, U, Args...>::type;
+
+template <class To, template <class...> class T, class... Args>
+using is_detected_convertible = ::std::is_convertible<
+  detected_t<T, Args...>,
+  To
+>;
+
+template <class T, template <class...> class U, class... Args>
+using is_detected_same = ::std::is_same<T, detected_t<U, Args...>>;
+
+template <class T, template<class...> class U, class... Args>
+using is_detected_convertible = ::std::is_convertible<
+  detected_t<U, Args...>,
+  T
+>;
+
+template <template <class...> class T, class... Args>
+using is_detected = typename detected_or<nonesuch, T, Args...>::value_t;
 
 /* forward declaration */
-template <class... Args> struct invokable;
-template <class... Args> struct invoke_of;
+template <::std::size_t, class...> struct aligned_union;
+template <class...> struct invokable;
+template <class...> struct invoke_of;
 template <class T> struct result_of; /* SFINAE result_of */
 
 /* C++14 style aliases for standard traits */
@@ -77,10 +142,15 @@ using remove_extent_t = typename ::std::remove_extent<T>::type;
 template <class T>
 using remove_all_extents_t = typename ::std::remove_all_extents<T>::type;
 
-template < ::std::size_t Len, ::std::size_t Align>
-using aligned_storage_t = typename ::std::aligned_storage<Len, Align>::type;
+template <
+  ::std::size_t Len,
+  ::std::size_t Align = alignof(typename ::std::aligned_storage<Len>::type)
+> using aligned_storage_t = typename ::std::aligned_storage<Len, Align>::type;
 
-template <class T> using decay_t = typename ::std::decay<T>::type;
+template <::std::size_t Len, class... Types>
+using aligned_union_t = typename aligned_union<Len, Types...>::type;
+
+template <class T> using decay_t = impl::decay_t<T>;
 
 template <bool B, class T = void>
 using enable_if_t = typename ::std::enable_if<B, T>::type;
@@ -91,100 +161,30 @@ using conditional_t = typename ::std::conditional<B, T, F>::type;
 template <class T>
 using underlying_type_t = typename ::std::underlying_type<T>::type;
 
+template <::std::size_t Len, class... Types>
+struct aligned_union {
+  using union_type = impl::discriminate<Types...>;
+  static constexpr ::std::size_t size () noexcept {
+    return Len > sizeof(union_type) ? Len : sizeof(union_type);
+  }
+
+  static constexpr ::std::size_t alignment_value = alignof(
+    impl::discriminate<Types...>
+  );
+
+  using type = aligned_storage_t<
+    (Len > sizeof(union_type) ? Len : sizeof(union_type)),
+    alignment_value
+  >;
+};
+
 /* custom type trait specializations */
 template <class... Args> using invoke_of_t = typename invoke_of<Args...>::type;
-template <class T> using class_of_t = typename class_of<T>::type;
 
-namespace impl {
-
-struct undefined { undefined (...); };
-
-/* Get the result of an attempt at the INVOKE expression */
-/* fallback */
-template <class... Args> auto invoke_expr (undefined, Args&&...) -> undefined;
-
-template <class Functor, class Object, class... Args>
-auto invoke_expr (Functor&& fun, Object&& obj, Args&&... args) -> enable_if_t<
-  ::std::is_member_function_pointer<remove_reference_t<Functor>>::value and
-  ::std::is_base_of<
-    class_of_t<remove_reference_t<Functor>>,
-    remove_reference_t<Object>
-  >::value,
-  decltype((::std::forward<Object>(obj).*fun)(::std::forward<Args>(args)...))
->;
-
-template <class Functor, class Object, class... Args>
-auto invoke_expr (Functor&& fun, Object&& obj, Args&&... args) -> enable_if_t<
-  ::std::is_member_function_pointer<remove_reference_t<Functor>>::value and
-  not ::std::is_base_of<
-    class_of_t<remove_reference_t<Functor>>,
-    remove_reference_t<Object>
-  >::value,
-  decltype(
-    ((*::std::forward<Object>(obj)).*fun)(::std::forward<Args>(args)...)
-  )
->;
-
-template <class Functor, class Object>
-auto invoke_expr (Functor&& functor, Object&& object) -> enable_if_t<
-  ::std::is_member_object_pointer<remove_reference_t<Functor>>::value and
-  ::std::is_base_of<
-    class_of_t<remove_reference_t<Functor>>,
-    remove_reference_t<Object>
-  >::value,
-  decltype(::std::forward<Object>(object).*functor)
->;
-
-template <class Functor, class Object>
-auto invoke_expr (Functor&& functor, Object&& object) -> enable_if_t<
-  ::std::is_member_object_pointer<remove_reference_t<Functor>>::value and
-  not ::std::is_base_of<
-    class_of_t<remove_reference_t<Functor>>,
-    remove_reference_t<Object>
-  >::value,
-  decltype((*::std::forward<Object>(object)).*functor)
->;
-
-template <class Functor, class... Args>
-auto invoke_expr (Functor&& functor, Args&&... args) -> decltype(
-  ::std::forward<Functor>(functor)(::std::forward<Args>(args)...)
-);
-
-template <bool, class... Args> struct invoke_of { };
 template <class... Args>
-struct invoke_of<true, Args...> {
-  using type = decltype(invoke_expr(::std::declval<Args>()...));
-};
-
-/* swappable implementation details */
-using ::std::declval;
-using ::std::swap;
-
-template <class T, class U>
-class is_swappable {
-  template <class X, class Y>
-  static auto check (int) noexcept -> decltype(
-    swap(declval<X&>(), declval<Y&>()),
-    void()
-  );
-  template <class X, class Y> static void check (...) noexcept(false);
-public:
-  static constexpr bool value =
-    noexcept(check<T, U>(0)) and noexcept(check<U, T>(0));
-};
-
-template <class T, class U>
-struct is_nothrow_swappable : ::std::integral_constant<
-  bool,
-  is_swappable<T, U>::value and noexcept(swap(declval<T&>(), declval<U&>()))
-> { };
-
-} /* namespace impl */
-
-template <class... Args> struct invokable : ::std::integral_constant<
-  bool,
-  not ::std::is_same<
-    decltype(impl::invoke_expr(::std::declval<Args>()...)),
+struct invokable : meta::none_t<
+  std::is_same<
+    decltype(impl::INVOKE(::std::declval<Args>()...)),
     impl::undefined
   >::value
 > { };
@@ -200,21 +200,19 @@ template <class T> using result_of_t = typename result_of<T>::type;
 
 template <class... Ts> struct common_type;
 
-template <class T> struct common_type<T> { using type = decay_t<T>; };
+template <class T> struct common_type<T> : identity<decay_t<T>> { };
 template <class T, class U>
-struct common_type<T, U> {
-  using type = decay_t<
-    decltype(true ? ::std::declval<T>() : ::std::declval<U>())
-  >;
-};
+struct common_type<T, U> : identity<
+  decay_t<decltype(true ? ::std::declval<T>() : ::std::declval<U>())>
+> { };
 
 template <class T, class U, class... Ts>
-struct common_type<T, U, Ts...> {
-  using type = typename common_type<
+struct common_type<T, U, Ts...> : identity<
+  typename common_type<
     typename common_type<T, U>::type,
     Ts...
-  >::type;
-};
+  >::type
+> { };
 
 template <class... T> using common_type_t = typename common_type<T...>::type;
 
@@ -222,46 +220,47 @@ template <class... T> using common_type_t = typename common_type<T...>::type;
 template <class T> struct is_null_pointer : ::std::false_type { };
 
 template <>
-struct is_null_pointer<add_cv_t< ::std::nullptr_t>> : ::std::true_type { };
+struct is_null_pointer<add_cv_t<::std::nullptr_t>> : ::std::true_type { };
 template <>
-struct is_null_pointer< ::std::nullptr_t volatile> : ::std::true_type { };
+struct is_null_pointer<::std::nullptr_t volatile> : ::std::true_type { };
 template <>
-struct is_null_pointer< ::std::nullptr_t const> : ::std::true_type { };
+struct is_null_pointer<::std::nullptr_t const> : ::std::true_type { };
 template <>
-struct is_null_pointer< ::std::nullptr_t> : ::std::true_type { };
+struct is_null_pointer<::std::nullptr_t> : ::std::true_type { };
 
-/* is_swappable */
-template <class T, class U=T>
-using is_swappable = ::std::integral_constant<
-  bool,
-  impl::is_swappable<T, U>::value
->;
-
-/* is_nothrow_swappable */
+/* is_nothrow_swappable - N4426 (implemented before paper was proposed) */
 template <class T, class U=T>
 using is_nothrow_swappable = impl::is_nothrow_swappable<T, U>;
 
-/* all-traits */
-template <class...> struct all_traits;
-template <class T, class... Args>
-struct all_traits<T, Args...> : ::std::integral_constant<bool,
-  T::value and all_traits<Args...>::value
-> { };
-template <> struct all_traits<> : ::std::true_type { };
-
-/* any-traits */
-template <class...> struct any_traits;
-template <class T, class... Args>
-struct any_traits<T, Args...> : ::std::integral_constant<bool,
-  T::value or any_traits<Args...>::value
-> { };
-template <> struct any_traits<> : ::std::false_type { };
-
-/* no-traits */
-template <class... Args> struct no_traits : ::std::integral_constant<bool,
-  not all_traits<Args...>::value
+/* propagates const or volatile without using the name propagate :) */
+template <class T, class U>
+struct transmit_volatile : ::std::conditional<
+  ::std::is_volatile<T>::value,
+  add_volatile_t<U>,
+  U
 > { };
 
-}} /* namespace core::v1 */
+template <class T, class U>
+struct transmit_const : ::std::conditional<
+  ::std::is_const<T>::value,
+  add_const_t<U>,
+  U
+> { };
+
+template <class T, class U>
+struct transmit_cv : transmit_volatile<
+  T, typename transmit_const<T, U>::type
+> { };
+
+template <class T, class U>
+using transmit_volatile_t = typename transmit_volatile<T, U>::type;
+
+template <class T, class U>
+using transmit_const_t = typename transmit_const<T, U>::type;
+
+template <class T, class U>
+using transmit_cv_t = typename transmit_cv<T, U>::type;
+
+}} /* namespace core::v2 */
 
 #endif /* CORE_TYPE_TRAITS_HPP */

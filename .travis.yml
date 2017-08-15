@@ -1,0 +1,96 @@
+# Matrix Build Declaration
+language: cpp
+sudo: required
+dist: trusty
+branches:
+  except:
+    - gh_pages
+
+before_install: bash ./scripts/travis-before-install
+before_script: bash ./scripts/travis-configure
+install: bash ./scripts/travis-install
+script: cmake --build build --target check -- CTEST_OUTPUT_ON_FAILURE=1 VERBOSE=1
+after_success: bash <(curl -s https://codecov.io/bash)
+
+matrix:
+  include:
+    - os: linux
+      compiler: gcc
+      env: BUILD=Release VERSION=5
+    - os: linux
+      compiler: gcc
+      env: BUILD=Debug VERSION=5
+    - os: linux
+      compiler: gcc
+      env: BUILD=Release VERSION=6
+    - os: linux
+      compiler: gcc
+      env: BUILD=Debug VERSION=6
+    - os: linux
+      compiler: clang
+      env: BUILD=Release VERSION=3.7
+    - os: linux
+      compiler: clang
+      env: BUILD=Debug VERSION=3.7
+    - os: linux
+      compiler: clang
+      env: BUILD=Release VERSION=3.8
+    - os: linux
+      compiler: clang
+      env: BUILD=Debug VERSION=3.8
+    - os: linux
+      compiler: clang
+      env: BUILD=Release VERSION=3.9
+    - os: linux
+      compiler: clang
+      env: BUILD=Debug VERSION=3.9
+    - os: linux
+      compiler: clang
+      env: BUILD=Release VERSION=3.7 LIBCXX=ON
+    - os: linux
+      compiler: clang
+      env: BUILD=Release VERSION=3.7 LIBCXX=ON
+    - os: linux
+      compiler: clang
+      env: BUILD=Release VERSION=3.8 LIBCXX=ON
+    - os: linux
+      compiler: clang
+      env: BUILD=Debug VERSION=3.8 LIBCXX=ON
+    - os: linux
+      compiler: clang
+      env: BUILD=Release VERSION=3.9 LIBCXX=ON
+    - os: linux
+      compiler: clang
+      env: BUILD=Debug VERSION=3.9 LIBCXX=ON
+    - os: osx
+      osx_image: xcode6.4
+      compiler: clang
+      env: BUILD=Release
+    - os: osx
+      osx_image: xcode6.4
+      compiler: clang
+      env: BUILD=Debug
+    - os: osx
+      osx_image: xcode7.3
+      compiler: clang
+      env: BUILD=Release
+    - os: osx
+      osx_image: xcode7.3
+      compiler: clang
+      env: BUILD=Debug
+    - os: osx
+      osx_image: xcode8
+      compiler: clang
+      env: BUILD=Release
+    - os: osx
+      osx_image: xcode8
+      compiler: clang
+      env: BUILD=Debug
+    - os: osx
+      osx_image: xcode8
+      compiler: clang
+      env: BUILD=Release, CXX_STANDARD=c++1z
+    - os: osx
+      osx_image: xcode8
+      compiler: clang
+      env: BUILD=Debug, CXX_STANDARD=c++1z

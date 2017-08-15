@@ -1,0 +1,6 @@
+coverage:
+  ignore:
+    - scripts
+    - package
+    - tests
+    - docs

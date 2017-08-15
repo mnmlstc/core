@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<installer-gui-script minSpecVersion="2">
+  <title>${title}</title>
+  <organization>${organization}</organization>
+  <domains enable_localSystem="true" />
+  <options customize="never" require-scripts="true" />
+  <!-- Documents displayed at various steps -->
+  <license file="${license}" mime-type="application/rtf" />
+  <pkg-ref id="${identifier}" auth="root">${package}-${version}.pkg</pkg-ref>
+  <choices-outline>
+    <line choice="${identifier}" />
+  </choices-outline>
+  <choice
+    id="${identifier}"
+    visible="false"
+    title="${title}"
+    description="${description}"
+    start_selected="true">
+    <pkg-ref id="${identifier}" />
+  </choice>
+</installer-gui-script>
